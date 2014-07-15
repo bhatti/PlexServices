@@ -1,0 +1,12 @@
+dependencies {
+  compile 'org.slf4j:slf4j-api:1.7.7'
+  testCompile 'junit:junit:4.11'
+  testCompile 'com.googlecode.jmockit:jmockit:1.7'
+}
+
+jar {
+  manifest {
+    attributes 'Implementation-Title': 'PlexService', 'Implementation-Version': version
+  }
+}
+
