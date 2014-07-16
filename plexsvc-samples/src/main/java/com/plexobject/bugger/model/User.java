@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import com.plexobject.security.Authorizable;
-import com.plexobject.security.AuthorizableRole;
 
 public class User implements Authorizable {
     private String username;
-    private Collection<AuthorizableRole> roles = new HashSet<AuthorizableRole>();
+    private String email;
+    private Collection<String> roles = new HashSet<>();
 
     @Override
     public String getUsername() {
@@ -16,16 +16,36 @@ public class User implements Authorizable {
     }
 
     @Override
-    public Collection<AuthorizableRole> getRoles() {
-        return roles;
+    public boolean hasRole(String role) {
+        return roles.contains(role);
     }
 
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public void setRoles(Collection<AuthorizableRole> roles) {
+    public void addRole(String role) {
+        this.roles.add(role);
+    }
+
+    public void removeRole(String role) {
+        this.roles.remove(role);
+    }
+
+    public Collection<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<String> roles) {
         this.roles = roles;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Override
@@ -56,7 +76,8 @@ public class User implements Authorizable {
 
     @Override
     public String toString() {
-        return "User [username=" + username + ", roles=" + roles + "]";
+        return "User [username=" + username + ", email=" + email + ", roles="
+                + roles + "]";
     }
 
 }

@@ -1,70 +1,58 @@
 package com.plexobject.bugger.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BugReport {
+public class BugReport extends Document {
     public enum State {
-        CREATED, READY, IN_DEVELOPMENT, IN_TEST, CLOSED
+        OPEN, READY, IN_DEVELOPMENT, IN_TEST, CLOSED
     }
 
-    private String id;
-    private Date createdAt;
-    private Date modifiedAt;
-    private String title;
-    private String description;
-    private User createdBy;
+    public enum Priority {
+        LOW, MEDIUM, HIGH
+    }
+
+    private String bugNumber;
+    private Date resolutionDate;
+    private Date estimatedResolutionDate;
     private User assignedTo;
-    private State state;
+    private User developedBy;
+    private User testedBy;
+    private Project project;
+    private State state = State.OPEN;
+    private Priority priority;
     private Map<String, Object> attributes = new HashMap<>();
+    private Collection<Comment> comments = new ArrayList<>();
+    private Collection<BugReportAudit> logs = new ArrayList<>();
 
-    public String getId() {
-        return id;
+    public String getBugNumber() {
+        return bugNumber;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setBugNumber(String bugNumber) {
+        this.bugNumber = bugNumber;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Date getResolutionDate() {
+        return resolutionDate;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setResolutionDate(Date resolutionDate) {
+        this.resolutionDate = resolutionDate;
+        if (resolutionDate != null) {
+            state = State.CLOSED;
+        }
     }
 
-    public Date getModifiedAt() {
-        return modifiedAt;
+    public Date getEstimatedResolutionDate() {
+        return estimatedResolutionDate;
     }
 
-    public void setModifiedAt(Date modifiedAt) {
-        this.modifiedAt = modifiedAt;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
+    public void setEstimatedResolutionDate(Date estimatedResolutionDate) {
+        this.estimatedResolutionDate = estimatedResolutionDate;
     }
 
     public User getAssignedTo() {
@@ -75,12 +63,44 @@ public class BugReport {
         this.assignedTo = assignedTo;
     }
 
+    public User getDevelopedBy() {
+        return developedBy;
+    }
+
+    public void setDevelopedBy(User developedBy) {
+        this.developedBy = developedBy;
+    }
+
+    public User getTestedBy() {
+        return testedBy;
+    }
+
+    public void setTestedBy(User testedBy) {
+        this.testedBy = testedBy;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     public State getState() {
         return state;
     }
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
     }
 
     public Map<String, Object> getAttributes() {
@@ -91,38 +111,31 @@ public class BugReport {
         this.attributes = attributes;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
+    public Collection<Comment> getComments() {
+        return comments;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        BugReport other = (BugReport) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+    public void setComments(Collection<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Collection<BugReportAudit> getLogs() {
+        return logs;
+    }
+
+    public void setLogs(Collection<BugReportAudit> logs) {
+        this.logs = logs;
     }
 
     @Override
     public String toString() {
-        return "BugReport [id=" + id + ", createdAt=" + createdAt
-                + ", modifiedAt=" + modifiedAt + ", title=" + title
-                + ", description=" + description + ", createdBy=" + createdBy
-                + ", assignedTo=" + assignedTo + ", state=" + state
-                + ", attributes=" + attributes + "]";
+        return "BugReport [bugNumber=" + bugNumber + ", resolutionDate="
+                + resolutionDate + ", estimatedResolutionDate="
+                + estimatedResolutionDate + ", assignedTo=" + assignedTo
+                + ", developedBy=" + developedBy + ", testedBy=" + testedBy
+                + ", project=" + project + ", state=" + state + ", priority="
+                + priority + ", attributes=" + attributes + ", comments="
+                + comments + ", logs=" + logs + "]" + super.toString();
     }
 
 }
