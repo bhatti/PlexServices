@@ -1,4 +1,4 @@
-package com.plexobject.bugger.service;
+package com.plexobject.bugger.service.user;
 
 import com.plexobject.bugger.model.User;
 import com.plexobject.bugger.repository.UserRepository;

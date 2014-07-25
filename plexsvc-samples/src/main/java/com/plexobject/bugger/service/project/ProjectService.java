@@ -1,4 +1,4 @@
-package com.plexobject.bugger.service;
+package com.plexobject.bugger.service.project;
 
 import com.plexobject.bugger.model.Project;
 import com.plexobject.security.RolesAllowed;

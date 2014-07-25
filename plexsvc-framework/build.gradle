@@ -1,5 +1,10 @@
 dependencies {
   compile 'org.slf4j:slf4j-api:1.7.7'
+  compile 'org.eclipse.jetty:jetty-server:9.2.1.v20140609'
+  compile 'org.eclipse.jetty:jetty-deploy:9.2.1.v20140609'
+  compile 'org.eclipse.jetty:jetty-util:9.2.1.v20140609'
+  compile 'org.eclipse.jetty:jetty-websocket:8.1.15.v20140411'
+
   testCompile 'junit:junit:4.11'
   testCompile 'com.googlecode.jmockit:jmockit:1.7'
 }
