@@ -3,21 +3,46 @@ package com.plexobject.bugger.model;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.plexobject.security.Authorizable;
-
-public class User implements Authorizable {
+public class User {
+    private Long id;
     private String username;
+    private String password;
     private String email;
     private Collection<String> roles = new HashSet<>();
 
-    @Override
+    public User() {
+
+    }
+
+    public User(Long id, String username, String password, String email,
+            String... roles) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        for (String role : roles) {
+            this.roles.add(role);
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getUsername() {
         return username;
     }
 
-    @Override
-    public boolean hasRole(String role) {
-        return roles.contains(role);
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setUsername(String username) {

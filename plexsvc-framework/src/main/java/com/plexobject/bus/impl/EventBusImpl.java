@@ -1,5 +1,6 @@
 package com.plexobject.bus.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,10 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.bus.Event;
 import com.plexobject.bus.EventBus;
-import com.plexobject.bus.EventFilter;
-import com.plexobject.bus.EventHandler;
+import com.plexobject.handler.Request;
+import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.predicate.Predicate;
 
 /**
  * This class implements EventBus for publishing and subscribing events
@@ -22,16 +24,16 @@ import com.plexobject.bus.EventHandler;
  *
  */
 public class EventBusImpl implements EventBus {
-    private static final Logger logger = LoggerFactory
+    private static final Logger log = LoggerFactory
             .getLogger(EventBusImpl.class);
 
     private static class HandlerAndFilter {
         private final long id;
-        private final EventHandler handler;
-        private final EventFilter filter;
+        private final RequestHandler handler;
+        private final Predicate<Object> filter;
 
-        public HandlerAndFilter(long id, EventHandler handler,
-                EventFilter filter) {
+        public HandlerAndFilter(final long id, final RequestHandler handler,
+                final Predicate<Object> filter) {
             this.id = id;
             this.handler = handler;
             this.filter = filter;
@@ -71,8 +73,8 @@ public class EventBusImpl implements EventBus {
     }
 
     @Override
-    public long subscribe(String channel, EventHandler handler,
-            EventFilter filter) {
+    public long subscribe(String channel, RequestHandler handler,
+            Predicate<Object> filter) {
         Objects.requireNonNull(channel, "channel is not specified");
         Objects.requireNonNull(handler, "handler is not specified");
         synchronized (channel.intern()) {
@@ -108,7 +110,7 @@ public class EventBusImpl implements EventBus {
     }
 
     @Override
-    public void publish(String channel, Event event) {
+    public void publish(String channel, Object event) {
         Objects.requireNonNull(channel, "channel is not specified");
         Objects.requireNonNull(event, "event is not specified");
         synchronized (channel.intern()) {
@@ -122,10 +124,22 @@ public class EventBusImpl implements EventBus {
                             try {
                                 if (haf.filter == null
                                         || haf.filter.accept(event)) {
-                                    haf.handler.handle(event);
+                                    String sessionId = null;
+                                    String username = null;
+                                    Request request = new Request(
+                                            new HashMap<String, Object>(),
+                                            sessionId, username, event,
+                                            new ResponseBuilder() {
+                                                @Override
+                                                public void send() {
+                                                    publish(channel, reply);
+                                                }
+                                            });
+
+                                    haf.handler.handle(request);
                                 }
                             } catch (Exception ex) {
-                                logger.error("Failed to publish " + event, ex);
+                                log.error("Failed to publish " + event, ex);
                             }
                         }
                     }

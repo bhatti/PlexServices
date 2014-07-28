@@ -16,6 +16,12 @@ public class ServiceException extends RuntimeException {
             this.fieldName = fieldName;
             this.errorMessage = errorMessage;
         }
+
+        @Override
+        public String toString() {
+            return "Error [errorCode=" + errorCode + ", fieldName=" + fieldName
+                    + ", errorMessage=" + errorMessage + "]";
+        }
     }
 
     public static class Builder {
@@ -94,4 +100,11 @@ public class ServiceException extends RuntimeException {
     public static Builder builder() {
         return new Builder();
     }
+
+    @Override
+    public String toString() {
+        return "ServiceException [errors=" + errors + ", super "
+                + super.toString() + "]";
+    }
+
 }

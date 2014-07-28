@@ -1,5 +1,8 @@
 package com.plexobject.bus;
 
+import com.plexobject.handler.RequestHandler;
+import com.plexobject.predicate.Predicate;
+
 /**
  * This class defines interface for intra-process communication via messaging
  * 
@@ -19,7 +22,8 @@ public interface EventBus {
      *            optional parameter for filtering
      * @return - subscription-id used for unsubscribing
      */
-    long subscribe(String channel, EventHandler handler, EventFilter filter);
+    long subscribe(String channel, RequestHandler handler,
+            Predicate<Object> filter);
 
     /**
      * This method unsubscriber with given id
@@ -38,5 +42,5 @@ public interface EventBus {
      * @param e
      *            - event
      */
-    void publish(String channel, Event e);
+    void publish(String channel, Object e);
 }

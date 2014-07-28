@@ -4,24 +4,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.bugger.model.BugReport;
-import com.plexobject.security.RolesAllowed;
-import com.plexobject.service.Service;
+import com.plexobject.handler.Request;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceRequest;
+import com.plexobject.service.ServiceConfig.Method;
 
-public class NotificationService implements Service {
-    private static final Logger logger = LoggerFactory
+@ServiceConfig(requestClass = Void.class, rolesAllowed = "Employee", endpoint = "/notify", method = Method.POST, contentType = "application/json")
+public class NotificationService implements RequestHandler {
+    private static final Logger log = LoggerFactory
             .getLogger(NotificationService.class);
 
     public void sendNotification(BugReport report) {
-        logger.info("Notifying " + report);
+        log.info("Notifying " + report);
     }
 
     // any employee who is member of same project can update bug report
-    @RolesAllowed("Employee")
-    @ServiceConfig(path = "/notify", method = "POST", contentType = "application/json")
     @Override
-    public void execute(ServiceRequest request) {
-        logger.info("Notifying " + request);
+    public void handle(Request request) {
+        log.info("Notifying " + request);
     }
 }

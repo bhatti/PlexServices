@@ -6,17 +6,33 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.plexobject.encode.CodecType;
+
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 public @interface ServiceConfig {
-    String name() default "";
+    public enum Method {
+        GET, POST, PUT, DELETE, HEAD
+    }
+
+    public enum GatewayType {
+        HTTP, JMS, EVENT_BUS
+    }
+
+    Class<?> requestClass();
+
+    GatewayType gateway() default GatewayType.HTTP;
+
+    CodecType codec() default CodecType.JSON;
+
+    Method method();
 
     String version() default "1.0";
 
-    String path() default "";
-
-    String method() default "";
+    String endpoint() default "";
 
     String contentType() default "";
+
+    String[] rolesAllowed() default "";
 }

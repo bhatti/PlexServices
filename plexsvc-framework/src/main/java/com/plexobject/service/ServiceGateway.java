@@ -1,7 +1,9 @@
 package com.plexobject.service;
 
-public interface ServiceGateway {
-    void add(Service service);
+import com.plexobject.handler.RequestHandler;
 
-    void remove(Service service);
+public interface ServiceGateway extends Lifecycle {
+    void add(RequestHandler service);
+
+    void remove(RequestHandler service);
 }

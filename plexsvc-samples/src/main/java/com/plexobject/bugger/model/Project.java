@@ -28,6 +28,14 @@ public class Project extends Document {
         return members;
     }
 
+    public void addMember(User member) {
+        this.members.add(member);
+    }
+
+    public void removeMember(User member) {
+        this.members.remove(member);
+    }
+
     public void setMembers(Collection<User> members) {
         this.members = members;
     }

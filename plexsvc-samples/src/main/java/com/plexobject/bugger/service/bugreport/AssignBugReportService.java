@@ -4,24 +4,23 @@ import com.plexobject.bugger.model.BugReport;
 import com.plexobject.bugger.model.User;
 import com.plexobject.bugger.repository.BugReportRepository;
 import com.plexobject.bugger.repository.UserRepository;
-import com.plexobject.security.RolesAllowed;
-import com.plexobject.service.Service;
+import com.plexobject.handler.Request;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceException;
-import com.plexobject.service.ServiceRequest;
 
+@ServiceConfig(requestClass = Void.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/assign", method = Method.POST, contentType = "application/json")
 public class AssignBugReportService extends AbstractBugReportService implements
-        Service {
+        RequestHandler {
     public AssignBugReportService(BugReportRepository bugReportRepository,
             UserRepository userRepository) {
         super(bugReportRepository, userRepository);
     }
 
     // any employee who is member of same project can assign bug report
-    @RolesAllowed("Employee")
-    @ServiceConfig(path = "/bugreports/{id}/assign", method = "POST", contentType = "application/json")
     @Override
-    public void execute(ServiceRequest request) {
+    public void handle(Request request) {
         String bugReportId = request.getProperty("id");
         String assignedTo = request.getProperty("assignedTo");
         ServiceException
@@ -32,17 +31,17 @@ public class AssignBugReportService extends AbstractBugReportService implements
                         "assignedTo", "assignedTo not specified")
                 .raiseIfHasErrors();
 
-        User assignedToUser = userRepository.load(assignedTo);
+        User assignedToUser = userRepository.load(Long.valueOf(assignedTo));
         BugReport report = bugReportRepository.load(Long.valueOf(bugReportId));
         ServiceException
                 .builder()
                 .addErrorIfNull(assignedToUser, "assignedToNotFound",
                         "assignedTo", "assignedTo not found")
-                .addErrorIfNull(report, "bugReportIdNotFound", "bugReportId",
-                        "bugReportId not found").raiseIfHasErrors();
+                .addErrorIfNull(report, "bugReportIdNotFound", "bugReport",
+                        "bugReport not found").raiseIfHasErrors();
         report.setAssignedTo(assignedToUser);
         bugReportRepository.save(report);
-        request.getServiceResponseBuilder().send();
+        request.getResponseBuilder().send();
     }
 
 }

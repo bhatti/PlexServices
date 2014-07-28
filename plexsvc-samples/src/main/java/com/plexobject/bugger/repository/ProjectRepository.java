@@ -17,11 +17,12 @@ public class ProjectRepository {
         return memoryStorage.get(id);
     }
 
-    public void save(Project project) {
+    public Project save(Project project) {
         if (project.getId() == null) {
             project.setId(nextId.incrementAndGet());
         }
         memoryStorage.put(project.getId(), project);
+        return project;
     }
 
     public void delete(Long id) {
