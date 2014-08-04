@@ -35,6 +35,7 @@ import com.plexobject.bugger.service.project.membership.AddProjectMemberService;
 import com.plexobject.bugger.service.project.membership.RemoveProjectMemberService;
 import com.plexobject.bugger.service.user.CreateUserService;
 import com.plexobject.bugger.service.user.DeleteUserService;
+import com.plexobject.bugger.service.user.LoginService;
 import com.plexobject.bugger.service.user.QueryUserService;
 import com.plexobject.bugger.service.user.UpdateUserService;
 import com.plexobject.encode.json.JsonObjectCodec;
@@ -82,6 +83,8 @@ public class Main {
         services.add(new UpdateUserService(userRepository));
         services.add(new QueryUserService(userRepository));
         services.add(new DeleteUserService(userRepository));
+        services.add(new LoginService(userRepository));
+
         //
         services.add(new CreateProjectService(projectRepository, userRepository));
         services.add(new UpdateProjectService(projectRepository, userRepository));
@@ -145,55 +148,55 @@ public class Main {
         return Arrays.asList(new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
                 "/projects/{projectId}/bugreports/{id}/assign", Method.POST,
                 "queue:{scope}-assign-bugreport-service-queue",
-                DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
                         "/projects/{projectId}/bugreports", Method.GET,
                         "queue:{scope}-query-project-bugreport-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users", Method.GET,
                         "queue:{scope}-query-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/projects",
                         Method.GET, "queue:{scope}-query-projects-service",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/bugreports",
                         Method.GET, "queue:{scope}-bugreports-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
                         "/projects/{id}/membership/add", Method.POST,
                         "queue:{scope}-add-project-member-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
                         "/projects/{id}/membership/remove", Method.POST,
                         "queue:{scope}-remove-project-member-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
                         "/projects/{projectId}/bugreports", Method.POST,
                         "queue:{scope}-create-bugreport-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users", Method.POST,
                         "queue:{scope}-create-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/projects",
                         Method.POST,
                         "queue:{scope}-create-projects-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users/{id}",
                         Method.POST,
                         "queue:{scope}-update-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users/{id}/delete",
                         Method.POST,
                         "queue:{scope}-delete-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/projects/{id}",
                         Method.POST,
                         "queue:{scope}-update-project-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }),
+                        DEFAULT_TIMEOUT_SECS),
                 new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
                         "/projects/{projectId}/bugreports/{id}", Method.POST,
                         "queue:{scope}-update-bugreport-service-queue",
-                        DEFAULT_TIMEOUT_SECS, new String[] { "Employee" }));
+                        DEFAULT_TIMEOUT_SECS));
     }
 
     public static void main(String[] args) throws Exception {

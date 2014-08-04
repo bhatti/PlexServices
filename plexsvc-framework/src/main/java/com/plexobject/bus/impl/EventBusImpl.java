@@ -21,134 +21,141 @@ import com.plexobject.predicate.Predicate;
  * This class implements EventBus for publishing and subscribing events
  * 
  * @author shahzad bhatti
- *
+ * 
  */
 public class EventBusImpl implements EventBus {
-    private static final Logger log = LoggerFactory
-            .getLogger(EventBusImpl.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(EventBusImpl.class);
 
-    private static class HandlerAndFilter {
-        private final long id;
-        private final RequestHandler handler;
-        private final Predicate<Object> filter;
+	private static class HandlerAndFilter {
+		private final long id;
+		private final RequestHandler handler;
+		private final Predicate<Object> filter;
 
-        public HandlerAndFilter(final long id, final RequestHandler handler,
-                final Predicate<Object> filter) {
-            this.id = id;
-            this.handler = handler;
-            this.filter = filter;
-        }
+		public HandlerAndFilter(final long id, final RequestHandler handler,
+				final Predicate<Object> filter) {
+			this.id = id;
+			this.handler = handler;
+			this.filter = filter;
+		}
 
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (int) (id ^ (id >>> 32));
-            return result;
-        }
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (int) (id ^ (id >>> 32));
+			return result;
+		}
 
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            HandlerAndFilter other = (HandlerAndFilter) obj;
-            if (id != other.id)
-                return false;
-            return true;
-        }
-    }
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			HandlerAndFilter other = (HandlerAndFilter) obj;
+			if (id != other.id)
+				return false;
+			return true;
+		}
+	}
 
-    private final Map<String, Map<Long, HandlerAndFilter>> handlersAndFiltersByChannel = new ConcurrentHashMap<>();
-    private final Map<Long, String> channelsBySubscriberId = new ConcurrentHashMap<>();
-    private final AtomicLong nextSubscriberId = new AtomicLong(0);
-    private final ExecutorService executor;
+	private final Map<String, Map<Long, HandlerAndFilter>> handlersAndFiltersByChannel = new ConcurrentHashMap<>();
+	private final Map<Long, String> channelsBySubscriberId = new ConcurrentHashMap<>();
+	private final AtomicLong nextSubscriberId = new AtomicLong(0);
+	private final ExecutorService executor;
 
-    public EventBusImpl(int maxDispatchThreads) {
-        this.executor = Executors.newFixedThreadPool(maxDispatchThreads > 0
-                && maxDispatchThreads < 16 ? maxDispatchThreads : 1);
-    }
+	public EventBusImpl(int maxDispatchThreads) {
+		this.executor = Executors.newFixedThreadPool(maxDispatchThreads > 0
+				&& maxDispatchThreads < 16 ? maxDispatchThreads : 1);
+	}
 
-    @Override
-    public long subscribe(String channel, RequestHandler handler,
-            Predicate<Object> filter) {
-        Objects.requireNonNull(channel, "channel is not specified");
-        Objects.requireNonNull(handler, "handler is not specified");
-        synchronized (channel.intern()) {
-            long id = nextSubscriberId.incrementAndGet();
-            HandlerAndFilter haf = new HandlerAndFilter(id, handler, filter);
+	@Override
+	public long subscribe(String channel, RequestHandler handler,
+			Predicate<Object> filter) {
+		Objects.requireNonNull(channel, "channel is not specified");
+		Objects.requireNonNull(handler, "handler is not specified");
+		synchronized (channel.intern()) {
+			long id = nextSubscriberId.incrementAndGet();
+			HandlerAndFilter haf = new HandlerAndFilter(id, handler, filter);
 
-            Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
-                    .get(channel);
-            if (handlers == null) {
-                handlers = new ConcurrentHashMap<>();
-                handlersAndFiltersByChannel.put(channel, handlers);
-            }
-            handlers.put(id, haf);
-            channelsBySubscriberId.put(id, channel);
-            return id;
-        }
-    }
+			Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
+					.get(channel);
+			if (handlers == null) {
+				handlers = new ConcurrentHashMap<>();
+				handlersAndFiltersByChannel.put(channel, handlers);
+			}
+			handlers.put(id, haf);
+			channelsBySubscriberId.put(id, channel);
+			return id;
+		}
+	}
 
-    @Override
-    public boolean unsubscribe(long subscriptionId) {
-        String channel = channelsBySubscriberId.remove(subscriptionId);
-        HandlerAndFilter haf = null;
-        if (channel != null) {
-            synchronized (channel.intern()) {
-                Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
-                        .get(channel);
-                if (handlers != null) {
-                    haf = handlers.remove(subscriptionId);
-                }
-            }
-        }
-        return haf != null;
-    }
+	@Override
+	public boolean unsubscribe(long subscriptionId) {
+		String channel = channelsBySubscriberId.remove(subscriptionId);
+		HandlerAndFilter haf = null;
+		if (channel != null) {
+			synchronized (channel.intern()) {
+				Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
+						.get(channel);
+				if (handlers != null) {
+					haf = handlers.remove(subscriptionId);
+				}
+			}
+		}
+		return haf != null;
+	}
 
-    @Override
-    public void publish(String channel, Object event) {
-        Objects.requireNonNull(channel, "channel is not specified");
-        Objects.requireNonNull(event, "event is not specified");
-        synchronized (channel.intern()) {
-            final Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
-                    .get(channel);
-            if (handlers != null) {
-                executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (HandlerAndFilter haf : handlers.values()) {
-                            try {
-                                if (haf.filter == null
-                                        || haf.filter.accept(event)) {
-                                    Request request = new Request(
-                                            new HashMap<String, Object>(),
-                                            event, new ResponseBuilder() {
-                                                @Override
-                                                public void sendSuccess(
-                                                        Object payload) {
-                                                    publish(channel, payload);
-                                                }
+	@Override
+	public void publish(final String channel, final Object event) {
+		Objects.requireNonNull(channel, "channel is not specified");
+		Objects.requireNonNull(event, "event is not specified");
+		synchronized (channel.intern()) {
+			final Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
+					.get(channel);
+			if (handlers != null) {
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						for (HandlerAndFilter haf : handlers.values()) {
+							try {
+								if (haf.filter == null
+										|| haf.filter.accept(event)) {
+									String sessionId = null;
+									Request request = new Request(
+											new HashMap<String, Object>(),
+											event, sessionId,
+											new ResponseBuilder() {
+												@Override
+												public void sendSuccess(
+														Object payload) {
+													publish(channel, payload);
+												}
 
-                                                @Override
-                                                public void sendError(
-                                                        Exception e) {
-                                                    publish(channel, e);
-                                                }
-                                            });
+												@Override
+												public void sendError(
+														Exception e) {
+													publish(channel, e);
+												}
 
-                                    haf.handler.handle(request);
-                                }
-                            } catch (Exception ex) {
-                                log.error("Failed to publish " + event, ex);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-    }
+												@Override
+												public void addSessionId(
+														String value) {
+												}
+											});
+
+									haf.handler.handle(request);
+								}
+							} catch (Exception ex) {
+								log.error("Failed to publish " + event, ex);
+							}
+						}
+					}
+				});
+			}
+		}
+	}
 }
