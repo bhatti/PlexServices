@@ -1,4 +1,6 @@
 /bin
 .gradle 
 .classpath
-.settings
+.settings 
+activemq-data
+build

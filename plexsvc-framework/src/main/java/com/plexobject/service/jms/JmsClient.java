@@ -151,7 +151,7 @@ public class JmsClient implements Lifecycle {
         }
     }
 
-    public MessageConsumer send(final String destName,
+    public MessageConsumer sendReceive(final String destName,
             final Map<String, Object> headers, final String payload,
             final Handler<Response> handler) throws JMSException,
             NamingException {
@@ -213,6 +213,7 @@ public class JmsClient implements Lifecycle {
         consumer.setMessageListener(listener);
         reqMsg.setJMSReplyTo(replyTo);
         createProducer(destination).send(reqMsg);
+        log.info("Sent " + payload + " to " + destination);
         return consumer;
     }
 
@@ -246,17 +247,16 @@ public class JmsClient implements Lifecycle {
     public Destination getDestination(String destName) throws JMSException,
             NamingException {
         String resolvedDestName = getNormalizedDestinationName(destName);
+        log.info("resolved " + resolvedDestName + " for " + destName);
         synchronized (resolvedDestName.intern()) {
             Destination destination = destinations.get(resolvedDestName);
             if (destination == null) {
                 if (resolvedDestName.startsWith("queue:")) {
-                    resolvedDestName = resolvedDestName.substring(6);
                     destination = currentJmsSession().createQueue(
-                            resolvedDestName);
+                            resolvedDestName.substring(6));
                 } else if (resolvedDestName.startsWith("topic:")) {
-                    resolvedDestName = resolvedDestName.substring(6);
                     destination = currentJmsSession().createTopic(
-                            resolvedDestName);
+                            resolvedDestName.substring(6));
                 } else {
                     throw new IllegalArgumentException("unknown type for "
                             + resolvedDestName);
@@ -321,7 +321,7 @@ public class JmsClient implements Lifecycle {
     private Session currentJmsSession() throws JMSException, NamingException {
         if (currentSession.get() == null) {
             currentSession.set(connection.createSession(transactedSession,
-                    javax.jms.Session.AUTO_ACKNOWLEDGE));
+                    Session.AUTO_ACKNOWLEDGE));
         }
         return currentSession.get();
     }

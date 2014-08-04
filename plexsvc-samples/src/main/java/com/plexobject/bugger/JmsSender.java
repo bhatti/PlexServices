@@ -24,7 +24,7 @@ public class JmsSender {
         Configuration config = new Configuration(propertyFile);
         final JmsClient jmsClient = new JmsClient(config);
         jmsClient.start();
-        final MessageConsumer consumer = jmsClient.send(dest, headers, text,
+        final MessageConsumer consumer = jmsClient.sendReceive(dest, headers, text,
                 new Handler<Response>() {
                     @Override
                     public void handle(Response reply) {

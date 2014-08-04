@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,12 +87,12 @@ public class HttpToJmsBridge extends AbstractHandler {
             return;
         }
         final String text = IOUtils.toString(baseRequest.getInputStream());
-        log.info("Forwarding " + entry + ", text " + text + ", params "
-                + params);
-        // final AsyncContext async = request.startAsync();
-        // async.setTimeout(entry.getTimeoutSecs() * 1000);
+        // log.debug("Forwarding " + entry + ", text " + text + ", params "
+        // + params);
+        final AsyncContext async = request.startAsync();
+        async.setTimeout(entry.getTimeoutSecs() * 1000);
         try {
-            jmsClient.send(entry.getDestination(), params, text,
+            jmsClient.sendReceive(entry.getDestination(), params, text,
                     new Handler<Response>() {
                         @Override
                         public void handle(Response reply) {
@@ -108,20 +109,25 @@ public class HttpToJmsBridge extends AbstractHandler {
                                 }
                                 for (String name : reply.getPropertyNames()) {
                                     Object value = reply.getProperty(name);
-                                    if (value instanceof String) {
-                                        response.addHeader(name, (String) value);
-                                    } else {
-                                        response.addHeader(name,
-                                                value.toString());
+                                    if (value != null) {
+                                        if (value instanceof String) {
+                                            response.addHeader(name,
+                                                    (String) value);
+                                        } else {
+                                            response.addHeader(name,
+                                                    value.toString());
+                                        }
                                     }
                                 }
                                 response.getWriter().println(
                                         (String) reply.getPayload());
                                 baseRequest.setHandled(true);
+                                async.complete();
+
                                 log.info("Replying back " + entry + ", reply "
                                         + reply);
                             } catch (Exception e) {
-                                log.error("Could not send back " + reply);
+                                log.error("Could not send back " + reply, e);
                             }
                         }
                     });
