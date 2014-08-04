@@ -22,8 +22,8 @@ public class UpdateUserService extends AbstractUserService implements
         User user = request.getPayload();
         ValidationException
                 .builder()
-                .addErrorIfNull(user.getId(), "undefined_id", "id",
-                        "id not specified").raiseIfHasErrors();
+                .assertNonNull(user.getId(), "undefined_id", "id",
+                        "id not specified").end();
 
         User saved = userRepository.save(user);
         request.getResponseBuilder().sendSuccess(saved);

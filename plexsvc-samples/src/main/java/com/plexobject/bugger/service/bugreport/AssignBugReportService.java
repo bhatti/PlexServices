@@ -27,19 +27,19 @@ public class AssignBugReportService extends AbstractBugReportService implements
         String assignedTo = request.getProperty("assignedTo");
         ValidationException
                 .builder()
-                .addErrorIfNull(projectId, "undefined_projectId", "projectId",
+                .assertNonNull(projectId, "undefined_projectId", "projectId",
                         "projectId not specified")
-                .addErrorIfNull(bugReportId, "undefined_bugReportId",
+                .assertNonNull(bugReportId, "undefined_bugReportId",
                         "bugReportId", "bugReportId not specified")
-                .addErrorIfNull(assignedTo, "undefined_assignedTo",
+                .assertNonNull(assignedTo, "undefined_assignedTo",
                         "assignedTo", "assignedTo not specified")
-                .raiseIfHasErrors();
+                .end();
 
         BugReport report = bugReportRepository.load(Long.valueOf(bugReportId));
         ValidationException
                 .builder()
-                .addErrorIfNull(report, "bugReportIdNotFound", "bugReport",
-                        "bugReport not found").raiseIfHasErrors();
+                .assertNonNull(report, "bugReportIdNotFound", "bugReport",
+                        "bugReport not found").end();
         report.setAssignedTo(assignedTo);
         bugReportRepository.save(report);
         request.getResponseBuilder().sendSuccess(report);

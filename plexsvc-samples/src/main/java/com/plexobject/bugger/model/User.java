@@ -112,8 +112,8 @@ public class User implements Validatable {
     public void validate() throws ValidationException {
         ValidationException
                 .builder()
-                .addErrorIfNull(username, "undefined_username", "username",
-                        "username not specified").raiseIfHasErrors();
+                .assertNonNull(username, "undefined_username", "username",
+                        "username not specified").end();
     }
 
 }

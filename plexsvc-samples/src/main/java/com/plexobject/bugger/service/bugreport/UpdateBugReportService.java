@@ -25,11 +25,11 @@ public class UpdateBugReportService extends AbstractBugReportService implements
         BugReport report = request.getPayload();
         ValidationException
                 .builder()
-                .addErrorIfNull(report.getId(), "undefined_id", "id",
+                .assertNonNull(report.getId(), "undefined_id", "id",
                         "id not specified")
-                .addErrorIfNull(report.getProjectId(), "undefined_projectId",
+                .assertNonNull(report.getProjectId(), "undefined_projectId",
                         "projectId", "projectId not specified")
-                .raiseIfHasErrors();
+                .end();
         BugReport saved = bugReportRepository.save(report);
         request.getResponseBuilder().sendSuccess(saved);
     }

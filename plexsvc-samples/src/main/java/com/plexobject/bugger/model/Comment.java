@@ -39,10 +39,10 @@ public class Comment extends Document {
     public void validate() throws ValidationException {
         ValidationException
                 .builder()
-                .addErrorIfNull(bugId, "undefined_bugId", "bugId",
+                .assertNonNull(bugId, "undefined_bugId", "bugId",
                         "bugId not specified")
-                .addErrorIfNull(projectId, "undefined_projectId", "projectId",
-                        "projectId not specified").raiseIfHasErrors();
+                .assertNonNull(projectId, "undefined_projectId", "projectId",
+                        "projectId not specified").end();
     }
 
 }

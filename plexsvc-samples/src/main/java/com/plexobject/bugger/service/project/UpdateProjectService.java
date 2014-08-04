@@ -24,8 +24,8 @@ public class UpdateProjectService extends AbstractProjectService implements
         Project project = request.getPayload();
         ValidationException
                 .builder()
-                .addErrorIfNull(project.getId(), "undefined_id", "id",
-                        "id not specified").raiseIfHasErrors();
+                .assertNonNull(project.getId(), "undefined_id", "id",
+                        "id not specified").end();
 
         Project saved = projectRepository.save(project);
         request.getResponseBuilder().sendSuccess(saved);

@@ -30,8 +30,8 @@ public class CreateCommentService extends AbstractBugReportService implements
                 .getBugId()));
         ValidationException
                 .builder()
-                .addErrorIfNull(report, "undefined_project", "project",
-                        "project not specified").raiseIfHasErrors();
+                .assertNonNull(report, "undefined_project", "project",
+                        "project not specified").end();
         report.getComments().add(comment);
         bugReportRepository.save(report);
         request.getResponseBuilder().sendSuccess(comment);

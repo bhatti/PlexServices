@@ -27,17 +27,17 @@ public class RemoveProjectMemberService extends AbstractProjectService
         boolean projectLead = "true".equals(request.getProperty("projectLead"));
         ValidationException
                 .builder()
-                .addErrorIfNull(projectId, "undefined_projectId", "projectId",
+                .assertNonNull(projectId, "undefined_projectId", "projectId",
                         "projectId not specified")
-                .addErrorIfNull(assignedTo, "undefined_assignedTo",
+                .assertNonNull(assignedTo, "undefined_assignedTo",
                         "assignedTo", "assignedTo not specified")
-                .raiseIfHasErrors();
+                .end();
 
         Project project = projectRepository.load(Long.valueOf(projectId));
         ValidationException
                 .builder()
-                .addErrorIfNull(project, "projectNotFound", "project",
-                        "project not found").raiseIfHasErrors();
+                .assertNonNull(project, "projectNotFound", "project",
+                        "project not found").end();
         if (projectLead) {
             project.setProjectLead(null);
         } else {

@@ -45,7 +45,7 @@ public class ValidationException extends RuntimeException {
             return this;
         }
 
-        public Builder addErrorIfNull(Object obj, String errorCode,
+        public Builder assertNonNull(Object obj, String errorCode,
                 String fieldName, String errorMessage) {
             if (obj == null) {
                 errors.add(new Error(errorCode, fieldName, errorMessage));
@@ -53,7 +53,7 @@ public class ValidationException extends RuntimeException {
             return this;
         }
 
-        public Builder addErrorIfEmpty(String buffer, String errorCode,
+        public Builder assertNonEmpty(String buffer, String errorCode,
                 String fieldName, String errorMessage) {
             if (buffer == null || buffer.length() == 0) {
                 errors.add(new Error(errorCode, fieldName, errorMessage));
@@ -61,7 +61,7 @@ public class ValidationException extends RuntimeException {
             return this;
         }
 
-        public Builder addErrorIfFalse(boolean predicate, String errorCode,
+        public Builder assertTrue(boolean predicate, String errorCode,
                 String fieldName, String errorMessage) {
             if (!predicate) {
                 errors.add(new Error(errorCode, fieldName, errorMessage));
@@ -69,7 +69,7 @@ public class ValidationException extends RuntimeException {
             return this;
         }
 
-        public void raiseIfHasErrors() {
+        public void end() {
             if (errors.size() > 0) {
                 throw new ValidationException(message, cause, errors);
             }

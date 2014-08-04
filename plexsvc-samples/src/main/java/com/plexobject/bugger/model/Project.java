@@ -66,9 +66,9 @@ public class Project extends Document {
     public void validate() throws ValidationException {
         ValidationException
                 .builder()
-                .addErrorIfNull(projectCode, "undefined_projectCode",
+                .assertNonNull(projectCode, "undefined_projectCode",
                         "projectCode", "projectCode not specified")
-                .raiseIfHasErrors();
+                .end();
     }
 
 }

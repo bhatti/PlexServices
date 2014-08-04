@@ -24,8 +24,8 @@ public class DeleteUserService extends AbstractUserService implements
         String id = request.getProperty("id");
 
         ValidationException.builder()
-                .addErrorIfNull(id, "undefined_id", "id", "id not specified")
-                .raiseIfHasErrors();
+                .assertNonNull(id, "undefined_id", "id", "id not specified")
+                .end();
 
         boolean deleted = userRepository.delete(Long.valueOf(id));
         Map<String, Boolean> response = new HashMap<String, Boolean>() {

@@ -157,12 +157,12 @@ public class BugReport extends Document {
     public void validate() throws ValidationException {
         ValidationException
                 .builder()
-                .addErrorIfNull(bugNumber, "undefined_bugNumber", "bugNumber",
+                .assertNonNull(bugNumber, "undefined_bugNumber", "bugNumber",
                         "bugNumber not specified")
-                .addErrorIfNull(projectId, "undefined_projectId", "projectId",
+                .assertNonNull(projectId, "undefined_projectId", "projectId",
                         "projectId not specified")
-                .addErrorIfNull(priority, "undefined_priority", "priority",
-                        "priority not specified").raiseIfHasErrors();
+                .assertNonNull(priority, "undefined_priority", "priority",
+                        "priority not specified").end();
     }
 
 }

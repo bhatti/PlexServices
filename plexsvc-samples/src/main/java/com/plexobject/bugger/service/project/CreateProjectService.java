@@ -25,8 +25,8 @@ public class CreateProjectService extends AbstractProjectService implements
         Project project = request.getPayload();
         ValidationException
                 .builder()
-                .addErrorIfNull(project, "undefined_project", "project",
-                        "project not specified").raiseIfHasErrors();
+                .assertNonNull(project, "undefined_project", "project",
+                        "project not specified").end();
         Project saved = projectRepository.save(project);
         request.getResponseBuilder().sendSuccess(saved);
     }
