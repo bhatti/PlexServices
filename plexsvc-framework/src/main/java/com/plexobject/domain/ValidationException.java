@@ -1,9 +1,9 @@
-package com.plexobject.service;
+package com.plexobject.domain;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class ServiceException extends RuntimeException {
+public class ValidationException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public static class Error {
@@ -71,24 +71,24 @@ public class ServiceException extends RuntimeException {
 
         public void raiseIfHasErrors() {
             if (errors.size() > 0) {
-                throw new ServiceException(message, cause, errors);
+                throw new ValidationException(message, cause, errors);
             }
         }
 
         public void raise() {
-            throw new ServiceException(message, cause, errors);
+            throw new ValidationException(message, cause, errors);
         }
     }
 
     private final Set<Error> errors;
 
-    public ServiceException(String message, Throwable cause,
+    public ValidationException(String message, Throwable cause,
             final Set<Error> errors) {
         super(message, cause);
         this.errors = errors;
     }
 
-    public ServiceException(String message, final Set<Error> errors) {
+    public ValidationException(String message, final Set<Error> errors) {
         super(message);
         this.errors = errors;
     }
@@ -103,7 +103,7 @@ public class ServiceException extends RuntimeException {
 
     @Override
     public String toString() {
-        return "ServiceException [errors=" + errors + ", super "
+        return "ValidationException [errors=" + errors + ", super "
                 + super.toString() + "]";
     }
 

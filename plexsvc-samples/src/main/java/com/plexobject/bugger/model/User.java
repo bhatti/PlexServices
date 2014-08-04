@@ -3,7 +3,11 @@ package com.plexobject.bugger.model;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class User {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plexobject.domain.Validatable;
+import com.plexobject.domain.ValidationException;
+
+public class User implements Validatable {
     private Long id;
     private String username;
     private String password;
@@ -14,9 +18,7 @@ public class User {
 
     }
 
-    public User(Long id, String username, String password, String email,
-            String... roles) {
-        this.id = id;
+    public User(String username, String password, String email, String... roles) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -37,6 +39,7 @@ public class User {
         return username;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
@@ -103,6 +106,14 @@ public class User {
     public String toString() {
         return "User [username=" + username + ", email=" + email + ", roles="
                 + roles + "]";
+    }
+
+    @Override
+    public void validate() throws ValidationException {
+        ValidationException
+                .builder()
+                .addErrorIfNull(username, "undefined_username", "username",
+                        "username not specified").raiseIfHasErrors();
     }
 
 }

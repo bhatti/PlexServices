@@ -8,9 +8,11 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
-@ServiceConfig(requestClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, contentType = "application/json")
+//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, contentType = "application/json")
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", method = Method.LISTEN, contentType = "application/json")
 public class QueryUserService extends AbstractUserService implements
         RequestHandler {
     public QueryUserService(UserRepository userRepository) {
@@ -32,6 +34,6 @@ public class QueryUserService extends AbstractUserService implements
                 return true;
             }
         });
-        request.getResponseBuilder().setReply(users).send();
+        request.getResponseBuilder().sendSuccess(users);
     }
 }

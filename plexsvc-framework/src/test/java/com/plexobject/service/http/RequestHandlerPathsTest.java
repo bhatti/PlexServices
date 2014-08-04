@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.service.jetty.PathsLookup;
 
 public class RequestHandlerPathsTest {
     private static class TestHandler implements RequestHandler {
@@ -57,7 +58,7 @@ public class RequestHandlerPathsTest {
         }
     }
 
-    RequestHandlerPaths requestHandlerPaths = new RequestHandlerPaths();
+    PathsLookup<RequestHandler> requestHandlerPaths = new PathsLookup<>();
 
     private static TestData[] TEST_DATA = {
             new TestData("/", "Root", "/"),
@@ -84,7 +85,7 @@ public class RequestHandlerPathsTest {
     @Before
     public void setUp() throws Exception {
         for (TestData td : TEST_DATA) {
-            requestHandlerPaths.addHandler(td.handlerUrl, new TestHandler(
+            requestHandlerPaths.put(td.handlerUrl, new TestHandler(
                     td.handlerName));
         }
     }
@@ -96,9 +97,9 @@ public class RequestHandlerPathsTest {
     @Test
     public void testGetHandler() {
         Map<String, Object> parameters = new HashMap<>();
-        assertNull(requestHandlerPaths.getHandler("/xxx", parameters));
+        assertNull(requestHandlerPaths.get("/xxx", parameters));
         for (TestData td : TEST_DATA) {
-            RequestHandler h = requestHandlerPaths.getHandler(td.searchUrl,
+            RequestHandler h = requestHandlerPaths.get(td.searchUrl,
                     parameters);
             assertNotNull("Could not find " + td, h);
             for (Map.Entry<String, String> e : td.params.entrySet()) {

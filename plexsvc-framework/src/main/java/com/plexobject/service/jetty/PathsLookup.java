@@ -1,4 +1,4 @@
-package com.plexobject.service.http;
+package com.plexobject.service.jetty;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,18 +7,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.plexobject.handler.RequestHandler;
-
-public class RequestHandlerPaths {
-    private static class Node {
+public class PathsLookup<T> {
+    private static class Node<T> {
         private final String pathFragment;
         private final String parameter;
         private final int level;
-        private Node parent;
-        private final Map<String, Node> children = new HashMap<>();
-        private RequestHandler requestHandler;
+        private Node<T> parent;
+        private final Map<String, Node<T>> children = new HashMap<>();
+        private T object;
 
-        private Node(Node parent, String pathFragment, int level) {
+        private Node(Node<T> parent, String pathFragment, int level) {
             this.parent = parent;
             this.pathFragment = pathFragment;
             this.level = level;
@@ -33,21 +31,20 @@ public class RequestHandlerPaths {
             return parameter != null;
         }
 
-        private Node add(String[] fragments, int index,
-                RequestHandler requestHandler) {
+        private Node<T> add(String[] fragments, int index, T object) {
             if (fragments.length <= index) {
-                this.requestHandler = requestHandler;
+                this.object = object;
                 return this;
             }
-            Node child = children.get(fragments[index]);
+            Node<T> child = children.get(fragments[index]);
             if (child == null) {
-                child = new Node(this, fragments[index], index);
+                child = new Node<T>(this, fragments[index], index);
                 children.put(fragments[index], child);
             }
-            return child.add(fragments, index + 1, requestHandler);
+            return child.add(fragments, index + 1, object);
         }
 
-        private Node find(String[] fragments, int index,
+        private Node<T> find(String[] fragments, int index,
                 Map<String, Object> parameters) {
             if (parent == null
                     || isParameterPath()
@@ -56,11 +53,12 @@ public class RequestHandlerPaths {
                 if (isParameterPath() && index < fragments.length) {
                     parameters.put(parameter, fragments[index]);
                 }
-                if (requestHandler != null && fragments.length - 1 == level) {
+                if (object != null && fragments.length - 1 == level) {
                     return this;
                 }
-                for (Node child : children.values()) {
-                    Node matched = child.find(fragments, index + 1, parameters);
+                for (Node<T> child : children.values()) {
+                    Node<T> matched = child.find(fragments, index + 1,
+                            parameters);
                     if (matched != null) {
                         return matched;
                     }
@@ -78,6 +76,7 @@ public class RequestHandlerPaths {
             return result;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(Object obj) {
             if (this == obj)
@@ -86,7 +85,7 @@ public class RequestHandlerPaths {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            Node other = (Node) obj;
+            Node<T> other = (Node<T>) obj;
             if (pathFragment == null) {
                 if (other.pathFragment != null)
                     return false;
@@ -97,50 +96,51 @@ public class RequestHandlerPaths {
 
         @Override
         public String toString() {
-            return pathFragment + "=> " + requestHandler + ", level " + level;
+            return pathFragment + "=> " + object + ", level " + level;
         }
 
         public void toString(StringBuilder sb) {
             for (int i = 0; i < level; i++) {
                 sb.append("   ");
             }
-            String handler = requestHandler != null ? requestHandler.getClass()
-                    .getSimpleName() : "<null>";
-            handler = requestHandler != null ? requestHandler.toString()
+            String handler = object != null ? object.getClass().getSimpleName()
                     : "<null>";
+            handler = object != null ? object.toString() : "<null>";
             sb.append(pathFragment + " => " + handler + ", level " + level
                     + "\n");
 
-            for (Node child : children.values()) {
+            for (Node<T> child : children.values()) {
                 child.toString(sb);
             }
         }
     }
 
-    private final Map<String, RequestHandler> servicesByPath = new ConcurrentHashMap<>();
-    private Node root = new Node(null, "/", 0);
+    private final Map<String, T> servicesByPath = new ConcurrentHashMap<>();
+    private Node<T> root = new Node<T>(null, "/", 0);
 
-    public void addHandler(String path, RequestHandler requestHandler) {
+    public void put(String path, T object) {
         Objects.requireNonNull(path, "null path");
-        Objects.requireNonNull(requestHandler, "null requestHandler");
-        servicesByPath.put(path, requestHandler);
+        Objects.requireNonNull(object, "null object");
+        servicesByPath.put(path, object);
         String[] fragments = path.split("/");
-        root.add(fragments, 1, requestHandler);
+        root.add(fragments, 1, object);
     }
 
-    public RequestHandler getHandler(String path, Map<String, Object> parameters) {
-        Node node = getNode(path, parameters);
-        return node != null ? node.requestHandler : null;
+    public T get(String path, Map<String, Object> parameters) {
+        Node<T> node = getNode(path, parameters);
+        return node != null ? node.object : null;
     }
 
-    public void removeHandler(String path) {
-        Node node = getNode(path, new HashMap<String, Object>());
+    public boolean remove(String path) {
+        Node<T> node = getNode(path, new HashMap<String, Object>());
         if (node != null) {
             node.parent.children.remove(node);
+            return true;
         }
+        return false;
     }
 
-    public Collection<RequestHandler> getRequestHandlers() {
+    public Collection<T> getObjects() {
         return new ArrayList<>(servicesByPath.values());
     }
 
@@ -151,14 +151,14 @@ public class RequestHandlerPaths {
         return sb.toString();
     }
 
-    private Node getNode(String path, Map<String, Object> parameters) {
+    private Node<T> getNode(String path, Map<String, Object> parameters) {
         Objects.requireNonNull(path, "null path");
 
         String[] fragments = path.split("/");
         if (fragments.length == 0) {
             return root;
         }
-        Node parent = root.children.get(fragments[1]);
+        Node<T> parent = root.children.get(fragments[1]);
         if (parent == null) {
             return null;
         }

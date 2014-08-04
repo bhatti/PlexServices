@@ -5,13 +5,15 @@ import com.plexobject.bugger.model.Comment;
 import com.plexobject.bugger.repository.BugReportRepository;
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.bugger.service.bugreport.AbstractBugReportService;
+import com.plexobject.domain.ValidationException;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceException;
 
-@ServiceConfig(requestClass = Comment.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{bugId}/comments", method = Method.POST, contentType = "application/json")
+//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Comment.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/comments", method = Method.POST, contentType = "application/json")
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue:create-project-bugreport-comment-service", method = Method.LISTEN, contentType = "application/json")
 public class CreateCommentService extends AbstractBugReportService implements
         RequestHandler {
     public CreateCommentService(BugReportRepository bugReportRepository,
@@ -22,23 +24,16 @@ public class CreateCommentService extends AbstractBugReportService implements
     // any employee who is member of same project can create comment
     @Override
     public void handle(Request request) {
-        String projectId = request.getProperty("projectId");
-        String bugId = request.getProperty("bugId");
-        ServiceException
-                .builder()
-                .addErrorIfNull(projectId, "undefined_projectId", "projectId",
-                        "projectId not specified")
-                .addErrorIfNull(bugId, "undefined_bugId", "bugId",
-                        "bugId not specified").raiseIfHasErrors();
-
-        Comment comment = request.getObject();
-        BugReport report = bugReportRepository.load(Long.valueOf(bugId));
-        ServiceException
+        Comment comment = request.getPayload();
+        comment.validate();
+        BugReport report = bugReportRepository.load(Long.valueOf(comment
+                .getBugId()));
+        ValidationException
                 .builder()
                 .addErrorIfNull(report, "undefined_project", "project",
                         "project not specified").raiseIfHasErrors();
         report.getComments().add(comment);
         bugReportRepository.save(report);
-        request.getResponseBuilder().setReply(comment).send();
+        request.getResponseBuilder().sendSuccess(comment);
     }
 }

@@ -13,11 +13,8 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
 
     @Override
     public boolean hasRole(Request request, String role) {
-        String username = request.getUsername();
+        String username = request.getProperty("username");
         // TODO session validation here
-        if (username == null) {
-            username = request.getProperty("username");
-        }
         if (username == null) {
             return false;
         }

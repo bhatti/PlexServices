@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: PlexService
-Implementation-Version: 0.1-SNAPSHOT
-

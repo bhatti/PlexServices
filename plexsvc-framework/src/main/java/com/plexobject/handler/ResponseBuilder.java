@@ -6,7 +6,6 @@ import java.util.Map;
 public abstract class ResponseBuilder {
     protected int status;
     protected String contentType;
-    protected Object reply;
     protected final Map<String, Object> properties = new HashMap<>();
 
     public ResponseBuilder setStatus(int status) {
@@ -19,15 +18,12 @@ public abstract class ResponseBuilder {
         return this;
     }
 
-    public <R> ResponseBuilder setReply(R reply) {
-        this.reply = reply;
-        return this;
-    }
-
     public ResponseBuilder setProperty(String name, String value) {
         properties.put(name, value);
         return this;
     }
 
-    public abstract void send();
+    public abstract void sendSuccess(Object payload);
+
+    public abstract void sendError(Exception e);
 }

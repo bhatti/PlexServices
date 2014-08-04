@@ -10,20 +10,8 @@ import com.plexobject.bugger.model.User;
 import com.plexobject.predicate.Predicate;
 
 public class UserRepository {
-    private final Map<Long, User> memoryStorage = new HashMap<Long, User>() {
-        private static final long serialVersionUID = 1L;
-        {
-            put(1L, new User(1L, "alex", "pass", "alex@plexobject.com",
-                    "Employee"));
-            put(2L, new User(2L, "jeff", "pass", "jeff@plexobject.com",
-                    "Employee", "Manager"));
-            put(3L, new User(3L, "scott", "pass", "scott@plexobject.com",
-                    "Employee", "Manager", "Administrator"));
-            put(4L, new User(4L, "erica", "pass", "erica@plexobject.com",
-                    "Employee"));
-        }
-    };
-    private AtomicLong nextId = new AtomicLong(memoryStorage.size());
+    private final Map<Long, User> memoryStorage = new HashMap<>();
+    private AtomicLong nextId = new AtomicLong(1);
 
     public User load(Long id) {
         return memoryStorage.get(id);
@@ -38,8 +26,8 @@ public class UserRepository {
         return u;
     }
 
-    public void delete(Long id) {
-        memoryStorage.remove(id);
+    public boolean delete(Long id) {
+        return memoryStorage.remove(id) != null;
     }
 
     public List<User> getAll(Predicate<User> predicate) {

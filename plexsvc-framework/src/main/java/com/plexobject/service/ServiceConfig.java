@@ -13,7 +13,7 @@ import com.plexobject.encode.CodecType;
 @Target(ElementType.TYPE)
 public @interface ServiceConfig {
     public enum Method {
-        GET, POST, PUT, DELETE, HEAD
+        GET, POST, PUT, DELETE, HEAD, LISTEN
     }
 
     public enum GatewayType {
@@ -22,7 +22,7 @@ public @interface ServiceConfig {
 
     Class<?> requestClass();
 
-    GatewayType gateway() default GatewayType.HTTP;
+    GatewayType gateway();
 
     CodecType codec() default CodecType.JSON;
 

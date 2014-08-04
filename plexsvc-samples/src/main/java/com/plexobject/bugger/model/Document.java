@@ -2,7 +2,9 @@ package com.plexobject.bugger.model;
 
 import java.util.Date;
 
-public abstract class Document {
+import com.plexobject.domain.Validatable;
+
+public abstract class Document implements Validatable {
     private Long id;
     private Date createdAt = new Date();
     private Date modifiedAt = new Date();

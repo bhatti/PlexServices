@@ -10,8 +10,8 @@ import com.plexobject.bugger.model.Project;
 import com.plexobject.predicate.Predicate;
 
 public class ProjectRepository {
-    private AtomicLong nextId = new AtomicLong();
     private final Map<Long, Project> memoryStorage = new HashMap<>();
+    private AtomicLong nextId = new AtomicLong(1);
 
     public Project load(Long id) {
         return memoryStorage.get(id);
@@ -20,6 +20,21 @@ public class ProjectRepository {
     public Project save(Project project) {
         if (project.getId() == null) {
             project.setId(nextId.incrementAndGet());
+        } else {
+            Project old = memoryStorage.get(project.getId());
+            if (old == null) {
+                throw new RuntimeException("Not found " + project);
+            }
+            if (project.getProjectCode() != null) {
+                old.setProjectCode(project.getProjectCode());
+            }
+            if (project.getProjectLead() != null) {
+                old.setProjectLead(project.getProjectLead());
+            }
+            if (project.getMembers() != null) {
+                old.setMembers(project.getMembers());
+            }
+            project = old;
         }
         memoryStorage.put(project.getId(), project);
         return project;

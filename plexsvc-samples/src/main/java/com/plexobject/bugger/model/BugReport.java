@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.plexobject.domain.ValidationException;
+
 public class BugReport extends Document {
     public enum State {
         OPEN, READY, IN_DEVELOPMENT, IN_TEST, CLOSED
@@ -18,15 +20,23 @@ public class BugReport extends Document {
     private String bugNumber;
     private Date resolutionDate;
     private Date estimatedResolutionDate;
-    private User assignedTo;
-    private User developedBy;
-    private User testedBy;
-    private Project project;
+    private String assignedTo;
+    private String developedBy;
+    private String testedBy;
+    private Long projectId;
     private State state = State.OPEN;
-    private Priority priority;
+    private Priority priority = Priority.LOW;
     private Map<String, Object> attributes = new HashMap<>();
     private Collection<Comment> comments = new ArrayList<>();
     private Collection<BugReportAudit> logs = new ArrayList<>();
+
+    public BugReport() {
+
+    }
+
+    public BugReport(String bugNumber) {
+        this.bugNumber = bugNumber;
+    }
 
     public String getBugNumber() {
         return bugNumber;
@@ -55,36 +65,36 @@ public class BugReport extends Document {
         this.estimatedResolutionDate = estimatedResolutionDate;
     }
 
-    public User getAssignedTo() {
+    public String getAssignedTo() {
         return assignedTo;
     }
 
-    public void setAssignedTo(User assignedTo) {
+    public void setAssignedTo(String assignedTo) {
         this.assignedTo = assignedTo;
     }
 
-    public User getDevelopedBy() {
+    public String getDevelopedBy() {
         return developedBy;
     }
 
-    public void setDevelopedBy(User developedBy) {
+    public void setDevelopedBy(String developedBy) {
         this.developedBy = developedBy;
     }
 
-    public User getTestedBy() {
+    public String getTestedBy() {
         return testedBy;
     }
 
-    public void setTestedBy(User testedBy) {
+    public void setTestedBy(String testedBy) {
         this.testedBy = testedBy;
     }
 
-    public Project getProject() {
-        return project;
+    public Long getProjectId() {
+        return projectId;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public State getState() {
@@ -119,6 +129,10 @@ public class BugReport extends Document {
         this.comments = comments;
     }
 
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+    }
+
     public Collection<BugReportAudit> getLogs() {
         return logs;
     }
@@ -133,9 +147,22 @@ public class BugReport extends Document {
                 + resolutionDate + ", estimatedResolutionDate="
                 + estimatedResolutionDate + ", assignedTo=" + assignedTo
                 + ", developedBy=" + developedBy + ", testedBy=" + testedBy
-                + ", project=" + project + ", state=" + state + ", priority="
-                + priority + ", attributes=" + attributes + ", comments="
-                + comments + ", logs=" + logs + "]" + super.toString();
+                + ", projectId=" + projectId + ", state=" + state
+                + ", priority=" + priority + ", attributes=" + attributes
+                + ", comments=" + comments + ", logs=" + logs + "]"
+                + super.toString();
+    }
+
+    @Override
+    public void validate() throws ValidationException {
+        ValidationException
+                .builder()
+                .addErrorIfNull(bugNumber, "undefined_bugNumber", "bugNumber",
+                        "bugNumber not specified")
+                .addErrorIfNull(projectId, "undefined_projectId", "projectId",
+                        "projectId not specified")
+                .addErrorIfNull(priority, "undefined_priority", "priority",
+                        "priority not specified").raiseIfHasErrors();
     }
 
 }

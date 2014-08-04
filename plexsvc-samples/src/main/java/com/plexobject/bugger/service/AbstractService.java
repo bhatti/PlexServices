@@ -23,21 +23,21 @@ public class AbstractService implements LifecycleAware, Pingable {
 
     @Override
     public void onCreated() {
-        log.info("created");
+        //log.debug("created");
     }
 
     @Override
     public void onDestroyed() {
-        log.info("destroyed");
+        //log.debug("destroyed");
     }
 
     @Override
     public void onStarted() {
-        log.info("started");
+        //log.debug("started");
     }
 
     @Override
     public void onStopped() {
-        log.info("stopped");
+        //log.debug("stopped");
     }
 }

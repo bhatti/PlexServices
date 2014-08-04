@@ -1,6 +1,4 @@
 package com.plexobject.handler;
 
-
-public interface RequestHandler {
-    void handle(Request request);
+public interface RequestHandler extends Handler<Request> {
 }

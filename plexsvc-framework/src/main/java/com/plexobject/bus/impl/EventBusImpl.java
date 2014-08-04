@@ -124,15 +124,19 @@ public class EventBusImpl implements EventBus {
                             try {
                                 if (haf.filter == null
                                         || haf.filter.accept(event)) {
-                                    String sessionId = null;
-                                    String username = null;
                                     Request request = new Request(
                                             new HashMap<String, Object>(),
-                                            sessionId, username, event,
-                                            new ResponseBuilder() {
+                                            event, new ResponseBuilder() {
                                                 @Override
-                                                public void send() {
-                                                    publish(channel, reply);
+                                                public void sendSuccess(
+                                                        Object payload) {
+                                                    publish(channel, payload);
+                                                }
+
+                                                @Override
+                                                public void sendError(
+                                                        Exception e) {
+                                                    publish(channel, e);
                                                 }
                                             });
 

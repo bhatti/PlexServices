@@ -8,22 +8,22 @@ mainClassName = 'com.plexobject.bugger.Main'
 
 dependencies {
   compile 'org.slf4j:slf4j-api:1.7.5'
-  compile 'log4j:log4j:1.2.17'
-  compile 'org.slf4j:slf4j-log4j12:1.7.7'
+    compile 'log4j:log4j:1.2.17'
+    compile 'org.slf4j:slf4j-log4j12:1.7.7'
+    compile 'org.apache.activemq:activemq-all:5.10.0'
 
+    compile 'com.google.guava:guava:17.0'
+    compile 'org.xerial:sqlite-jdbc:3.7.2'
 
-  compile 'com.google.guava:guava:17.0'
-  compile 'org.xerial:sqlite-jdbc:3.7.2'
-
-  compile project(':plexsvc-framework')
-  testCompile 'junit:junit:4.11'
+    compile project(':plexsvc-framework')
+    testCompile 'junit:junit:4.11'
 }
 
 
 run {
-    if(project.hasProperty('args')){
-        args project.args.split('\\s+')
-    }
+  if(project.hasProperty('args')){
+    args project.args.split('\\s+')
+  }
 }
 
 
@@ -33,3 +33,7 @@ jar {
   }
 }
 
+task dist(type: Copy) {
+   into "$buildDir/dist/lib"
+   from configurations.runtime
+}

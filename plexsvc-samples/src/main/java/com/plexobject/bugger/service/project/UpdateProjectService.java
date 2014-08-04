@@ -3,13 +3,15 @@ package com.plexobject.bugger.service.project;
 import com.plexobject.bugger.model.Project;
 import com.plexobject.bugger.repository.ProjectRepository;
 import com.plexobject.bugger.repository.UserRepository;
+import com.plexobject.domain.ValidationException;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceException;
 
-@ServiceConfig(requestClass = Project.class, rolesAllowed = "Manager", endpoint = "/projects/{id}", method = Method.POST, contentType = "application/json")
+//@ServiceConfig(gateway = GatewayType.HTTP,requestClass = Project.class, rolesAllowed = "Manager", endpoint = "/projects/{id}", method = Method.POST, contentType = "application/json")
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = Project.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-update-project-service-queue", method = Method.LISTEN, contentType = "application/json")
 public class UpdateProjectService extends AbstractProjectService implements
         RequestHandler {
     public UpdateProjectService(ProjectRepository projectRepository,
@@ -19,17 +21,13 @@ public class UpdateProjectService extends AbstractProjectService implements
 
     @Override
     public void handle(Request request) {
-        String id = request.getProperty("id");
-
-        Project project = request.getObject();
-        ServiceException
+        Project project = request.getPayload();
+        ValidationException
                 .builder()
-                .addErrorIfNull(id, "undefined_id", "id", "id not specified")
-                .addErrorIfNull(project, "undefined_project", "project",
-                        "project not specified").raiseIfHasErrors();
-        project.setId(Long.valueOf(id));
+                .addErrorIfNull(project.getId(), "undefined_id", "id",
+                        "id not specified").raiseIfHasErrors();
 
         Project saved = projectRepository.save(project);
-        request.getResponseBuilder().setReply(saved).send();
+        request.getResponseBuilder().sendSuccess(saved);
     }
 }
