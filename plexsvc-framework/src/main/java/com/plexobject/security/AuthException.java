@@ -1,17 +1,17 @@
-package com.plexobject.domain;
+package com.plexobject.security;
 
 public class AuthException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
-	private final String status;
+	private final int status;
 	private final String location;
 
-	public AuthException(String status, String location, String message) {
+	public AuthException(int status, String location, String message) {
 		super(message);
 		this.status = status;
 		this.location = location;
 	}
 
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
 

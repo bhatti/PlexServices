@@ -19,10 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
+import com.plexobject.handler.ResponseBuilder;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.jetty.HttpResponseBuilder;
 import com.plexobject.service.jetty.HttpServer;
 import com.plexobject.service.jetty.PathsLookup;
 import com.plexobject.service.jms.JmsClient;
@@ -97,32 +100,25 @@ public class HttpToJmsBridge extends AbstractHandler {
                         @Override
                         public void handle(Response reply) {
                             try {
+                                CodecType codecType = null; // we only deal with
+                                                            // text
+                                ResponseBuilder responseBuilder = new HttpResponseBuilder(
+                                        entry.getContentType(), codecType,
+                                        baseRequest, response);
                                 // async.dispatch();
                                 response.setContentType(entry.getContentType());
-                                if (response.getStatus() > 0) {
-                                    response.setStatus(response.getStatus());
-                                }
+                                //
                                 for (String name : reply.getPropertyNames()) {
                                     Object value = reply.getProperty(name);
-                                    if (value != null) {
-                                        if (value instanceof String) {
-                                            response.addHeader(name,
-                                                    (String) value);
-                                        } else {
-                                            response.addHeader(name,
-                                                    value.toString());
-                                        }
-                                    }
+                                    responseBuilder.setProperty(name, value);
                                 }
-                                response.getWriter().println(
-                                        (String) reply.getPayload());
-                                baseRequest.setHandled(true);
-                                async.complete();
-
+                                responseBuilder.send(reply.getPayload());
                                 log.info("Replying back " + entry + ", reply "
                                         + reply);
                             } catch (Exception e) {
                                 log.error("Could not send back " + reply, e);
+                            } finally {
+                                async.complete();
                             }
                         }
                     });

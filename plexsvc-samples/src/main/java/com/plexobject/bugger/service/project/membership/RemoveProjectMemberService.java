@@ -43,6 +43,6 @@ public class RemoveProjectMemberService extends AbstractProjectService
         } else {
             project.removeMember(assignedTo);
         }
-        request.getResponseBuilder().sendSuccess(project);
+        request.getResponseBuilder().send(project);
     }
 }

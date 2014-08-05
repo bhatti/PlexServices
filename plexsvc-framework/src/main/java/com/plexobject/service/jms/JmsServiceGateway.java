@@ -59,7 +59,7 @@ public class JmsServiceGateway extends AbstractServiceGateway {
 
         try {
             Destination dest = jmsClient.getDestination(getDestinationName(h));
-            jmsHandler = new JmsRequestHandler(jmsClient, dest, h);
+            jmsHandler = new JmsRequestHandler(authorizer, jmsClient, dest, h);
             jmsHandlersByRequestHandler.put(h, jmsHandler);
             log.info("Adding JMS service " + h.getClass().getSimpleName()
                     + " for " + dest);

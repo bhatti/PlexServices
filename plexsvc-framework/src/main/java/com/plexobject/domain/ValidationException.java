@@ -74,10 +74,6 @@ public class ValidationException extends RuntimeException {
                 throw new ValidationException(message, cause, errors);
             }
         }
-
-        public void raise() {
-            throw new ValidationException(message, cause, errors);
-        }
     }
 
     private final Set<Error> errors;

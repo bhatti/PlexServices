@@ -1,16 +1,16 @@
 package com.plexobject.bugger.repository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.plexobject.bugger.model.Project;
 import com.plexobject.predicate.Predicate;
 
 public class ProjectRepository {
-    private final Map<Long, Project> memoryStorage = new HashMap<>();
+    private final Map<Long, Project> memoryStorage = new ConcurrentHashMap<>();
     private AtomicLong nextId = new AtomicLong(1);
 
     public Project load(Long id) {

@@ -28,6 +28,6 @@ public class UpdateProjectService extends AbstractProjectService implements
                         "id not specified").end();
 
         Project saved = projectRepository.save(project);
-        request.getResponseBuilder().sendSuccess(saved);
+        request.getResponseBuilder().send(saved);
     }
 }

@@ -24,7 +24,7 @@ public class CreateBugReportService extends AbstractBugReportService implements
         BugReport report = request.getPayload();
         report.validate();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseBuilder().sendSuccess(saved);
+        request.getResponseBuilder().send(saved);
     }
 
 }

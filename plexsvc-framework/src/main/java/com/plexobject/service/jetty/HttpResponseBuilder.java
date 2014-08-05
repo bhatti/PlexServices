@@ -10,68 +10,74 @@ import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
+import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodeFactory;
 import com.plexobject.handler.ResponseBuilder;
-import com.plexobject.security.SessionValidator;
-import com.plexobject.service.ErrorResponse;
-import com.plexobject.service.ServiceConfig;
 
 public class HttpResponseBuilder extends ResponseBuilder {
     private static final Logger log = LoggerFactory
             .getLogger(HttpResponseBuilder.class);
 
-    private final ServiceConfig config;
+    private final String contentType;
+    private final CodecType codecType;
     private final Request baseRequest;
     private final HttpServletResponse response;
 
-    public HttpResponseBuilder(final ServiceConfig config,
-            final Request baseRequest, final HttpServletResponse response) {
-        this.config = config;
+    public HttpResponseBuilder(final String contentType,
+            final CodecType codecType, final Request baseRequest,
+            final HttpServletResponse response) {
+        this.contentType = contentType;
+        this.codecType = codecType;
         this.baseRequest = baseRequest;
         this.response = response;
     }
 
     public void addSessionId(String value) {
-        response.addCookie(new Cookie(SessionValidator.SESSION_ID, value));
+        response.addCookie(new Cookie(Constants.SESSION_ID, value));
     }
 
-    public void redirect(String location) {
-        try {
-            response.sendRedirect(location);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to redirect to " + location);
+    public final void send(Object payload) {
+        String location = (String) properties.get(Constants.LOCATION);
+        if (location != null) {
+            redirect(location);
+            return;
         }
-    }
 
-    public final void sendSuccess(Object payload) {
+        String sessionId = (String) properties.get(Constants.SESSION_ID);
+        if (sessionId != null) {
+            addSessionId(sessionId);
+        }
+
         try {
-            response.setContentType(config.contentType());
+            response.setContentType(contentType);
             if (response.getStatus() > 0) {
                 response.setStatus(response.getStatus());
+            } else {
+                String status = (String) properties.get(Constants.STATUS);
+                if (status != null) {
+                    response.setStatus(Integer.parseInt(status));
+                }
+
             }
             for (Map.Entry<String, Object> e : properties.entrySet()) {
-                response.addHeader(e.getKey(), e.getValue().toString());
+                Object value = e.getValue();
+                if (value != null) {
+                    if (value instanceof String) {
+                        response.addHeader(e.getKey(), (String) value);
+                    } else {
+                        response.addHeader(e.getKey(), value.toString());
+                    }
+                }
             }
+
             baseRequest.setHandled(true);
-            String replyText = ObjectCodeFactory.getObjectCodec(config.codec())
-                    .encode(payload);
+            String replyText = payload instanceof String ? (String) payload
+                    : ObjectCodeFactory.getObjectCodec(codecType).encode(
+                            payload);
             response.getWriter().println(replyText);
         } catch (Exception e) {
             log.error("Failed to write " + payload + ", " + this, e);
-        }
-    }
-
-    @Override
-    public void sendError(Exception e) {
-        response.setContentType(config.contentType());
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        baseRequest.setHandled(true);
-        try {
-            String replyText = ObjectCodeFactory.getObjectCodec(config.codec())
-                    .encode(new ErrorResponse(e));
-            response.getWriter().println(replyText);
-        } catch (IOException ex) {
-            log.error("Failed to send error " + e + ", " + this, ex);
         }
     }
 
@@ -90,4 +96,11 @@ public class HttpResponseBuilder extends ResponseBuilder {
         return sb.toString();
     }
 
+    private void redirect(String location) {
+        try {
+            response.sendRedirect(location);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to redirect to " + location);
+        }
+    }
 }

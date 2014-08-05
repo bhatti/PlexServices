@@ -1,7 +1,9 @@
 package com.plexobject.bugger.model;
 
 import com.plexobject.bugger.repository.UserRepository;
+import com.plexobject.domain.Constants;
 import com.plexobject.handler.Request;
+import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 
 public class BuggerRoleAuthorizer implements RoleAuthorizer {
@@ -12,16 +14,23 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
     }
 
     @Override
-    public boolean hasRole(Request request, String role) {
-        String username = request.getProperty("username");
-        // TODO session validation here
-        if (username == null) {
-            return false;
+    public void authorize(Request request, String[] roles) throws AuthException {
+        if (roles == null || roles.length == 0 || roles[0].equals("")) {
+            return;
         }
-        User user = userRepository.get(username);
+        String sessionId = request.getSessionId();
+        User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
-            return false;
+            throw new AuthException(Constants.SC_UNAUTHORIZED,
+                    "/login?errorCode=authenticationFailed",
+                    "failed to validate session-id");
         }
-        return user.getRoles().contains(role);
+        for (String role : roles) {
+            if (!user.getRoles().contains(role)) {
+                throw new AuthException(Constants.SC_UNAUTHORIZED,
+                        "/login?errorCode=authenticationFailed",
+                        "failed to match role");
+            }
+        }
     }
 }

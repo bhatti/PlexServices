@@ -28,7 +28,7 @@ public class CreateProjectService extends AbstractProjectService implements
                 .assertNonNull(project, "undefined_project", "project",
                         "project not specified").end();
         Project saved = projectRepository.save(project);
-        request.getResponseBuilder().sendSuccess(saved);
+        request.getResponseBuilder().send(saved);
     }
 
 }

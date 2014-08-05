@@ -31,6 +31,6 @@ public class UpdateBugReportService extends AbstractBugReportService implements
                         "projectId", "projectId not specified")
                 .end();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseBuilder().sendSuccess(saved);
+        request.getResponseBuilder().send(saved);
     }
 }

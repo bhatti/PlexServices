@@ -1,9 +1,9 @@
 package com.plexobject.bugger.repository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.plexobject.bugger.model.BugReport;
@@ -11,7 +11,7 @@ import com.plexobject.predicate.Predicate;
 
 public class BugReportRepository {
     private AtomicLong nextId = new AtomicLong(1);
-    private final Map<Long, BugReport> memoryStorage = new HashMap<>();
+    private final Map<Long, BugReport> memoryStorage = new ConcurrentHashMap<>();
 
     public BugReport load(Long id) {
         return memoryStorage.get(id);

@@ -34,6 +34,6 @@ public class CreateCommentService extends AbstractBugReportService implements
                         "project not specified").end();
         report.getComments().add(comment);
         bugReportRepository.save(report);
-        request.getResponseBuilder().sendSuccess(comment);
+        request.getResponseBuilder().send(comment);
     }
 }
