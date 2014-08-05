@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
@@ -54,7 +54,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             log.info("Received " + text + " for " + handler);
             String sessionId = (String) params.get(Constants.SESSION_ID);
             String remoteAddr = (String) params.get(Constants.REMOTE_ADDRESS);
-            ResponseBuilder responseBuilder = new JmsResponseBuilder(config,
+            AbstractResponseBuilder responseBuilder = new JmsResponseBuilder(config,
                     jmsClient, message.getJMSReplyTo());
 
             new RequestBuilder(handler, roleAuthorizer).setPayload(text)

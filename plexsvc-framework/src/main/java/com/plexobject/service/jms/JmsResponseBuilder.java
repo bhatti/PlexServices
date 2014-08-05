@@ -6,31 +6,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
-import com.plexobject.encode.ObjectCodeFactory;
-import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.service.ServiceConfig;
 
-public class JmsResponseBuilder extends ResponseBuilder {
+public class JmsResponseBuilder extends AbstractResponseBuilder {
     private static final Logger log = LoggerFactory
             .getLogger(JmsResponseBuilder.class);
-    private final ServiceConfig config;
     private final JmsClient jmsClient;
     private final Destination replyTo;
 
     public JmsResponseBuilder(final ServiceConfig config, JmsClient jmsClient,
             Destination replyTo) {
-        this.config = config;
+        super(config.contentType(), config.codec());
         this.jmsClient = jmsClient;
         this.replyTo = replyTo;
     }
 
-    public final void send(Object payload) {
+    protected void doSend(String payload) {
         try {
-            String replyText = ObjectCodeFactory.getObjectCodec(config.codec())
-                    .encode(payload);
-            jmsClient.send(replyTo, properties, replyText);
+            jmsClient.send(replyTo, properties, payload);
             if (log.isDebugEnabled()) {
-                log.debug("Sending reply " + replyText + " to " + replyTo);
+                log.debug("Sending reply " + payload + " to " + replyTo);
             }
         } catch (Exception e) {
             log.error("Failed to send " + payload, e);

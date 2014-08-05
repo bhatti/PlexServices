@@ -23,7 +23,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
-import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.jetty.HttpResponseBuilder;
 import com.plexobject.service.jetty.HttpServer;
@@ -102,7 +102,7 @@ public class HttpToJmsBridge extends AbstractHandler {
                             try {
                                 CodecType codecType = null; // we only deal with
                                                             // text
-                                ResponseBuilder responseBuilder = new HttpResponseBuilder(
+                                AbstractResponseBuilder responseBuilder = new HttpResponseBuilder(
                                         entry.getContentType(), codecType,
                                         baseRequest, response);
                                 // async.dispatch();

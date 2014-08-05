@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.bus.EventBus;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.handler.ResponseDispatcher;
 import com.plexobject.predicate.Predicate;
 
 /**
@@ -129,15 +129,10 @@ public class EventBusImpl implements EventBus {
                                     Request request = new Request(
                                             new HashMap<String, Object>(),
                                             event, sessionId, remoteAddr,
-                                            new ResponseBuilder() {
+                                            new ResponseDispatcher() {
                                                 @Override
                                                 public void send(Object payload) {
                                                     publish(channel, payload);
-                                                }
-
-                                                @Override
-                                                public void addSessionId(
-                                                        String value) {
                                                 }
                                             });
 

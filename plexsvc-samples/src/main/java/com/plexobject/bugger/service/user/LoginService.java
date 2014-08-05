@@ -6,7 +6,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.domain.ValidationException;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.security.AuthException;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.GatewayType;
@@ -32,10 +32,10 @@ public class LoginService extends AbstractUserService implements RequestHandler 
                         "password not specified").end();
 
         User user = userRepository.authenticate(username, password);
-        ResponseBuilder responseBuilder = request.getResponseBuilder();
+        AbstractResponseBuilder responseBuilder = request.getResponseBuilder();
         if (user == null) {
             throw new AuthException(Constants.SC_UNAUTHORIZED,
-                    "/login?errorCode=authenticationFailed",
+                    request.getSessionId(), request.getRemoteAddress(),
                     "failed to authenticate");
         } else {
             responseBuilder.addSessionId(userRepository.getSessionId(user));

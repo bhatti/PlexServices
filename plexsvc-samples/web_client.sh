@@ -6,7 +6,6 @@
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/projects/2/bugreports/2/assign?assignedTo=scott"
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/bugreports"   
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/projects/2/bugreports"   
-#curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/projects"   
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/projects/2/membership/remove?projectLead=true&assignedTo=scott"
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/projects/2/membership/add?projectLead=true&assignedTo=scott"
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/projects/2" -d "{\"title\":\"Bugger cool\",\"projectLead\":\"alex\",\"members\":[\"erica\"]}"
@@ -14,12 +13,12 @@
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/projects"   
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/users" -d "{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"
 #curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/users"   
-curl --cookie-jar cookies.txt -v -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/login?username=scott&password=pass"
-curl -v --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/users"   
+curl --cookie-jar cookies.txt -v -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/login?username=erica&password=pass"
+#curl --cookie-jar cookies.txt -v -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/login?username=scott&password=pass"
+#curl -v --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/users"   
 #curl --cookie cookies.txt -v -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/login?username=scott&password=xxx"
+curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/projects"   
 exit
-
-
 
 
 

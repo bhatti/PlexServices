@@ -12,23 +12,19 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
-import com.plexobject.encode.ObjectCodeFactory;
-import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.handler.AbstractResponseBuilder;
 
-public class HttpResponseBuilder extends ResponseBuilder {
+public class HttpResponseBuilder extends AbstractResponseBuilder {
     private static final Logger log = LoggerFactory
             .getLogger(HttpResponseBuilder.class);
 
-    private final String contentType;
-    private final CodecType codecType;
     private final Request baseRequest;
     private final HttpServletResponse response;
 
     public HttpResponseBuilder(final String contentType,
             final CodecType codecType, final Request baseRequest,
             final HttpServletResponse response) {
-        this.contentType = contentType;
-        this.codecType = codecType;
+        super(contentType, codecType);
         this.baseRequest = baseRequest;
         this.response = response;
     }
@@ -37,29 +33,16 @@ public class HttpResponseBuilder extends ResponseBuilder {
         response.addCookie(new Cookie(Constants.SESSION_ID, value));
     }
 
-    public final void send(Object payload) {
+    protected void doSend(String payload) {
         String location = (String) properties.get(Constants.LOCATION);
         if (location != null) {
             redirect(location);
             return;
         }
-
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        if (sessionId != null) {
-            addSessionId(sessionId);
-        }
-
         try {
             response.setContentType(contentType);
-            if (response.getStatus() > 0) {
-                response.setStatus(response.getStatus());
-            } else {
-                String status = (String) properties.get(Constants.STATUS);
-                if (status != null) {
-                    response.setStatus(Integer.parseInt(status));
-                }
-
-            }
+            response.setStatus(getStatus());
+            //
             for (Map.Entry<String, Object> e : properties.entrySet()) {
                 Object value = e.getValue();
                 if (value != null) {
@@ -72,10 +55,7 @@ public class HttpResponseBuilder extends ResponseBuilder {
             }
 
             baseRequest.setHandled(true);
-            String replyText = payload instanceof String ? (String) payload
-                    : ObjectCodeFactory.getObjectCodec(codecType).encode(
-                            payload);
-            response.getWriter().println(replyText);
+            response.getWriter().println(payload);
         } catch (Exception e) {
             log.error("Failed to write " + payload + ", " + this, e);
         }

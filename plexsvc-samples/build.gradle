@@ -24,6 +24,11 @@ run {
   if(project.hasProperty('args')){
     args project.args.split('\\s+')
   }
+  systemProperties = [
+    "com.sun.management.jmxremote.ssl":"false",
+    "com.sun.management.jmxremote.authenticate":"false",
+    "com.sun.management.jmxremote.port":"9191",
+  ]
 }
 
 

@@ -13,7 +13,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.ResponseBuilder;
+import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
@@ -43,7 +43,7 @@ class HttpRequestHandler extends AbstractHandler {
         ServiceConfig config = handler.getClass().getAnnotation(
                 ServiceConfig.class);
 
-        ResponseBuilder responseBuilder = new HttpResponseBuilder(
+        AbstractResponseBuilder responseBuilder = new HttpResponseBuilder(
                 config.contentType(), config.codec(), baseRequest, response);
         new RequestBuilder(handler, roleAuthorizer)
                 .setPayload(IOUtils.toString(baseRequest.getInputStream()))

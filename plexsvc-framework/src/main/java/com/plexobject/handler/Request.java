@@ -5,11 +5,11 @@ import java.util.Map;
 public class Request extends AbstractPayload {
     private final String sessionId;
     private final String remoteAddress;
-    private final ResponseBuilder responseBuilder;
+    private final ResponseDispatcher responseBuilder;
 
     public Request(final Map<String, Object> properties, final Object payload,
             final String sessionId, final String remoteAddress,
-            final ResponseBuilder responseBuilder) {
+            final ResponseDispatcher responseBuilder) {
         super(properties, payload);
         this.sessionId = sessionId;
         this.remoteAddress = remoteAddress;
@@ -25,7 +25,7 @@ public class Request extends AbstractPayload {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends ResponseBuilder> T getResponseBuilder() {
+    public <T extends AbstractResponseBuilder> T getResponseBuilder() {
         return (T) responseBuilder;
     }
 

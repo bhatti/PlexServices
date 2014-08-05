@@ -1,5 +1,6 @@
 package com.plexobject.metrics;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,7 +17,10 @@ import com.plexobject.util.Preconditions;
  * @author shahzad bhatti
  * @param <T>
  */
-public class Percentile<T extends Number & Comparable<T>> {
+public class Percentile<T extends Number & Comparable<T>> implements
+        Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final int MAX_BUFFER_SIZE = 10001;
 
     private final Sampler sampler;

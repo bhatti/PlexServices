@@ -1,5 +1,6 @@
 package com.plexobject.metrics;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import com.plexobject.util.Preconditions;
@@ -9,8 +10,8 @@ import com.plexobject.util.Preconditions;
  * 
  * @author shahzad bhatti
  */
-public class Sampler {
-
+public class Sampler implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Random rand;
     private final double threshold;
 
