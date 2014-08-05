@@ -105,7 +105,6 @@ public class PathsLookup<T> {
             }
             String handler = object != null ? object.getClass().getSimpleName()
                     : "<null>";
-            handler = object != null ? object.toString() : "<null>";
             sb.append(pathFragment + " => " + handler + ", level " + level
                     + "\n");
 
