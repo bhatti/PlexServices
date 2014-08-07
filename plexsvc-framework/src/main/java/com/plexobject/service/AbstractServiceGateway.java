@@ -7,6 +7,13 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.util.Configuration;
 
+/**
+ * This is abstract class that provides helper methods for ServiceGateway
+ * interface
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public abstract class AbstractServiceGateway implements ServiceGateway {
     protected final Logger log = LoggerFactory.getLogger(getClass());
     protected final RoleAuthorizer authorizer;

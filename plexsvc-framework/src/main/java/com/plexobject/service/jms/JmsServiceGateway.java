@@ -15,6 +15,12 @@ import com.plexobject.service.AbstractServiceGateway;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.util.Configuration;
 
+/**
+ * This class provides gateway to internal services over JMS
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class JmsServiceGateway extends AbstractServiceGateway {
     private JmsClient jmsClient;
     private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();

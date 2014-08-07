@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * This class stores application configuration
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class Configuration {
     private final Properties properties = new Properties();
 

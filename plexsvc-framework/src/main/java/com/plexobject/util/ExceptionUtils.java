@@ -12,11 +12,16 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class provides helper methods for exceptions s *
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class ExceptionUtils {
-    private static final String ERROR_TYPE = "errorType";
-
     private static final Logger log = LoggerFactory
             .getLogger(ExceptionUtils.class);
+    private static final String ERROR_TYPE = "errorType";
 
     private static final Set<String> FORBIDDEN_EXCEPTION_FIELDS = new HashSet<String>() {
         private static final long serialVersionUID = 1L;

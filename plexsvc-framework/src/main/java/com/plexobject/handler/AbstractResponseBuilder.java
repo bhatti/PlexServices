@@ -12,7 +12,8 @@ import com.plexobject.encode.ObjectCodeFactory;
 import com.plexobject.util.ExceptionUtils;
 
 public abstract class AbstractResponseBuilder implements ResponseDispatcher {
-    private static final Logger log = LoggerFactory.getLogger(AbstractResponseBuilder.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(AbstractResponseBuilder.class);
 
     protected static final String[] HEADER_PROPERTIES = new String[] {
             Constants.STATUS, Constants.LOCATION, Constants.SESSION_ID };
@@ -51,7 +52,7 @@ public abstract class AbstractResponseBuilder implements ResponseDispatcher {
         String replyText = null;
 
         if (payload instanceof Exception) {
-            log.warn("Error received " + payload);
+            log.warn("Error received " + payload, payload);
             Map<String, Object> attributes = ExceptionUtils
                     .toMap((Exception) payload);
             replyText = ObjectCodeFactory.getObjectCodec(codecType).encode(

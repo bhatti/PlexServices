@@ -3,6 +3,12 @@ package com.plexobject.domain;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This exception is raised when validation error occurs
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class ValidationException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

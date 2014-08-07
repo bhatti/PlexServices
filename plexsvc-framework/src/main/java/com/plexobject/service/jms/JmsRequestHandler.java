@@ -21,6 +21,13 @@ import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
 
+/**
+ * This class implements MessageListener for handling requests over JMS and then
+ * forwards them to underlying services.
+ * 
+ * @author shahzad bhatti
+ *
+ */
 class JmsRequestHandler implements MessageListener, ExceptionListener {
     private static final Logger log = LoggerFactory
             .getLogger(JmsRequestHandler.class);
@@ -51,11 +58,12 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
         try {
             Map<String, Object> params = JmsClient.getParams(message);
             final String text = txtMessage.getText();
-            log.info("Received " + text + " for " + handler);
+            log.info("Received " + text + " for " + config.endpoint() + " "
+                    + handler.getClass().getSimpleName());
             String sessionId = (String) params.get(Constants.SESSION_ID);
             String remoteAddr = (String) params.get(Constants.REMOTE_ADDRESS);
-            AbstractResponseBuilder responseBuilder = new JmsResponseBuilder(config,
-                    jmsClient, message.getJMSReplyTo());
+            AbstractResponseBuilder responseBuilder = new JmsResponseBuilder(
+                    config, jmsClient, message.getJMSReplyTo());
 
             new RequestBuilder(handler, roleAuthorizer).setPayload(text)
                     .setParameters(params).setSessionId(sessionId)

@@ -1,5 +1,11 @@
 package com.plexobject.util;
 
+/**
+ * This class validates arguments
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class Preconditions {
     public static void checkArgument(boolean pred, String message) {
         if (!pred) {

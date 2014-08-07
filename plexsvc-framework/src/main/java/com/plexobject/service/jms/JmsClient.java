@@ -35,6 +35,12 @@ import com.plexobject.handler.Response;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.util.Configuration;
 
+/**
+ * This class provides helper methods for communication with JMS
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class JmsClient implements Lifecycle {
     private static final Logger log = LoggerFactory.getLogger(JmsClient.class);
     private final Configuration config;

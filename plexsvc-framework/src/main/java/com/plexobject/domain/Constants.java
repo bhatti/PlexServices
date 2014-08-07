@@ -11,4 +11,5 @@ public interface Constants {
     public static final int SC_UNAUTHORIZED = 401;
     public static final int SC_NOT_FOUND = 404;
     public static final int SC_INTERNAL_SERVER_ERROR = 500;
+    public static final int SC_GATEWAY_TIMEOUT = 504;
 }

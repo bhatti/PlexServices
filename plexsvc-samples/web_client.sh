@@ -17,7 +17,7 @@ curl --cookie-jar cookies.txt -v -k -H "Content-Type: application/json" -X POST 
 #curl --cookie-jar cookies.txt -v -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/login?username=scott&password=pass"
 #curl -v --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/users"   
 #curl --cookie cookies.txt -v -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/login?username=scott&password=xxx"
-curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/projects"   
+#curl --cookie cookies.txt -k -H "Content-Type: application/json" "http://127.0.0.1:8181/projects"   
 exit
 
 

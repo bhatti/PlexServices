@@ -20,6 +20,13 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.util.IOUtils;
 
+/**
+ * This class extends jetty's AbstractHandler, which is invoked when web request
+ * is received
+ * 
+ * @author shahzad bhatti
+ *
+ */
 class HttpRequestHandler extends AbstractHandler {
     private RoleAuthorizer roleAuthorizer;
     private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,11 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
+import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
-import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.jetty.HttpResponseBuilder;
 import com.plexobject.service.jetty.HttpServer;
@@ -32,7 +35,13 @@ import com.plexobject.service.jms.JmsClient;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
-// See http://git.eclipse.org/c/jetty/org.eclipse.jetty.project.git/tree/examples/async-rest/async-rest-jar/src/main/java/org/eclipse/jetty/example/asyncrest/AsyncRestServlet.java?h=release-9
+/**
+ * This class forwards http requests over to JMS queues/topics based on
+ * configuration
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class HttpToJmsBridge extends AbstractHandler {
     private static final Logger log = LoggerFactory
             .getLogger(HttpToJmsBridge.class);
@@ -90,18 +99,30 @@ public class HttpToJmsBridge extends AbstractHandler {
             return;
         }
         final String text = IOUtils.toString(baseRequest.getInputStream());
-        // log.debug("Forwarding " + entry + ", text " + text + ", params "
-        // + params);
         final AsyncContext async = request.startAsync();
         async.setTimeout(entry.getTimeoutSecs() * 1000);
         try {
+            async.addListener(new AsyncListener() {
+                public void onComplete(AsyncEvent event) throws IOException {
+                }
+
+                public void onError(AsyncEvent event) {
+                }
+
+                public void onStartAsync(AsyncEvent event) {
+                    timeout(baseRequest, response, async);
+                }
+
+                public void onTimeout(AsyncEvent event) {
+                    timeout(baseRequest, response, async);
+                }
+            });
             jmsClient.sendReceive(entry.getDestination(), params, text,
                     new Handler<Response>() {
                         @Override
                         public void handle(Response reply) {
                             try {
-                                CodecType codecType = null; // we only deal with
-                                                            // text
+                                CodecType codecType = CodecType.TEXT;
                                 AbstractResponseBuilder responseBuilder = new HttpResponseBuilder(
                                         entry.getContentType(), codecType,
                                         baseRequest, response);
@@ -114,16 +135,36 @@ public class HttpToJmsBridge extends AbstractHandler {
                                 }
                                 responseBuilder.send(reply.getPayload());
                                 log.info("Replying back " + entry + ", reply "
-                                        + reply);
+                                        + reply + ", params " + params);
                             } catch (Exception e) {
                                 log.error("Could not send back " + reply, e);
                             } finally {
-                                async.complete();
+                                completed(async);
                             }
                         }
+
                     });
         } catch (Exception e) {
             log.error("Failed to send request", e);
+        }
+    }
+
+    private static void completed(final AsyncContext async) {
+        try {
+            async.complete();
+        } catch (IllegalStateException e) {
+        }
+    }
+
+    private static void timeout(final Request baseRequest,
+            final HttpServletResponse response, final AsyncContext async) {
+        response.setStatus(Constants.SC_GATEWAY_TIMEOUT);
+        baseRequest.setHandled(true);
+        try {
+            response.getWriter().println("timed out");
+            completed(async);
+        } catch (IOException e) {
+            log.error("Failed to send timeout", e);
         }
     }
 

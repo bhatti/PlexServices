@@ -15,6 +15,12 @@ import com.plexobject.metrics.Timing;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 
+/**
+ * This class builds remote request
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class RequestBuilder {
     private static final Logger log = LoggerFactory
             .getLogger(RequestBuilder.class);

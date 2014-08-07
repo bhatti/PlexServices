@@ -2,6 +2,12 @@ package com.plexobject.handler;
 
 import java.util.Map;
 
+/**
+ * This class encapsulates remote request
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class Request extends AbstractPayload {
     private final String sessionId;
     private final String remoteAddress;

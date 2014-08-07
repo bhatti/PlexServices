@@ -14,6 +14,12 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseBuilder;
 
+/**
+ * This class replies object using http protocol
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class HttpResponseBuilder extends AbstractResponseBuilder {
     private static final Logger log = LoggerFactory
             .getLogger(HttpResponseBuilder.class);

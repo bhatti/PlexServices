@@ -9,6 +9,12 @@ import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.service.ServiceConfig;
 
+/**
+ * This class sends reply back over JMS
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class JmsResponseBuilder extends AbstractResponseBuilder {
     private static final Logger log = LoggerFactory
             .getLogger(JmsResponseBuilder.class);

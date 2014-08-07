@@ -15,49 +15,50 @@ import com.plexobject.service.ServiceConfig.Method;
 //@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", method = Method.GET, contentType = "application/json")
 @ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-query-project-bugreport-service-queue", method = Method.LISTEN, contentType = "application/json")
 public class QueryProjectBugReportService extends AbstractBugReportService
-		implements RequestHandler {
-	public QueryProjectBugReportService(
-			BugReportRepository bugReportRepository,
-			UserRepository userRepository) {
-		super(bugReportRepository, userRepository);
-	}
+        implements RequestHandler {
+    public QueryProjectBugReportService(
+            BugReportRepository bugReportRepository,
+            UserRepository userRepository) {
+        super(bugReportRepository, userRepository);
+    }
 
-	@Override
-	public void handle(Request request) {
-		final Long projectId = request.hasProperty("projectId") ? request
-				.getLongProperty("projectId") : null;
-		final long since = request.hasProperty("since") ? request
-				.getLongProperty("since") : null;
-		final boolean overdue = request.getBooleanProperty("overdue");
-		final boolean unassigned = request.getBooleanProperty("unassigned");
-		final long now = System.currentTimeMillis();
+    @Override
+    public void handle(Request request) {
+        final Long projectId = request.hasProperty("projectId") ? request
+                .getLongProperty("projectId") : null;
+        final long since = request.hasProperty("since") ? request
+                .getLongProperty("since") : 0;
+        final boolean overdue = request.getBooleanProperty("overdue", false);
+        final boolean unassigned = request.getBooleanProperty("unassigned",
+                false);
+        final long now = System.currentTimeMillis();
 
-		final List<BugReport> reports = bugReportRepository
-				.getAll(new Predicate<BugReport>() {
+        final List<BugReport> reports = bugReportRepository
+                .getAll(new Predicate<BugReport>() {
 
-					@Override
-					public boolean accept(BugReport report) {
-						if (!report.getProjectId().equals(projectId)) {
-							return false;
-						}
-						if (since != 0
-								&& report.getCreatedAt().getTime() < since) {
-							return false;
-						}
-						if (overdue
-								&& report.getEstimatedResolutionDate() != null
-								&& report.getEstimatedResolutionDate()
-										.getTime() < now) {
-							return false;
-						}
-						if (unassigned && report.getAssignedTo() != null) {
-							return false;
-						}
+                    @Override
+                    public boolean accept(BugReport report) {
+                        if (!report.getProjectId().equals(projectId)) {
+                            return false;
+                        }
+                        if (since != 0
+                                && report.getCreatedAt().getTime() < since) {
+                            return false;
+                        }
+                        if (overdue
+                                && report.getEstimatedResolutionDate() != null
+                                && report.getEstimatedResolutionDate()
+                                        .getTime() < now) {
+                            return false;
+                        }
+                        if (unassigned && report.getAssignedTo() != null) {
+                            return false;
+                        }
 
-						return true;
-					}
-				});
-		request.getResponseBuilder().send(reports);
-	}
+                        return true;
+                    }
+                });
+        request.getResponseBuilder().send(reports);
+    }
 
 }

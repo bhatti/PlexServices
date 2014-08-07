@@ -7,6 +7,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * PlexService allows http url with parameters. This class provides lookup
+ * methods for matching url with parameters.
+ * 
+ * @author shahzad bhatti
+ *
+ * @param <T>
+ */
 public class PathsLookup<T> {
     private static class Node<T> {
         private final String pathFragment;

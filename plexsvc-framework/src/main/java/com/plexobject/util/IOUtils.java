@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * This class defines helper methods for Input/output
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class IOUtils {
     public static String toString(InputStream is) throws IOException {
         StringBuilder sb = new StringBuilder();

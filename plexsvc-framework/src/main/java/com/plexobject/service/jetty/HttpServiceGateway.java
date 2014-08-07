@@ -14,6 +14,12 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.util.Configuration;
 
+/**
+ * This class provides gateway to services using http protocol
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class HttpServiceGateway extends AbstractServiceGateway {
     private final HttpRequestHandler handler;
     private final HttpServer httpServer;
