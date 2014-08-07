@@ -18,16 +18,16 @@ import com.plexobject.util.Configuration;
  * @author shahzad bhatti
  *
  */
-public class HandlerRegistry implements ServiceGateway {
+public class ServiceRegistry implements ServiceGateway {
     private final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
     private boolean running;
 
-    public HandlerRegistry(Configuration config,
+    public ServiceRegistry(Configuration config,
             Collection<RequestHandler> services, RoleAuthorizer authorizer) {
         this(getDefaultGateways(config, authorizer), services, authorizer);
     }
 
-    public HandlerRegistry(
+    public ServiceRegistry(
             Map<ServiceConfig.GatewayType, ServiceGateway> gateways,
             Collection<RequestHandler> services, RoleAuthorizer authorizer) {
         this.gateways.putAll(gateways);

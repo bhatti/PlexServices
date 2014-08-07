@@ -21,10 +21,6 @@ public class LoginService extends AbstractUserService implements RequestHandler 
 
     @Override
     public void handle(Request request) {
-      try {
-        Thread.sleep(Integer.MAX_VALUE);
-      } catch (InterruptedException e) {
-      }
         String username = request.getStringProperty("username");
         String password = request.getStringProperty("password");
 

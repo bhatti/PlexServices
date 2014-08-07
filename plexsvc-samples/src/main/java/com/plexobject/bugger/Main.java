@@ -41,7 +41,7 @@ import com.plexobject.bugger.service.user.UpdateUserService;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.HandlerRegistry;
+import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
@@ -54,7 +54,7 @@ public class Main {
     private final UserRepository userRepository = new UserRepository();
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final BugReportRepository bugreportRepository = new BugReportRepository();
-    private final HandlerRegistry serviceRegistry;
+    private final ServiceRegistry serviceRegistry;
     private final Configuration config;
 
     public Main(String propertyFile) throws Exception {
@@ -64,7 +64,7 @@ public class Main {
         //
         Collection<RequestHandler> services = addServices();
         //
-        serviceRegistry = new HandlerRegistry(config, services,
+        serviceRegistry = new ServiceRegistry(config, services,
                 new BuggerRoleAuthorizer(userRepository));
     }
 
