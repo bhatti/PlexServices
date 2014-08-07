@@ -73,7 +73,32 @@ public class CreateUserService extends AbstractUserService implements
     }
 }
 ```
+The end-point can contain variables such as scope that are initialized from configuration.
 
+
+### Defining a REST service with parameterized URLs
+```java 
+@ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, 
+rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
+method = Method.POST, contentType = "application/json")
+public class CreateBugReportService extends AbstractBugReportService implements
+        RequestHandler {
+    public CreateBugReportService(BugReportRepository bugReportRepository,
+            UserRepository userRepository) {
+        super(bugReportRepository, userRepository);
+    }
+
+    @Override
+    public void handle(Request request) {
+        BugReport report = request.getPayload();
+        report.validate();
+        BugReport saved = bugReportRepository.save(report);
+        request.getResponseBuilder().send(saved);
+    }
+}
+```
+
+The request object will provide parameters for projectId from URL.
 
 ### Defining a REST service for querying users
 ```java 
@@ -121,7 +146,7 @@ public class QueryUserService extends AbstractUserService implements
     }
 }
 ```
-
+The end-point can contain variables such as scope that are initialized from configuration.
 
 ### Defining role-based security
 ```java 
