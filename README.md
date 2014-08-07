@@ -2,7 +2,7 @@
 
 ##Overview
 
-PlexService provides framework for defining secured micro-services, which can be accessed by HTTP or JMS. The developers define configurations via annoations and configure external gateway access via HTTP or JMS. The developers can define role based security for accessing services. PlexService also provides http-to-jms bridge for accessing services over http that are defined in JMS. PlexService uses jetty for hosting http services.
+PlexService provides framework for defining secured micro-services, which can be accessed by HTTP or JMS. The developers define configurations via annoations and configure external gateway access via HTTP or JMS. The developers can define role based security for accessing services. PlexService also provides http-to-jms bridge for accessing services over http that listen to JMS queues/topics. PlexService uses jetty for hosting http services. 
 
 
 
@@ -184,6 +184,9 @@ Here is JSON configuration for bridge:
 ```javascript 
 [{"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST","destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"GET","destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/users","method":"GET","destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects","method":"GET","destination":"queue:{scope}-query-projects-service","timeoutSecs":30},{"contentType":"application/json","path":"/bugreports","method":"GET","destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects/{id}/membership/add","method":"POST","destination":"queue:{scope}-add-project-member-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects/{id}/membership/remove","method":"POST","destination":"queue:{scope}-remove-project-member-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"POST","destination":"queue:{scope}-create-bugreport-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/users","method":"POST","destination":"queue:{scope}-create-user-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects","method":"POST","destination":"queue:{scope}-create-projects-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/users/{id}","method":"POST","destination":"queue:{scope}-update-user-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/users/{id}/delete","method":"POST","destination":"queue:{scope}-delete-user-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects/{id}","method":"POST","destination":"queue:{scope}-update-project-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}","method":"POST","destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},{"contentType":"application/json","path":"/login","method":"POST","destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
 ```
+
+## Sample Application
+You can view a full-fledged sample application under plexsvc-sample folder for detailed examples of services and various configurations.
 
 ## Support or Contact
   Email bhatti AT plexobject DOT com for any questions or suggestions.
