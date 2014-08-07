@@ -2,7 +2,7 @@
 
 ##Overview
 
-PlexService provides framework for defining secured micro-services, which can be accessed by HTTP or JMS. The developers define configurations via annoations and configure external gateway access via HTTP or JMS. The developers can define role based security for accessing services. PlexService also provides http-to-jms bridge for accessing services over http that listen to JMS queues/topics. PlexService uses jetty for hosting http services. 
+PlexService provides framework for defining secured micro-services, which can be accessed by HTTP or JMS. PlexService framework provides easy conversion of POJO objects into JSON when accessing services remotely. The developers define configurations via annoations, which allow them to define gateway types, encoding scheme, end-points, roles, etc. PlexService provides secured access using role based security. PlexService also provides http-to-jms bridge for accessing services over http that listen to JMS queues/topics. PlexService uses jetty for hosting http/rest services.
 
 
 
