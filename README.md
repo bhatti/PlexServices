@@ -155,57 +155,72 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
 
 ### Registering services and starting service container
 ```java 
-       Collection<RequestHandler> services = new HashSet<>();
-       services.add(new CreateUserService(userRepository));
-       services.add(new UpdateUserService(userRepository));
-       services.add(new QueryUserService(userRepository));
-       services.add(new DeleteUserService(userRepository));
-       services.add(new LoginService(userRepository));
-       services.add(new CreateProjectService(projectRepository, userRepository));
-       services.add(new UpdateProjectService(projectRepository, userRepository));
-       services.add(new QueryProjectService(projectRepository, userRepository));
-       services.add(new AddProjectMemberService(projectRepository, userRepository));
-       services.add(new RemoveProjectMemberService(projectRepository, userRepository));
-       services.add(new CreateBugReportService(bugreportRepository, userRepository));
-       services.add(new UpdateBugReportService(bugreportRepository, userRepository));
-       services.add(new QueryBugReportService(bugreportRepository, userRepository));
-       services.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
+Collection<RequestHandler> services = new HashSet<>();
+services.add(new CreateUserService(userRepository));
+services.add(new UpdateUserService(userRepository));
+services.add(new QueryUserService(userRepository));
+services.add(new DeleteUserService(userRepository));
+services.add(new LoginService(userRepository));
+services.add(new CreateProjectService(projectRepository, userRepository));
+services.add(new UpdateProjectService(projectRepository, userRepository));
+services.add(new QueryProjectService(projectRepository, userRepository));
+services.add(new AddProjectMemberService(projectRepository, userRepository));
+services.add(new RemoveProjectMemberService(projectRepository, userRepository));
+services.add(new CreateBugReportService(bugreportRepository, userRepository));
+services.add(new UpdateBugReportService(bugreportRepository, userRepository));
+services.add(new QueryBugReportService(bugreportRepository, userRepository));
+services.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
 
-       services.add(new AssignBugReportService(bugreportRepository, userRepository));
-       serviceRegistry = new ServiceRegistry(config, services, new BuggerRoleAuthorizer(userRepository));
-       serviceRegistry.start();
+services.add(new AssignBugReportService(bugreportRepository, userRepository));
+serviceRegistry = new ServiceRegistry(config, services, new BuggerRoleAuthorizer(userRepository));
+serviceRegistry.start();
 
 ```
 
 
 ### Creating Http to JMS bridge
 ```java 
-      final String mappingJson = IOUtils.toString(new FileInputStream( args[1]));
-      Collection<HttpToJmsEntry> entries = new JsonObjectCodec().decode(
+final String mappingJson = IOUtils.toString(new FileInputStream( args[1]));
+Collection<HttpToJmsEntry> entries = new JsonObjectCodec().decode(
                     mappingJson, new TypeReference<List<HttpToJmsEntry>>() {
                     });
-      HttpToJmsBridge bridge = new HttpToJmsBridge(new Configuration(args[0]), entries);
-      bridge.startBridge();
+HttpToJmsBridge bridge = new HttpToJmsBridge(new Configuration(args[0]), entries);
+bridge.startBridge();
 ```
 
 Here is JSON configuration for bridge:
 ```javascript 
 [
-{"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST","destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"GET","destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/users","method":"GET","destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects","method":"GET","destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
-{"contentType":"application/json","path":"/bugreports","method":"GET","destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects/{id}/membership/add","method":"POST","destination":"queue:{scope}-add-project-member-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects/{id}/membership/remove","method":"POST","destination":"queue:{scope}-remove-project-member-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"POST","destination":"queue:{scope}-create-bugreport-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/users","method":"POST","destination":"queue:{scope}-create-user-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects","method":"POST","destination":"queue:{scope}-create-projects-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/users/{id}","method":"POST","destination":"queue:{scope}-update-user-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/users/{id}/delete","method":"POST","destination":"queue:{scope}-delete-user-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects/{id}","method":"POST","destination":"queue:{scope}-update-project-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}","method":"POST","destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
-{"contentType":"application/json","path":"/login","method":"POST","destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
+{"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
+	"destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"GET",
+	"destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/users","method":"GET",
+	"destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects","method":"GET",
+	"destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
+{"contentType":"application/json","path":"/bugreports","method":"GET",
+	"destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects/{id}/membership/add","method":"POST",
+	"destination":"queue:{scope}-add-project-member-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects/{id}/membership/remove","method":"POST",
+	"destination":"queue:{scope}-remove-project-member-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"POST",
+	"destination":"queue:{scope}-create-bugreport-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/users","method":"POST",
+	"destination":"queue:{scope}-create-user-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects","method":"POST",
+	"destination":"queue:{scope}-create-projects-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/users/{id}","method":"POST",
+	"destination":"queue:{scope}-update-user-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/users/{id}/delete","method":"POST",
+	"destination":"queue:{scope}-delete-user-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects/{id}","method":"POST",
+	"destination":"queue:{scope}-update-project-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}","method":"POST",
+	"destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
+{"contentType":"application/json","path":"/login","method":"POST",
+	"destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
 ```
 
 ## Sample Application
