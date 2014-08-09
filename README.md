@@ -1,9 +1,10 @@
-#PlexService - HTTP/Messaging based Micro-Service Framework
+#PlexService - REST/Messaging based Micro-Service Framework
 
 ##Overview
 
-PlexService provides framework for defining secured micro-services, which can be accessed by HTTP or JMS. PlexService framework provides easy conversion of POJO objects into JSON when accessing services remotely. The developers define configurations via annoations, which allow them to define gateway types, encoding scheme, end-points, roles, etc. PlexService provides secured access using role based security. PlexService also provides http-to-jms bridge for accessing services over http that listen to JMS queues/topics. PlexService uses jetty for hosting http/rest services.
+PlexService is a simple Javaa framework for defining secured micro-services, which can be accessed by Web or JMS interfaces. PlexService framework provides provides basic support for converting POJO objects into JSON for remote consumption. The developers define service configuration via Java annoations, which allow them to define gateway types, encoding scheme, end-points, roles, etc. PlexService supports role-based security, which are called before accessing underlying services. 
 
+PlexService also provides http-to-jms bridge for accessing services over http that listen to JMS queues/topics. PlexService uses jetty for hosting web services. Finally, PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface.
 
 
 ##Building
@@ -73,7 +74,7 @@ public class CreateUserService extends AbstractUserService implements
     }
 }
 ```
-The end-point can contain variables such as scope that are initialized from configuration.
+The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexService will serialize POJO classes into JSON when delivering messages over JMS.
 
 
 ### Defining a REST service with parameterized URLs
@@ -98,7 +99,10 @@ public class CreateBugReportService extends AbstractBugReportService implements
 }
 ```
 
-The request object will provide parameters for projectId from URL.
+The http end-point or URL can also store variables, but unlike end-points for
+queues/topics, they are populated using http parameters. For example, projectId
+parameter would be populated from URL in above example. PlexService will serialize POJO 
+classes into JSON when delivering messages over HTTP.
 
 ### Defining a REST service for querying users
 ```java 
