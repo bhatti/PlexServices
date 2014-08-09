@@ -1,4 +1,0 @@
-rootProject.name = 'PlexService'
-//rootProject.projectDir = new File(settingsDir, 'PlexService')
-
-include 'plexsvc-framework', 'plexsvc-samples'
