@@ -252,7 +252,7 @@ Here is JSON configuration for bridge:
 	"destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
 ```
 
-## API Doc and Samples
+## API Doc
 <ul>
   <li><a href="http://bhatti.github.io/PlexService/javadoc/">Java Doc</a>
 </ul>
