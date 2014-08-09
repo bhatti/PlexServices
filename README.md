@@ -252,6 +252,12 @@ Here is JSON configuration for bridge:
 	"destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
 ```
 
+## API Doc and Samples
+<ul>
+  <li><a href="http://bhatti.github.io/PlexService/javadoc/">Java Doc</a>
+</ul>
+
+
 ## Sample Application
 You can view a full-fledged sample application under plexsvc-sample folder for detailed examples of services and various configurations.
 
