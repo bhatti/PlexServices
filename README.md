@@ -98,7 +98,7 @@ ws.onerror = function(err) {
 ```
 
 ### Defining a JMS service for creating a user
-    ```java 
+```java 
     @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
       method = Method.LISTEN, contentType = "application/json")
@@ -121,7 +121,7 @@ ws.onerror = function(err) {
 
 
 ### Defining a REST service with parameterized URLs
-  ```java 
+```java 
   @ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = Method.POST, contentType = "application/json")
@@ -148,7 +148,7 @@ ws.onerror = function(err) {
   classes into JSON when delivering messages over HTTP.
 
 ### Defining a REST service for querying users
-  ```java 
+```java 
   @ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
       contentType = "application/json")
@@ -172,7 +172,7 @@ ws.onerror = function(err) {
 
 
 ### Defining a JMS service for querying users
-  ```java 
+```java 
   @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", 
       method = Method.LISTEN, contentType = "application/json")
@@ -196,7 +196,7 @@ ws.onerror = function(err) {
   The end-point can contain variables such as scope that are initialized from configuration.
 
 ### Defining role-based security
-  ```java 
+```java 
   public class BuggerRoleAuthorizer implements RoleAuthorizer {
     private final UserRepository userRepository;
 
@@ -226,8 +226,8 @@ ws.onerror = function(err) {
 
 
 ### Registering services and starting service container
-  ```java 
-  Collection<RequestHandler> services = new HashSet<>();
+```java 
+Collection<RequestHandler> services = new HashSet<>();
 services.add(new CreateUserService(userRepository));
 services.add(new UpdateUserService(userRepository));
 services.add(new QueryUserService(userRepository));
@@ -251,7 +251,7 @@ serviceRegistry.start();
 
 
 ### Creating Http to JMS bridge
-  ```java 
+```java 
   final String mappingJson = IOUtils.toString(new FileInputStream( args[1]));
 Collection<HttpToJmsEntry> entries = new JsonObjectCodec().decode(
     mappingJson, new TypeReference<List<HttpToJmsEntry>>() {
@@ -263,7 +263,7 @@ bridge.startBridge();
 
 
 ### Creating Websocket to JMS bridge
-  ```java 
+```java 
   final String mappingJson = IOUtils.toString(new FileInputStream( args[1]));
 Collection<HttpToJmsEntry> entries = new JsonObjectCodec().decode(
     mappingJson, new TypeReference<List<HttpToJmsEntry>>() {
@@ -273,7 +273,7 @@ bridge.startBridge();
 ```
 
   Here is JSON configuration for bridge:
-  ```javascript 
+```javascript 
   [
   {"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
     "destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},
@@ -305,7 +305,7 @@ bridge.startBridge();
     "destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
   {"contentType":"application/json","path":"/login","method":"POST",
     "destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
-      ```
+```
 
 ## API Doc
       <ul>
