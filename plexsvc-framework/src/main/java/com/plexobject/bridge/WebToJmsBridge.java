@@ -152,9 +152,11 @@ public class WebToJmsBridge {
                     params.put(name, rawRequest.getProperty(name));
                 }
                 log.info("** Received " + rawRequest);
-                final String text = rawRequest.getPayload();
+                final String textPayload = ObjectCodeFactory.getObjectCodec(
+                        CodecType.JSON).encode(rawRequest.getPayload());
                 try {
-                    jmsClient.sendReceive(entry.getDestination(), params, text,
+                    jmsClient.sendReceive(entry.getDestination(), params,
+                            textPayload,
                             new com.plexobject.handler.Handler<Response>() {
                                 @Override
                                 public void handle(Response reply) {

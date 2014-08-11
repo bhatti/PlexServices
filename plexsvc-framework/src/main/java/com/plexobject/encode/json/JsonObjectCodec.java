@@ -32,6 +32,10 @@ public class JsonObjectCodec extends AbstractObjectCodec {
 
     @Override
     public <T> String encode(T obj) {
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+
         try {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
@@ -60,13 +64,17 @@ public class JsonObjectCodec extends AbstractObjectCodec {
 
     @SuppressWarnings("unchecked")
     private <T> T jsonDecode(String text, Class<?> type) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         ClassLoader savedCL = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(
                     getClass().getClassLoader());
             return (T) mapper.readValue(text, type);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to decode '" + text + "'", e);
+            throw new RuntimeException("Failed to decode " + text.length()
+                    + ", '" + text + "'", e);
         } finally {
             Thread.currentThread().setContextClassLoader(savedCL);
         }

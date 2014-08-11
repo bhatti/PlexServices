@@ -59,7 +59,8 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             Map<String, Object> params = JmsClient.getParams(message);
             final String text = txtMessage.getText();
             log.info("Received " + text + " for " + config.endpoint() + " "
-                    + handler.getClass().getSimpleName());
+                    + handler.getClass().getSimpleName() + ", headers "
+                    + params);
             String sessionId = (String) params.get(Constants.SESSION_ID);
             String remoteAddr = (String) params.get(Constants.REMOTE_ADDRESS);
             AbstractResponseBuilder responseBuilder = new JmsResponseBuilder(

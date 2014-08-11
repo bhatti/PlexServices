@@ -30,14 +30,70 @@
           var req = {"payload":"","PlexSessionID":"4", "endpoint":"/users", "method":"GET"};
           ws.send(JSON.stringify(req));
         });
+        $("#deleteUserButton").click(function() {
+          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/users/2/delete", "method":"POST"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#assignBugreportButton").click(function() {
+          var req = {"payload":"","assignedTo":"scott", "PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#createBugreportButton").click(function() {
+          var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#updateBugreportButton").click(function() {
+          var req = {"payload":{"title":"my title.", "description":"my description","bugNumber":"story-201", "assignedTo":"scott", "developedBy":"erica"},"PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2", "method":"POST"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#queryBugreportsButton").click(function() {
+          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/bugreports", "method":"GET"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#queryProjectBugreportsButton").click(function() {
+          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects/2/bugreports", "method":"GET"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#addMemberToProjectButton").click(function() {
+          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects/2/membership/add", "method":"POST", "projectLead":true, "assignedTo":"scott"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#removeMemberToProjectButton").click(function() {
+          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects/2/membership/remove", "method":"POST", "projectLead":true, "assignedTo":"scott"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#updateProjectButton").click(function() {
+          var req = {"payload":{"title":"my title.", "projectLead":"alex", "members":["erica"]},"PlexSessionID":"4", "endpoint":"/projects/22", "method":"POST"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#queryProjectButton").click(function() {
+          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects", "method":"GET"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#createUserButton").click(function() {
+          var req = {"payload":{"username":"david","password":"pass","email":"david@optionshouse.com","roles":["Employee"]},"PlexSessionID":"4", "endpoint":"/users", "method":"POST"};
+          ws.send(JSON.stringify(req));
+        });
+
       });
 
     </script>
   </head>
   <body>
     <form onsubmit="return false;">
-      <input type="button" id="queryUsersButton" value="Query Users"/>
       <input type="button" id="loginButton" value="Login"/>
+      <input type="button" id="createUserButton" value="Create User"/>
+      <input type="button" id="deleteUserButton" value="Delete User"/>
+      <input type="button" id="queryUsersButton" value="Query Users"/>
+      <input type="button" id="assignBugreportButton" value="Assign Bugreport"/>
+      <input type="button" id="createBugreportButton" value="Create Bugreport"/>
+      <input type="button" id="updateBugreportButton" value="Update Bugreport"/>
+      <input type="button" id="updateProjectButton" value="Update Project"/>
+      <input type="button" id="queryProjectButton" value="Query Project"/>
+      <input type="button" id="queryBugreportsButton" value="Query Bugreport"/>
+      <input type="button" id="queryProjectBugreportsButton" value="Query Project Bugreport"/>
+      <input type="button" id="addMemberToProjectButton" value="Add Member to Project"/>
+      <input type="button" id="removeMemberToProjectButton" value="Remove Member to Project"/>
     </form>
 
     <br>

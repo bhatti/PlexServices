@@ -302,11 +302,11 @@ public class JmsClient implements Lifecycle {
     public static Map<String, Object> getParams(Message message)
             throws JMSException {
         Map<String, Object> params = new HashMap<>();
-        params.put("JMSMessageID", message.getJMSMessageID());
-        params.put("JMSTimestamp", message.getJMSTimestamp());
-        params.put("JMSCorrelationID", message.getJMSCorrelationID());
-        params.put("JMSReplyTo", message.getJMSReplyTo());
-        params.put("JMSDestination", message.getJMSDestination());
+        //params.put("JMSMessageID", message.getJMSMessageID());
+        //params.put("JMSTimestamp", message.getJMSTimestamp());
+        //params.put("JMSCorrelationID", message.getJMSCorrelationID());
+        //params.put("JMSReplyTo", message.getJMSReplyTo());
+        //params.put("JMSDestination", message.getJMSDestination());
         Enumeration headerNames = message.getPropertyNames();
         while (headerNames.hasMoreElements()) {
             String name = (String) headerNames.nextElement();
