@@ -79,7 +79,6 @@ RequestHandler {
 
 ### Accessing Websocket services from Javascript
 ```javascript 
-<script>
 var ws = new WebSocket("ws://127.0.0.1:8181/users");
 ws.onopen = function() {
   var req = {"payload":"", "endpoint":"/login", "method":"POST", "username":"scott", "password":"pass"};
