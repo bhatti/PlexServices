@@ -12,7 +12,7 @@ import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, contentType = "application/json")
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", method = Method.LISTEN, contentType = "application/json")
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", method = Method.MESSAGE, contentType = "application/json")
 public class QueryUserService extends AbstractUserService implements
         RequestHandler {
     public QueryUserService(UserRepository userRepository) {

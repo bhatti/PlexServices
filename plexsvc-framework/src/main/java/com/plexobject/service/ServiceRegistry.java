@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.jetty.HttpServiceGateway;
+import com.plexobject.service.jetty.WebsocketServiceGateway;
 import com.plexobject.service.jms.JmsServiceGateway;
 import com.plexobject.util.Configuration;
 
@@ -77,9 +79,13 @@ public class ServiceRegistry implements ServiceGateway {
         final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
         try {
             gateways.put(ServiceConfig.GatewayType.HTTP,
-                    new HttpServiceGateway(config, authorizer));
+                    new HttpServiceGateway(config, authorizer,
+                            new ConcurrentHashMap<>()));
             gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
                     config, authorizer));
+            gateways.put(ServiceConfig.GatewayType.WEBSOCKET,
+                    new WebsocketServiceGateway(config, authorizer,
+                            new ConcurrentHashMap<>()));
             return gateways;
         } catch (RuntimeException e) {
             throw e;

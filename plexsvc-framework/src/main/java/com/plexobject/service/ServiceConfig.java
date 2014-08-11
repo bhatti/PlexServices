@@ -13,11 +13,11 @@ import com.plexobject.encode.CodecType;
 @Target(ElementType.TYPE)
 public @interface ServiceConfig {
     public enum Method {
-        GET, POST, PUT, DELETE, HEAD, LISTEN
+        GET, POST, PUT, DELETE, HEAD, MESSAGE
     }
 
     public enum GatewayType {
-        HTTP, JMS, EVENT_BUS
+        HTTP, WEBSOCKET, JMS, EVENT_BUS
     }
 
     Class<?> requestClass();

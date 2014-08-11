@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <h1>WebSocket client</h1>
+    <script>
+      var ws = new WebSocket("ws://127.0.0.1:8181/users");
+      ws.onopen = function() {
+        alert("Opened!");
+      };
+
+      ws.onmessage = function (evt) {
+        alert("Message: " + evt.data);
+        $('#output').text(evt.data);
+      };
+
+      ws.onclose = function() {
+        alert("Closed!");
+      };
+
+      ws.onerror = function(err) {
+        alert("Error: " + err);
+      };
+      $(document).ready(function() {
+        $("#loginButton").click(function() {
+          var req = {"payload":"", "endpoint":"/login", "method":"POST", "username":"scott", "password":"pass"};
+          ws.send(JSON.stringify(req));
+        });
+        $("#queryUsersButton").click(function() {
+          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/users", "method":"GET"};
+          ws.send(JSON.stringify(req));
+        });
+      });
+
+    </script>
+  </head>
+  <body>
+    <form onsubmit="return false;">
+      <input type="button" id="queryUsersButton" value="Query Users"/>
+      <input type="button" id="loginButton" value="Login"/>
+    </form>
+
+    <br>
+
+    Output:<br>
+    <div id="output" style="width: 600px; height: 100px;">
+    </div>
+
+  </body>
+</html>

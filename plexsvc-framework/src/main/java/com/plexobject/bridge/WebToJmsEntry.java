@@ -9,18 +9,18 @@ import com.plexobject.service.ServiceConfig.Method;
  * @author shahzad bhatti
  *
  */
-public class HttpToJmsEntry {
+public class WebToJmsEntry {
     private String contentType = "text/html;charset=utf-8";
     private String path;
     private Method method;
     private String destination;
     private int timeoutSecs;
 
-    public HttpToJmsEntry() {
+    public WebToJmsEntry() {
 
     }
 
-    public HttpToJmsEntry(String contentType, String path, Method method,
+    public WebToJmsEntry(String contentType, String path, Method method,
             String destination, int timeoutSecs) {
         this.contentType = contentType;
         this.path = path;
@@ -72,14 +72,14 @@ public class HttpToJmsEntry {
     @Override
     @JsonIgnore
     public String toString() {
-        return "HttpToJmsEntry [contentType=" + contentType + ", path=" + path
+        return "WebToJmsEntry [contentType=" + contentType + ", path=" + path
                 + ", method=" + method + ", destination=" + destination
                 + ", timeoutSecs=" + timeoutSecs + "]";
     }
 
     @JsonIgnore
     public String getShortString() {
-        return "HttpToJmsEntry [path=" + path + ", method=" + method
+        return "WebToJmsEntry [path=" + path + ", method=" + method
                 + ", destination=" + destination + "]";
     }
 }

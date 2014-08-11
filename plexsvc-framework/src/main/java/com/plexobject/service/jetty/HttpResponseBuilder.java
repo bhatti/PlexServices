@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,14 +24,14 @@ public class HttpResponseBuilder extends AbstractResponseBuilder {
     private static final Logger log = LoggerFactory
             .getLogger(HttpResponseBuilder.class);
 
-    private final Request baseRequest;
+    private final HttpServletRequest request;
     private final HttpServletResponse response;
 
     public HttpResponseBuilder(final String contentType,
-            final CodecType codecType, final Request baseRequest,
+            final CodecType codecType, final HttpServletRequest request,
             final HttpServletResponse response) {
         super(contentType, codecType);
-        this.baseRequest = baseRequest;
+        this.request = request;
         this.response = response;
     }
 
@@ -60,7 +60,6 @@ public class HttpResponseBuilder extends AbstractResponseBuilder {
                 }
             }
 
-            baseRequest.setHandled(true);
             response.getWriter().println(payload);
         } catch (Exception e) {
             log.error("Failed to write " + payload + ", " + this, e);
@@ -69,12 +68,15 @@ public class HttpResponseBuilder extends AbstractResponseBuilder {
 
     @Override
     public String toString() {
+        return toString(request);
+    }
+
+    public static String toString(HttpServletRequest request) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Method:" + baseRequest.getMethod());
-        sb.append(", Path:" + baseRequest.getPathInfo());
-        sb.append(", Host:"
-                + baseRequest.getRemoteInetSocketAddress().getHostName());
-        for (Map.Entry<String, String[]> e : baseRequest.getParameterMap()
+        sb.append("Method:" + request.getMethod());
+        sb.append(", Path:" + request.getPathInfo());
+        sb.append(", Host:" + request.getRemoteHost());
+        for (Map.Entry<String, String[]> e : request.getParameterMap()
                 .entrySet()) {
             sb.append(", " + e.getKey() + " -> " + e.getValue()[0]);
 

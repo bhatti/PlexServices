@@ -12,7 +12,7 @@ import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/remove", method = Method.POST, contentType = "application/json")
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-remove-project-member-service-queue", method = Method.LISTEN, contentType = "application/json")
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-remove-project-member-service-queue", method = Method.MESSAGE, contentType = "application/json")
 public class RemoveProjectMemberService extends AbstractProjectService
         implements RequestHandler {
     public RemoveProjectMemberService(ProjectRepository projectRepository,

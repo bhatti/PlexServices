@@ -13,7 +13,7 @@ import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, endpoint = "/login", method = Method.POST, contentType = "application/json")
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, endpoint = "queue:{scope}-login-service-queue", method = Method.LISTEN, contentType = "application/json")
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, endpoint = "queue:{scope}-login-service-queue", method = Method.MESSAGE, contentType = "application/json")
 public class LoginService extends AbstractUserService implements RequestHandler {
     public LoginService(UserRepository userRepository) {
         super(userRepository);

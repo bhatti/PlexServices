@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.plexobject.bridge.HttpToJmsBridge;
-import com.plexobject.bridge.HttpToJmsEntry;
+import com.plexobject.bridge.WebToJmsBridge;
+import com.plexobject.bridge.WebToJmsEntry;
 import com.plexobject.bugger.model.BugReport;
 import com.plexobject.bugger.model.BugReport.Priority;
 import com.plexobject.bugger.model.BuggerRoleAuthorizer;
@@ -40,6 +40,7 @@ import com.plexobject.bugger.service.user.QueryUserService;
 import com.plexobject.bugger.service.user.UpdateUserService;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
@@ -141,59 +142,52 @@ public class Main {
 
     void run() throws InterruptedException {
         serviceRegistry.start();
-        // HttpToJmsBridge.run(config, getJmsToJmsEntries());
+        // WebToJmsBridge.run(config, getJmsToJmsEntries());
     }
 
-    static Collection<HttpToJmsEntry> getJmsToJmsEntries() {
-        return Arrays.asList(new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
+    static Collection<WebToJmsEntry> getJmsToJmsEntries() {
+        return Arrays.asList(new WebToJmsEntry(DEFAULT_CONTENT_TYPE,
                 "/projects/{projectId}/bugreports/{id}/assign", Method.POST,
                 "queue:{scope}-assign-bugreport-service-queue",
-                DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
-                        "/projects/{projectId}/bugreports", Method.GET,
-                        "queue:{scope}-query-project-bugreport-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users", Method.GET,
-                        "queue:{scope}-query-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/projects",
-                        Method.GET, "queue:{scope}-query-projects-service",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/bugreports",
+                DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CONTENT_TYPE,
+                "/projects/{projectId}/bugreports", Method.GET,
+                "queue:{scope}-query-project-bugreport-service-queue",
+                DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CONTENT_TYPE,
+                "/users", Method.GET, "queue:{scope}-query-user-service-queue",
+                DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CONTENT_TYPE,
+                "/projects", Method.GET,
+                "queue:{scope}-query-projects-service", DEFAULT_TIMEOUT_SECS),
+                new WebToJmsEntry(DEFAULT_CONTENT_TYPE, "/bugreports",
                         Method.GET, "queue:{scope}-bugreports-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
-                        "/projects/{id}/membership/add", Method.POST,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE, "/projects/{id}/membership/add",
+                        Method.POST,
                         "queue:{scope}-add-project-member-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE,
                         "/projects/{id}/membership/remove", Method.POST,
                         "queue:{scope}-remove-project-member-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE,
                         "/projects/{projectId}/bugreports", Method.POST,
                         "queue:{scope}-create-bugreport-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users", Method.POST,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE, "/users", Method.POST,
                         "queue:{scope}-create-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/projects",
-                        Method.POST,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE, "/projects", Method.POST,
                         "queue:{scope}-create-projects-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users/{id}",
-                        Method.POST,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE, "/users/{id}", Method.POST,
                         "queue:{scope}-update-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/users/{id}/delete",
-                        Method.POST,
-                        "queue:{scope}-delete-user-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE, "/projects/{id}",
-                        Method.POST,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE, "/users/{id}/delete",
+                        Method.POST, "queue:{scope}-delete-user-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE, "/projects/{id}", Method.POST,
                         "queue:{scope}-update-project-service-queue",
-                        DEFAULT_TIMEOUT_SECS),
-                new HttpToJmsEntry(DEFAULT_CONTENT_TYPE,
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(
+                        DEFAULT_CONTENT_TYPE,
                         "/projects/{projectId}/bugreports/{id}", Method.POST,
                         "queue:{scope}-update-bugreport-service-queue",
                         DEFAULT_TIMEOUT_SECS));
@@ -212,13 +206,12 @@ public class Main {
         if (args.length > 1) {
             final String mappingJson = IOUtils.toString(new FileInputStream(
                     args[1]));
-            Collection<HttpToJmsEntry> entries = new JsonObjectCodec().decode(
-                    mappingJson, new TypeReference<List<HttpToJmsEntry>>() {
+            Collection<WebToJmsEntry> entries = new JsonObjectCodec().decode(
+                    mappingJson, new TypeReference<List<WebToJmsEntry>>() {
                     });
-            HttpToJmsBridge bridge = new HttpToJmsBridge(new Configuration(
-                    args[0]), entries);
+            WebToJmsBridge bridge = new WebToJmsBridge(new Configuration(
+                    args[0]), entries, GatewayType.WEBSOCKET);
             bridge.startBridge();
-            log.info("**** Started http->jms bridge");
         }
         Thread.currentThread().join();
     }

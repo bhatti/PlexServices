@@ -199,7 +199,8 @@ public class JmsClient implements Lifecycle {
         consumer.setMessageListener(listener);
         reqMsg.setJMSReplyTo(replyTo);
         createProducer(destination).send(reqMsg);
-        log.info("Sent " + payload + " to " + destination);
+        log.info("Sent '" + payload + "' to " + destination + ", headers "
+                + headers);
         return consumer;
     }
 

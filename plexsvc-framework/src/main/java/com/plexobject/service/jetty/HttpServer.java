@@ -5,16 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -48,7 +48,7 @@ public class HttpServer implements Lifecycle {
     private final Server server;
     private boolean running;
 
-    public HttpServer(Configuration config, AbstractHandler handler) {
+    public HttpServer(Configuration config, Handler handler) {
         QueuedThreadPool threadPool = new QueuedThreadPool();
         threadPool.setMaxThreads(config.getInteger(HTTP_THREADS_COUNT, 500));
         server = new Server();
@@ -141,24 +141,23 @@ public class HttpServer implements Lifecycle {
         return running;
     }
 
-    public static Map<String, Object> getParams(Request baseRequest) {
+    public static Map<String, Object> getParams(HttpServletRequest request) {
         Map<String, Object> params = new HashMap<>();
 
-        params.put("hostname", baseRequest.getRemoteInetSocketAddress()
-                .getHostName());
-        Cookie[] cookies = baseRequest.getCookies();
+        params.put("hostname", request.getRemoteHost());
+        Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
                 params.put(c.getName(), c.getValue());
             }
         }
 
-        Enumeration<String> headerNames = baseRequest.getHeaderNames();
+        Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String name = headerNames.nextElement();
-            params.put(name, baseRequest.getHeaders(name).nextElement());
+            params.put(name, request.getHeaders(name).nextElement());
         }
-        for (Map.Entry<String, String[]> e : baseRequest.getParameterMap()
+        for (Map.Entry<String, String[]> e : request.getParameterMap()
                 .entrySet()) {
             params.put(e.getKey(), e.getValue()[0]);
         }
