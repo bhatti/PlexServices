@@ -100,7 +100,7 @@ ws.onerror = function(err) {
 ```java 
     @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
-      method = Method.LISTEN, contentType = "application/json")
+      method = Method.MESSAGE, contentType = "application/json")
     public class CreateUserService extends AbstractUserService implements
     RequestHandler {
     public CreateUserService(UserRepository userRepository) {
@@ -146,6 +146,54 @@ ws.onerror = function(err) {
   parameter would be populated from URL in above example. PlexService will serialize POJO 
   classes into JSON when delivering messages over HTTP.
 
+### Defining a Websocket based service to create bug-report 
+```java 
+@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", method = Method.MESSAGE, contentType = "application/json")
+public class CreateBugReportService extends AbstractBugReportService implements
+        RequestHandler {
+    public CreateBugReportService(BugReportRepository bugReportRepository,
+            UserRepository userRepository) {
+        super(bugReportRepository, userRepository);
+    }
+
+    @Override
+    public void handle(Request request) {
+        BugReport report = request.getPayload();
+        report.validate();
+        BugReport saved = bugReportRepository.save(report);
+        request.getResponseBuilder().send(saved);
+    }
+
+}
+```
+
+  For websocket based services, the parameters are passed explicitly by consumer. 
+PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.
+
+
+### Consuming Websocket based service for creating bug-report 
+```javascript
+ 
+var ws = new WebSocket("ws://127.0.0.1:8181/users");
+ws.onopen = function() {
+  var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
+  ws.send(JSON.stringify(req));
+};
+
+ws.onmessage = function (evt) {
+  alert("Message: " + evt.data);
+};
+
+ws.onclose = function() {
+};
+
+ws.onerror = function(err) {
+};
+```
+
+  For websocket based services, the parameters are passed explicitly by consumer. 
+PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.
+
 ### Defining a REST service for querying users
 ```java 
   @ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, 
@@ -174,7 +222,7 @@ ws.onerror = function(err) {
 ```java 
   @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", 
-      method = Method.LISTEN, contentType = "application/json")
+      method = Method.MESSAGE, contentType = "application/json")
   public class QueryUserService extends AbstractUserService implements
   RequestHandler {
     public QueryUserService(UserRepository userRepository) {
@@ -307,9 +355,7 @@ bridge.startBridge();
 ```
 
 ## API Doc
-      <ul>
-      <li><a href="http://bhatti.github.io/PlexService/javadoc/">Java Doc</a>
-      </ul>
+[Java Doc](http://bhatti.github.io/PlexService/javadoc/)
 
 
 ## Sample Application
