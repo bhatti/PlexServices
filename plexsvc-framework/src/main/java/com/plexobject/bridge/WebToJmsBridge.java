@@ -175,9 +175,8 @@ public class WebToJmsBridge {
 						        @Override
 						        public void handle(Response reply) {
 							        try {
-								        CodecType codecType = CodecType.TEXT;
 								        AbstractResponseBuilder responseBuilder = new WebsocketResponseBuilder(
-								                codecType, session);
+								                CodecType.TEXT, session);
 								        responseBuilder.send(reply);
 								        log.info("Replying back " + entry
 								                + ", reply " + reply
@@ -307,19 +306,18 @@ public class WebToJmsBridge {
 	private final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
 
 	public WebToJmsBridge(Configuration config,
-	        Collection<WebToJmsEntry> entries, GatewayType gatewayType,
-	        CodecType codecType) {
+	        Collection<WebToJmsEntry> entries, GatewayType gatewayType) {
 		this.jmsClient = new JmsClient(config);
 
 		Handler handler = null;
 		switch (gatewayType) {
 		case HTTP:
 			handler = new HttpForwarder(jmsClient, entriesPathsByMethod,
-			        codecType);
+			        CodecType.JSON);
 			break;
 		case WEBSOCKET:
 			handler = new WebsocketConfigHandler(jmsClient,
-			        entriesPathsByMethod, codecType);
+			        entriesPathsByMethod, CodecType.JSON);
 			break;
 		default:
 			throw new RuntimeException("Unsupported gateway type "
@@ -340,7 +338,7 @@ public class WebToJmsBridge {
 			}
 			entryPaths.put(e.getPath(), e);
 			log.info("Adding " + gatewayType + "->JMS mapping for "
-			        + e.getShortString() + ", codecType " + codecType);
+			        + e.getShortString());
 		}
 	}
 
@@ -368,7 +366,7 @@ public class WebToJmsBridge {
 		Configuration config = new Configuration(args[0]);
 
 		WebToJmsBridge bridge = new WebToJmsBridge(config, entries,
-		        GatewayType.HTTP, config.getDefaultCodecType());
+		        GatewayType.HTTP);
 		bridge.startBridge();
 		Thread.currentThread().join();
 	}

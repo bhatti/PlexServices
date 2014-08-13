@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.msgpack.MessagePack;
 
+import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 
 public class BinaryObjectCodec implements ObjectCodec {
@@ -31,4 +32,8 @@ public class BinaryObjectCodec implements ObjectCodec {
 		}
 	}
 
+	@Override
+	public CodecType getType() {
+		return CodecType.BINARY;
+	}
 }
