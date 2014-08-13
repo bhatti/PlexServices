@@ -12,8 +12,8 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
-//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/add", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-add-project-member-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/add", method = Method.POST, codec = CodecType.BINARY)
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-add-project-member-service-queue", method = Method.MESSAGE, codec = CodecType.BINARY)
 public class AddProjectMemberService extends AbstractProjectService implements
         RequestHandler {
     public AddProjectMemberService(ProjectRepository projectRepository,

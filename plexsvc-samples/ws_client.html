@@ -6,20 +6,16 @@
     <script>
       var ws = new WebSocket("ws://127.0.0.1:8181/users");
       ws.onopen = function() {
-        alert("Opened!");
       };
 
       ws.onmessage = function (evt) {
-        alert("Message: " + evt.data);
         $('#output').text(evt.data);
       };
 
       ws.onclose = function() {
-        alert("Closed!");
       };
 
       ws.onerror = function(err) {
-        alert("Error: " + err);
       };
       $(document).ready(function() {
         $("#loginButton").click(function() {

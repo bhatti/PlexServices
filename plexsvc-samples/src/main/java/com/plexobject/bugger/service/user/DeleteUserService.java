@@ -12,8 +12,8 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
-//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, rolesAllowed = "Administrator", endpoint = "/users/{id}/delete", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-delete-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, rolesAllowed = "Administrator", endpoint = "/users/{id}/delete", method = Method.POST, codec = CodecType.BINARY)
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-delete-user-service-queue", method = Method.MESSAGE, codec = CodecType.BINARY)
 public class DeleteUserService extends AbstractUserService implements
         RequestHandler {
 	public DeleteUserService(UserRepository userRepository) {
