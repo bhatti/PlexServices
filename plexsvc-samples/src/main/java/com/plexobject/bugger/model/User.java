@@ -3,10 +3,13 @@ package com.plexobject.bugger.model;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.msgpack.annotation.Message;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Validatable;
 import com.plexobject.domain.ValidationException;
 
+@Message
 public class User implements Validatable {
     private Long id;
     private String username;

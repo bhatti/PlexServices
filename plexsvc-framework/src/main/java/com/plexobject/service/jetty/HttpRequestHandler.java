@@ -62,7 +62,7 @@ class HttpRequestHandler extends AbstractHandler {
                 ServiceConfig.class);
 
         AbstractResponseBuilder responseBuilder = new HttpResponseBuilder(
-                config.contentType(), config.codec(), baseRequest, response);
+                config.codec(), baseRequest, response);
         new RequestBuilder(handler, roleAuthorizer)
                 .setPayload(IOUtils.toString(baseRequest.getInputStream()))
                 .setParameters(params).setSessionId(getSessionId(baseRequest))

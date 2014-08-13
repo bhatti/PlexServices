@@ -37,7 +37,7 @@ git clone git@github.com:bhatti/PlexService.git
 ```java 
 @ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
-    contentType = "application/json")
+    codec = CodecType.JSON)
 public class CreateUserService extends AbstractUserService implements
 RequestHandler {
   public CreateUserService(UserRepository userRepository) {
@@ -59,7 +59,7 @@ RequestHandler {
 ```java 
 @ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
-    contentType = "application/json")
+    codec = CodecType.JSON)
 public class CreateUserService extends AbstractUserService implements
 RequestHandler {
   public CreateUserService(UserRepository userRepository) {
@@ -76,6 +76,7 @@ RequestHandler {
 }
 ```
 
+Note that we use URL format for endpoints for websockets, but it can be in any format as long it's unique for a service.
 
 ### Accessing Websocket services from Javascript
 ```javascript 
@@ -100,7 +101,8 @@ ws.onerror = function(err) {
 ```java 
     @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
-      method = Method.MESSAGE, contentType = "application/json")
+      method = Method.MESSAGE, 
+      codec = CodecType.JSON)
     public class CreateUserService extends AbstractUserService implements
     RequestHandler {
     public CreateUserService(UserRepository userRepository) {
@@ -123,7 +125,8 @@ ws.onerror = function(err) {
 ```java 
   @ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
-      method = Method.POST, contentType = "application/json")
+      method = Method.POST, 
+      codec = CodecType.JSON)
   public class CreateBugReportService extends AbstractBugReportService implements
   RequestHandler {
     public CreateBugReportService(BugReportRepository bugReportRepository,
@@ -148,7 +151,9 @@ ws.onerror = function(err) {
 
 ### Defining a Websocket based service to create bug-report 
 ```java 
-@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", method = Method.MESSAGE, contentType = "application/json")
+@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = BugReport.class, 
+      rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", 
+      method = Method.MESSAGE, codec = CodecType.JSON)
 public class CreateBugReportService extends AbstractBugReportService implements
         RequestHandler {
     public CreateBugReportService(BugReportRepository bugReportRepository,
@@ -198,7 +203,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
 ```java 
   @ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
-      contentType = "application/json")
+      codec = CodecType.JSON)
   public class QueryUserService extends AbstractUserService implements
   RequestHandler {
     public QueryUserService(UserRepository userRepository) {
@@ -222,7 +227,8 @@ PlexService automatically passes any json parameters sent as part of request, wh
 ```java 
   @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", 
-      method = Method.MESSAGE, contentType = "application/json")
+      method = Method.MESSAGE, 
+      codec = CodecType.JSON)
   public class QueryUserService extends AbstractUserService implements
   RequestHandler {
     public QueryUserService(UserRepository userRepository) {
@@ -322,35 +328,35 @@ bridge.startBridge();
   Here is JSON configuration for bridge:
 ```javascript 
   [
-  {"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
+  {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
     "destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"GET",
+  {"codecType":"JSON","path":"/projects/{projectId}/bugreports","method":"GET",
     "destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/users","method":"GET",
+  {"codecType":"JSON","path":"/users","method":"GET",
     "destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects","method":"GET",
+  {"codecType":"JSON","path":"/projects","method":"GET",
     "destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
-  {"contentType":"application/json","path":"/bugreports","method":"GET",
+  {"codecType":"JSON","path":"/bugreports","method":"GET",
     "destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects/{id}/membership/add","method":"POST",
+  {"codecType":"JSON","path":"/projects/{id}/membership/add","method":"POST",
     "destination":"queue:{scope}-add-project-member-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects/{id}/membership/remove","method":"POST",
+  {"codecType":"JSON","path":"/projects/{id}/membership/remove","method":"POST",
     "destination":"queue:{scope}-remove-project-member-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects/{projectId}/bugreports","method":"POST",
+  {"codecType":"JSON","path":"/projects/{projectId}/bugreports","method":"POST",
     "destination":"queue:{scope}-create-bugreport-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/users","method":"POST",
+  {"codecType":"JSON","path":"/users","method":"POST",
     "destination":"queue:{scope}-create-user-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects","method":"POST",
+  {"codecType":"JSON","path":"/projects","method":"POST",
     "destination":"queue:{scope}-create-projects-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/users/{id}","method":"POST",
+  {"codecType":"JSON","path":"/users/{id}","method":"POST",
     "destination":"queue:{scope}-update-user-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/users/{id}/delete","method":"POST",
+  {"codecType":"JSON","path":"/users/{id}/delete","method":"POST",
     "destination":"queue:{scope}-delete-user-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects/{id}","method":"POST",
+  {"codecType":"JSON","path":"/projects/{id}","method":"POST",
     "destination":"queue:{scope}-update-project-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/projects/{projectId}/bugreports/{id}","method":"POST",
+  {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}","method":"POST",
     "destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
-  {"contentType":"application/json","path":"/login","method":"POST",
+  {"codecType":"JSON","path":"/login","method":"POST",
     "destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
 ```
 

@@ -12,27 +12,25 @@ import com.plexobject.encode.CodecType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ServiceConfig {
-    public enum Method {
-        GET, POST, PUT, DELETE, HEAD, MESSAGE
-    }
+	public enum Method {
+		GET, POST, PUT, DELETE, HEAD, MESSAGE
+	}
 
-    public enum GatewayType {
-        HTTP, WEBSOCKET, JMS, EVENT_BUS
-    }
+	public enum GatewayType {
+		HTTP, WEBSOCKET, JMS, EVENT_BUS
+	}
 
-    Class<?> requestClass();
+	Class<?> requestClass();
 
-    GatewayType gateway();
+	GatewayType gateway();
 
-    CodecType codec() default CodecType.JSON;
+	CodecType codec();
 
-    Method method();
+	Method method();
 
-    String version() default "1.0";
+	String version() default "1.0";
 
-    String endpoint() default "";
+	String endpoint() default "";
 
-    String contentType() default "";
-
-    String[] rolesAllowed() default "";
+	String[] rolesAllowed() default "";
 }

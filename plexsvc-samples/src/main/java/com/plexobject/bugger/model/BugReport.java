@@ -6,8 +6,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.msgpack.annotation.Message;
+
 import com.plexobject.domain.ValidationException;
 
+@Message
 public class BugReport extends Document {
     public enum State {
         OPEN, READY, IN_DEVELOPMENT, IN_TEST, CLOSED

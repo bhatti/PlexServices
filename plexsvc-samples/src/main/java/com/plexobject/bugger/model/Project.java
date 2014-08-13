@@ -3,8 +3,11 @@ package com.plexobject.bugger.model;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.msgpack.annotation.Message;
+
 import com.plexobject.domain.ValidationException;
 
+@Message
 public class Project extends Document {
     private String projectCode;
     private String projectLead;

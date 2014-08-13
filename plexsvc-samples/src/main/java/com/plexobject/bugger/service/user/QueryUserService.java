@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.plexobject.bugger.model.User;
 import com.plexobject.bugger.repository.UserRepository;
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
@@ -11,8 +12,8 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
-//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, contentType = "application/json")
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", method = Method.MESSAGE, contentType = "application/json")
+//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements
         RequestHandler {
     public QueryUserService(UserRepository userRepository) {

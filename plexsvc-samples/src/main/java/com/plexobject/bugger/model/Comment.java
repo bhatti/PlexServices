@@ -1,7 +1,10 @@
 package com.plexobject.bugger.model;
 
+import org.msgpack.annotation.Message;
+
 import com.plexobject.domain.ValidationException;
 
+@Message
 public class Comment extends Document {
     private Long projectId;
     private Long bugId;
