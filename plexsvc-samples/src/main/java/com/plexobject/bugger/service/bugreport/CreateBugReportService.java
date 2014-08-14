@@ -10,8 +10,8 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
-//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", method = Method.POST, codec = CodecType.BINARY)
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.BINARY)
+//@ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", method = Method.POST, codec = CodecType.JSON)
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class CreateBugReportService extends AbstractBugReportService implements
         RequestHandler {
 	public CreateBugReportService(BugReportRepository bugReportRepository,

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="jquery.min.js"></script>
     <h1>WebSocket client</h1>
     <script>
       var ws = new WebSocket("ws://127.0.0.1:8181/users");
@@ -9,7 +9,8 @@
       };
 
       ws.onmessage = function (evt) {
-        $('#output').text(evt.data);
+        var data = evt.data;
+        $('#output').text(data);
       };
 
       ws.onclose = function() {
@@ -17,58 +18,76 @@
 
       ws.onerror = function(err) {
       };
+
+      function send(payload) {
+        $('#input').text(payload);
+        ws.send(payload);
+      }
       $(document).ready(function() {
-        $("#loginButton").click(function() {
-          var req = {"payload":"", "endpoint":"/login", "method":"POST", "username":"scott", "password":"pass"};
-          ws.send(JSON.stringify(req));
+         $("#loginButton").click(function() {
+          var payload = {};
+          var req = {"payload":payload, "endpoint":"/login", "method":"POST", "username":"scott", "password":"pass"};
+          send(JSON.stringify(req));
         });
         $("#queryUsersButton").click(function() {
-          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/users", "method":"GET"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/users", "method":"GET"};
+          send(JSON.stringify(req));
         });
         $("#deleteUserButton").click(function() {
-          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/users/2/delete", "method":"POST"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/users/2/delete", "method":"POST"};
+          send(JSON.stringify(req));
         });
         $("#assignBugreportButton").click(function() {
-          var req = {"payload":"","assignedTo":"scott", "PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"assignedTo":"scott", "PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
+          send(JSON.stringify(req));
         });
         $("#createBugreportButton").click(function() {
+          var payload = {"title":"my title", "description":"my description","bugNumber":"story-201", "assignedTo":"mike", "developedBy":"mike"};
           var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
-          ws.send(JSON.stringify(req));
+          send(JSON.stringify(req));
         });
         $("#updateBugreportButton").click(function() {
-          var req = {"payload":{"title":"my title.", "description":"my description","bugNumber":"story-201", "assignedTo":"scott", "developedBy":"erica"},"PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2", "method":"POST"};
-          ws.send(JSON.stringify(req));
+          var payload = {"title":"my title.", "description":"my description","bugNumber":"story-201", "assignedTo":"scott", "developedBy":"erica"};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2", "method":"POST"};
+          send(JSON.stringify(req));
         });
         $("#queryBugreportsButton").click(function() {
-          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/bugreports", "method":"GET"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/bugreports", "method":"GET"};
+          send(JSON.stringify(req));
         });
         $("#queryProjectBugreportsButton").click(function() {
-          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects/2/bugreports", "method":"GET"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/projects/2/bugreports", "method":"GET"};
+          send(JSON.stringify(req));
         });
         $("#addMemberToProjectButton").click(function() {
-          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects/2/membership/add", "method":"POST", "projectLead":true, "assignedTo":"scott"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/projects/2/membership/add", "method":"POST", "projectLead":true, "assignedTo":"scott"};
+          send(JSON.stringify(req));
         });
         $("#removeMemberToProjectButton").click(function() {
-          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects/2/membership/remove", "method":"POST", "projectLead":true, "assignedTo":"scott"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/projects/2/membership/remove", "method":"POST", "projectLead":true, "assignedTo":"scott"};
+          send(JSON.stringify(req));
         });
         $("#updateProjectButton").click(function() {
-          var req = {"payload":{"title":"my title.", "projectLead":"alex", "members":["erica"]},"PlexSessionID":"4", "endpoint":"/projects/22", "method":"POST"};
-          ws.send(JSON.stringify(req));
+          var payload = {"title":"my title.", "projectLead":"alex", "members":["erica"]};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/projects/22", "method":"POST"};
+          send(JSON.stringify(req));
         });
         $("#queryProjectButton").click(function() {
-          var req = {"payload":"","PlexSessionID":"4", "endpoint":"/projects", "method":"GET"};
-          ws.send(JSON.stringify(req));
+          var payload = {};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/projects", "method":"GET"};
+          send(JSON.stringify(req));
         });
         $("#createUserButton").click(function() {
-          var req = {"payload":{"username":"david","password":"pass","email":"david@optionshouse.com","roles":["Employee"]},"PlexSessionID":"4", "endpoint":"/users", "method":"POST"};
-          ws.send(JSON.stringify(req));
+          var payload = {"username":"david","password":"pass","email":"david@optionshouse.com","roles":["Employee"]};
+          var req = {"payload":payload,"PlexSessionID":"4", "endpoint":"/users", "method":"POST"};
+          send(JSON.stringify(req));
         });
 
       });
@@ -93,6 +112,10 @@
     </form>
 
     <br>
+
+    Input:<br>
+    <div id="input" style="width: 600px; height: 100px;">
+    </div>
 
     Output:<br>
     <div id="output" style="width: 600px; height: 100px;">

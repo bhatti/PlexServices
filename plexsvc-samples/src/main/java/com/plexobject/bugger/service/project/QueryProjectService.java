@@ -14,7 +14,7 @@ import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Project.class, rolesAllowed = "Employee", endpoint = "/projects", method = Method.GET, contentType = "application/json")
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = Project.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-query-projects-service", method = Method.MESSAGE, codec = CodecType.BINARY)
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = Project.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-query-projects-service", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QueryProjectService extends AbstractProjectService implements
         RequestHandler {
 	public QueryProjectService(ProjectRepository projectRepository,
