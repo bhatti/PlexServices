@@ -66,7 +66,7 @@ public class RequestBuilder {
 
 	public void invoke() {
 		if (handler != null) {
-			Timing timing = Timing.begin(handler.getClass().getSimpleName());
+			Timing timing = Timing.begin(handler.getClass());
 
 			ServiceConfig config = handler.getClass().getAnnotation(
 			        ServiceConfig.class);

@@ -75,7 +75,7 @@ public class JmsServiceGateway extends AbstractServiceGateway {
 	}
 
 	@Override
-	public synchronized void remove(RequestHandler h) {
+	public synchronized boolean remove(RequestHandler h) {
 		JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.remove(h);
 
 		try {
@@ -85,12 +85,19 @@ public class JmsServiceGateway extends AbstractServiceGateway {
 				        ServiceConfig.class);
 				log.info("Removing service " + h.getClass().getSimpleName()
 				        + " for " + config.endpoint());
+				return true;
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to remove service handler " + h,
 			        e);
 		}
+		return false;
+	}
 
+	@Override
+	public boolean exists(RequestHandler handler) {
+		JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.get(handler);
+		return jmsHandler != null;
 	}
 
 	// queue:name

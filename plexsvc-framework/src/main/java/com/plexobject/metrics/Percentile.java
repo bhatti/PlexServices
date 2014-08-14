@@ -135,8 +135,9 @@ public class Percentile<T extends Number & Comparable<T>> implements
         }
     }
 
-    public class PercentileVar implements Sampleable {
-        public final double percentile;
+    public class PercentileVar implements Sampleable, Serializable {
+        private static final long serialVersionUID = 1L;
+		public final double percentile;
         @JsonIgnore
         public final boolean sortFirst;
 

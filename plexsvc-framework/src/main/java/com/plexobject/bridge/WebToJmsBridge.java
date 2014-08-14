@@ -265,6 +265,7 @@ public class WebToJmsBridge {
 								                .setProperty(name, value);
 							        }
 							        responseBuilder.send(reply.getPayload());
+
 							        log.info("Replying back " + entry
 							                + ", reply " + reply + ", params "
 							                + params);

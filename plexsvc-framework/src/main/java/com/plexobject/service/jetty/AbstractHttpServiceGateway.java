@@ -78,7 +78,26 @@ public class AbstractHttpServiceGateway extends AbstractServiceGateway {
 	}
 
 	@Override
-	public synchronized void remove(RequestHandler handler) {
+	public synchronized boolean remove(RequestHandler handler) {
+		ServiceConfig config = handler.getClass().getAnnotation(
+		        ServiceConfig.class);
+		PathsLookup<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
+		        .get(config.method());
+
+		boolean removed = false;
+		if (requestHandlerPaths != null) {
+			String path = getPath(handler, config);
+			removed = requestHandlerPaths.remove(path);
+			if (removed && handler instanceof LifecycleAware) {
+				((LifecycleAware) handler).onDestroyed();
+				log.info("Removing service handler " + handler);
+			}
+		}
+		return removed;
+	}
+
+	@Override
+	public boolean exists(RequestHandler handler) {
 		ServiceConfig config = handler.getClass().getAnnotation(
 		        ServiceConfig.class);
 		PathsLookup<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
@@ -86,12 +105,9 @@ public class AbstractHttpServiceGateway extends AbstractServiceGateway {
 
 		if (requestHandlerPaths != null) {
 			String path = getPath(handler, config);
-			requestHandlerPaths.remove(path);
-			if (handler instanceof LifecycleAware) {
-				((LifecycleAware) handler).onDestroyed();
-			}
-			log.info("Removing service handler " + handler);
+			return requestHandlerPaths.get(path, new HashMap<String, Object>()) != null;
 		}
+		return false;
 	}
 
 	private String getPath(com.plexobject.handler.RequestHandler handler,
@@ -104,16 +120,4 @@ public class AbstractHttpServiceGateway extends AbstractServiceGateway {
 		return path;
 	}
 
-	private boolean exists(RequestHandler handler) {
-		ServiceConfig config = handler.getClass().getAnnotation(
-		        ServiceConfig.class);
-		PathsLookup<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
-		        .get(config.method());
-
-		if (requestHandlerPaths != null) {
-			String path = getPath(handler, config);
-			return requestHandlerPaths.get(path, new HashMap<String, Object>()) != null;
-		}
-		return false;
-	}
 }

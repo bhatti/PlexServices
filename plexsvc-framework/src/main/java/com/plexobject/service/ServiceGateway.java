@@ -11,9 +11,11 @@ import com.plexobject.handler.RequestHandler;
  *
  */
 public interface ServiceGateway extends Lifecycle {
-    void add(RequestHandler handler);
+	void add(RequestHandler handler);
 
-    void remove(RequestHandler handler);
+	boolean remove(RequestHandler handler);
 
-    Collection<RequestHandler> getHandlers();
+	boolean exists(RequestHandler handler);
+
+	Collection<RequestHandler> getHandlers();
 }

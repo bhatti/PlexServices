@@ -1,5 +1,6 @@
 package com.plexobject.service;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,7 +8,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.metrics.ServiceMetrics;
+import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.jetty.HttpServiceGateway;
@@ -23,8 +33,12 @@ import com.plexobject.util.Configuration;
  *
  */
 public class ServiceRegistry implements ServiceGateway {
+	private static final Logger log = LoggerFactory
+	        .getLogger(ServiceRegistry.class);
+
 	private final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
 	private boolean running;
+	private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
 	public ServiceRegistry(Configuration config,
 	        Collection<RequestHandler> services, RoleAuthorizer authorizer) {
@@ -53,18 +67,65 @@ public class ServiceRegistry implements ServiceGateway {
 		ServiceGateway gateway = gateways.get(config.gateway());
 		Objects.requireNonNull(gateway,
 		        "Unsupported gateway for service handler " + h);
-		gateway.add(h);
+		if (!gateway.exists(h)) {
+			registerMetricsJMX(h);
+			registerServiceHandlerLifecycle(h);
+			gateway.add(h);
+		}
+	}
+
+	private void registerServiceHandlerLifecycle(RequestHandler h) {
+		String objName = getPackageName(h) + h.getClass().getSimpleName()
+		        + ":type=Lifecycle";
+		try {
+			mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
+			        new ObjectName(objName));
+		} catch (InstanceAlreadyExistsException e) {
+		} catch (Exception e) {
+			log.error("Could not register mbean " + objName, e);
+		}
+	}
+
+	private static String getPackageName(RequestHandler h) {
+		return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
+		        + ".";
+	}
+
+	private void registerMetricsJMX(RequestHandler h) {
+		String objName = getPackageName(h) + h.getClass().getSimpleName()
+		        + ":type=Metrics";
+		ServiceMetrics metrics = ServiceMetricsRegistry.getInstance()
+		        .getServiceMetrics(h.getClass());
+		try {
+			mbs.registerMBean(metrics, new ObjectName(objName));
+		} catch (InstanceAlreadyExistsException e) {
+		} catch (Exception e) {
+			log.error("Could not register mbean " + objName, e);
+		}
 	}
 
 	@Override
-	public synchronized void remove(RequestHandler h) {
+	public synchronized boolean remove(RequestHandler h) {
 		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
 		Objects.requireNonNull(config, "config" + h
 		        + " doesn't define ServiceConfig annotation");
 		ServiceGateway gateway = gateways.get(config.gateway());
-		Objects.requireNonNull(gateway,
-		        "Unsupported gateway for service handler " + h);
-		gateway.remove(h);
+		if (gateway == null) {
+			return false;
+		}
+		return gateway.remove(h);
+	}
+
+	@Override
+	public boolean exists(RequestHandler h) {
+		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+		Objects.requireNonNull(config, "config" + h
+		        + " doesn't define ServiceConfig annotation");
+		ServiceGateway gateway = gateways.get(config.gateway());
+		if (gateway == null) {
+			return false;
+		}
+		return gateway.exists(h);
 	}
 
 	@Override

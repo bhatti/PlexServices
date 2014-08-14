@@ -212,7 +212,7 @@ public class Main {
 			        });
 			Configuration config = new Configuration(args[0]);
 			WebToJmsBridge bridge = new WebToJmsBridge(config, entries,
-			        GatewayType.WEBSOCKET);
+			        GatewayType.HTTP);
 			bridge.startBridge();
 		}
 		Thread.currentThread().join();

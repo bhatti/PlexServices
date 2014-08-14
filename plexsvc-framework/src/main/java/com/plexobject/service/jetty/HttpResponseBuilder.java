@@ -7,6 +7,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +25,13 @@ public class HttpResponseBuilder extends AbstractResponseBuilder {
 	private static final Logger log = LoggerFactory
 	        .getLogger(HttpResponseBuilder.class);
 
-	private final HttpServletRequest request;
+	private final Request baseRequest;
 	private final HttpServletResponse response;
 
 	public HttpResponseBuilder(final CodecType codecType,
-	        final HttpServletRequest request, final HttpServletResponse response) {
+	        final Request baseRequest, final HttpServletResponse response) {
 		super(codecType);
-		this.request = request;
+		this.baseRequest = baseRequest;
 		this.response = response;
 	}
 
@@ -60,6 +61,8 @@ public class HttpResponseBuilder extends AbstractResponseBuilder {
 			}
 
 			response.getWriter().println(payload);
+			baseRequest.setHandled(true);
+
 		} catch (Exception e) {
 			log.error("Failed to write " + payload + ", " + this, e);
 		}
@@ -67,7 +70,7 @@ public class HttpResponseBuilder extends AbstractResponseBuilder {
 
 	@Override
 	public String toString() {
-		return toString(request);
+		return toString(baseRequest);
 	}
 
 	public static String toString(HttpServletRequest request) {
