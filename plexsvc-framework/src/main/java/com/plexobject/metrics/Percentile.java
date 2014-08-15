@@ -137,7 +137,7 @@ public class Percentile<T extends Number & Comparable<T>> implements
 
     public class PercentileVar implements Sampleable, Serializable {
         private static final long serialVersionUID = 1L;
-		public final double percentile;
+        public final double percentile;
         @JsonIgnore
         public final boolean sortFirst;
 
@@ -154,6 +154,7 @@ public class Percentile<T extends Number & Comparable<T>> implements
                 }
 
                 if (allSamples.isEmpty()) {
+                    System.out.println("empty");
                     return 0d;
                 }
 
@@ -188,5 +189,11 @@ public class Percentile<T extends Number & Comparable<T>> implements
 
             Collections.sort(allSamples);
         }
+
+        @Override
+        public String toString() {
+            return percentile + "=" + sample();
+        }
+
     }
 }

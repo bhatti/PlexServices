@@ -51,7 +51,7 @@ import com.plexobject.util.IOUtils;
 
 public class Main {
 	private static final Logger log = LoggerFactory.getLogger(Main.class);
-	private static final int DEFAULT_TIMEOUT_SECS = 30;
+	private static final int DEFAULT_TIMEOUT_SECS = 5;
 	private static final CodecType DEFAULT_CODEC = CodecType.BINARY;
 
 	private final CommentRepository commentRepository = new CommentRepository();

@@ -64,7 +64,7 @@ public class HttpServer implements Lifecycle {
         HttpConfiguration http_config = new HttpConfiguration();
         int httpsPort = config.getInteger(HTTPS_PORT, DEFAULT_HTTPS_PORT);
         int httpPort = config.getInteger(HTTP_PORT, DEFAULT_HTTP_PORT);
-        int httpTimeoutSecs = config.getInteger(HTTP_TIMEOUT_SECS, 30);
+        int httpTimeoutSecs = config.getInteger(HTTP_TIMEOUT_SECS, 10);
         String keystorePath = config.getProperty(KEYSTORE_PATH);
         String keystorePassword = config.getProperty(KEYSTORE_PASSWORD);
         String keystoreManagerPassword = config

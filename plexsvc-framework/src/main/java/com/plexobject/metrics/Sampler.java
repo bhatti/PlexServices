@@ -47,4 +47,10 @@ public class Sampler implements Serializable {
     public boolean select() {
         return rand.nextDouble() < threshold;
     }
+
+    @Override
+    public String toString() {
+        return "Sampler [" + select() + "]";
+    }
+    
 }
