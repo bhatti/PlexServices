@@ -2,9 +2,15 @@
 
 ##Overview
 
-PlexService is a simple Javaa framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides basic support for converting POJO objects into JSON for remote consumption. The developers define service configuration via Java annoations, which allow them to define gateway types, encoding scheme, end-points, roles, etc. PlexService supports role-based security, which are called before accessing underlying services. 
+PlexService is a simple Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides basic support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define gateway types, encoding scheme, end-points, roles, etc. 
 
-PlexService also provides web-to-jms bridge for accessing services over http or websockets that listen to JMS queues/topics. PlexService uses jetty for serving web services over http or websockets. Finally, PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface.
+PlexService supports role-based security, which are enforced before accessing underlying services. 
+
+PlexService also provides web-to-jms bridge for accessing services over http or websockets that listen to JMS queues/topics. 
+
+PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface.
+
+PlexService uses jetty 9.0 for serving web services over http or websockets. It allows developers to hook JMS containers at runtime.
 
 
 ##Building
@@ -99,12 +105,11 @@ ws.onerror = function(err) {
 
 ### Defining a JMS service for creating a user
 ```java 
-    @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
-    public class CreateUserService extends AbstractUserService implements
-    RequestHandler {
+public class CreateUserService extends AbstractUserService implements RequestHandler {
     public CreateUserService(UserRepository userRepository) {
     super(userRepository);
     }
@@ -116,19 +121,18 @@ ws.onerror = function(err) {
       User saved = userRepository.save(user);
       request.getResponseBuilder().send(saved);
     }
-    }
+}
 ```
   The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexService will serialize POJO classes into JSON when delivering messages over JMS.
 
 
 ### Defining a REST service with parameterized URLs
 ```java 
-  @ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, 
+@ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = Method.POST, 
       codec = CodecType.JSON)
-  public class CreateBugReportService extends AbstractBugReportService implements
-  RequestHandler {
+public class CreateBugReportService extends AbstractBugReportService implements RequestHandler {
     public CreateBugReportService(BugReportRepository bugReportRepository,
         UserRepository userRepository) {
       super(bugReportRepository, userRepository);
@@ -141,7 +145,7 @@ ws.onerror = function(err) {
         BugReport saved = bugReportRepository.save(report);
         request.getResponseBuilder().send(saved);
       }
-  }
+}
 ```
 
   The http end-point or URL can also store variables, but unlike end-points for
@@ -225,12 +229,11 @@ PlexService automatically passes any json parameters sent as part of request, wh
 
 ### Defining a JMS service for querying users
 ```java 
-  @ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
+@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
-  public class QueryUserService extends AbstractUserService implements
-  RequestHandler {
+public class QueryUserService extends AbstractUserService implements RequestHandler {
     public QueryUserService(UserRepository userRepository) {
       super(userRepository);
     }
@@ -244,13 +247,13 @@ PlexService automatically passes any json parameters sent as part of request, wh
             });
         request.getResponseBuilder().send(users);
       }
-  }
+}
 ```
   The end-point can contain variables such as scope that are initialized from configuration.
 
 ### Defining role-based security
 ```java 
-  public class BuggerRoleAuthorizer implements RoleAuthorizer {
+public class BuggerRoleAuthorizer implements RoleAuthorizer {
     private final UserRepository userRepository;
 
     public BuggerRoleAuthorizer(UserRepository userRepository) {
@@ -274,7 +277,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
           }
         }
       }
-  }
+}
 ```
 
 
