@@ -49,11 +49,13 @@ public class JmsClient implements Lifecycle {
     private ThreadLocal<Map<String, MessageProducer>> currentProducers = new ThreadLocal<>();
     private Map<String, Destination> destinations = new ConcurrentHashMap<>();
     private boolean transactedSession;
+    private static boolean sendJmsHeaders;
     private boolean running;
 
     public JmsClient(Configuration config) {
         this.config = config;
         transactedSession = config.getBoolean("jms.trasactedSession");
+        sendJmsHeaders = config.getBoolean("jms.sendJmsHeaders");
         try {
             final String contextFactory = config
                     .getProperty("jms.contextFactory");
@@ -302,11 +304,13 @@ public class JmsClient implements Lifecycle {
     public static Map<String, Object> getParams(Message message)
             throws JMSException {
         Map<String, Object> params = new HashMap<>();
-        //params.put("JMSMessageID", message.getJMSMessageID());
-        //params.put("JMSTimestamp", message.getJMSTimestamp());
-        //params.put("JMSCorrelationID", message.getJMSCorrelationID());
-        //params.put("JMSReplyTo", message.getJMSReplyTo());
-        //params.put("JMSDestination", message.getJMSDestination());
+        if (sendJmsHeaders) {
+            params.put("JMSMessageID", message.getJMSMessageID());
+            params.put("JMSTimestamp", message.getJMSTimestamp());
+            params.put("JMSCorrelationID", message.getJMSCorrelationID());
+            params.put("JMSReplyTo", message.getJMSReplyTo());
+            params.put("JMSDestination", message.getJMSDestination());
+        }
         Enumeration headerNames = message.getPropertyNames();
         while (headerNames.hasMoreElements()) {
             String name = (String) headerNames.nextElement();
