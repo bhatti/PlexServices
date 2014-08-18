@@ -14,7 +14,6 @@ dependencies {
 
     compile 'com.google.guava:guava:17.0'
     compile 'org.xerial:sqlite-jdbc:3.7.2'
-    compile 'org.msgpack:msgpack:0.6.11'
 
     compile project(':plexsvc-framework')
     testCompile 'junit:junit:4.11'

@@ -9,9 +9,9 @@ import com.plexobject.domain.Constants;
 import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
+import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.metrics.Timing;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
@@ -81,6 +81,8 @@ public class RequestBuilder {
 			        .getInstance().getObjectCodec(config.codec())
 			        .decode(payload, config.requestClass(), params)
 			        : null;
+
+
 			try {
 				Request handlerReq = new Request(params, object, sessionId,
 				        remoteAddress, responseBuilder);

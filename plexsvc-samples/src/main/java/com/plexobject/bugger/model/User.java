@@ -3,6 +3,10 @@ package com.plexobject.bugger.model;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.msgpack.annotation.Message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,6 +14,7 @@ import com.plexobject.domain.Validatable;
 import com.plexobject.domain.ValidationException;
 
 @Message
+@XmlRootElement
 public class User implements Validatable {
     private Long id;
     private String username;
@@ -34,6 +39,7 @@ public class User implements Validatable {
         return id;
     }
 
+    @XmlAttribute
     public void setId(Long id) {
         this.id = id;
     }
@@ -47,10 +53,12 @@ public class User implements Validatable {
         return password;
     }
 
+    @XmlElement
     public void setPassword(String password) {
         this.password = password;
     }
 
+    @XmlElement
     public void setUsername(String username) {
         this.username = username;
     }
@@ -67,6 +75,7 @@ public class User implements Validatable {
         return roles;
     }
 
+    @XmlElement
     public void setRoles(Collection<String> roles) {
         this.roles = roles;
     }
@@ -75,6 +84,7 @@ public class User implements Validatable {
         return email;
     }
 
+    @XmlElement
     public void setEmail(String email) {
         this.email = email;
     }
