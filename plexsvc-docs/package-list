@@ -3,8 +3,10 @@ com.plexobject.bus
 com.plexobject.bus.impl
 com.plexobject.domain
 com.plexobject.encode
+com.plexobject.encode.binary
 com.plexobject.encode.json
 com.plexobject.encode.text
+com.plexobject.encode.xml
 com.plexobject.handler
 com.plexobject.metrics
 com.plexobject.predicate
