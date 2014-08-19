@@ -185,7 +185,9 @@ PlexService automatically passes any json parameters sent as part of request, wh
  
 var ws = new WebSocket("ws://127.0.0.1:8181/users");
 ws.onopen = function() {
-  var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
+  var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", 
+    "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", 
+      "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
   ws.send(JSON.stringify(req));
 };
 
@@ -365,12 +367,13 @@ bridge.startBridge();
 
 
 ### Adding Streaming Quotes Service over Websockets 
-Here is an example of creating a streaing quote server that sends real-time
+Here is an example of creating a streaming quote server that sends real-time
 quote quotes over the websockets.
 
 
 ```java 
-@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = Void.class, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = Void.class, 
+  endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QuoteServer implements RequestHandler {
     public enum Action {
         SUBSCRIBE, UNSUBSCRIBE
@@ -416,7 +419,8 @@ Here is the streaing server that pushes the updates to web clients:
 ```java 
 public class QuoteStreamer extends TimerTask {
     private int delay = 1000;
-    private Map<String, Collection<ResponseDispatcher>> subscribers = new ConcurrentHashMap<>();
+    private Map<String, Collection<ResponseDispatcher>> subscribers = 
+      new ConcurrentHashMap<>();
     private QuoteCache quoteCache = new QuoteCache();
     private final Timer timer = new Timer(true);
 
@@ -466,6 +470,8 @@ public class QuoteStreamer extends TimerTask {
     }
 }
 ```
+
+
 Here is a javascript client that subscribes to the streaming quotes:
 ```javascript
    <script>
@@ -519,7 +525,10 @@ Here is a javascript client that subscribes to the streaming quotes:
         });
       });
    <script>
+```
 
+Here is the html form that displays quotes:
+```html
   <body>
     <form>
       Symbol:<input type="text" id="symbol" value="AAPL" size="4" />
