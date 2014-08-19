@@ -363,6 +363,192 @@ bridge.startBridge();
     "destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
 ```
 
+
+### Adding Streaming Quotes Service over Websockets 
+Here is an example of creating a streaing quote server that sends real-time
+quote quotes over the websockets.
+
+
+```java 
+@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = Void.class, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+public class QuoteServer implements RequestHandler {
+    public enum Action {
+        SUBSCRIBE, UNSUBSCRIBE
+    }
+
+    static final Logger log = LoggerFactory.getLogger(QuoteServer.class);
+
+    private QuoteStreamer quoteStreamer = new QuoteStreamer();
+
+    @Override
+    public void handle(Request request) {
+        String symbol = request.getProperty("symbol");
+        String actionVal = request.getProperty("action");
+        log.info("Received " + request);
+        ValidationException
+                .builder()
+                .assertNonNull(symbol, "undefined_symbol", "symbol",
+                        "symbol not specified")
+                .assertNonNull(actionVal, "undefined_action", "action",
+                        "action not specified").end();
+        Action action = Action.valueOf(actionVal.toUpperCase());
+        if (action == Action.SUBSCRIBE) {
+            quoteStreamer.add(symbol, request.getResponseBuilder());
+        } else {
+            quoteStreamer.remove(symbol, request.getResponseBuilder());
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Configuration config = new Configuration(args[0]);
+        QuoteServer service = new QuoteServer();
+        Collection<RequestHandler> services = new ArrayList<>();
+        services.add(new QuoteServer());
+        //
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, services, null);
+        serviceRegistry.start();
+        Thread.currentThread().join();
+    }
+}
+
+```
+Here is the streaing server that pushes the updates to web clients:
+```java 
+public class QuoteStreamer extends TimerTask {
+    private int delay = 1000;
+    private Map<String, Collection<ResponseDispatcher>> subscribers = new ConcurrentHashMap<>();
+    private QuoteCache quoteCache = new QuoteCache();
+    private final Timer timer = new Timer(true);
+
+    public QuoteStreamer() {
+        timer.schedule(this, delay, delay);
+    }
+
+    public void add(String symbol, ResponseDispatcher dispatcher) {
+        symbol = symbol.toUpperCase();
+        synchronized (symbol.intern()) {
+            Collection<ResponseDispatcher> dispatchers = subscribers
+                    .get(symbol);
+            if (dispatchers == null) {
+                dispatchers = new HashSet<ResponseDispatcher>();
+                subscribers.put(symbol, dispatchers);
+            }
+            dispatchers.add(dispatcher);
+        }
+    }
+
+    public void remove(String symbol, ResponseDispatcher dispatcher) {
+        symbol = symbol.toUpperCase();
+        synchronized (symbol.intern()) {
+            Collection<ResponseDispatcher> dispatchers = subscribers
+                    .get(symbol);
+            if (dispatchers != null) {
+                dispatchers.remove(dispatcher);
+            }
+        }
+    }
+
+    @Override
+    public void run() {
+        for (Map.Entry<String, Collection<ResponseDispatcher>> e : subscribers
+                .entrySet()) {
+            Quote q = quoteCache.getLatestQuote(e.getKey());
+            Collection<ResponseDispatcher> dispatchers = new ArrayList<>(
+                    e.getValue());
+            for (ResponseDispatcher d : dispatchers) {
+                try {
+                    d.send(q);
+                } catch (Exception ex) {
+                    remove(e.getKey(), d);
+                }
+            }
+        }
+    }
+}
+```
+Here is a javascript client that subscribes to the streaming quotes:
+```javascript
+   <script>
+      var ws = new WebSocket("ws://127.0.0.1:8181/quotes");
+      ws.onopen = function() {
+      };
+      var lasts = {};
+      ws.onmessage = function (evt) {
+        //console.log(evt.data);
+        var quote = JSON.parse(evt.data).payload;
+        var d = new Date(quote.timestamp);
+        $('#time').text(d.toString());
+        $('#company').text(quote.company);
+        $('#last').text(quote.last.toFixed(2));
+        var prev = lasts[quote.company];
+        if (prev != undefined) {
+          var change = quote.last - prev;
+          if (change >= 0) {
+            $('#change').css({'background-color':'green'});
+          } else {
+            $('#change').css({'background-color':'red'});
+          }
+          $('#change').text(change.toFixed(2));
+        } else {
+          $('#change').text('N/A');
+        }
+        lasts[quote.company] = quote.last;
+      };
+
+      ws.onclose = function() {
+      };
+
+      ws.onerror = function(err) {
+      };
+      function send(payload) {
+        $('#input').text(payload);
+        ws.send(payload);
+      }
+      $(document).ready(function() {
+        $("#subscribe").click(function() {
+          var symbol = $("#symbol").val();
+          var req = {"endpoint":"/quotes", "symbol":symbol, "action":"subscribe"};
+          send(JSON.stringify(req));
+        });
+      });
+      $(document).ready(function() {
+        $("#unsubscribe").click(function() {
+          var symbol = $("#symbol").val();                                                                                            
+          var req = {"endpoint":"/quotes", "symbol":symbol, "action":"unsubscribe"};
+          send(JSON.stringify(req));
+        });
+      });
+   <script>
+
+  <body>
+      Symbol:<input type="text" id="symbol" value="AAPL" size="4" />
+      <input type="button" id="subscribe" value="Subscribe"/>
+      <input type="button" id="unsubscribe" value="Unsubscribe"/>
+    </form>
+
+    <br>
+
+    <table id="quotes" class="quote" width="600" border="2" cellpadding="0" cellspacing="3">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Company</th>
+          <th>Last</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="time"></td>
+          <td id="company"></td>
+          <td id="last"></td>
+          <td id="change"></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+```
+
 ## API Doc
 [Java Doc](http://bhatti.github.io/PlexService/javadoc/)
 
