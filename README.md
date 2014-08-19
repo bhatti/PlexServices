@@ -521,6 +521,7 @@ Here is a javascript client that subscribes to the streaming quotes:
    <script>
 
   <body>
+    <form>
       Symbol:<input type="text" id="symbol" value="AAPL" size="4" />
       <input type="button" id="subscribe" value="Subscribe"/>
       <input type="button" id="unsubscribe" value="Unsubscribe"/>
