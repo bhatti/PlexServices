@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseBuilder;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.jetty.HttpResponseBuilder;
 
 /**
  * This class sends reply back over JMS
@@ -43,4 +44,5 @@ public class JmsResponseBuilder extends AbstractResponseBuilder {
     public void addSessionId(String value) {
         properties.put(Constants.SESSION_ID, value);
     }
+
 }

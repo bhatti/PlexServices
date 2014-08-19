@@ -33,154 +33,154 @@ import com.plexobject.util.Configuration;
  *
  */
 public class ServiceRegistry implements ServiceGateway {
-	private static final Logger log = LoggerFactory
-	        .getLogger(ServiceRegistry.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(ServiceRegistry.class);
 
-	private final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
-	private boolean running;
-	private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    private final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
+    private boolean running;
+    private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
-	public ServiceRegistry(Configuration config,
-	        Collection<RequestHandler> services, RoleAuthorizer authorizer) {
-		this(getDefaultGateways(config, authorizer), services, authorizer);
-	}
+    public ServiceRegistry(Configuration config,
+            Collection<RequestHandler> services, RoleAuthorizer authorizer) {
+        this(getDefaultGateways(config, authorizer), services, authorizer);
+    }
 
-	public ServiceRegistry(
-	        Map<ServiceConfig.GatewayType, ServiceGateway> gateways,
-	        Collection<RequestHandler> services, RoleAuthorizer authorizer) {
-		this.gateways.putAll(gateways);
-		for (RequestHandler handler : services) {
-			add(handler);
-		}
-	}
+    public ServiceRegistry(
+            Map<ServiceConfig.GatewayType, ServiceGateway> gateways,
+            Collection<RequestHandler> services, RoleAuthorizer authorizer) {
+        this.gateways.putAll(gateways);
+        for (RequestHandler handler : services) {
+            add(handler);
+        }
+    }
 
-	@Override
-	public synchronized boolean isRunning() {
-		return running;
-	}
+    @Override
+    public synchronized boolean isRunning() {
+        return running;
+    }
 
-	@Override
-	public synchronized void add(RequestHandler h) {
-		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
-		Objects.requireNonNull(config, "service handler " + h
-		        + " doesn't define ServiceConfig annotation");
-		ServiceGateway gateway = gateways.get(config.gateway());
-		Objects.requireNonNull(gateway,
-		        "Unsupported gateway for service handler " + h);
-		if (!gateway.exists(h)) {
-			registerMetricsJMX(h);
-			registerServiceHandlerLifecycle(h);
-			gateway.add(h);
-		}
-	}
+    @Override
+    public synchronized void add(RequestHandler h) {
+        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+        Objects.requireNonNull(config, "service handler " + h
+                + " doesn't define ServiceConfig annotation");
+        ServiceGateway gateway = gateways.get(config.gateway());
+        Objects.requireNonNull(gateway,
+                "Unsupported gateway for service handler " + h);
+        if (!gateway.exists(h)) {
+            registerMetricsJMX(h);
+            registerServiceHandlerLifecycle(h);
+            gateway.add(h);
+        }
+    }
 
-	private void registerServiceHandlerLifecycle(RequestHandler h) {
-		String objName = getPackageName(h) + h.getClass().getSimpleName()
-		        + ":type=Lifecycle";
-		try {
-			mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
-			        new ObjectName(objName));
-		} catch (InstanceAlreadyExistsException e) {
-		} catch (Exception e) {
-			log.error("Could not register mbean " + objName, e);
-		}
-	}
+    private void registerServiceHandlerLifecycle(RequestHandler h) {
+        String objName = getPackageName(h) + h.getClass().getSimpleName()
+                + ":type=Lifecycle";
+        try {
+            mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
+                    new ObjectName(objName));
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (Exception e) {
+            log.error("Could not register mbean " + objName, e);
+        }
+    }
 
-	private static String getPackageName(RequestHandler h) {
-		return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
-		        + ".";
-	}
+    private static String getPackageName(RequestHandler h) {
+        return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
+                + ".";
+    }
 
-	private void registerMetricsJMX(RequestHandler h) {
-		String objName = getPackageName(h) + h.getClass().getSimpleName()
-		        + ":type=Metrics";
-		ServiceMetrics metrics = ServiceMetricsRegistry.getInstance()
-		        .getServiceMetrics(h.getClass());
-		try {
-			mbs.registerMBean(metrics, new ObjectName(objName));
-		} catch (InstanceAlreadyExistsException e) {
-		} catch (Exception e) {
-			log.error("Could not register mbean " + objName, e);
-		}
-	}
+    private void registerMetricsJMX(RequestHandler h) {
+        String objName = getPackageName(h) + h.getClass().getSimpleName()
+                + ":type=Metrics";
+        ServiceMetrics metrics = ServiceMetricsRegistry.getInstance()
+                .getServiceMetrics(h.getClass());
+        try {
+            mbs.registerMBean(metrics, new ObjectName(objName));
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (Exception e) {
+            log.error("Could not register mbean " + objName, e);
+        }
+    }
 
-	@Override
-	public synchronized boolean remove(RequestHandler h) {
-		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
-		Objects.requireNonNull(config, "config" + h
-		        + " doesn't define ServiceConfig annotation");
-		ServiceGateway gateway = gateways.get(config.gateway());
-		if (gateway == null) {
-			return false;
-		}
-		return gateway.remove(h);
-	}
+    @Override
+    public synchronized boolean remove(RequestHandler h) {
+        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+        Objects.requireNonNull(config, "config" + h
+                + " doesn't define ServiceConfig annotation");
+        ServiceGateway gateway = gateways.get(config.gateway());
+        if (gateway == null) {
+            return false;
+        }
+        return gateway.remove(h);
+    }
 
-	@Override
-	public boolean exists(RequestHandler h) {
-		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
-		Objects.requireNonNull(config, "config" + h
-		        + " doesn't define ServiceConfig annotation");
-		ServiceGateway gateway = gateways.get(config.gateway());
-		if (gateway == null) {
-			return false;
-		}
-		return gateway.exists(h);
-	}
+    @Override
+    public boolean exists(RequestHandler h) {
+        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+        Objects.requireNonNull(config, "config" + h
+                + " doesn't define ServiceConfig annotation");
+        ServiceGateway gateway = gateways.get(config.gateway());
+        if (gateway == null) {
+            return false;
+        }
+        return gateway.exists(h);
+    }
 
-	@Override
-	public synchronized Collection<RequestHandler> getHandlers() {
-		Collection<RequestHandler> handlers = new ArrayList<>();
-		for (ServiceGateway g : gateways.values()) {
-			handlers.addAll(g.getHandlers());
-		}
-		return handlers;
-	}
+    @Override
+    public synchronized Collection<RequestHandler> getHandlers() {
+        Collection<RequestHandler> handlers = new ArrayList<>();
+        for (ServiceGateway g : gateways.values()) {
+            handlers.addAll(g.getHandlers());
+        }
+        return handlers;
+    }
 
-	private static Map<ServiceConfig.GatewayType, ServiceGateway> getDefaultGateways(
-	        Configuration config, RoleAuthorizer authorizer) {
-		final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
-		try {
-			gateways.put(
-			        ServiceConfig.GatewayType.HTTP,
-			        new HttpServiceGateway(
-			                config,
-			                authorizer,
-			                new ConcurrentHashMap<Method, PathsLookup<RequestHandler>>()));
-			gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
-			        config, authorizer));
-			gateways.put(
-			        ServiceConfig.GatewayType.WEBSOCKET,
-			        new WebsocketServiceGateway(
-			                config,
-			                authorizer,
-			                new ConcurrentHashMap<Method, PathsLookup<RequestHandler>>()));
-			return gateways;
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to add gateways", e);
-		}
-	}
+    private static Map<ServiceConfig.GatewayType, ServiceGateway> getDefaultGateways(
+            Configuration config, RoleAuthorizer authorizer) {
+        final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
+        try {
+            gateways.put(
+                    ServiceConfig.GatewayType.HTTP,
+                    new HttpServiceGateway(
+                            config,
+                            authorizer,
+                            new ConcurrentHashMap<Method, PathsLookup<RequestHandler>>()));
+            gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
+                    config, authorizer));
+            gateways.put(
+                    ServiceConfig.GatewayType.WEBSOCKET,
+                    new WebsocketServiceGateway(
+                            config,
+                            authorizer,
+                            new ConcurrentHashMap<Method, PathsLookup<RequestHandler>>()));
+            return gateways;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add gateways", e);
+        }
+    }
 
-	@Override
-	public synchronized void start() {
-		for (ServiceGateway g : gateways.values()) {
-			if (g.getHandlers().size() > 0) {
-				g.start();
-			}
-		}
-		running = true;
-	}
+    @Override
+    public synchronized void start() {
+        for (ServiceGateway g : gateways.values()) {
+            if (g.getHandlers().size() > 0) {
+                g.start();
+            }
+        }
+        running = true;
+    }
 
-	@Override
-	public synchronized void stop() {
-		for (ServiceGateway g : gateways.values()) {
-			if (g.getHandlers().size() > 0) {
-				g.stop();
-			}
-		}
-		running = false;
-	}
+    @Override
+    public synchronized void stop() {
+        for (ServiceGateway g : gateways.values()) {
+            if (g.getHandlers().size() > 0) {
+                g.stop();
+            }
+        }
+        running = false;
+    }
 
 }

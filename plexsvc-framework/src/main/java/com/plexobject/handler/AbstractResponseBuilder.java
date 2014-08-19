@@ -40,12 +40,11 @@ public abstract class AbstractResponseBuilder implements ResponseDispatcher {
         return this;
     }
 
-    public final void send(Object payload) {
+    public void send(Object payload) {
         String sessionId = (String) properties.get(Constants.SESSION_ID);
         if (sessionId != null) {
             addSessionId(sessionId);
         }
-
         String replyText = null;
         if (payload instanceof Exception) {
             log.warn("Error received " + payload, payload);
@@ -67,7 +66,9 @@ public abstract class AbstractResponseBuilder implements ResponseDispatcher {
         doSend(replyText);
     }
 
-    protected abstract void doSend(String payload);
+    protected void doSend(String payload) {
+
+    }
 
     public abstract void addSessionId(String value);
 
@@ -87,4 +88,31 @@ public abstract class AbstractResponseBuilder implements ResponseDispatcher {
         return status;
     }
 
+    @Override
+    public int hashCode() {
+        String sessionId = (String) properties.get(Constants.SESSION_ID);
+        if (sessionId != null) {
+            sessionId.hashCode();
+        }
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractResponseBuilder other = (AbstractResponseBuilder) obj;
+
+        String sessionId = (String) properties.get(Constants.SESSION_ID);
+        String otherSessionId = (String) other.properties
+                .get(Constants.SESSION_ID);
+        if (sessionId != null && otherSessionId != null) {
+            return sessionId.equals(otherSessionId);
+        }
+        return false;
+    }
 }

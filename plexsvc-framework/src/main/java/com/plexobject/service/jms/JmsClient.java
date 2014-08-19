@@ -1,5 +1,6 @@
 package com.plexobject.service.jms;
 
+import java.io.Closeable;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -159,9 +160,10 @@ public class JmsClient implements Lifecycle {
         }
     }
 
-    public MessageConsumer sendReceive(final String destName,
+    public void sendReceive(final String destName,
             final Map<String, Object> headers, final String payload,
-            final Handler<Response> handler) throws JMSException,
+            final Handler<Response> handler, final boolean singleUseOnly,
+            final Handler<Exception> exceptionHandler) throws JMSException,
             NamingException {
         Destination destination = getDestination(destName);
         Message reqMsg = currentJmsSession().createTextMessage(payload);
@@ -169,6 +171,21 @@ public class JmsClient implements Lifecycle {
         final TemporaryQueue replyTo = currentJmsSession()
                 .createTemporaryQueue();
         final MessageConsumer consumer = createConsumer(replyTo);
+        final Closeable closeable = new Closeable() {
+            @Override
+            public void close() {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    log.warn("Failed to close", e);
+                }
+                try {
+                    replyTo.delete();
+                } catch (Exception e) {
+                    log.warn("Failed to delete temp queue", e);
+                }
+            }
+        };
         final MessageListener listener = new MessageListener() {
             @Override
             public void onMessage(Message message) {
@@ -182,18 +199,22 @@ public class JmsClient implements Lifecycle {
                             + headers);
                     final Response response = new Response(params, text);
                     handler.handle(response);
+                    if (singleUseOnly) {
+                        try {
+                            closeable.close();
+                        } catch (Exception e) {
+                            log.warn("Failed to close", e);
+                        }
+                    }
                 } catch (Exception e) {
                     log.error("Failed to forward message " + message, e);
-                } finally {
                     try {
-                        consumer.close();
-                    } catch (JMSException e) {
-                        log.warn("Failed to close", e);
+                        closeable.close();
+                    } catch (Exception ex) {
+                        log.warn("Failed to close", ex);
                     }
-                    try {
-                        replyTo.delete();
-                    } catch (Exception e) {
-                        log.warn("Failed to delete temp queue", e);
+                    if (exceptionHandler != null) {
+                        exceptionHandler.handle(e);
                     }
                 }
             }
@@ -203,7 +224,6 @@ public class JmsClient implements Lifecycle {
         createProducer(destination).send(reqMsg);
         log.info("Sent '" + payload + "' to " + destination + ", headers "
                 + headers);
-        return consumer;
     }
 
     private void setHeaders(final Map<String, Object> headers, Message reqMsg)
@@ -345,4 +365,5 @@ public class JmsClient implements Lifecycle {
         }
         return currentSession.get();
     }
+
 }

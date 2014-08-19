@@ -15,62 +15,56 @@ import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.util.Configuration;
 
 public class WebsocketServiceGateway extends AbstractHttpServiceGateway {
-	public static class WebsocketConfigCreator implements WebSocketCreator {
-		private final RoleAuthorizer authorizer;
-		private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
-		private final CodecType codecType;
+    public static class WebsocketConfigCreator implements WebSocketCreator {
+        private final RoleAuthorizer authorizer;
+        private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
+        private final CodecType codecType;
 
-		private WebsocketConfigCreator(
-		        RoleAuthorizer authorizer,
-		        final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod,
-		        final CodecType codecType) {
-			this.authorizer = authorizer;
-			this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
-			this.codecType = codecType;
-		}
+        private WebsocketConfigCreator(
+                RoleAuthorizer authorizer,
+                final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod,
+                final CodecType codecType) {
+            this.authorizer = authorizer;
+            this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
+            this.codecType = codecType;
+        }
 
-		@Override
-		public Object createWebSocket(ServletUpgradeRequest req,
-		        ServletUpgradeResponse resp) {
-			for (String subprotocol : req.getSubProtocols()) {
-				if ("text".equals(subprotocol)) { // "binary"
-					resp.setAcceptedSubProtocol(subprotocol);
-					return new WebsocketRequestHandler(authorizer,
-					        requestHandlerPathsByMethod, codecType);
-				}
-			}
-			return null;
-		}
-	}
+        @Override
+        public Object createWebSocket(ServletUpgradeRequest req,
+                ServletUpgradeResponse resp) {
+            return new WebsocketRequestHandler(authorizer,
+                    requestHandlerPathsByMethod, codecType);
+        }
+    }
 
-	public static class WebsocketConfigHandler extends WebSocketHandler {
-		private final RoleAuthorizer authorizer;
-		private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
-		private final CodecType codecType;
+    public static class WebsocketConfigHandler extends WebSocketHandler {
+        private final RoleAuthorizer authorizer;
+        private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
+        private final CodecType codecType;
 
-		private WebsocketConfigHandler(
-		        RoleAuthorizer authorizer,
-		        final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod,
-		        final CodecType codecType) {
-			this.authorizer = authorizer;
-			this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
-			this.codecType = codecType;
-		}
+        private WebsocketConfigHandler(
+                RoleAuthorizer authorizer,
+                final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod,
+                final CodecType codecType) {
+            this.authorizer = authorizer;
+            this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
+            this.codecType = codecType;
+        }
 
-		@Override
-		public void configure(WebSocketServletFactory factory) {
-			factory.setCreator(new WebsocketConfigCreator(authorizer,
-			        requestHandlerPathsByMethod, codecType));
-			// factory.register(WebsocketRequestHandler.class);
-		}
-	}
+        @Override
+        public void configure(WebSocketServletFactory factory) {
+            factory.setCreator(new WebsocketConfigCreator(authorizer,
+                    requestHandlerPathsByMethod, codecType));
+            // factory.register(WebsocketRequestHandler.class);
+        }
+    }
 
-	public WebsocketServiceGateway(
-	        final Configuration config,
-	        final RoleAuthorizer authorizer,
-	        final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod) {
-		super(config, authorizer, new WebsocketConfigHandler(authorizer,
-		        requestHandlerPathsByMethod, config.getDefaultCodecType()),
-		        requestHandlerPathsByMethod);
-	}
+    public WebsocketServiceGateway(
+            final Configuration config,
+            final RoleAuthorizer authorizer,
+            final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod) {
+        super(config, authorizer, new WebsocketConfigHandler(authorizer,
+                requestHandlerPathsByMethod, config.getDefaultCodecType()),
+                requestHandlerPathsByMethod);
+    }
 }

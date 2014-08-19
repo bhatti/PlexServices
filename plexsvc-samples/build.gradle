@@ -1,8 +1,8 @@
 sourceCompatibility = '1.7'
 
 apply plugin: 'application'
-
 mainClassName = 'com.plexobject.bugger.Main'
+
 
 //rootProject.name = 'plexsvc-framework'
 
@@ -30,6 +30,31 @@ run {
     "com.sun.management.jmxremote.port":"9191",
   ]
 }
+
+task bugger(type:JavaExec) {
+  main = 'com.plexobject.bugger.Main'
+  classpath = sourceSets.main.runtimeClasspath
+  //args project.args.split('\\s+')
+  args "bugger.properties,http_jms_services_mapping.json".split(",")
+  systemProperties = [
+    "com.sun.management.jmxremote.ssl":"false",
+    "com.sun.management.jmxremote.authenticate":"false",
+    "com.sun.management.jmxremote.port":"9191",
+  ]
+}
+
+task quote(type:JavaExec) {
+  main = 'com.plexobject.stock.QuoteServer'
+  classpath = sourceSets.main.runtimeClasspath
+  //args project.args.split('\\s+')
+  args "bugger.properties,http_jms_services_mapping.json".split(",")
+  systemProperties = [
+    "com.sun.management.jmxremote.ssl":"false",
+    "com.sun.management.jmxremote.authenticate":"false",
+    "com.sun.management.jmxremote.port":"9191",
+  ]
+}
+
 
 
 jar {

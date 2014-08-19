@@ -52,8 +52,7 @@ def remove_member(l):
 
 
 class LoadTestTask(TaskSet):
-  #tasks = [login, query_users, add_user, delete_user, add_project, update_project, query_projects, query_project_bugreports, query_bugreports, assign_bugreport, add_member, remove_member]
-  tasks = [login]
+  tasks = [login, query_users, add_user, delete_user, add_project, update_project, query_projects, query_project_bugreports, query_bugreports, assign_bugreport, add_member, remove_member]
 #  @task
 #  def page404(self):
 #    self.client.get("/does_not_exist") 

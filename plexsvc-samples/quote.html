@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="jquery.min.js"></script>
+    <h1>WebSocket client</h1>
+    <script>
+      var ws = new WebSocket("ws://127.0.0.1:8181/quotes");
+      ws.onopen = function() {
+      };
+      var lasts = {};
+      ws.onmessage = function (evt) {
+        //console.log(evt.data);
+        var quote = JSON.parse(evt.data).payload;
+        var d = new Date(quote.timestamp);
+        var day = d.getDay();
+        var mon = d.getMonth() + 1; //Months are zero based
+        var yr = d.getFullYear();
+        var hr = d.getHours();
+        var mn = d.getMinutes();
+        var sc = d.getSeconds();
+
+        $('#time').text(mon + '/' + day + '/' + yr + ' ' + hr + ':' + mn + ':' + sc);
+        $('#company').text(quote.company);
+        $('#last').text(quote.last.toFixed(2));
+        var prev = lasts[quote.company];
+        if (prev != undefined) {
+          var change = quote.last - prev;
+          if (change >= 0) {
+            $('#change').css({'background-color':'green'});
+          } else {
+            $('#change').css({'background-color':'red'});
+          }
+          $('#change').text(change.toFixed(2));
+
+        } else {
+          $('#change').text('N/A');
+        }
+        lasts[quote.company] = quote.last;
+      };
+
+      ws.onclose = function() {
+      };
+
+      ws.onerror = function(err) {
+      };
+
+      function send(payload) {
+        $('#input').text(payload);
+        ws.send(payload);
+      }
+      $(document).ready(function() {
+        $("#subscribe").click(function() {
+          var symbol = $("#symbol").val();
+          var req = {"endpoint":"/quotes", "symbol":symbol, "action":"subscribe"};
+          send(JSON.stringify(req));
+        });
+      });
+      $(document).ready(function() {
+        $("#unsubscribe").click(function() {
+          var symbol = $("#symbol").val();
+          var req = {"endpoint":"/quotes", "symbol":symbol, "action":"unsubscribe"};
+          send(JSON.stringify(req));
+        });
+      });
+
+    </script>
+  </head>
+  <body>
+    <form onsubmit="return false;">
+      Symbol:<input type="text" id="symbol" value="AAPL" size="4" />
+      <input type="button" id="subscribe" value="Subscribe"/>
+      <input type="button" id="unsubscribe" value="Unsubscribe"/>
+    </form>
+
+    <br>
+
+    <table id="quotes" class="quote" width="600" border="2" cellpadding="0" cellspacing="3">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Company</th>
+          <th>Last</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="time"></td>
+          <td id="company"></td>
+          <td id="last"></td>
+          <td id="change"></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
