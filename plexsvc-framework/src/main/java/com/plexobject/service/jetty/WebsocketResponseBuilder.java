@@ -52,12 +52,7 @@ public class WebsocketResponseBuilder extends AbstractResponseBuilder {
 
     @Override
     public int hashCode() {
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        if (sessionId != null) {
-            sessionId.hashCode();
-        }
-        String host = session.getRemoteAddress().getHostName();
-        return host.hashCode();
+        return session.getRemote().hashCode();
     }
 
     @Override
@@ -69,24 +64,12 @@ public class WebsocketResponseBuilder extends AbstractResponseBuilder {
         if (getClass() != obj.getClass())
             return false;
         WebsocketResponseBuilder other = (WebsocketResponseBuilder) obj;
-
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        String otherSessionId = (String) other.properties
-                .get(Constants.SESSION_ID);
-        if (sessionId != null && otherSessionId != null) {
-            return sessionId.equals(otherSessionId);
-        }
-        String host = session.getRemoteAddress().getHostName();
-        String otherHost = other.session.getRemoteAddress().getHostName();
-        if (host != null && otherHost != null) {
-            return host.equals(otherHost);
-        }
-        return false;
+        return session.getRemote().equals(other.session.getRemote());
     }
 
     @Override
     public String toString() {
-        return "WebsocketResponse " + session.getRemoteAddress().getHostName();
+        return "WebsocketResponse " + session.getRemote();
     }
 
 }

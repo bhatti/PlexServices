@@ -34,14 +34,18 @@ public class QuoteCache {
         try {
             quote.setSymbol(symbol);
             URL url = new URL(
-                    "http://download.finance.yahoo.com/d/quotes.csv?s=GOOG&f=nsl1op");
+                    "http://download.finance.yahoo.com/d/quotes.csv?s="
+                            + symbol + "&f=nsl1op");
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     url.openStream()));
-            String[] toks = in.readLine().replaceAll("\"", "").split(",");
-            quote.setCompany(toks[0]);
-            quote.setLast(Float.valueOf(toks[2]));
-            quote.setOpen(Float.valueOf(toks[3]));
-            quote.setClose(Float.valueOf(toks[4]));
+            String line = in.readLine();
+            String company = line.substring(1, line.indexOf("\",\""));
+            String[] priceToks = line.substring(line.lastIndexOf("\",") + 2)
+                    .split(",");
+            quote.setCompany(company);
+            quote.setLast(Float.valueOf(priceToks[0]));
+            quote.setOpen(Float.valueOf(priceToks[1]));
+            quote.setClose(Float.valueOf(priceToks[2]));
         } catch (IOException e) {
             log.error("Failed to lookup " + symbol, e);
             quote.setCompany(symbol);
