@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.jetty.PathsLookup;
+import com.plexobject.service.route.RouteResolver;
 
 public class RequestHandlerPathsTest {
     private static class TestHandler implements RequestHandler {
@@ -58,7 +58,7 @@ public class RequestHandlerPathsTest {
         }
     }
 
-    PathsLookup<RequestHandler> requestHandlerPaths = new PathsLookup<>();
+    RouteResolver<RequestHandler> requestHandlerPaths = new RouteResolver<>();
 
     private static TestData[] TEST_DATA = {
             new TestData("/", "Root", "/"),

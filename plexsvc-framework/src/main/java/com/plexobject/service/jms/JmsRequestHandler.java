@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.AbstractResponseBuilder;
+import com.plexobject.handler.AbstractResponseDelegate;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
@@ -63,13 +63,13 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                     + params);
             String sessionId = (String) params.get(Constants.SESSION_ID);
             String remoteAddr = (String) params.get(Constants.REMOTE_ADDRESS);
-            AbstractResponseBuilder responseBuilder = new JmsResponseBuilder(
+            AbstractResponseDelegate responseBuilder = new JmsResponseBuilder(
                     config, jmsClient, message.getJMSReplyTo());
 
             new RequestBuilder(handler, roleAuthorizer).setPayload(text)
                     .setParameters(params).setSessionId(sessionId)
                     .setRemoteAddress(remoteAddr)
-                    .setResponseBuilder(responseBuilder).invoke();
+                    .setResponseDispatcher(responseBuilder).invoke();
         } catch (JMSException e) {
             log.error("Failed to handle request", e);
         }

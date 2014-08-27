@@ -1,43 +1,38 @@
-package com.plexobject.service.jetty;
+package com.plexobject.service.http;
 
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
-import com.plexobject.handler.AbstractResponseBuilder;
+import com.plexobject.handler.AbstractResponseDelegate;
 
 /**
- * This class replies object using http protocol
+ * This class sends response using implementation of http-response
  * 
  * @author shahzad bhatti
  *
  */
-public class HttpResponseBuilder extends AbstractResponseBuilder {
+public class HttpResponseDelegate extends AbstractResponseDelegate {
     private static final Logger log = LoggerFactory
-            .getLogger(HttpResponseBuilder.class);
+            .getLogger(HttpResponseDelegate.class);
 
-    private final Request baseRequest;
-    private final HttpServletResponse response;
+    private final Handledable handledable;
+    private final HttpResponse response;
 
-    public HttpResponseBuilder(final CodecType codecType,
-            final Request baseRequest, final HttpServletResponse response) {
+    public HttpResponseDelegate(final CodecType codecType,
+            final Handledable handledable, final HttpResponse response) {
         super(codecType);
-        this.baseRequest = baseRequest;
+        this.handledable = handledable;
         this.response = response;
     }
 
     public void addSessionId(String value) {
         properties.put(Constants.SESSION_ID, value);
-        response.addCookie(new Cookie(Constants.SESSION_ID, value));
+        response.addCookie(Constants.SESSION_ID, value);
     }
 
     protected void doSend(String payload) {
@@ -61,30 +56,11 @@ public class HttpResponseBuilder extends AbstractResponseBuilder {
                 }
             }
 
-            response.getWriter().println(payload);
-            baseRequest.setHandled(true);
-
+            response.send(payload);
+            handledable.setHandled(true);
         } catch (Exception e) {
             log.error("Failed to write " + payload + ", " + this, e);
         }
-    }
-
-    @Override
-    public String toString() {
-        return toString(baseRequest);
-    }
-
-    public static String toString(HttpServletRequest request) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Method:" + request.getMethod());
-        sb.append(", Path:" + request.getPathInfo());
-        sb.append(", Host:" + request.getRemoteHost());
-        for (Map.Entry<String, String[]> e : request.getParameterMap()
-                .entrySet()) {
-            sb.append(", " + e.getKey() + " -> " + e.getValue()[0]);
-
-        }
-        return sb.toString();
     }
 
     private void redirect(String location) {

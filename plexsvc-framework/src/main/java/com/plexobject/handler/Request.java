@@ -40,7 +40,7 @@ public class Request extends AbstractPayload {
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
-	public <T extends AbstractResponseBuilder> T getResponseBuilder() {
+	public <T extends AbstractResponseDelegate> T getResponseBuilder() {
 		return (T) responseBuilder;
 	}
 

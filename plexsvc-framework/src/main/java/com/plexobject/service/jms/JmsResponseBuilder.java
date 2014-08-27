@@ -6,9 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
-import com.plexobject.handler.AbstractResponseBuilder;
+import com.plexobject.handler.AbstractResponseDelegate;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.jetty.HttpResponseBuilder;
 
 /**
  * This class sends reply back over JMS
@@ -16,7 +15,7 @@ import com.plexobject.service.jetty.HttpResponseBuilder;
  * @author shahzad bhatti
  *
  */
-public class JmsResponseBuilder extends AbstractResponseBuilder {
+public class JmsResponseBuilder extends AbstractResponseDelegate {
     private static final Logger log = LoggerFactory
             .getLogger(JmsResponseBuilder.class);
     private final JmsClient jmsClient;

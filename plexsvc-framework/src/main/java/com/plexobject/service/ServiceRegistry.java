@@ -21,9 +21,9 @@ import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.jetty.HttpServiceGateway;
-import com.plexobject.service.jetty.PathsLookup;
 import com.plexobject.service.jetty.WebsocketServiceGateway;
 import com.plexobject.service.jms.JmsServiceGateway;
+import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 
 /**
@@ -146,7 +146,7 @@ public class ServiceRegistry implements ServiceGateway {
                     new HttpServiceGateway(
                             config,
                             authorizer,
-                            new ConcurrentHashMap<Method, PathsLookup<RequestHandler>>()));
+                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
             gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
                     config, authorizer));
             gateways.put(
@@ -154,7 +154,7 @@ public class ServiceRegistry implements ServiceGateway {
                     new WebsocketServiceGateway(
                             config,
                             authorizer,
-                            new ConcurrentHashMap<Method, PathsLookup<RequestHandler>>()));
+                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
             return gateways;
         } catch (RuntimeException e) {
             throw e;

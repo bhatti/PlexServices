@@ -30,10 +30,11 @@ import com.plexobject.util.Configuration;
  * @author shahzad bhatti
  *
  */
-public class HttpServer implements Lifecycle {
+public class JettyHttpServer implements Lifecycle {
     private static final String HTTP_THREADS_COUNT = "httpThreadsCount";
 
-    private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(JettyHttpServer.class);
 
     private static final String HTTPS_TIMEOUT_SECS = "httpsTimeoutSecs";
     private static final String KEYSTORE_MANAGER_PASSWORD = "keystoreManagerPassword";
@@ -48,7 +49,7 @@ public class HttpServer implements Lifecycle {
     private final Server server;
     private boolean running;
 
-    public HttpServer(Configuration config, Handler handler) {
+    public JettyHttpServer(Configuration config, Handler handler) {
         QueuedThreadPool threadPool = new QueuedThreadPool();
         threadPool.setMaxThreads(config.getInteger(HTTP_THREADS_COUNT, 500));
         server = new Server();
@@ -162,6 +163,19 @@ public class HttpServer implements Lifecycle {
             params.put(e.getKey(), e.getValue()[0]);
         }
         return params;
+    }
+
+    public static String toString(HttpServletRequest request) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Method:" + request.getMethod());
+        sb.append(", Path:" + request.getPathInfo());
+        sb.append(", Host:" + request.getRemoteHost());
+        for (Map.Entry<String, String[]> e : request.getParameterMap()
+                .entrySet()) {
+            sb.append(", " + e.getKey() + " -> " + e.getValue()[0]);
+
+        }
+        return sb.toString();
     }
 
 }

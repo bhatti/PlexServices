@@ -13,13 +13,14 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
-import com.plexobject.handler.AbstractResponseBuilder;
+import com.plexobject.handler.AbstractResponseDelegate;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.route.RouteResolver;
 
 /**
  * This class implements websocket handler for incoming web requests
@@ -28,17 +29,17 @@ import com.plexobject.service.ServiceConfig.Method;
  *
  */
 @WebSocket
-public class WebsocketRequestHandler {
+class WebsocketRequestHandler {
     private static final Logger log = LoggerFactory
             .getLogger(WebsocketRequestHandler.class);
 
     private RoleAuthorizer roleAuthorizer;
-    private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
+    private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
     private final ObjectCodec codec;
 
     public WebsocketRequestHandler(
             final RoleAuthorizer roleAuthorizer,
-            final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod,
+            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,
             final CodecType codecType) {
         this.roleAuthorizer = roleAuthorizer;
         this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
@@ -57,7 +58,7 @@ public class WebsocketRequestHandler {
             return;
         }
         //
-        PathsLookup<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
+        RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
                 .get(Method.MESSAGE);
         RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
                 .get(endpoint, params) : null;
@@ -73,11 +74,11 @@ public class WebsocketRequestHandler {
         ServiceConfig config = handler.getClass().getAnnotation(
                 ServiceConfig.class);
 
-        AbstractResponseBuilder responseBuilder = new WebsocketResponseBuilder(
+        AbstractResponseDelegate responseBuilder = new WebsocketResponseDelegate(
                 config.codec(), session);
         new RequestBuilder(handler, roleAuthorizer).setPayload(textPayload)
                 .setParameters(params).setSessionId(rawRequest.getSessionId())
                 .setRemoteAddress(session.getRemoteAddress().getHostName())
-                .setResponseBuilder(responseBuilder).invoke();
+                .setResponseDispatcher(responseBuilder).invoke();
     }
 }

@@ -1,4 +1,4 @@
-package com.plexobject.service.jetty;
+package com.plexobject.service.route;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @param <T>
  */
-public class PathsLookup<T> {
+public class RouteResolver<T> {
     private static class Node<T> {
         private final String pathFragment;
         private final String parameter;

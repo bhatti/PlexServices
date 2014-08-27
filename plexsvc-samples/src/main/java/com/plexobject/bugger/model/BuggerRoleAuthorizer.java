@@ -1,10 +1,10 @@
 package com.plexobject.bugger.model;
 
 import com.plexobject.bugger.repository.UserRepository;
-import com.plexobject.domain.Constants;
 import com.plexobject.handler.Request;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.http.HttpResponse;
 
 public class BuggerRoleAuthorizer implements RoleAuthorizer {
     private final UserRepository userRepository;
@@ -21,13 +21,13 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
-            throw new AuthException(Constants.SC_UNAUTHORIZED,
+            throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
                     request.getSessionId(), request.getRemoteAddress(),
                     "failed to validate session-id");
         }
         for (String role : roles) {
             if (!user.getRoles().contains(role)) {
-                throw new AuthException(Constants.SC_UNAUTHORIZED,
+                throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
                         request.getSessionId(), request.getRemoteAddress(),
                         "failed to match role");
             }

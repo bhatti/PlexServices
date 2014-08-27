@@ -35,15 +35,16 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.encode.json.JsonObjectCodec;
-import com.plexobject.handler.AbstractResponseBuilder;
+import com.plexobject.handler.AbstractResponseDelegate;
 import com.plexobject.handler.Response;
 import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.jetty.HttpResponseBuilder;
-import com.plexobject.service.jetty.HttpServer;
-import com.plexobject.service.jetty.PathsLookup;
-import com.plexobject.service.jetty.WebsocketResponseBuilder;
+import com.plexobject.service.http.HttpResponse;
+import com.plexobject.service.jetty.JettyHttpServer;
+import com.plexobject.service.jetty.JettyResponseDelegate;
+import com.plexobject.service.jetty.WebsocketResponseDelegate;
 import com.plexobject.service.jms.JmsClient;
+import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
@@ -60,12 +61,12 @@ public class WebToJmsBridge {
 
     public static class WebsocketConfigCreator implements WebSocketCreator {
         private final JmsClient jmsClient;
-        private final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod;
+        private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod;
         private final CodecType codecType;
 
         public WebsocketConfigCreator(
                 final JmsClient jmsClient,
-                final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod,
+                final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod,
                 final CodecType codecType) {
             this.jmsClient = jmsClient;
             this.entriesPathsByMethod = entriesPathsByMethod;
@@ -97,12 +98,12 @@ public class WebToJmsBridge {
 
     public static class WebsocketConfigHandler extends WebSocketHandler {
         private final JmsClient jmsClient;
-        private final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod;
+        private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod;
         private final CodecType codecType;
 
         private WebsocketConfigHandler(
                 final JmsClient jmsClient,
-                final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod,
+                final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod,
                 final CodecType codecType) {
             this.jmsClient = jmsClient;
             this.entriesPathsByMethod = entriesPathsByMethod;
@@ -120,12 +121,12 @@ public class WebToJmsBridge {
     @WebSocket
     public static class WebsocketForwardHandler {
         private final JmsClient jmsClient;
-        private final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod;
+        private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod;
         private final ObjectCodec codec;
 
         private WebsocketForwardHandler(
                 final JmsClient jmsClient,
-                final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod,
+                final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod,
                 final CodecType codecType) {
             this.jmsClient = jmsClient;
             this.entriesPathsByMethod = entriesPathsByMethod;
@@ -151,7 +152,7 @@ public class WebToJmsBridge {
                     log.error("Unknown request without method " + jsonMsg);
                     return;
                 }
-                PathsLookup<WebToJmsEntry> entryPaths = entriesPathsByMethod
+                RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
                         .get(Method.valueOf(method.toUpperCase()));
                 final WebToJmsEntry entry = entryPaths != null ? entryPaths
                         .get(endpoint, params) : null;
@@ -182,15 +183,16 @@ public class WebToJmsBridge {
                                 @Override
                                 public void handle(Response reply) {
                                     try {
-                                        AbstractResponseBuilder responseBuilder = new WebsocketResponseBuilder(
+                                        AbstractResponseDelegate responseBuilder = new WebsocketResponseDelegate(
                                                 CodecType.TEXT, session);
                                         responseBuilder.send(reply);
                                         log.info("Replying back " + entry
                                                 + ", reply " + reply
                                                 + ", params " + params);
                                     } catch (Exception e) {
-                                        log.error("Could not send back websocket "
-                                                + reply, e);
+                                        log.error(
+                                                "Could not send back websocket "
+                                                        + reply, e);
                                     }
                                 }
 
@@ -204,12 +206,12 @@ public class WebToJmsBridge {
 
     public static class HttpForwarder extends AbstractHandler {
         private final JmsClient jmsClient;
-        private final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod;
+        private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod;
         private final CodecType codecType;
 
         private HttpForwarder(
                 final JmsClient jmsClient,
-                final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod,
+                final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod,
                 final CodecType codecType) {
             this.jmsClient = jmsClient;
             this.entriesPathsByMethod = entriesPathsByMethod;
@@ -222,9 +224,10 @@ public class WebToJmsBridge {
                 final HttpServletResponse response) throws IOException,
                 ServletException {
 
-            final Map<String, Object> params = HttpServer.getParams(request);
+            final Map<String, Object> params = JettyHttpServer
+                    .getParams(request);
 
-            PathsLookup<WebToJmsEntry> entryPaths = entriesPathsByMethod
+            RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
                     .get(Method.valueOf(request.getMethod()));
             final WebToJmsEntry entry = entryPaths != null ? entryPaths.get(
                     request.getPathInfo(), params) : null;
@@ -232,7 +235,7 @@ public class WebToJmsBridge {
             if (entry == null) {
                 log.warn("Unknown request received " + request.getMethod()
                         + " at " + request.getPathInfo() + " -> "
-                        + HttpServer.getParams(request));
+                        + JettyHttpServer.getParams(request));
                 return;
             }
             final String text = IOUtils.toString(request.getInputStream());
@@ -260,7 +263,7 @@ public class WebToJmsBridge {
                             @Override
                             public void handle(Response reply) {
                                 try {
-                                    AbstractResponseBuilder responseBuilder = new HttpResponseBuilder(
+                                    AbstractResponseDelegate responseBuilder = new JettyResponseDelegate(
                                             codecType, baseRequest, response);
                                     // async.dispatch();
                                     response.setContentType(codecType
@@ -277,7 +280,8 @@ public class WebToJmsBridge {
                                             + ", reply " + reply + ", params "
                                             + params);
                                 } catch (Exception e) {
-                                    log.error("Could not send back http " + reply, e);
+                                    log.error("Could not send back http "
+                                            + reply, e);
                                 } finally {
                                     completed(async);
                                 }
@@ -298,7 +302,7 @@ public class WebToJmsBridge {
 
         private void timeout(final Request baseRequest,
                 final HttpServletResponse response, final AsyncContext async) {
-            response.setStatus(Constants.SC_GATEWAY_TIMEOUT);
+            response.setStatus(HttpResponse.SC_GATEWAY_TIMEOUT);
             baseRequest.setHandled(true);
             try {
                 response.getWriter().println("timed out");
@@ -309,9 +313,9 @@ public class WebToJmsBridge {
         }
     }
 
-    private final HttpServer httpServer;
+    private final JettyHttpServer httpServer;
     private final JmsClient jmsClient;
-    private final Map<Method, PathsLookup<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
+    private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
 
     public WebToJmsBridge(Configuration config,
             Collection<WebToJmsEntry> entries, GatewayType gatewayType) {
@@ -331,13 +335,13 @@ public class WebToJmsBridge {
             throw new RuntimeException("Unsupported gateway type "
                     + gatewayType);
         }
-        this.httpServer = new HttpServer(config, handler);
+        this.httpServer = new JettyHttpServer(config, handler);
 
         for (WebToJmsEntry e : entries) {
-            PathsLookup<WebToJmsEntry> entryPaths = entriesPathsByMethod.get(e
-                    .getMethod());
+            RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
+                    .get(e.getMethod());
             if (entryPaths == null) {
-                entryPaths = new PathsLookup<WebToJmsEntry>();
+                entryPaths = new RouteResolver<WebToJmsEntry>();
                 entriesPathsByMethod.put(e.getMethod(), entryPaths);
             }
             if (entryPaths.get(e.getPath(), new HashMap<String, Object>()) != null) {

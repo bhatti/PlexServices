@@ -9,12 +9,13 @@ import com.plexobject.domain.Constants;
 import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
-import com.plexobject.handler.AbstractResponseBuilder;
+import com.plexobject.handler.AbstractResponseDelegate;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.metrics.Timing;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.http.HttpResponse;
 
 /**
  * This class builds remote request
@@ -31,7 +32,7 @@ public class RequestBuilder {
 	private Map<String, Object> params;
 	private String remoteAddress;
 	private String sessionId;
-	private AbstractResponseBuilder responseBuilder;
+	private AbstractResponseDelegate responseBuilder;
 
 	public RequestBuilder(RequestHandler handler, RoleAuthorizer roleAuthorizer) {
 		this.handler = handler;
@@ -58,8 +59,8 @@ public class RequestBuilder {
 		return this;
 	}
 
-	public RequestBuilder setResponseBuilder(
-	        AbstractResponseBuilder responseBuilder) {
+	public RequestBuilder setResponseDispatcher(
+	        AbstractResponseDelegate responseBuilder) {
 		this.responseBuilder = responseBuilder;
 		return this;
 	}
@@ -94,7 +95,7 @@ public class RequestBuilder {
 				handler.handle(handlerReq);
 				timing.endSuccess();
 			} catch (AuthException e) {
-				responseBuilder.setStatus(Constants.SC_UNAUTHORIZED);
+				responseBuilder.setStatus(HttpResponse.SC_UNAUTHORIZED);
 				if (e.getLocation() != null) {
 					responseBuilder.setProperty(Constants.LOCATION,
 					        e.getLocation());
@@ -102,11 +103,11 @@ public class RequestBuilder {
 				responseBuilder.send(e);
 				timing.endSuccess();
 			} catch (ValidationException e) {
-				responseBuilder.setStatus(Constants.SC_BAD_REQUEST);
+				responseBuilder.setStatus(HttpResponse.SC_BAD_REQUEST);
 				responseBuilder.send(e);
 				timing.endSuccess();
 			} catch (Exception e) {
-				responseBuilder.setStatus(Constants.SC_INTERNAL_SERVER_ERROR);
+				responseBuilder.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
 				responseBuilder.send(e);
 				timing.endSuccess();
 			}
@@ -114,7 +115,7 @@ public class RequestBuilder {
 			log.warn("Received Unknown request params " + params + ", payload "
 			        + payload);
 			responseBuilder.setCodecType(CodecType.HTML);
-			responseBuilder.setStatus(Constants.SC_NOT_FOUND);
+			responseBuilder.setStatus(HttpResponse.SC_NOT_FOUND);
 			responseBuilder.send("page not found");
 		}
 	}

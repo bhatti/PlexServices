@@ -12,17 +12,19 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.http.AbstractHttpServiceGateway;
+import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 
 public class WebsocketServiceGateway extends AbstractHttpServiceGateway {
     public static class WebsocketConfigCreator implements WebSocketCreator {
         private final RoleAuthorizer authorizer;
-        private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
+        private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
         private final CodecType codecType;
 
         private WebsocketConfigCreator(
                 RoleAuthorizer authorizer,
-                final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod,
+                final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,
                 final CodecType codecType) {
             this.authorizer = authorizer;
             this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
@@ -39,12 +41,12 @@ public class WebsocketServiceGateway extends AbstractHttpServiceGateway {
 
     public static class WebsocketConfigHandler extends WebSocketHandler {
         private final RoleAuthorizer authorizer;
-        private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
+        private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
         private final CodecType codecType;
 
         private WebsocketConfigHandler(
                 RoleAuthorizer authorizer,
-                final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod,
+                final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,
                 final CodecType codecType) {
             this.authorizer = authorizer;
             this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
@@ -62,9 +64,10 @@ public class WebsocketServiceGateway extends AbstractHttpServiceGateway {
     public WebsocketServiceGateway(
             final Configuration config,
             final RoleAuthorizer authorizer,
-            final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod) {
-        super(config, authorizer, new WebsocketConfigHandler(authorizer,
-                requestHandlerPathsByMethod, config.getDefaultCodecType()),
-                requestHandlerPathsByMethod);
+            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
+        super(config, authorizer, requestHandlerPathsByMethod,
+                new JettyHttpServer(config, new WebsocketConfigHandler(
+                        authorizer, requestHandlerPathsByMethod,
+                        config.getDefaultCodecType())));
     }
 }

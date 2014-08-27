@@ -14,12 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
-import com.plexobject.handler.AbstractResponseBuilder;
+import com.plexobject.handler.AbstractResponseDelegate;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.IOUtils;
 
 /**
@@ -32,13 +33,13 @@ import com.plexobject.util.IOUtils;
 class HttpRequestHandler extends AbstractHandler {
     private static final Logger log = LoggerFactory
             .getLogger(HttpRequestHandler.class);
-    private final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod;
+    private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
 
     private RoleAuthorizer roleAuthorizer;
 
     public HttpRequestHandler(
             RoleAuthorizer roleAuthorizer,
-            final Map<Method, PathsLookup<RequestHandler>> requestHandlerPathsByMethod) {
+            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
         this.roleAuthorizer = roleAuthorizer;
         this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
     }
@@ -47,27 +48,27 @@ class HttpRequestHandler extends AbstractHandler {
     public void handle(final String target, final Request baseRequest,
             final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
-        Map<String, Object> params = HttpServer.getParams(baseRequest);
+        Map<String, Object> params = JettyHttpServer.getParams(baseRequest);
 
-        PathsLookup<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
+        RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
                 .get(Method.valueOf(baseRequest.getMethod()));
         RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
                 .get(baseRequest.getPathInfo(), params) : null;
         if (handler == null) {
             log.error("Unknown request received "
-                    + HttpResponseBuilder.toString(request));
+                    + JettyHttpServer.toString(request));
             return;
         }
         ServiceConfig config = handler.getClass().getAnnotation(
                 ServiceConfig.class);
 
-        AbstractResponseBuilder responseBuilder = new HttpResponseBuilder(
+        AbstractResponseDelegate dispatcher = new JettyResponseDelegate(
                 config.codec(), baseRequest, response);
         new RequestBuilder(handler, roleAuthorizer)
                 .setPayload(IOUtils.toString(baseRequest.getInputStream()))
                 .setParameters(params).setSessionId(getSessionId(baseRequest))
                 .setRemoteAddress(baseRequest.getRemoteHost())
-                .setResponseBuilder(responseBuilder).invoke();
+                .setResponseDispatcher(dispatcher).invoke();
     }
 
     private static String getSessionId(HttpServletRequest request) {
