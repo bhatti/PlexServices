@@ -12,10 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.bus.EventBus;
+import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.ResponseDispatcher;
 import com.plexobject.predicate.Predicate;
+import com.plexobject.service.ServiceConfig.Method;
 
 /**
  * This class implements EventBus for publishing and subscribing events
@@ -125,14 +126,21 @@ public class EventBusImpl implements EventBus {
                                 if (haf.filter == null
                                         || haf.filter.accept(event)) {
                                     String sessionId = null;
-                                    Request request = new Request(
+                                    Method method = null;
+                                    String uri = null;
+                                    Request request = new Request(method, uri,
                                             new HashMap<String, Object>(),
                                             new HashMap<String, Object>(),
                                             event, sessionId,
-                                            new ResponseDispatcher() {
+                                            new AbstractResponseDispatcher() {
                                                 @Override
                                                 public void send(Object payload) {
                                                     publish(channel, payload);
+                                                }
+
+                                                @Override
+                                                public void addSessionId(
+                                                        String value) {
                                                 }
                                             });
 

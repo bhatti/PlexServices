@@ -36,6 +36,6 @@ public class DeleteUserService extends AbstractUserService implements
 				put("deleted", deleted);
 			}
 		};
-		request.getResponseBuilder().send(response);
+		request.getResponseDispatcher().send(response);
 	}
 }

@@ -38,7 +38,7 @@ import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
-import com.plexobject.http.WebRequestHandler;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
 
 @Sharable
@@ -47,14 +47,14 @@ public class NettyWebsocketRequestHandler extends
     private static final Logger log = LoggerFactory
             .getLogger(NettyWebRequestHandler.class);
 
-    private final WebRequestHandler handler;
+    private final RequestHandler handler;
     private final String wsPath;
     private final boolean ssl;
     private final ObjectCodec codec;
 
     private WebSocketServerHandshaker handshaker;
 
-    public NettyWebsocketRequestHandler(WebRequestHandler handler,
+    public NettyWebsocketRequestHandler(RequestHandler handler,
             final String wsPath, final boolean ssl, final CodecType codecType) {
         this.handler = handler;
         this.wsPath = wsPath;
@@ -150,8 +150,13 @@ public class NettyWebsocketRequestHandler extends
         final String textPayload = codec.encode(rawRequest.getPayload());
         AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
                 ctx.channel());
-        handler.handle(Method.MESSAGE, endpoint, textPayload, params, headers,
-                dispatcher);
+
+        String sessionId = (String) headers.get(Constants.SESSION_ID);
+        com.plexobject.handler.Request req = new com.plexobject.handler.Request(
+                Method.MESSAGE, endpoint, params, headers, textPayload,
+                sessionId, dispatcher);
+        handler.handle(req);
+
     }
 
     private static void sendHttpResponse(ChannelHandlerContext ctx,

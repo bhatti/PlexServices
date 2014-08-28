@@ -35,6 +35,6 @@ public class QueryUserService extends AbstractUserService implements
                 return true;
             }
         });
-        request.getResponseBuilder().send(users);
+        request.getResponseDispatcher().send(users);
     }
 }

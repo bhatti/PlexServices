@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
-import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
@@ -20,7 +20,7 @@ import com.plexobject.service.route.RouteResolver;
  * @author shahzad bhatti
  *
  */
-public class ServiceExecutor implements WebRequestHandler {
+public class ServiceExecutor implements RequestHandler {
     private static final Logger log = LoggerFactory
             .getLogger(ServiceExecutor.class);
     private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
@@ -35,28 +35,29 @@ public class ServiceExecutor implements WebRequestHandler {
     }
 
     @Override
-    public void handle(Method method, String uri, String payload,
-            Map<String, Object> params, Map<String, Object> headers,
-            AbstractResponseDispatcher dispatcher) {
+    public void handle(Request request) {
         RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
-                .get(method);
+                .get(request.getMethod());
         RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
-                .get(uri, params) : null;
+                .get(request.getUri(), request.getProperties()) : null;
         if (handler == null) {
-            log.error("Unknown request received " + payload + "/" + params);
+            log.error("Unknown request received " + request.getPayload() + "/"
+                    + request.getProperties());
             return;
         }
         ServiceConfig config = handler.getClass().getAnnotation(
                 ServiceConfig.class);
-        dispatcher.setCodecType(config.codec());
+        request.getResponseDispatcher().setCodecType(config.codec());
         // dispatcher.setContentType(config.codec()
         // .getContentType());
 
-        String sessionId = (String) headers.get(Constants.SESSION_ID);
+        String sessionId = (String) request.getHeader(Constants.SESSION_ID);
 
-        new RequestBuilder(handler, roleAuthorizer).setPayload(payload)
-                .setParameters(params).setSessionId(sessionId)
-                .setResponseDispatcher(dispatcher).invoke();
+        new RequestBuilder(handler, roleAuthorizer)
+                .setPayload(request.getPayload())
+                .setParameters(request.getProperties()).setSessionId(sessionId)
+                .setResponseDispatcher(request.getResponseDispatcher())
+                .invoke();
     }
 
 }

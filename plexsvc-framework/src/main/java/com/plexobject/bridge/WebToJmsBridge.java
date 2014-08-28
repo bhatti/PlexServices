@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.encode.json.JsonObjectCodec;
-import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.Request;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.ServiceGatewayFactory;
-import com.plexobject.http.WebRequestHandler;
 import com.plexobject.jms.JmsClient;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.ServiceConfig.GatewayType;
@@ -31,7 +31,7 @@ import com.plexobject.util.IOUtils;
  * @author shahzad bhatti
  *
  */
-public class WebToJmsBridge implements WebRequestHandler {
+public class WebToJmsBridge implements RequestHandler {
     private static final Logger log = LoggerFactory
             .getLogger(WebToJmsBridge.class);
     private final JmsClient jmsClient;
@@ -64,44 +64,47 @@ public class WebToJmsBridge implements WebRequestHandler {
     }
 
     @Override
-    public void handle(Method method, String uri, String payload,
-            Map<String, Object> params, Map<String, Object> headers,
-            AbstractResponseDispatcher dispatcher) {
-        log.info("Received " + method + ":" + uri + "=>" + payload
-                + ", params " + params + ", headers " + headers);
-
+    public void handle(Request request) {
         RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
-                .get(method);
-        final WebToJmsEntry entry = entryPaths != null ? entryPaths.get(uri,
-                params) : null;
+                .get(request.getMethod());
+        final WebToJmsEntry entry = entryPaths != null ? entryPaths.get(
+                request.getUri(), request.getProperties()) : null;
 
         if (entry == null) {
-            log.warn("Unknown request received " + payload + ", registered "
-                    + entriesPathsByMethod.keySet() + ": "
+            log.warn("Unknown request received " + request.getPayload()
+                    + ", registered " + entriesPathsByMethod.keySet() + ": "
                     + entriesPathsByMethod.values());
             return;
         }
-        headers.putAll(params);
+        Map<String, Object> params = new HashMap<>();
+        params.putAll(request.getProperties());
+        params.putAll(request.getHeaders());
         try {
-            jmsClient.sendReceive(entry.getDestination(), headers, payload,
+            jmsClient.sendReceive(entry.getDestination(), params,
+                    request.getPayload(),
                     new com.plexobject.handler.Handler<Response>() {
                         @Override
                         public void handle(Response reply) {
                             try {
                                 for (String name : reply.getHeaderNames()) {
-                                    dispatcher.setProperty(name,
-                                            reply.getHeader(name));
+                                    request.getResponseDispatcher()
+                                            .setProperty(name,
+                                                    reply.getHeader(name));
                                 }
                                 for (String name : reply.getPropertyNames()) {
-                                    dispatcher.setProperty(name,
-                                            reply.getProperty(name));
+                                    request.getResponseDispatcher()
+                                            .setProperty(name,
+                                                    reply.getProperty(name));
                                 }
-                                //dispatcher.setCodecType(CodecType.TEXT);
-                                dispatcher.setCodecType(entry.getCodecType());
-                                dispatcher.send(reply.getPayload());
+                                // dispatcher.setCodecType(CodecType.TEXT);
+                                request.getResponseDispatcher().setCodecType(
+                                        entry.getCodecType());
+                                request.getResponseDispatcher().send(
+                                        reply.getPayload());
                                 log.info("Replying back " + entry + ", reply "
                                         + reply + ", params " + params
-                                        + ", dispatcher" + ": " + dispatcher);
+                                        + ", dispatcher" + ": "
+                                        + request.getResponseDispatcher());
                             } catch (Exception e) {
                                 log.error("Could not send back websocket "
                                         + reply, e);

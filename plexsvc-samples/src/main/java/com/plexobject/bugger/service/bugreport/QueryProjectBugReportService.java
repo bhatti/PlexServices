@@ -59,7 +59,7 @@ public class QueryProjectBugReportService extends AbstractBugReportService
 				        return true;
 			        }
 		        });
-		request.getResponseBuilder().send(reports);
+		request.getResponseDispatcher().send(reports);
 	}
 
 }

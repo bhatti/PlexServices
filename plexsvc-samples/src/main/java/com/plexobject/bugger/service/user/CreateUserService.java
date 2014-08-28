@@ -22,7 +22,7 @@ public class CreateUserService extends AbstractUserService implements
 		User user = request.getPayload();
 		user.validate();
 		User saved = userRepository.save(user);
-		request.getResponseBuilder().send(saved);
+		request.getResponseDispatcher().send(saved);
 	}
 
 }

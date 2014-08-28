@@ -32,7 +32,7 @@ public class ServiceGatewayFactory {
             final Configuration config,
             final RoleAuthorizer authorizer,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
-        WebRequestHandler executor = new ServiceExecutor(authorizer,
+        RequestHandler executor = new ServiceExecutor(authorizer,
                 requestHandlerPathsByMethod);
         Lifecycle server = getServer(type, config, executor, false);
         return new DefaultHttpServiceGateway(config, authorizer,
@@ -40,7 +40,7 @@ public class ServiceGatewayFactory {
     }
 
     public static Lifecycle getServer(final GatewayType type,
-            final Configuration config, final WebRequestHandler executor,
+            final Configuration config, final RequestHandler executor,
             final boolean async) {
         ServiceContainer container = config.getDefaultServiceContainer();
         if (type == GatewayType.HTTP) {

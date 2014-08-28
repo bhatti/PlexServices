@@ -42,7 +42,7 @@ public class AssignBugReportService extends AbstractBugReportService implements
 		                "bugReport not found").end();
 		report.setAssignedTo(assignedTo);
 		bugReportRepository.save(report);
-		request.getResponseBuilder().send(report);
+		request.getResponseDispatcher().send(report);
 	}
 
 }

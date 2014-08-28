@@ -30,6 +30,14 @@ public abstract class AbstractPayload {
         properties.put(name, value);
     }
 
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public Map<String, Object> getHeaders() {
+        return headers;
+    }
+
     @SuppressWarnings("unchecked")
     public <V> V getProperty(String name) {
         return (V) properties.get(name);
@@ -110,8 +118,8 @@ public abstract class AbstractPayload {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ".toString [properties=" + properties
-                + ", payload=" + payload + "]";
+        return getClass().getSimpleName() + ".toString [properties="
+                + properties + ", payload=" + payload + "]";
     }
 
 }

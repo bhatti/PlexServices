@@ -1,6 +1,7 @@
 package com.plexobject.http.jetty;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -13,10 +14,11 @@ import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.Handledable;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.http.WebRequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
@@ -28,7 +30,7 @@ public class JettyAsyncWebRequestHandler extends JettyWebRequestHandler {
     private final Configuration config;
 
     public JettyAsyncWebRequestHandler(Configuration config,
-            WebRequestHandler handler) {
+            RequestHandler handler) {
         super(handler);
         this.config = config;
     }
@@ -64,10 +66,14 @@ public class JettyAsyncWebRequestHandler extends JettyWebRequestHandler {
                         completed(async);
                     }
                 }, baseRequest, response);
+        Map<String, Object> headers = getHeaders(baseRequest);
+        String sessionId = (String) headers.get(Constants.SESSION_ID);
 
-        handler.handle(method, uri,
-                IOUtils.toString(baseRequest.getInputStream()),
-                getParams(baseRequest), getHeaders(baseRequest), dispatcher);
+        com.plexobject.handler.Request req = new com.plexobject.handler.Request(
+                method, uri, getParams(baseRequest), headers,
+                IOUtils.toString(baseRequest.getInputStream()), sessionId,
+                dispatcher);
+        handler.handle(req);
     }
 
     private void completed(final AsyncContext async) {

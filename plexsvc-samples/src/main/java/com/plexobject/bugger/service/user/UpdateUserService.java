@@ -27,6 +27,6 @@ public class UpdateUserService extends AbstractUserService implements
                         "id not specified").end();
 
         User saved = userRepository.save(user);
-        request.getResponseBuilder().send(saved);
+        request.getResponseDispatcher().send(saved);
     }
 }

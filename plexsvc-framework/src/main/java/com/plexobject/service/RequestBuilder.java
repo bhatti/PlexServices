@@ -16,6 +16,7 @@ import com.plexobject.http.HttpResponse;
 import com.plexobject.metrics.Timing;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.ServiceConfig.Method;
 
 /**
  * This class builds remote request
@@ -32,11 +33,24 @@ public class RequestBuilder {
     private Map<String, Object> params;
     private Map<String, Object> headers;
     private String sessionId;
+    private Method method;
+    private String uri;
+
     private AbstractResponseDispatcher responseBuilder;
 
     public RequestBuilder(RequestHandler handler, RoleAuthorizer roleAuthorizer) {
         this.handler = handler;
         this.roleAuthorizer = roleAuthorizer;
+    }
+
+    public RequestBuilder setMethod(Method method) {
+        this.method = method;
+        return this;
+    }
+
+    public RequestBuilder setUri(String uri) {
+        this.uri = uri;
+        return this;
     }
 
     public RequestBuilder setPayload(String payload) {
@@ -84,8 +98,8 @@ public class RequestBuilder {
                     : null;
 
             try {
-                Request handlerReq = new Request(params, headers, object,
-                        sessionId, responseBuilder);
+                Request handlerReq = new Request(method, uri, params, headers,
+                        object, sessionId, responseBuilder);
                 if (config.rolesAllowed() != null
                         && config.rolesAllowed().length > 0
                         && !config.rolesAllowed()[0].equals("")) {

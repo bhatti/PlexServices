@@ -44,6 +44,6 @@ public class AddProjectMemberService extends AbstractProjectService implements
         } else {
             project.addMember(assignedTo);
         }
-        request.getResponseBuilder().send(project);
+        request.getResponseDispatcher().send(project);
     }
 }

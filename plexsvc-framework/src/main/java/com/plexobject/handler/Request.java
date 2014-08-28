@@ -5,6 +5,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Constants;
+import com.plexobject.service.ServiceConfig.Method;
 
 /**
  * This class encapsulates remote request
@@ -14,18 +15,30 @@ import com.plexobject.domain.Constants;
  */
 public class Request extends AbstractPayload {
     private String sessionId;
-    private ResponseDispatcher responseBuilder;
+    private AbstractResponseDispatcher responseBuilder;
+    private Method method;
+    private String uri;
 
     Request() {
-
     }
 
-    public Request(final Map<String, Object> properties,
+    public Request(Method method, String uri,
+            final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
-            final String sessionId, final ResponseDispatcher responseBuilder) {
+            final String sessionId, final AbstractResponseDispatcher responseBuilder) {
         super(properties, headers, payload);
+        this.method = method;
+        this.uri = uri;
         this.sessionId = sessionId;
         this.responseBuilder = responseBuilder;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
     }
 
     public String getSessionId() {
@@ -34,7 +47,7 @@ public class Request extends AbstractPayload {
 
     @SuppressWarnings("unchecked")
     @JsonIgnore
-    public <T extends AbstractResponseDispatcher> T getResponseBuilder() {
+    public <T extends AbstractResponseDispatcher> T getResponseDispatcher() {
         return (T) responseBuilder;
     }
 

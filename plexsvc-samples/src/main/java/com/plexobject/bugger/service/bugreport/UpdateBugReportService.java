@@ -31,6 +31,6 @@ public class UpdateBugReportService extends AbstractBugReportService implements
 		        .assertNonNull(report.getProjectId(), "undefined_projectId",
 		                "projectId", "projectId not specified").end();
 		BugReport saved = bugReportRepository.save(report);
-		request.getResponseBuilder().send(saved);
+		request.getResponseDispatcher().send(saved);
 	}
 }

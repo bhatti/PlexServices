@@ -15,7 +15,7 @@ import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
-import com.plexobject.http.WebRequestHandler;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
 
 @WebSocket
@@ -24,9 +24,9 @@ public class JettyWebsocketRequestHandler {
             .getLogger(JettyWebsocketRequestHandler.class);
     private final ObjectCodec codec;
 
-    private final WebRequestHandler handler;
+    private final RequestHandler handler;
 
-    public JettyWebsocketRequestHandler(WebRequestHandler handler,
+    public JettyWebsocketRequestHandler(RequestHandler handler,
             final CodecType codecType) {
         this.handler = handler;
         this.codec = ObjectCodecFactory.getInstance().getObjectCodec(codecType);
@@ -49,8 +49,12 @@ public class JettyWebsocketRequestHandler {
             final String textPayload = codec.encode(rawRequest.getPayload());
             AbstractResponseDispatcher dispatcher = new JettyWebsocketResponseDispatcher(
                     session);
-            handler.handle(Method.MESSAGE, endpoint, textPayload, params,
-                    headers, dispatcher);
+
+            String sessionId = (String) headers.get(Constants.SESSION_ID);
+            com.plexobject.handler.Request req = new com.plexobject.handler.Request(
+                    Method.MESSAGE, endpoint, params, headers, textPayload,
+                    sessionId, dispatcher);
+            handler.handle(req);
         }
     }
 }

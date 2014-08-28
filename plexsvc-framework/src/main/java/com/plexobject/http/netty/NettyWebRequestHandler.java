@@ -24,8 +24,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
-import com.plexobject.http.WebRequestHandler;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
 
 @Sharable
@@ -33,9 +34,9 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory
             .getLogger(NettyWebRequestHandler.class);
 
-    private final WebRequestHandler handler;
+    private final RequestHandler handler;
 
-    public NettyWebRequestHandler(WebRequestHandler handler) {
+    public NettyWebRequestHandler(RequestHandler handler) {
         this.handler = handler;
     }
 
@@ -47,29 +48,34 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof HttpRequest) {
-            HttpRequest req = (HttpRequest) msg;
+            HttpRequest request = (HttpRequest) msg;
 
-            if (HttpHeaders.is100ContinueExpected(req)) {
+            if (HttpHeaders.is100ContinueExpected(request)) {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
                 return;
             }
 
             AbstractResponseDispatcher dispatcher = new NettyResponseDispatcher(
-                    req, ctx);
+                    request, ctx);
             String payload = null;
 
-            if (req instanceof HttpContent) {
-                HttpContent content = (HttpContent) req;
+            if (request instanceof HttpContent) {
+                HttpContent content = (HttpContent) request;
                 payload = content.content().toString(CharsetUtil.UTF_8);
             }
-            Method method = Method.valueOf(req.getMethod().name());
-            String uri = req.getUri();
+            Method method = Method.valueOf(request.getMethod().name());
+            String uri = request.getUri();
             int n = uri.indexOf("?");
             if (n != -1) {
                 uri = uri.substring(0, n);
             }
-            handler.handle(method, uri, payload, getParams(req),
-                    getHeaders(req), dispatcher);
+            Map<String, Object> headers = getHeaders(request);
+
+            String sessionId = (String) headers.get(Constants.SESSION_ID);
+            com.plexobject.handler.Request req = new com.plexobject.handler.Request(
+                    method, uri, getParams(request), headers, payload,
+                    sessionId, dispatcher);
+            handler.handle(req);
 
             if (req instanceof LastHttpContent) {
                 ctx.close();
