@@ -150,7 +150,7 @@ public class NettyWebsocketRequestHandler extends
         final String textPayload = codec.encode(rawRequest.getPayload());
         AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
                 ctx.channel());
-        handler.handle(Method.MESSAGE, "", textPayload, params, headers,
+        handler.handle(Method.MESSAGE, endpoint, textPayload, params, headers,
                 dispatcher);
     }
 
