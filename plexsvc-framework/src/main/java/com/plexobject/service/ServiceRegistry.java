@@ -16,13 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.http.ServiceGatewayFactory;
+import com.plexobject.jms.JmsServiceGateway;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.jetty.HttpServiceGateway;
-import com.plexobject.service.jetty.WebsocketServiceGateway;
-import com.plexobject.service.jms.JmsServiceGateway;
 import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 
@@ -143,18 +143,22 @@ public class ServiceRegistry implements ServiceGateway {
         try {
             gateways.put(
                     ServiceConfig.GatewayType.HTTP,
-                    new HttpServiceGateway(
-                            config,
-                            authorizer,
-                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
+                    ServiceGatewayFactory
+                            .getServiceGateway(
+                                    GatewayType.HTTP,
+                                    config,
+                                    authorizer,
+                                    new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
             gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
                     config, authorizer));
             gateways.put(
                     ServiceConfig.GatewayType.WEBSOCKET,
-                    new WebsocketServiceGateway(
-                            config,
-                            authorizer,
-                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
+                    ServiceGatewayFactory
+                            .getServiceGateway(
+                                    GatewayType.WEBSOCKET,
+                                    config,
+                                    authorizer,
+                                    new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
             return gateways;
         } catch (RuntimeException e) {
             throw e;

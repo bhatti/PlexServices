@@ -1,4 +1,4 @@
-package com.plexobject.service.http;
+package com.plexobject.http;
 
 import java.io.IOException;
 import java.util.Map;
@@ -7,8 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
-import com.plexobject.encode.CodecType;
-import com.plexobject.handler.AbstractResponseDelegate;
+import com.plexobject.handler.AbstractResponseDispatcher;
 
 /**
  * This class sends response using implementation of http-response
@@ -16,16 +15,15 @@ import com.plexobject.handler.AbstractResponseDelegate;
  * @author shahzad bhatti
  *
  */
-public class HttpResponseDelegate extends AbstractResponseDelegate {
-    private static final Logger log = LoggerFactory
-            .getLogger(HttpResponseDelegate.class);
+public class HttpResponseDispatcher extends AbstractResponseDispatcher {
+    protected static final Logger log = LoggerFactory
+            .getLogger(HttpResponseDispatcher.class);
 
     private final Handledable handledable;
     private final HttpResponse response;
 
-    public HttpResponseDelegate(final CodecType codecType,
-            final Handledable handledable, final HttpResponse response) {
-        super(codecType);
+    public HttpResponseDispatcher(final Handledable handledable,
+            final HttpResponse response) {
         this.handledable = handledable;
         this.response = response;
     }

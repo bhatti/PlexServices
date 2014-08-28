@@ -1,4 +1,4 @@
-package com.plexobject.service.jms;
+package com.plexobject.jms;
 
 import javax.jms.Destination;
 
@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
-import com.plexobject.handler.AbstractResponseDelegate;
-import com.plexobject.service.ServiceConfig;
+import com.plexobject.handler.AbstractResponseDispatcher;
 
 /**
  * This class sends reply back over JMS
@@ -15,15 +14,13 @@ import com.plexobject.service.ServiceConfig;
  * @author shahzad bhatti
  *
  */
-public class JmsResponseBuilder extends AbstractResponseDelegate {
+public class JmsResponseDispatcher extends AbstractResponseDispatcher {
     private static final Logger log = LoggerFactory
-            .getLogger(JmsResponseBuilder.class);
+            .getLogger(JmsResponseDispatcher.class);
     private final JmsClient jmsClient;
     private final Destination replyTo;
 
-    public JmsResponseBuilder(final ServiceConfig config, JmsClient jmsClient,
-            Destination replyTo) {
-        super(config.codec());
+    public JmsResponseDispatcher(JmsClient jmsClient, Destination replyTo) {
         this.jmsClient = jmsClient;
         this.replyTo = replyTo;
     }

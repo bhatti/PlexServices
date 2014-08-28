@@ -125,10 +125,10 @@ public class EventBusImpl implements EventBus {
                                 if (haf.filter == null
                                         || haf.filter.accept(event)) {
                                     String sessionId = null;
-                                    String remoteAddr = null;
                                     Request request = new Request(
                                             new HashMap<String, Object>(),
-                                            event, sessionId, remoteAddr,
+                                            new HashMap<String, Object>(),
+                                            event, sessionId,
                                             new ResponseDispatcher() {
                                                 @Override
                                                 public void send(Object payload) {

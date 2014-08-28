@@ -1,4 +1,4 @@
-package com.plexobject.service.jetty;
+package com.plexobject.http.jetty;
 
 import java.io.IOException;
 
@@ -7,15 +7,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Request;
 
-import com.plexobject.encode.CodecType;
-import com.plexobject.service.http.Handledable;
-import com.plexobject.service.http.HttpResponse;
-import com.plexobject.service.http.HttpResponseDelegate;
+import com.plexobject.http.Handledable;
+import com.plexobject.http.HttpResponse;
+import com.plexobject.http.HttpResponseDispatcher;
 
-public class JettyResponseDelegate extends HttpResponseDelegate {
-    public JettyResponseDelegate(final CodecType codecType,
+public class JettyResponseDispatcher extends HttpResponseDispatcher {
+    public JettyResponseDispatcher(final Request baseRequest,
+            final HttpServletResponse response) {
+        this(getHandledable(baseRequest), baseRequest, response);
+    }
+
+    public JettyResponseDispatcher(final Handledable handled,
             final Request baseRequest, final HttpServletResponse response) {
-        super(codecType, getHandledable(baseRequest), getHttpResponse(response));
+        super(handled, getHttpResponse(response));
     }
 
     private static Handledable getHandledable(final Request baseRequest) {
@@ -38,6 +42,7 @@ public class JettyResponseDelegate extends HttpResponseDelegate {
             @Override
             public void addCookie(String name, String value) {
                 response.addCookie(new Cookie(name, value));
+                log.info("----- adding cookie " + name + "=>" + value);
             }
 
             @Override
@@ -48,6 +53,8 @@ public class JettyResponseDelegate extends HttpResponseDelegate {
             @Override
             public void addHeader(String name, String value) {
                 response.addHeader(name, value);
+                log.info("----- adding header " + name + "=>" + value);
+
             }
 
             @Override
@@ -63,7 +70,7 @@ public class JettyResponseDelegate extends HttpResponseDelegate {
 
             @Override
             public void sendError(int sc, String msg) throws IOException {
-                response.sendError(sc, msg);                
+                response.sendError(sc, msg);
             }
         };
     }

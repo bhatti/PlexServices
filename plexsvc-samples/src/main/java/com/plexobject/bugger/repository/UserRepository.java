@@ -81,4 +81,10 @@ public class UserRepository {
         return memoryStorage.size();
     }
 
+    @Override
+    public String toString() {
+        return "UserRepository [sessions=" + sessions + "] "
+                + System.identityHashCode(this);
+    }
+
 }

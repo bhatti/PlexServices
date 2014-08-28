@@ -165,6 +165,9 @@ public class RouteResolver<T> {
         if (fragments.length == 0) {
             return root;
         }
+        if (fragments.length < 2) {
+            throw new IllegalArgumentException("Invalid path '" + path + "'");
+        }
         Node<T> parent = root.children.get(fragments[1]);
         if (parent == null) {
             return null;

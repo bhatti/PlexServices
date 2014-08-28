@@ -1,4 +1,4 @@
-package com.plexobject.service.jms;
+package com.plexobject.jms;
 
 import java.util.Map;
 
@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
+import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.AbstractResponseDelegate;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
@@ -58,18 +58,16 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
         try {
             Map<String, Object> params = JmsClient.getParams(message);
             final String text = txtMessage.getText();
+            String sessionId = (String) params.get(Constants.SESSION_ID);
             log.info("Received " + text + " for " + config.endpoint() + " "
                     + handler.getClass().getSimpleName() + ", headers "
-                    + params);
-            String sessionId = (String) params.get(Constants.SESSION_ID);
-            String remoteAddr = (String) params.get(Constants.REMOTE_ADDRESS);
-            AbstractResponseDelegate responseBuilder = new JmsResponseBuilder(
-                    config, jmsClient, message.getJMSReplyTo());
-
+                    + params + ", session " + sessionId);
+            AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
+                    jmsClient, message.getJMSReplyTo());
+            dispatcher.setCodecType(config.codec());
             new RequestBuilder(handler, roleAuthorizer).setPayload(text)
                     .setParameters(params).setSessionId(sessionId)
-                    .setRemoteAddress(remoteAddr)
-                    .setResponseDispatcher(responseBuilder).invoke();
+                    .setResponseDispatcher(dispatcher).invoke();
         } catch (JMSException e) {
             log.error("Failed to handle request", e);
         }

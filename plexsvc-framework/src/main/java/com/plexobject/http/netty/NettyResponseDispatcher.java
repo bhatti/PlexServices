@@ -1,4 +1,4 @@
-package com.plexobject.service.netty;
+package com.plexobject.http.netty;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.LOCATION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.SET_COOKIE;
@@ -20,19 +20,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.plexobject.encode.CodecType;
-import com.plexobject.service.http.Handledable;
-import com.plexobject.service.http.HttpResponse;
-import com.plexobject.service.http.HttpResponseDelegate;
+import com.plexobject.http.Handledable;
+import com.plexobject.http.HttpResponse;
+import com.plexobject.http.HttpResponseDispatcher;
 
-public class NettyResponseDelegate extends HttpResponseDelegate {
+public class NettyResponseDispatcher extends HttpResponseDispatcher {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONNECTION = "Connection";
     private static final String CONTENT_LENGTH = "Content-Length";
 
-    public NettyResponseDelegate(final CodecType codecType,
-            final HttpRequest request, final ChannelHandlerContext ctx) {
-        super(codecType, getHandledable(request), getHttpResponse(request, ctx));
+    public NettyResponseDispatcher(final HttpRequest request,
+            final ChannelHandlerContext ctx) {
+        super(getHandledable(request), getHttpResponse(request, ctx));
     }
 
     private static Handledable getHandledable(final HttpRequest request) {

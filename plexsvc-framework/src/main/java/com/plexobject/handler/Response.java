@@ -9,7 +9,8 @@ import java.util.Map;
  *
  */
 public class Response extends AbstractPayload {
-    public Response(final Map<String, Object> properties, final Object payload) {
-        super(properties, payload);
+    public Response(final Map<String, Object> properties,
+            final Map<String, Object> headers, final Object payload) {
+        super(properties, headers, payload);
     }
 }

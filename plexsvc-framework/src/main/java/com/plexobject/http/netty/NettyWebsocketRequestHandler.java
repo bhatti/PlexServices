@@ -1,4 +1,4 @@
-package com.plexobject.service.netty;
+package com.plexobject.http.netty;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.HOST;
 import static io.netty.handler.codec.http.HttpMethod.GET;
@@ -10,6 +10,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -35,43 +36,31 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
-import com.plexobject.handler.AbstractResponseDelegate;
+import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
-import com.plexobject.handler.RequestHandler;
-import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.RequestBuilder;
-import com.plexobject.service.ServiceConfig;
+import com.plexobject.http.WebRequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.route.RouteResolver;
 
-/**
- * This class implements websocket handler for incoming web requests
- * 
- * @author shahzad bhatti
- *
- */
-class WebsocketRequestHandler extends SimpleChannelInboundHandler<Object> {
+@Sharable
+public class NettyWebsocketRequestHandler extends
+        SimpleChannelInboundHandler<Object> {
     private static final Logger log = LoggerFactory
-            .getLogger(WebsocketRequestHandler.class);
+            .getLogger(NettyWebRequestHandler.class);
 
-    private RoleAuthorizer roleAuthorizer;
-    private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
-    private final ObjectCodec codec;
+    private final WebRequestHandler handler;
     private final String wsPath;
     private final boolean ssl;
-
-    public WebsocketRequestHandler(
-            final RoleAuthorizer roleAuthorizer,
-            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,
-            final CodecType codecType, final String wsPath, final boolean ssl) {
-        this.roleAuthorizer = roleAuthorizer;
-        this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
-        this.codec = ObjectCodecFactory.getInstance().getObjectCodec(codecType);
-        this.wsPath = wsPath;
-        this.ssl = ssl;
-    }
+    private final ObjectCodec codec;
 
     private WebSocketServerHandshaker handshaker;
+
+    public NettyWebsocketRequestHandler(WebRequestHandler handler,
+            final String wsPath, final boolean ssl, final CodecType codecType) {
+        this.handler = handler;
+        this.wsPath = wsPath;
+        this.ssl = ssl;
+        this.codec = ObjectCodecFactory.getInstance().getObjectCodec(codecType);
+    }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
@@ -145,34 +134,24 @@ class WebsocketRequestHandler extends SimpleChannelInboundHandler<Object> {
         log.debug("%s received %s%n", ctx.channel(), jsonMsg);
 
         Map<String, Object> params = new HashMap<>();
+        Map<String, Object> headers = new HashMap<>();
+
         Request rawRequest = codec.decode(jsonMsg, Request.class, params);
+
+        for (String name : rawRequest.getPropertyNames()) {
+            params.put(name, rawRequest.getProperty(name));
+        }
         String endpoint = rawRequest.getStringProperty(Constants.ENDPOINT);
         if (endpoint == null) {
             log.error("Unknown request without endpoint " + jsonMsg);
             return;
         }
-        //
-        RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
-                .get(Method.MESSAGE);
-        RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
-                .get(endpoint, params) : null;
-        if (handler == null) {
-            log.error("Unknown request received " + jsonMsg);
-            return;
-        }
-        for (String name : rawRequest.getPropertyNames()) {
-            params.put(name, rawRequest.getProperty(name));
-        }
+
         final String textPayload = codec.encode(rawRequest.getPayload());
-
-        ServiceConfig config = handler.getClass().getAnnotation(
-                ServiceConfig.class);
-
-        AbstractResponseDelegate responseBuilder = new WebsocketResponseDelegate(
-                config.codec(), ctx.channel());
-        new RequestBuilder(handler, roleAuthorizer).setPayload(textPayload)
-                .setParameters(params).setSessionId(rawRequest.getSessionId())
-                .setResponseDispatcher(responseBuilder).invoke();
+        AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
+                ctx.channel());
+        handler.handle(Method.MESSAGE, "", textPayload, params, headers,
+                dispatcher);
     }
 
     private static void sendHttpResponse(ChannelHandlerContext ctx,

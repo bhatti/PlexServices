@@ -1,10 +1,7 @@
-package com.plexobject.service.jetty;
+package com.plexobject.http.jetty;
 
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.server.Connector;
@@ -140,29 +137,6 @@ public class JettyHttpServer implements Lifecycle {
     @Override
     public synchronized boolean isRunning() {
         return running;
-    }
-
-    public static Map<String, Object> getParams(HttpServletRequest request) {
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("hostname", request.getRemoteHost());
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                params.put(c.getName(), c.getValue());
-            }
-        }
-
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String name = headerNames.nextElement();
-            params.put(name, request.getHeaders(name).nextElement());
-        }
-        for (Map.Entry<String, String[]> e : request.getParameterMap()
-                .entrySet()) {
-            params.put(e.getKey(), e.getValue()[0]);
-        }
-        return params;
     }
 
     public static String toString(HttpServletRequest request) {

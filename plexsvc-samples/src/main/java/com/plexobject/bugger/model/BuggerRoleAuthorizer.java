@@ -1,12 +1,17 @@
 package com.plexobject.bugger.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.handler.Request;
+import com.plexobject.http.HttpResponse;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.http.HttpResponse;
 
 public class BuggerRoleAuthorizer implements RoleAuthorizer {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     private final UserRepository userRepository;
 
     public BuggerRoleAuthorizer(UserRepository userRepository) {
@@ -21,15 +26,17 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
+            log.info("could not authenticate " + sessionId + " -- "
+                    + request);
+
             throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-                    request.getSessionId(), request.getRemoteAddress(),
-                    "failed to validate session-id");
+                    request.getSessionId(), "failed to validate session-id:"
+                            + sessionId);
         }
         for (String role : roles) {
             if (!user.getRoles().contains(role)) {
                 throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-                        request.getSessionId(), request.getRemoteAddress(),
-                        "failed to match role");
+                        request.getSessionId(), "failed to match role");
             }
         }
     }

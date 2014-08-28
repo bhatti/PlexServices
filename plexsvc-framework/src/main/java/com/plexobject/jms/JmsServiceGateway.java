@@ -1,4 +1,4 @@
-package com.plexobject.service.jms;
+package com.plexobject.jms;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -9,4 +9,5 @@ public interface Constants {
     public static final String ENDPOINT = "endpoint";
     public static final String PAYLOAD = "payload";
     public static final String METHOD = "method";
+    public static final String HOST = "host";
 }

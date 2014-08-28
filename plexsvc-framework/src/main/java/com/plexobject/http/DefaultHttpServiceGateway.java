@@ -1,4 +1,4 @@
-package com.plexobject.service.http;
+package com.plexobject.http;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,11 +15,11 @@ import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 
-public class AbstractHttpServiceGateway extends AbstractServiceGateway {
+public class DefaultHttpServiceGateway extends AbstractServiceGateway {
     private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
     private final Lifecycle server;
 
-    public AbstractHttpServiceGateway(
+    public DefaultHttpServiceGateway(
             Configuration config,
             RoleAuthorizer authorizer,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,

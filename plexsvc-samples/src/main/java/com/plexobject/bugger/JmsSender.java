@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
-import com.plexobject.service.jms.JmsClient;
+import com.plexobject.jms.JmsClient;
 import com.plexobject.util.Configuration;
 
 public class JmsSender {
@@ -33,7 +33,7 @@ public class JmsSender {
                     System.exit(0);
                 }
             }
-        }, true, null);
+        }, true);
         log.debug("Sent to " + dest + ": " + text + ", waiting for reply ");
         Thread.currentThread().join();
     }

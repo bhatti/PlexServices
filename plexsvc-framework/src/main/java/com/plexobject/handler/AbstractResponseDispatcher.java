@@ -9,12 +9,12 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
-import com.plexobject.service.http.HttpResponse;
+import com.plexobject.http.HttpResponse;
 import com.plexobject.util.ExceptionUtils;
 
-public abstract class AbstractResponseDelegate implements ResponseDispatcher {
+public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
     private static final Logger log = LoggerFactory
-            .getLogger(AbstractResponseDelegate.class);
+            .getLogger(AbstractResponseDispatcher.class);
 
     protected static final String[] HEADER_PROPERTIES = new String[] {
             Constants.STATUS, Constants.LOCATION, Constants.SESSION_ID };
@@ -22,21 +22,17 @@ public abstract class AbstractResponseDelegate implements ResponseDispatcher {
     private int status = HttpResponse.SC_OK;
     protected final Map<String, Object> properties = new HashMap<>();
 
-    public AbstractResponseDelegate(final CodecType codecType) {
-        this.codecType = codecType;
-    }
-
-    public AbstractResponseDelegate setStatus(int status) {
+    public AbstractResponseDispatcher setStatus(int status) {
         this.status = status;
         return this;
     }
 
-    public AbstractResponseDelegate setCodecType(CodecType type) {
+    public AbstractResponseDispatcher setCodecType(CodecType type) {
         this.codecType = type;
         return this;
     }
 
-    public AbstractResponseDelegate setProperty(String name, Object value) {
+    public AbstractResponseDispatcher setProperty(String name, Object value) {
         properties.put(name, value);
         return this;
     }
@@ -106,7 +102,7 @@ public abstract class AbstractResponseDelegate implements ResponseDispatcher {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AbstractResponseDelegate other = (AbstractResponseDelegate) obj;
+        AbstractResponseDispatcher other = (AbstractResponseDispatcher) obj;
 
         String sessionId = (String) properties.get(Constants.SESSION_ID);
         String otherSessionId = (String) other.properties

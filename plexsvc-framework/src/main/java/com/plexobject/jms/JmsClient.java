@@ -1,4 +1,4 @@
-package com.plexobject.service.jms;
+package com.plexobject.jms;
 
 import java.io.Closeable;
 import java.util.Enumeration;
@@ -162,9 +162,8 @@ public class JmsClient implements Lifecycle {
 
     public void sendReceive(final String destName,
             final Map<String, Object> headers, final String payload,
-            final Handler<Response> handler, final boolean singleUseOnly,
-            final Handler<Exception> exceptionHandler) throws JMSException,
-            NamingException {
+            final Handler<Response> handler, final boolean singleUseOnly)
+            throws JMSException, NamingException {
         Destination destination = getDestination(destName);
         Message reqMsg = currentJmsSession().createTextMessage(payload);
         setHeaders(headers, reqMsg);
@@ -197,7 +196,7 @@ public class JmsClient implements Lifecycle {
                     log.info(destName + ": Received " + text
                             + " in response to " + payload + ", params "
                             + headers);
-                    final Response response = new Response(params, text);
+                    final Response response = new Response(params, params, text);
                     handler.handle(response);
                     if (singleUseOnly) {
                         try {
@@ -212,9 +211,6 @@ public class JmsClient implements Lifecycle {
                         closeable.close();
                     } catch (Exception ex) {
                         log.warn("Failed to close", ex);
-                    }
-                    if (exceptionHandler != null) {
-                        exceptionHandler.handle(e);
                     }
                 }
             }

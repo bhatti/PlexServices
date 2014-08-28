@@ -8,18 +8,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public abstract class AbstractPayload {
     protected final Map<String, Object> properties;
+    protected final Map<String, Object> headers;
     protected final long createdAt;
     protected Object payload;
 
     AbstractPayload() {
         this.createdAt = System.currentTimeMillis();
         this.properties = new HashMap<>();
+        this.headers = new HashMap<>();
     }
 
     public AbstractPayload(final Map<String, Object> properties,
-            final Object payload) {
+            final Map<String, Object> headers, final Object payload) {
         this.createdAt = System.currentTimeMillis();
         this.properties = properties;
+        this.headers = headers;
         this.payload = payload;
     }
 
@@ -81,6 +84,19 @@ public abstract class AbstractPayload {
     @JsonIgnore
     public Collection<String> getPropertyNames() {
         return properties.keySet();
+    }
+
+    public void setHeader(String name, Object value) {
+        headers.put(name, value);
+    }
+
+    public String getHeader(String name) {
+        return (String) headers.get(name);
+    }
+
+    @JsonIgnore
+    public Collection<String> getHeaderNames() {
+        return headers.keySet();
     }
 
     public long getCreatedAt() {

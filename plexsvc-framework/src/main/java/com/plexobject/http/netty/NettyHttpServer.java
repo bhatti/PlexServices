@@ -1,6 +1,5 @@
-package com.plexobject.service.netty;
+package com.plexobject.http.netty;
 
-import static io.netty.handler.codec.http.HttpHeaders.Names.COOKIE;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -11,8 +10,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.Cookie;
-import io.netty.handler.codec.http.CookieDecoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -22,10 +19,8 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.net.ssl.SSLException;
 
@@ -92,8 +87,7 @@ public class NettyHttpServer implements Lifecycle {
     private Channel channel;
 
     public NettyHttpServer(Configuration config,
-            ChannelInboundHandlerAdapter handler) throws SSLException,
-            InterruptedException {
+            ChannelInboundHandlerAdapter handler) {
         this.config = config;
 
         // int httpsPort = config.getInteger(HTTPS_PORT, DEFAULT_HTTPS_PORT);
@@ -106,8 +100,12 @@ public class NettyHttpServer implements Lifecycle {
             // SelfSignedCertificate ssc = new SelfSignedCertificate();
             // sslCtx = SslContext.newServerContext(ssc.certificate(),
             // ssc.privateKey());
-            sslCtx = SslContext.newServerContext(new File(certPath), new File(
-                    keyFilePath), keyPassword);
+            try {
+                sslCtx = SslContext.newServerContext(new File(certPath),
+                        new File(keyFilePath), keyPassword);
+            } catch (SSLException e) {
+                throw new RuntimeException(e);
+            }
         }
         bootstrap = new ServerBootstrap();
         bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
@@ -165,46 +163,6 @@ public class NettyHttpServer implements Lifecycle {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static Map<String, Object> getParams(HttpRequest request) {
-        Map<String, Object> params = new HashMap<>();
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-        for (Map.Entry<String, List<String>> e : decoder.parameters()
-                .entrySet()) {
-            params.put(e.getKey(), e.getValue().get(0));
-        }
-
-        String cookieString = request.headers().get(COOKIE);
-        if (cookieString != null) {
-            Set<Cookie> cookies = CookieDecoder.decode(cookieString);
-            if (!cookies.isEmpty()) {
-                // Reset the cookies if necessary.
-                for (Cookie cookie : cookies) {
-                    params.put(cookie.getName(), cookie.getValue());
-                    // response.headers().add(SET_COOKIE,
-                    // ServerCookieEncoder.encode(cookie));
-                }
-            }
-
-            // if (request.getMethod() == HttpMethod.POST) {
-            // ChannelBuffer content = request.getDecoderResult();
-            // if (content.readable()) {
-            // String param = content.toString(WaarpStringUtils.UTF8);
-            // QueryStringDecoder queryStringDecoder2 = new QueryStringDecoder(
-            // "/?" + param);
-            // params = queryStringDecoder2.getParameters();
-            // } else {
-            // params = null;
-            // }
-            // }
-            // params.put("hostname", request.getRemoteHost());
-        }
-        for (String name : request.headers().names()) {
-            String value = request.headers().get(name);
-            params.put(name, value);
-        }
-        return params;
     }
 
     public static String toString(HttpRequest request) {

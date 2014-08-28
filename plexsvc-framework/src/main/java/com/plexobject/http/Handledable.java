@@ -1,4 +1,4 @@
-package com.plexobject.service.http;
+package com.plexobject.http;
 
 public interface Handledable {
     void setHandled(boolean f);
