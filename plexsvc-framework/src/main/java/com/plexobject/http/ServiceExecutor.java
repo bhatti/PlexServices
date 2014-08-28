@@ -38,8 +38,6 @@ public class ServiceExecutor implements WebRequestHandler {
     public void handle(Method method, String uri, String payload,
             Map<String, Object> params, Map<String, Object> headers,
             AbstractResponseDispatcher dispatcher) {
-        log.info("Received " + method + ":" + uri + "=>" + payload
-                + ", params " + params + ", headers " + headers);
         RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
                 .get(method);
         RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths

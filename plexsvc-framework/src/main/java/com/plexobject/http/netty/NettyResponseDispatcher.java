@@ -110,7 +110,8 @@ public class NettyResponseDispatcher extends HttpResponseDispatcher {
                     response.headers().set(CONNECTION, Values.KEEP_ALIVE);
                     ctx.write(response);
                 }
-                response.release(); // ??
+                ctx.flush();
+                log.info(">>>>> Sending " + response + ", contents '" + contents + "'\n\n", new Exception("st"));
             }
 
             @Override

@@ -60,17 +60,20 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
 
             if (req instanceof HttpContent) {
                 HttpContent content = (HttpContent) req;
-                if (content instanceof LastHttpContent) {
-                    ctx.close();
-                    return;
-                }
                 payload = content.content().toString(CharsetUtil.UTF_8);
             }
             Method method = Method.valueOf(req.getMethod().name());
             String uri = req.getUri();
-
+            int n = uri.indexOf("?");
+            if (n != -1) {
+                uri = uri.substring(0, n);
+            }
             handler.handle(method, uri, payload, getParams(req),
                     getHeaders(req), dispatcher);
+
+            if (req instanceof LastHttpContent) {
+                ctx.close();
+            }
         }
     }
 

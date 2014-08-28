@@ -110,7 +110,7 @@ public abstract class AbstractPayload {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [properties=" + properties
+        return getClass().getSimpleName() + ".toString [properties=" + properties
                 + ", payload=" + payload + "]";
     }
 

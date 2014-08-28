@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Response;
@@ -97,8 +96,9 @@ public class WebToJmsBridge implements WebRequestHandler {
                                     dispatcher.setProperty(name,
                                             reply.getProperty(name));
                                 }
-                                dispatcher.setCodecType(CodecType.TEXT);
-                                dispatcher.send(reply);
+                                //dispatcher.setCodecType(CodecType.TEXT);
+                                dispatcher.setCodecType(entry.getCodecType());
+                                dispatcher.send(reply.getPayload());
                                 log.info("Replying back " + entry + ", reply "
                                         + reply + ", params " + params
                                         + ", dispatcher" + ": " + dispatcher);

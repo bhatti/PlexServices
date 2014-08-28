@@ -113,7 +113,6 @@ public class NettyHttpServer implements Lifecycle {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new NettyServerInitializer(sslCtx, handler));
-
     }
 
     @Override
