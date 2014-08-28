@@ -46,9 +46,9 @@ public class QuoteServer implements RequestHandler {
                         "action not specified").end();
         Action action = Action.valueOf(actionVal.toUpperCase());
         if (action == Action.SUBSCRIBE) {
-            quoteStreamer.add(symbol, request.getResponseBuilder());
+            quoteStreamer.add(symbol, request.getResponseDispatcher());
         } else {
-            quoteStreamer.remove(symbol, request.getResponseBuilder());
+            quoteStreamer.remove(symbol, request.getResponseDispatcher());
         }
     }
 

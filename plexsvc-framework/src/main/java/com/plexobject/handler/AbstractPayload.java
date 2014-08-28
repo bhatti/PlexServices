@@ -99,7 +99,14 @@ public abstract class AbstractPayload {
     }
 
     public String getHeader(String name) {
-        return (String) headers.get(name);
+        Object value = headers.get(name);
+        if (value instanceof String) {
+            return (String) value;
+        } else if (value != null) {
+            return value.toString();
+        } else {
+            return null;
+        }
     }
 
     @JsonIgnore
