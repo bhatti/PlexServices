@@ -10,7 +10,9 @@ PlexService also provides web-to-jms bridge for accessing services over http or 
 
 PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface.
 
-PlexService uses jetty 9.0 for serving web services over http or websockets. It allows developers to hook JMS containers at runtime.
+PlexService supports jetty 9.0+ and Netty 4.0+ for hosting web services and you can use http or websockets transport for your services. 
+
+PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
 
 ##Building
@@ -32,7 +34,7 @@ git clone git@github.com:bhatti/PlexService.git
 
 
 ##Version
-- 0.2 : experimental
+- 0.3 : experimental
 
 ##License
 - MIT
