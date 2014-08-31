@@ -14,7 +14,8 @@ import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Response;
 
-public class NettyWebsocketResponseDispatcher extends AbstractResponseDispatcher {
+public class NettyWebsocketResponseDispatcher extends
+        AbstractResponseDispatcher {
     private static final Logger log = LoggerFactory
             .getLogger(NettyWebsocketResponseDispatcher.class);
     private final Channel channel;
@@ -39,7 +40,9 @@ public class NettyWebsocketResponseDispatcher extends AbstractResponseDispatcher
                     new HashMap<String, Object>(), payload);
             String responseText = ObjectCodecFactory.getInstance()
                     .getObjectCodec(codecType).encode(response);
+            // log.info("Sending " + responseText + " to " + channel);
             channel.write(new TextWebSocketFrame(responseText));
+            channel.flush();
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

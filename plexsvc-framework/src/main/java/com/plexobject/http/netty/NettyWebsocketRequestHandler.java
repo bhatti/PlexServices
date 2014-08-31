@@ -41,6 +41,22 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
 
+/**
+ * This class handles requests over websockets using Netty container
+ * 
+ *
+ * <ul>
+ * <li>Safari 5+ (draft-ietf-hybi-thewebsocketprotocol-00)
+ * <li>Chrome 6-13 (draft-ietf-hybi-thewebsocketprotocol-00)
+ * <li>Chrome 14+ (draft-ietf-hybi-thewebsocketprotocol-10)
+ * <li>Chrome 16+ (RFC 6455 aka draft-ietf-hybi-thewebsocketprotocol-17)
+ * <li>Firefox 7+ (draft-ietf-hybi-thewebsocketprotocol-10)
+ * <li>Firefox 11+ (RFC 6455 aka draft-ietf-hybi-thewebsocketprotocol-17)
+ * </ul>
+ * 
+ * @author shahzadb hatti
+ *
+ */
 @Sharable
 public class NettyWebsocketRequestHandler extends
         SimpleChannelInboundHandler<Object> {

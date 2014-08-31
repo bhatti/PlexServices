@@ -4,4 +4,6 @@
 
 0.2  -Added websockets support and role based security
 
+0.3  -Added support for netty 
+
 

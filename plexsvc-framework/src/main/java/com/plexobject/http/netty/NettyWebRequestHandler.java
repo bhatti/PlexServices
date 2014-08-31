@@ -28,6 +28,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.http.Handledable;
 import com.plexobject.service.ServiceConfig.Method;
 
 @Sharable
@@ -57,7 +58,14 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
             }
 
             AbstractResponseDispatcher dispatcher = new NettyResponseDispatcher(
-                    request, ctx);
+                    new Handledable() {
+                        @Override
+                        public void setHandled(boolean h) {
+                            if (request instanceof LastHttpContent) {
+                                ctx.close();
+                            }
+                        }
+                    }, request, ctx);
             String payload = null;
 
             if (request instanceof HttpContent) {
@@ -83,9 +91,6 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
 
             handler.handle(req);
 
-            if (req instanceof LastHttpContent) {
-                ctx.close();
-            }
         }
     }
 

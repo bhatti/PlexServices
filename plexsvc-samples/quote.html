@@ -5,7 +5,10 @@
     <h1>WebSocket client</h1>
     <script>
       var ws = new WebSocket("ws://127.0.0.1:8181/ws");
+      var ready = false;
       ws.onopen = function() {
+        ready = true;
+        console.log('ready');
       };
       var lasts = {};
       ws.onmessage = function (evt) {
@@ -39,14 +42,22 @@
       };
 
       ws.onclose = function() {
+        console.log('closed');
+        ready = false;
       };
 
       ws.onerror = function(err) {
+        console.log('error ' + err);
+        ready = false;
       };
 
       function send(payload) {
-        $('#input').text(payload);
-        ws.send(payload);
+        if (ready) {
+          $('#input').text(payload);
+          ws.send(payload);
+        } else {
+          console.log('not ready');
+        }
       }
       $(document).ready(function() {
         $("#subscribe").click(function() {

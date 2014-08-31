@@ -33,7 +33,7 @@ public class Configuration {
 
     public HttpServiceContainer getDefaultServiceContainer() {
         return HttpServiceContainer.valueOf(getProperty("defaultServiceContainer",
-                "JETTY").toUpperCase());
+                "NETTY").toUpperCase());
     }
 
     public int getDefaultTimeoutSecs() {

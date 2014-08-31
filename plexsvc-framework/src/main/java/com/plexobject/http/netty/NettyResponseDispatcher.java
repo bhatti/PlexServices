@@ -29,17 +29,9 @@ public class NettyResponseDispatcher extends HttpResponseDispatcher {
     private static final String CONNECTION = "Connection";
     private static final String CONTENT_LENGTH = "Content-Length";
 
-    public NettyResponseDispatcher(final HttpRequest request,
-            final ChannelHandlerContext ctx) {
-        super(getHandledable(request), getHttpResponse(request, ctx));
-    }
-
-    private static Handledable getHandledable(final HttpRequest request) {
-        return new Handledable() {
-            @Override
-            public void setHandled(boolean h) {
-            }
-        };
+    public NettyResponseDispatcher(final Handledable handledable,
+            final HttpRequest request, final ChannelHandlerContext ctx) {
+        super(handledable, getHttpResponse(request, ctx));
     }
 
     private static HttpResponse getHttpResponse(final HttpRequest request,
@@ -111,7 +103,6 @@ public class NettyResponseDispatcher extends HttpResponseDispatcher {
                     ctx.write(response);
                 }
                 ctx.flush();
-                log.info(">>>>> Sending " + response + ", contents '" + contents + "'\n\n", new Exception("st"));
             }
 
             @Override
