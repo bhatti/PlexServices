@@ -25,7 +25,7 @@ public class QuoteCache {
             }
         }
         q.setTimestamp(System.currentTimeMillis());
-        q.setLast((float) random(q.getOpen() - 5, q.getOpen() + 5));
+        q.setLast((float) random(q.getOpen() - 1, q.getOpen() + 1));
         return q;
     }
 

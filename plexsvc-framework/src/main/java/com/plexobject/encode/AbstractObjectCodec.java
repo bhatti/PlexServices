@@ -6,6 +6,13 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is base class for encoding implementation classes that provides helper
+ * methods
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public abstract class AbstractObjectCodec implements ObjectCodec {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 

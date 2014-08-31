@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.http;
 
 public enum HttpServiceContainer {
     JETTY, NETTY;

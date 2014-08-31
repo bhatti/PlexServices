@@ -8,7 +8,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.service.ServiceConfig.Method;
 
 /**
- * This class encapsulates remote request
+ * This class encapsulates a request object
  * 
  * @author shahzad bhatti
  *

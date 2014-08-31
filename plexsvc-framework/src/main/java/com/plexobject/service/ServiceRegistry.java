@@ -23,7 +23,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.DefaultHttpServiceGateway;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.http.HttpRoutableRequestHandler;
+import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.HttpServerFactory;
 import com.plexobject.jms.JmsServiceGateway;
 import com.plexobject.metrics.ServiceMetrics;
@@ -56,22 +56,15 @@ public class ServiceRegistry implements ServiceGateway {
 
     public ServiceRegistry(Configuration config,
             Collection<RequestHandler> services, RoleAuthorizer authorizer) {
-        this(config, null, services, authorizer);
-    }
-
-    public ServiceRegistry(Configuration config,
-            Map<ServiceConfig.GatewayType, ServiceGateway> gateways,
-            Collection<RequestHandler> services, RoleAuthorizer authorizer) {
-        if (gateways == null) {
-            gateways = getDefaultGateways(config, authorizer);
-        }
         this.authorizer = authorizer;
-        this.gateways.putAll(gateways);
+        this.gateways.putAll(getDefaultGateways(config, authorizer));
         String statsdHost = config.getProperty("statsd.host");
         if (statsdHost != null) {
-            String servicePrefix = "com.plexobject";
+            String servicePrefix = "";
             for (RequestHandler handler : services) {
                 servicePrefix = handler.getClass().getPackage().getName();
+                int lastDot = servicePrefix.lastIndexOf(".");
+                servicePrefix = servicePrefix.substring(lastDot + 1);
             }
             this.statsd = new NonBlockingStatsDClient(config.getProperty(
                     "statsd.prefix", servicePrefix), statsdHost,
@@ -299,7 +292,7 @@ public class ServiceRegistry implements ServiceGateway {
             final Configuration config,
             final RoleAuthorizer authorizer,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
-        RequestHandler executor = new HttpRoutableRequestHandler(this,
+        RequestHandler executor = new DefaultHttpRequestHandler(this,
                 requestHandlerPathsByMethod);
         Lifecycle server = HttpServerFactory.getHttpServer(type, config,
                 executor, false);

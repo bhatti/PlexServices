@@ -1,7 +1,7 @@
 package com.plexobject.handler;
 
 /**
- * This interface defines method to handle requests
+ * This interface defines method to handle requests of given type
  * 
  * @author shahzad bhatti
  *

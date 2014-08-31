@@ -5,7 +5,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 import org.eclipse.jetty.server.Handler;
 
-import com.plexobject.domain.HttpServiceContainer;
 import com.plexobject.domain.ObjectFactory;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.jetty.JettyAsyncWebRequestHandler;
@@ -20,6 +19,13 @@ import com.plexobject.service.Lifecycle;
 import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.util.Configuration;
 
+/**
+ * This class creates http server based on configuration using Jetty or Netty
+ * container
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class HttpServerFactory {
     public static Lifecycle getHttpServer(final GatewayType type,
             final Configuration config, final RequestHandler executor,

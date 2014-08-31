@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import com.plexobject.domain.HttpServiceContainer;
 import com.plexobject.encode.CodecType;
+import com.plexobject.http.HttpServiceContainer;
 
 /**
  * This class stores application configuration
