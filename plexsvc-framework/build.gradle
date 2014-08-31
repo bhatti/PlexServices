@@ -13,6 +13,7 @@ dependencies {
     compile 'com.sun.xml.bind:jaxb-impl:2.2.7'
     compile 'javax.jms:jms:1.1'
     compile 'javax.jms:jms-api:1.1-rev-1'
+    compile 'com.timgroup:java-statsd-client:3.0.2'
 
     testCompile 'junit:junit:4.11'
     testCompile 'com.googlecode.jmockit:jmockit:1.7'

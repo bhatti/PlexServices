@@ -10,9 +10,9 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.AbstractServiceGateway;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
 /**
@@ -25,9 +25,9 @@ public class JmsServiceGateway extends AbstractServiceGateway {
     private JmsClient _jmsClient;
     private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
 
-    public JmsServiceGateway(Configuration config, RoleAuthorizer authorizer)
-            throws Exception {
-        super(config, authorizer);
+    public JmsServiceGateway(final Configuration config,
+            final ServiceRegistry serviceRegistry) throws Exception {
+        super(config, serviceRegistry);
     }
 
     private synchronized JmsClient getJmsClient() {
@@ -75,7 +75,7 @@ public class JmsServiceGateway extends AbstractServiceGateway {
         try {
             Destination dest = getJmsClient().getDestination(
                     getDestinationName(h));
-            jmsHandler = new JmsRequestHandler(authorizer, getJmsClient(),
+            jmsHandler = new JmsRequestHandler(serviceRegistry, getJmsClient(),
                     dest, h);
             jmsHandlersByRequestHandler.put(h, jmsHandler);
             log.info("Adding JMS service " + h.getClass().getSimpleName()

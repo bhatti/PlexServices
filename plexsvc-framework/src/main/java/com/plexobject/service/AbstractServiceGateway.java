@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.util.Configuration;
 
 /**
@@ -16,14 +15,14 @@ import com.plexobject.util.Configuration;
  */
 public abstract class AbstractServiceGateway implements ServiceGateway {
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    protected final RoleAuthorizer authorizer;
+    protected final ServiceRegistry serviceRegistry;
     protected final Configuration config;
     protected boolean running;
 
     public AbstractServiceGateway(Configuration config,
-            RoleAuthorizer authorizer) {
+            ServiceRegistry serviceRegistry) {
         this.config = config;
-        this.authorizer = authorizer;
+        this.serviceRegistry = serviceRegistry;
     }
 
     protected abstract void doStart() throws Exception;

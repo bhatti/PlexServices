@@ -6,12 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
-import com.plexobject.handler.HandlerInvoker;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.route.RouteResolver;
 
 /**
@@ -24,13 +23,12 @@ public class HttpRoutableRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory
             .getLogger(HttpRoutableRequestHandler.class);
     private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
-
-    private RoleAuthorizer roleAuthorizer;
+    private final ServiceRegistry serviceRegistry;
 
     public HttpRoutableRequestHandler(
-            RoleAuthorizer roleAuthorizer,
+            final ServiceRegistry serviceRegistry,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
-        this.roleAuthorizer = roleAuthorizer;
+        this.serviceRegistry = serviceRegistry;
         this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
     }
 
@@ -53,6 +51,6 @@ public class HttpRoutableRequestHandler implements RequestHandler {
 
         String sessionId = (String) request.getHeader(Constants.SESSION_ID);
         request.setSessionId(sessionId);
-        HandlerInvoker.invoke(request, handler, roleAuthorizer);
+        serviceRegistry.invoke(request, handler);
     }
 }

@@ -12,7 +12,7 @@ import org.junit.Test;
 public class ServiceMetricsTest {
     private static final double EPSILON = 0.000001;
     private long started = System.currentTimeMillis();
-    private ServiceMetrics metrics = new ServiceMetrics("test");
+    private ServiceMetrics metrics = new ServiceMetrics(null, "test");
 
     @Before
     public void setUp() throws Exception {

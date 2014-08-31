@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.plexobject.service.ServiceConfig;
+import com.timgroup.statsd.StatsDClient;
+
 /**
  * This class maintains service metrics. It also exposes them as JMX MBeans so
  * that the can be viewed with JConsole.
@@ -12,58 +15,42 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author shahzad bhatti
  */
 public class ServiceMetricsRegistry {
-	private final Map<String, ServiceMetrics> stats = new ConcurrentHashMap<>();
-	private final long started = System.currentTimeMillis();
-	private static final ServiceMetricsRegistry INSTANCE = new ServiceMetricsRegistry();
+    private final Map<String, ServiceMetrics> stats = new ConcurrentHashMap<>();
+    private final StatsDClient statsd;
 
-	private ServiceMetricsRegistry() {
-	}
+    public ServiceMetricsRegistry(final StatsDClient statsd) {
+        this.statsd = statsd;
+    }
 
-	public static ServiceMetricsRegistry getInstance() {
-		return INSTANCE;
-	}
+    /**
+     * This method returns service metrics for given name
+     * 
+     * @param name
+     * @return
+     */
+    public ServiceMetrics getServiceMetrics(Class<?> serviceClass) {
+        ServiceConfig config = serviceClass.getAnnotation(ServiceConfig.class);
+        boolean statsDEnabled = config != null && config.recordStatsdMetrics();
+        String name = serviceClass.getSimpleName();
+        ServiceMetrics t = stats.get(name);
+        if (t == null) {
+            t = new ServiceMetrics(statsDEnabled ? statsd : null, name);
+            t = register(name, t);
+        }
+        return t;
+    }
 
-	void reset() {
-		stats.clear();
-	}
+    private ServiceMetrics register(String name, ServiceMetrics t) {
+        ServiceMetrics old = ((ConcurrentHashMap<String, ServiceMetrics>) stats)
+                .putIfAbsent(name, t);
+        if (old != null) {
+            t = old;
+        }
+        return t;
+    }
 
-	/**
-	 * This method returns service metrics for given name
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public ServiceMetrics getServiceMetrics(Class<?> serviceClass) {
-		String name = serviceClass.getSimpleName();
-		ServiceMetrics t = stats.get(name);
-		if (t == null) {
-			t = new ServiceMetrics(name);
-			t = register(name, t);
-		}
-		return t;
-	}
+    public Collection<ServiceMetricsMBean> getAllMetrics() {
+        return new ArrayList<ServiceMetricsMBean>(stats.values());
+    }
 
-	private ServiceMetrics register(String name, ServiceMetrics t) {
-		ServiceMetrics old = ((ConcurrentHashMap<String, ServiceMetrics>) stats)
-		        .putIfAbsent(name, t);
-		if (old != null) {
-			t = old;
-		}
-		return t;
-	}
-
-	public Collection<ServiceMetricsMBean> getAllMetrics() {
-		return new ArrayList<ServiceMetricsMBean>(stats.values());
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("Total Counters: " + stats.size()
-		        + ", running time " + (System.currentTimeMillis() - started)
-		        + "\n");
-		for (ServiceMetricsMBean m : getAllMetrics()) {
-			sb.append(m.getSummary() + "\n");
-		}
-		return sb.toString();
-	}
 }

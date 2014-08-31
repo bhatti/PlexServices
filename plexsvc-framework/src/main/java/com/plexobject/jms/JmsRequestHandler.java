@@ -16,12 +16,11 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
-import com.plexobject.handler.HandlerInvoker;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.ServiceRegistry;
 
 /**
  * This class implements MessageListener for handling requests over JMS and then
@@ -34,16 +33,16 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
     private static final Logger log = LoggerFactory
             .getLogger(JmsRequestHandler.class);
 
-    private final RoleAuthorizer roleAuthorizer;
+    private final ServiceRegistry serviceRegistry;
     private final JmsClient jmsClient;
     private final Destination destination;
     private final RequestHandler handler;
     private MessageConsumer consumer;
 
-    JmsRequestHandler(RoleAuthorizer roleAuthorizer, JmsClient jmsClient,
-            Destination destination, RequestHandler handler)
+    JmsRequestHandler(final ServiceRegistry serviceRegistry,
+            JmsClient jmsClient, Destination destination, RequestHandler handler)
             throws JMSException, NamingException {
-        this.roleAuthorizer = roleAuthorizer;
+        this.serviceRegistry = serviceRegistry;
         this.jmsClient = jmsClient;
         this.destination = destination;
         this.handler = handler;
@@ -73,7 +72,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                     .setSessionId(sessionId).setResponseDispatcher(dispatcher)
                     .build();
 
-            HandlerInvoker.invoke(req, handler, roleAuthorizer);
+            serviceRegistry.invoke(req, handler);
         } catch (JMSException e) {
             log.error("Failed to handle request", e);
         }

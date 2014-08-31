@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.AbstractServiceGateway;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 
@@ -20,11 +20,11 @@ public class DefaultHttpServiceGateway extends AbstractServiceGateway {
     private final Lifecycle server;
 
     public DefaultHttpServiceGateway(
-            Configuration config,
-            RoleAuthorizer authorizer,
+            final Configuration config,
+            final ServiceRegistry serviceRegistry,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,
             final Lifecycle server) {
-        super(config, authorizer);
+        super(config, serviceRegistry);
         this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
         this.server = server;
     }

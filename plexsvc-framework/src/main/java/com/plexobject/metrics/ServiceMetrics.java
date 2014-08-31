@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.timgroup.statsd.StatsDClient;
+
 /**
  * This class stores timing information for service metrics
  * 
@@ -51,8 +53,10 @@ public class ServiceMetrics implements ServiceMetricsMBean {
     private long minValue = Long.MAX_VALUE;
     private long maxValue = Long.MIN_VALUE;
     private long lastValue;
+    private final StatsDClient statsd;
 
-    public ServiceMetrics(String name) {
+    public ServiceMetrics(StatsDClient statsd, String name) {
+        this.statsd = statsd;
         this.name = name;
         for (int i = 0; i < SECONDS; i++) {
             transactionsPerSec[i] = new AtomicInteger();
@@ -101,6 +105,10 @@ public class ServiceMetrics implements ServiceMetricsMBean {
 
     @SuppressWarnings("deprecation")
     public void addResponseTime(long value) {
+        if (statsd != null) {
+            statsd.incrementCounter(name + "Counter");
+            statsd.recordExecutionTime(name + "ExecutionTime", value);
+        }
         accmulatedResponseValue.addAndGet(value);
         successInvocations.incrementAndGet();
         lastSuccessRequestTime = System.currentTimeMillis();
@@ -122,33 +130,27 @@ public class ServiceMetrics implements ServiceMetricsMBean {
         transactionsPerSec[(now.getSeconds() + 1) % SECONDS].set(0);
     }
 
-    @Override
     public Percentile<Long> getPercentile() {
         return percentile;
     }
 
-    @Override
     public double getTotalThroughput() {
         long elapsed = System.currentTimeMillis() - started;
         return elapsed > 0 ? getSuccessInvocations() * 1000.0 / elapsed : 0;
     }
 
-    @Override
     public double getVariance() {
         return accumulatedVariance / getSuccessInvocations();
     }
 
-    @Override
     public double getStandardDeviation() {
         return Math.sqrt(getVariance());
     }
 
-    @Override
     public double getRunningMean() {
         return runningMean;
     }
 
-    @Override
     public double getTotalMean() {
         return runningMean;
     }
@@ -163,17 +165,14 @@ public class ServiceMetrics implements ServiceMetricsMBean {
         return maxValue;
     }
 
-    @Override
     public long getRange() {
         return maxValue - minValue;
     }
 
-    @Override
     public String getPercentileValue() {
         return percentile.toString();
     }
 
-    @Override
     public String getSummary() {
         return "Summary for " + name + "\n\tStarted: "
                 + formatDate(getStartTime()) + "\n\tLast Success Time: "
@@ -189,7 +188,6 @@ public class ServiceMetrics implements ServiceMetricsMBean {
     }
 
     @SuppressWarnings("deprecation")
-    @Override
     public double getLatestThroughput() {
         final Date now = new Date();
         int currentSec = now.getSeconds();
@@ -198,12 +196,10 @@ public class ServiceMetrics implements ServiceMetricsMBean {
                 .get() : transactionsPerSec[currentSec].get());
     }
 
-    @Override
     public double getPeakThroughput() {
         return peakThroughput.get();
     }
 
-    @Override
     public double getLowestThroughput() {
         return lowestThoughput.get();
     }
