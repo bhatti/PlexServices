@@ -128,11 +128,10 @@ public class Request extends AbstractPayload {
 
     @Override
     public String toString() {
-        return "Request [sessionId=" + sessionId + ", responseBuilder="
-                + responseBuilder + ", method=" + method + ", endpoint="
-                + endpoint + ", properties=" + properties + ", headers="
-                + headers + ", createdAt=" + createdAt + ", payload=" + payload
-                + "]";
+        return "Request [sessionId=" + sessionId + ", method=" + method
+                + ", endpoint=" + endpoint + ", properties=" + properties
+                + ", headers=" + headers + ", createdAt=" + createdAt
+                + ", payload=" + payload + "]";
     }
 
     public static Builder builder() {

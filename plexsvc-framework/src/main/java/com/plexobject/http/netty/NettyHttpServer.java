@@ -44,7 +44,7 @@ public class NettyHttpServer implements Lifecycle {
     private static final String KEY_PASSWORD = "keyPassword";
     private static final String KEY_FILE = "keyFile";
     private static final int DEFAULT_HTTP_PORT = 8181;
-    private static final String HTTP_PORT = "httpPort";
+    static final String HTTP_PORT = "httpPort";
 
     // private static final String HTTP_THREADS_COUNT = "httpThreadsCount";
     // private static final String HTTPS_TIMEOUT_SECS = "httpsTimeoutSecs";

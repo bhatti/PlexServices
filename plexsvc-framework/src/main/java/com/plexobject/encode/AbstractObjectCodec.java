@@ -30,13 +30,16 @@ public abstract class AbstractObjectCodec implements ObjectCodec {
     }
 
     protected <T> void populateProperties(Map<String, Object> params, T object) {
-        for (Map.Entry<String, Object> e : params.entrySet()) {
-            try {
-                String name = toCamelCase(e.getKey());
-                BeanUtils.setProperty(object, name, e.getValue());
-            } catch (Exception ex) {
-                log.warn("Failed to set " + e.getKey() + "=>" + e.getValue(),
-                        ex);
+        if (params != null) {
+            for (Map.Entry<String, Object> e : params.entrySet()) {
+                try {
+                    String name = toCamelCase(e.getKey());
+                    BeanUtils.setProperty(object, name, e.getValue());
+                } catch (Exception ex) {
+                    log.warn(
+                            "Failed to set " + e.getKey() + "=>" + e.getValue(),
+                            ex);
+                }
             }
         }
     }

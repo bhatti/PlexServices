@@ -26,14 +26,19 @@ public class Configuration {
         properties.load(in);
     }
 
+    public Configuration(Properties props) {
+        properties.putAll(System.getProperties());
+        properties.putAll(props);
+    }
+
     public CodecType getDefaultCodecType() {
         return CodecType.valueOf(getProperty("defaultCodecType", "JSON")
                 .toUpperCase());
     }
 
     public HttpServiceContainer getDefaultServiceContainer() {
-        return HttpServiceContainer.valueOf(getProperty("defaultServiceContainer",
-                "NETTY").toUpperCase());
+        return HttpServiceContainer.valueOf(getProperty(
+                "defaultServiceContainer", "NETTY").toUpperCase());
     }
 
     public int getDefaultTimeoutSecs() {

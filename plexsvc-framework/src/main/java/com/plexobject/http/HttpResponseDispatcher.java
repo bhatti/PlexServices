@@ -35,12 +35,15 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
 
     protected void doSend(String payload) {
         String location = (String) properties.get(Constants.LOCATION);
+
         if (location != null) {
             redirect(location);
             return;
         }
         try {
-            response.setContentType(codecType.getContentType());
+            if (codecType != null) {
+                response.setContentType(codecType.getContentType());
+            }
             response.setStatus(getStatus());
             //
             for (Map.Entry<String, Object> e : properties.entrySet()) {
