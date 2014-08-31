@@ -38,9 +38,10 @@ public class JettyWebsocketRequestHandler {
             Map<String, Object> params = new HashMap<>();
             Map<String, Object> headers = new HashMap<>();
             Request rawRequest = codec.decode(jsonMsg, Request.class, params);
-            String endpoint = rawRequest.getStringProperty(Constants.ENDPOINT);
+            String endpoint = rawRequest.getEndpoint();
             if (endpoint == null) {
-                log.error("Unknown request without endpoint " + jsonMsg);
+                log.error("Unknown request without endpoint " + jsonMsg
+                        + ", rawRequest " + rawRequest);
                 return;
             }
             for (String name : rawRequest.getPropertyNames()) {
@@ -51,9 +52,13 @@ public class JettyWebsocketRequestHandler {
                     session);
 
             String sessionId = (String) headers.get(Constants.SESSION_ID);
-            com.plexobject.handler.Request req = new com.plexobject.handler.Request(
-                    Method.MESSAGE, endpoint, params, headers, textPayload,
-                    sessionId, dispatcher);
+
+            com.plexobject.handler.Request req = com.plexobject.handler.Request
+                    .builder().setMethod(Method.MESSAGE).setEndpoint(endpoint)
+                    .setParameters(params).setHeaders(headers)
+                    .setPayload(textPayload).setSessionId(sessionId)
+                    .setResponseDispatcher(dispatcher).build();
+
             handler.handle(req);
         }
     }

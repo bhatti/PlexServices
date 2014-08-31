@@ -36,10 +36,16 @@ public class JettyWebRequestHandler extends AbstractHandler {
         String uri = baseRequest.getPathInfo();
         Map<String, Object> headers = getHeaders(baseRequest);
         String sessionId = (String) headers.get(Constants.SESSION_ID);
-        com.plexobject.handler.Request req = new com.plexobject.handler.Request(
-                method, uri, getParams(baseRequest), headers,
-                IOUtils.toString(baseRequest.getInputStream()), sessionId,
-                dispatcher);
+        
+        Map<String, Object> params = getParams(baseRequest);
+        String payload = IOUtils.toString(baseRequest.getInputStream());
+
+        com.plexobject.handler.Request req = com.plexobject.handler.Request
+                .builder().setMethod(method).setEndpoint(uri)
+                .setParameters(params).setHeaders(headers).setPayload(payload)
+                .setSessionId(sessionId).setResponseDispatcher(dispatcher)
+                .build();
+        
         handler.handle(req);
     }
 

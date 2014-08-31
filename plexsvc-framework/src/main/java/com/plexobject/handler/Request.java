@@ -14,31 +14,88 @@ import com.plexobject.service.ServiceConfig.Method;
  *
  */
 public class Request extends AbstractPayload {
+    public static class Builder {
+        private Object payload;
+        private Map<String, Object> params;
+        private Map<String, Object> headers;
+        private String sessionId;
+        private Method method;
+        private String endpoint;
+
+        private AbstractResponseDispatcher responseBuilder;
+
+        public Builder setMethod(Method method) {
+            this.method = method;
+            return this;
+        }
+
+        public Builder setEndpoint(String endpoint) {
+            this.endpoint = endpoint;
+            return this;
+        }
+
+        public Builder setPayload(Object payload) {
+            this.payload = payload;
+            return this;
+        }
+
+        public Builder setSessionId(String sessionId) {
+            this.sessionId = sessionId;
+            return this;
+        }
+
+        public Builder setParameters(Map<String, Object> params) {
+            this.params = params;
+            return this;
+        }
+
+        public Builder setHeaders(Map<String, Object> headers) {
+            this.headers = headers;
+            return this;
+        }
+
+        public Builder setResponseDispatcher(
+                AbstractResponseDispatcher responseBuilder) {
+            this.responseBuilder = responseBuilder;
+            return this;
+        }
+
+        public Request build() {
+            return new Request(method, endpoint, params, headers, payload,
+                    sessionId, responseBuilder);
+        }
+    }
+
     private String sessionId;
     private AbstractResponseDispatcher responseBuilder;
     private Method method;
-    private String uri;
+    private String endpoint;
 
     Request() {
     }
 
-    public Request(Method method, String uri,
+    Request(Method method, String endpoint,
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
-            final String sessionId, final AbstractResponseDispatcher responseBuilder) {
+            final String sessionId,
+            final AbstractResponseDispatcher responseBuilder) {
         super(properties, headers, payload);
         this.method = method;
-        this.uri = uri;
+        this.endpoint = endpoint;
         this.sessionId = sessionId;
         this.responseBuilder = responseBuilder;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public Method getMethod() {
         return method;
     }
 
-    public String getUri() {
-        return uri;
+    public String getEndpoint() {
+        return endpoint;
     }
 
     public String getSessionId() {
@@ -71,8 +128,14 @@ public class Request extends AbstractPayload {
 
     @Override
     public String toString() {
-        return "Request [sessionId=" + sessionId + ", properties=" + properties
-                + ", createdAt=" + createdAt + ", payload=" + payload + "]";
+        return "Request [sessionId=" + sessionId + ", responseBuilder="
+                + responseBuilder + ", method=" + method + ", endpoint="
+                + endpoint + ", properties=" + properties + ", headers="
+                + headers + ", createdAt=" + createdAt + ", payload=" + payload
+                + "]";
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
 }

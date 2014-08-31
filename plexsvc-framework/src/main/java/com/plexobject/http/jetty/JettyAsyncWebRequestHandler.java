@@ -67,12 +67,15 @@ public class JettyAsyncWebRequestHandler extends JettyWebRequestHandler {
                     }
                 }, baseRequest, response);
         Map<String, Object> headers = getHeaders(baseRequest);
+        Map<String, Object> params = getParams(baseRequest);
         String sessionId = (String) headers.get(Constants.SESSION_ID);
+        String payload = IOUtils.toString(baseRequest.getInputStream());
 
-        com.plexobject.handler.Request req = new com.plexobject.handler.Request(
-                method, uri, getParams(baseRequest), headers,
-                IOUtils.toString(baseRequest.getInputStream()), sessionId,
-                dispatcher);
+        com.plexobject.handler.Request req = com.plexobject.handler.Request
+                .builder().setMethod(method).setEndpoint(uri)
+                .setParameters(params).setHeaders(headers).setPayload(payload)
+                .setSessionId(sessionId).setResponseDispatcher(dispatcher)
+                .build();
         handler.handle(req);
     }
 

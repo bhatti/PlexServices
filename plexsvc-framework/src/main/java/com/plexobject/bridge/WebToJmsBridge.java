@@ -68,7 +68,7 @@ public class WebToJmsBridge implements RequestHandler {
         RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
                 .get(request.getMethod());
         final WebToJmsEntry entry = entryPaths != null ? entryPaths.get(
-                request.getUri(), request.getProperties()) : null;
+                request.getEndpoint(), request.getProperties()) : null;
 
         if (entry == null) {
             log.warn("Unknown request received " + request.getPayload()

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
 
@@ -72,9 +73,14 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
             Map<String, Object> headers = getHeaders(request);
 
             String sessionId = (String) headers.get(Constants.SESSION_ID);
-            com.plexobject.handler.Request req = new com.plexobject.handler.Request(
-                    method, uri, getParams(request), headers, payload,
-                    sessionId, dispatcher);
+
+            Map<String, Object> params = getParams(request);
+
+            Request req = Request.builder().setMethod(method).setEndpoint(uri)
+                    .setParameters(params).setHeaders(headers)
+                    .setPayload(payload).setSessionId(sessionId)
+                    .setResponseDispatcher(dispatcher).build();
+
             handler.handle(req);
 
             if (req instanceof LastHttpContent) {

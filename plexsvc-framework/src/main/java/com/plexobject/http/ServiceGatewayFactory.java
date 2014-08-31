@@ -32,7 +32,7 @@ public class ServiceGatewayFactory {
             final Configuration config,
             final RoleAuthorizer authorizer,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
-        RequestHandler executor = new ServiceExecutor(authorizer,
+        RequestHandler executor = new HttpRoutableRequestHandler(authorizer,
                 requestHandlerPathsByMethod);
         Lifecycle server = getServer(type, config, executor, false);
         return new DefaultHttpServiceGateway(config, authorizer,

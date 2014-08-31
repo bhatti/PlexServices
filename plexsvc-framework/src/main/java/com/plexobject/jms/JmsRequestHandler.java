@@ -16,10 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.HandlerInvoker;
+import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.ServiceConfig.Method;
 
 /**
  * This class implements MessageListener for handling requests over JMS and then
@@ -57,17 +59,21 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                 ServiceConfig.class);
         try {
             Map<String, Object> params = JmsClient.getParams(message);
-            final String text = txtMessage.getText();
+            final String textPayload = txtMessage.getText();
             String sessionId = (String) params.get(Constants.SESSION_ID);
-            log.info("Received " + text + " for " + config.endpoint() + " "
-                    + handler.getClass().getSimpleName() + ", headers "
+            log.info("Received " + textPayload + " for " + config.endpoint()
+                    + " " + handler.getClass().getSimpleName() + ", headers "
                     + params + ", session " + sessionId);
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsClient, message.getJMSReplyTo());
             dispatcher.setCodecType(config.codec());
-            new RequestBuilder(handler, roleAuthorizer).setPayload(text)
-                    .setParameters(params).setSessionId(sessionId)
-                    .setResponseDispatcher(dispatcher).invoke();
+
+            Request req = Request.builder().setMethod(Method.MESSAGE)
+                    .setParameters(params).setPayload(textPayload)
+                    .setSessionId(sessionId).setResponseDispatcher(dispatcher)
+                    .build();
+
+            HandlerInvoker.invoke(req, handler, roleAuthorizer);
         } catch (JMSException e) {
             log.error("Failed to handle request", e);
         }

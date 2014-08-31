@@ -6,28 +6,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
+import com.plexobject.handler.HandlerInvoker;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.route.RouteResolver;
 
 /**
- * This class executes http service
+ * This class looks up http handler by route and executes its handler
  * 
  * @author shahzad bhatti
  *
  */
-public class ServiceExecutor implements RequestHandler {
+public class HttpRoutableRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory
-            .getLogger(ServiceExecutor.class);
+            .getLogger(HttpRoutableRequestHandler.class);
     private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
 
     private RoleAuthorizer roleAuthorizer;
 
-    public ServiceExecutor(
+    public HttpRoutableRequestHandler(
             RoleAuthorizer roleAuthorizer,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
         this.roleAuthorizer = roleAuthorizer;
@@ -39,7 +39,7 @@ public class ServiceExecutor implements RequestHandler {
         RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
                 .get(request.getMethod());
         RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
-                .get(request.getUri(), request.getProperties()) : null;
+                .get(request.getEndpoint(), request.getProperties()) : null;
         if (handler == null) {
             log.error("Unknown request received " + request.getPayload() + "/"
                     + request.getProperties());
@@ -52,12 +52,7 @@ public class ServiceExecutor implements RequestHandler {
         // .getContentType());
 
         String sessionId = (String) request.getHeader(Constants.SESSION_ID);
-
-        new RequestBuilder(handler, roleAuthorizer)
-                .setPayload(request.getPayload())
-                .setParameters(request.getProperties()).setSessionId(sessionId)
-                .setResponseDispatcher(request.getResponseDispatcher())
-                .invoke();
+        request.setSessionId(sessionId);
+        HandlerInvoker.invoke(request, handler, roleAuthorizer);
     }
-
 }

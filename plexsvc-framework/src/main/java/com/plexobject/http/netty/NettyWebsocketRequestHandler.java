@@ -141,7 +141,7 @@ public class NettyWebsocketRequestHandler extends
         for (String name : rawRequest.getPropertyNames()) {
             params.put(name, rawRequest.getProperty(name));
         }
-        String endpoint = rawRequest.getStringProperty(Constants.ENDPOINT);
+        String endpoint = rawRequest.getEndpoint();
         if (endpoint == null) {
             log.error("Unknown request without endpoint " + jsonMsg);
             return;
@@ -152,9 +152,13 @@ public class NettyWebsocketRequestHandler extends
                 ctx.channel());
 
         String sessionId = (String) headers.get(Constants.SESSION_ID);
-        com.plexobject.handler.Request req = new com.plexobject.handler.Request(
-                Method.MESSAGE, endpoint, params, headers, textPayload,
-                sessionId, dispatcher);
+
+        Request req = Request.builder().setMethod(Method.MESSAGE)
+                .setEndpoint(endpoint).setParameters(params)
+                .setHeaders(headers).setPayload(textPayload)
+                .setSessionId(sessionId).setResponseDispatcher(dispatcher)
+                .build();
+
         handler.handle(req);
 
     }

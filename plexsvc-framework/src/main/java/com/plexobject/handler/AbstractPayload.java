@@ -18,12 +18,16 @@ public abstract class AbstractPayload {
         this.headers = new HashMap<>();
     }
 
-    public AbstractPayload(final Map<String, Object> properties,
+    protected AbstractPayload(final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload) {
         this.createdAt = System.currentTimeMillis();
         this.properties = properties;
         this.headers = headers;
         this.payload = payload;
+    }
+
+    public void setPayload(Object obj) {
+        this.payload = obj;
     }
 
     public void setProperty(String name, Object value) {

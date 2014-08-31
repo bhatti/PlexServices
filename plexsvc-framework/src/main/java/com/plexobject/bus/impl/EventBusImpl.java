@@ -1,6 +1,5 @@
 package com.plexobject.bus.impl;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,7 +15,6 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
-import com.plexobject.service.ServiceConfig.Method;
 
 /**
  * This class implements EventBus for publishing and subscribing events
@@ -125,25 +123,22 @@ public class EventBusImpl implements EventBus {
                             try {
                                 if (haf.filter == null
                                         || haf.filter.accept(event)) {
-                                    String sessionId = null;
-                                    Method method = null;
-                                    String uri = null;
-                                    Request request = new Request(method, uri,
-                                            new HashMap<String, Object>(),
-                                            new HashMap<String, Object>(),
-                                            event, sessionId,
-                                            new AbstractResponseDispatcher() {
-                                                @Override
-                                                public void send(Object payload) {
-                                                    publish(channel, payload);
-                                                }
+                                    Request request = Request
+                                            .builder()
+                                            .setResponseDispatcher(
+                                                    new AbstractResponseDispatcher() {
+                                                        @Override
+                                                        public void send(
+                                                                Object payload) {
+                                                            publish(channel,
+                                                                    payload);
+                                                        }
 
-                                                @Override
-                                                public void addSessionId(
-                                                        String value) {
-                                                }
-                                            });
-
+                                                        @Override
+                                                        public void addSessionId(
+                                                                String value) {
+                                                        }
+                                                    }).build();
                                     haf.handler.handle(request);
                                 }
                             } catch (Exception ex) {
