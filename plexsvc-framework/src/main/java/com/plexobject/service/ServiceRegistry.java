@@ -16,7 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.http.ServiceGatewayFactory;
+import com.plexobject.http.DefaultHttpServiceGateway;
+import com.plexobject.http.HttpRoutableRequestHandler;
+import com.plexobject.http.HttpServerFactory;
 import com.plexobject.jms.JmsServiceGateway;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
@@ -143,22 +145,20 @@ public class ServiceRegistry implements ServiceGateway {
         try {
             gateways.put(
                     ServiceConfig.GatewayType.HTTP,
-                    ServiceGatewayFactory
-                            .getServiceGateway(
-                                    GatewayType.HTTP,
-                                    config,
-                                    authorizer,
-                                    new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
+                    getHttpServiceGateway(
+                            GatewayType.HTTP,
+                            config,
+                            authorizer,
+                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
             gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
                     config, authorizer));
             gateways.put(
                     ServiceConfig.GatewayType.WEBSOCKET,
-                    ServiceGatewayFactory
-                            .getServiceGateway(
-                                    GatewayType.WEBSOCKET,
-                                    config,
-                                    authorizer,
-                                    new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
+                    getHttpServiceGateway(
+                            GatewayType.WEBSOCKET,
+                            config,
+                            authorizer,
+                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
             return gateways;
         } catch (RuntimeException e) {
             throw e;
@@ -187,4 +187,16 @@ public class ServiceRegistry implements ServiceGateway {
         running = false;
     }
 
+    private static ServiceGateway getHttpServiceGateway(
+            final GatewayType type,
+            final Configuration config,
+            final RoleAuthorizer authorizer,
+            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
+        RequestHandler executor = new HttpRoutableRequestHandler(authorizer,
+                requestHandlerPathsByMethod);
+        Lifecycle server = HttpServerFactory.getHttpServer(type, config,
+                executor, false);
+        return new DefaultHttpServiceGateway(config, authorizer,
+                requestHandlerPathsByMethod, server);
+    }
 }

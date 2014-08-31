@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import com.plexobject.domain.ServiceContainer;
+import com.plexobject.domain.HttpServiceContainer;
 import com.plexobject.encode.CodecType;
 
 /**
@@ -31,8 +31,8 @@ public class Configuration {
                 .toUpperCase());
     }
 
-    public ServiceContainer getDefaultServiceContainer() {
-        return ServiceContainer.valueOf(getProperty("defaultServiceContainer",
+    public HttpServiceContainer getDefaultServiceContainer() {
+        return HttpServiceContainer.valueOf(getProperty("defaultServiceContainer",
                 "JETTY").toUpperCase());
     }
 

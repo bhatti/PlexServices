@@ -15,7 +15,7 @@ import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
-import com.plexobject.http.ServiceGatewayFactory;
+import com.plexobject.http.HttpServerFactory;
 import com.plexobject.jms.JmsClient;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.ServiceConfig.GatewayType;
@@ -43,7 +43,7 @@ public class WebToJmsBridge implements RequestHandler {
             Collection<WebToJmsEntry> entries, GatewayType gatewayType) {
         this.jmsClient = new JmsClient(config);
 
-        this.server = ServiceGatewayFactory.getServer(gatewayType, config,
+        this.server = HttpServerFactory.getHttpServer(gatewayType, config,
                 this, true);
 
         for (WebToJmsEntry e : entries) {
