@@ -8,7 +8,7 @@ PlexService supports role-based security, which are enforced before accessing un
 
 PlexService also provides web-to-jms bridge for accessing services over http or websockets that listen to JMS queues/topics. 
 
-PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface.
+PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
 
 PlexService supports jetty 9.0+ and Netty 4.0+ for hosting web services and you can use http or websockets transport for your services. 
 
@@ -34,7 +34,7 @@ git clone git@github.com:bhatti/PlexService.git
 
 
 ##Version
-- 0.3 : experimental
+- 0.3
 
 ##License
 - MIT
