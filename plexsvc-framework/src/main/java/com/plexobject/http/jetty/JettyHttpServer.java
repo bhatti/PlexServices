@@ -18,6 +18,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.util.Configuration;
 
@@ -39,9 +40,7 @@ public class JettyHttpServer implements Lifecycle {
     private static final String KEYSTORE_PATH = "keystorePath";
     private static final String HTTP_TIMEOUT_SECS = "httpTimeoutSecs";
     private static final int DEFAULT_HTTP_PORT = 8181;
-    private static final String HTTP_PORT = "httpPort";
     private static final int DEFAULT_HTTPS_PORT = 8443;
-    private static final String HTTPS_PORT = "httpsPort";
 
     private final Server server;
     private boolean running;
@@ -60,8 +59,10 @@ public class JettyHttpServer implements Lifecycle {
         // http://git.eclipse.org/c/jetty/org.eclipse.jetty.project.git/tree/examples/async-rest/async-rest-jar/src/main/java/org/eclipse/jetty/example/asyncrest/AsyncRestServlet.java?h=release-9
 
         HttpConfiguration http_config = new HttpConfiguration();
-        int httpsPort = config.getInteger(HTTPS_PORT, DEFAULT_HTTPS_PORT);
-        int httpPort = config.getInteger(HTTP_PORT, DEFAULT_HTTP_PORT);
+        int httpsPort = config.getInteger(Constants.HTTPS_PORT,
+                DEFAULT_HTTPS_PORT);
+        int httpPort = config
+                .getInteger(Constants.HTTP_PORT, DEFAULT_HTTP_PORT);
         int httpTimeoutSecs = config.getInteger(HTTP_TIMEOUT_SECS, 10);
         String keystorePath = config.getProperty(KEYSTORE_PATH);
         String keystorePassword = config.getProperty(KEYSTORE_PASSWORD);

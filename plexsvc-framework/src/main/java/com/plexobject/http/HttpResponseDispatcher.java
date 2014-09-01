@@ -56,7 +56,6 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
                     }
                 }
             }
-
             response.send(payload);
             handledable.setHandled(true);
         } catch (Exception e) {

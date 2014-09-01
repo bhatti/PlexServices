@@ -42,7 +42,6 @@ public class JettyResponseDispatcher extends HttpResponseDispatcher {
             @Override
             public void addCookie(String name, String value) {
                 response.addCookie(new Cookie(name, value));
-                log.info("----- adding cookie " + name + "=>" + value);
             }
 
             @Override
@@ -53,8 +52,6 @@ public class JettyResponseDispatcher extends HttpResponseDispatcher {
             @Override
             public void addHeader(String name, String value) {
                 response.addHeader(name, value);
-                log.info("----- adding header " + name + "=>" + value);
-
             }
 
             @Override
@@ -66,6 +63,7 @@ public class JettyResponseDispatcher extends HttpResponseDispatcher {
             @Override
             public void send(String contents) throws IOException {
                 response.getWriter().println(contents);
+                response.getWriter().flush();
             }
 
             @Override

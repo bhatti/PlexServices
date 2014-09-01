@@ -1,4 +1,4 @@
-package com.plexobject.http.netty;
+package com.plexobject.http.jetty;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,11 +17,11 @@ import com.plexobject.http.HttpServiceContainer;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.ServiceConfig.GatewayType;
 
-public class NettyWebRequestHandlerTest {
+public class JettyWebRequestHandlerTest {
     private static final String PONG = "pong";
-    private static final String PING = "ping";
+    private static final String PING = "<ping>ping</ping>";
     private static final int HTTP_PORT = 8323;
-    private NettyHttpServer server;
+    private JettyHttpServer server;
     private final List<Request> requests = new ArrayList<>();
     private CountDownLatch latch = new CountDownLatch(1);
     private RequestHandler handler = new RequestHandler() {
@@ -35,8 +35,8 @@ public class NettyWebRequestHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        server = (NettyHttpServer) TestWebUtils.createHttpServer(
-                HttpServiceContainer.NETTY, GatewayType.HTTP, HTTP_PORT,
+        server = (JettyHttpServer) TestWebUtils.createHttpServer(
+                HttpServiceContainer.JETTY, GatewayType.HTTP, HTTP_PORT,
                 handler);
         server.start();
     }
@@ -44,7 +44,6 @@ public class NettyWebRequestHandlerTest {
     @After
     public void tearDown() throws Exception {
         server.stop();
-        server.destroy();
     }
 
     @Test

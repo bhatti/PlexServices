@@ -27,6 +27,7 @@ import javax.net.ssl.SSLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.util.Configuration;
 
@@ -44,7 +45,6 @@ public class NettyHttpServer implements Lifecycle {
     private static final String KEY_PASSWORD = "keyPassword";
     private static final String KEY_FILE = "keyFile";
     private static final int DEFAULT_HTTP_PORT = 8181;
-    static final String HTTP_PORT = "httpPort";
 
     // private static final String HTTP_THREADS_COUNT = "httpThreadsCount";
     // private static final String HTTPS_TIMEOUT_SECS = "httpsTimeoutSecs";
@@ -120,7 +120,8 @@ public class NettyHttpServer implements Lifecycle {
         if (channel != null) {
             return;
         }
-        int httpPort = config.getInteger(HTTP_PORT, DEFAULT_HTTP_PORT);
+        int httpPort = config
+                .getInteger(Constants.HTTP_PORT, DEFAULT_HTTP_PORT);
 
         try {
             channel = bootstrap.bind(httpPort).sync().channel();

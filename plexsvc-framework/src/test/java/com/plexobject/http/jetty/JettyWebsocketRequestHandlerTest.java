@@ -1,4 +1,4 @@
-package com.plexobject.http.netty;
+package com.plexobject.http.jetty;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,29 +18,26 @@ import com.plexobject.http.HttpServiceContainer;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.ServiceConfig.GatewayType;
 
-public class NettyWebsocketRequestHandlerTest {
+public class JettyWebsocketRequestHandlerTest {
     private static final int HTTP_PORT = 8323;
 
     private static final String PONG = "pong";
-    private static final String PING = "ping";
-
-    private NettyHttpServer server;
+    private static final String PING = "<ping>ping</ping>";
+    private JettyHttpServer server;
     private final List<Request> requests = new ArrayList<>();
-
     private RequestHandler handler = new RequestHandler() {
         @Override
         public void handle(Request request) {
             requests.add(request);
             request.getResponseDispatcher().setCodecType(CodecType.JSON);
-
             request.getResponseDispatcher().send(PONG);
         }
     };
 
     @Before
     public void setUp() throws Exception {
-        server = (NettyHttpServer) TestWebUtils.createHttpServer(
-                HttpServiceContainer.NETTY, GatewayType.WEBSOCKET, HTTP_PORT,
+        server = (JettyHttpServer) TestWebUtils.createHttpServer(
+                HttpServiceContainer.JETTY, GatewayType.WEBSOCKET, HTTP_PORT,
                 handler);
 
         server.start();
@@ -49,7 +46,6 @@ public class NettyWebsocketRequestHandlerTest {
     @After
     public void tearDown() throws Exception {
         server.stop();
-        server.destroy();
     }
 
     @Test
@@ -69,4 +65,5 @@ public class NettyWebsocketRequestHandlerTest {
                         new HashMap<String, Object>());
         assertEquals(PONG, response.getPayload());
     }
+
 }
