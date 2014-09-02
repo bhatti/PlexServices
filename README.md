@@ -501,7 +501,7 @@ public class QuoteStreamer extends TimerTask {
 Here is a javascript client that subscribes to the streaming quotes:
 ```javascript
    <script>
-      var ws = new WebSocket("ws://127.0.0.1:8181/quotes");
+      var ws = new WebSocket("ws://127.0.0.1:8181/ws");
       ws.onopen = function() {
       };
       var lasts = {};
