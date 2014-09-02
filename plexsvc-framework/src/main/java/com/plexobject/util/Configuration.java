@@ -42,11 +42,11 @@ public class Configuration {
     }
 
     public int getDefaultTimeoutSecs() {
-        return getInteger("serviceTimeoutSecs", 10);
+        return getInteger("http.serviceTimeoutSecs", 10);
     }
 
     public String getDefaultWebsocketUri() {
-        return getProperty("websocketUri", "/ws");
+        return getProperty("http.websocketUri", "/ws");
     }
 
     public boolean isSsl() {
