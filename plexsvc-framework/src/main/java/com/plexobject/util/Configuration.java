@@ -38,7 +38,7 @@ public class Configuration {
 
     public HttpServiceContainer getDefaultServiceContainer() {
         return HttpServiceContainer.valueOf(getProperty(
-                "defaultServiceContainer", "NETTY").toUpperCase());
+                "http.webServiceContainer", "NETTY").toUpperCase());
     }
 
     public int getDefaultTimeoutSecs() {

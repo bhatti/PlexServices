@@ -195,7 +195,7 @@ public class TestWebUtils {
     public static Lifecycle createHttpServer(HttpServiceContainer container,
             GatewayType type, int port, RequestHandler handler) {
         Properties props = new Properties();
-        props.setProperty("defaultServiceContainer", container.name());
+        props.setProperty("http.webServiceContainer", container.name());
         props.setProperty(Constants.HTTP_PORT, String.valueOf(port));
         Configuration config = new Configuration(props);
         return HttpServerFactory.getHttpServer(type, config, handler, true);

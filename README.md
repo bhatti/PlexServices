@@ -367,6 +367,30 @@ bridge.startBridge();
     "destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
 ```
 
+### Configuring JMS provider in configuration
+Here is how you can specify JMS container in properties file, which is passed
+to the runtime.
+```bash
+jms.contextFactory=org.apache.activemq.jndi.ActiveMQInitialContextFactory
+jms.providerUrl=tcp://localhost:61616
+jms.connectionFactoryLookup=ConnectionFactory
+```
+In above example, we are using ActiveMQ as JMS container 
+
+
+### Configuring HTTP container in configuration
+Here is how you can specify container for your web services in properties file:
+to the runtime.
+```bash
+http.webServiceContainer=JETTY 
+```
+In above example, we are using Jetty embedded server for hosting web services.
+We can switch to Netty embedded server by changing configuration file
+as follows:
+```bash
+http.webServiceContainer=NETTY 
+```
+
 
 ### Adding Streaming Quotes Service over Websockets 
 Here is an example of creating a streaming quote server that sends real-time
