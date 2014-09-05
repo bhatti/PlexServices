@@ -1,0 +1,1 @@
+[{"codecType":"JSON","type":"JMS_TO_EB_CHANNEL", "source":"queue:{scope}-query-user-service-queue","target":"query-user-channel", "requestType":"com.plexobject.bugger.model.User"}, {"codecType":"JSON","type":"EB_CHANNEL_TO_JMS", "source":"create-user","target":"queue:{scope}-assign-bugreport-service-queue","requestType":"com.plexobject.bugger.model.User"}]

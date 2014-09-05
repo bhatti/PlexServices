@@ -8,8 +8,8 @@ import org.apache.activemq.broker.BrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.bridge.WebToJmsBridge;
-import com.plexobject.bridge.WebToJmsEntry;
+import com.plexobject.bridge.web.WebToJmsBridge;
+import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.bugger.Main;
 import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;

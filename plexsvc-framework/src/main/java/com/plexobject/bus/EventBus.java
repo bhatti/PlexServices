@@ -1,5 +1,6 @@
 package com.plexobject.bus;
 
+import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
 
@@ -39,8 +40,8 @@ public interface EventBus {
      * 
      * @param channel
      *            - where event will be published
-     * @param e
-     *            - event
+     * @param req
+     *            - Request
      */
-    void publish(String channel, Object e);
+    void publish(String channel, Request req);
 }

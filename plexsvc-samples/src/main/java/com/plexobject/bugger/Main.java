@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.plexobject.bridge.WebToJmsBridge;
-import com.plexobject.bridge.WebToJmsEntry;
+import com.plexobject.bridge.web.WebToJmsBridge;
+import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.bugger.model.BugReport;
 import com.plexobject.bugger.model.BugReport.Priority;
 import com.plexobject.bugger.model.BuggerRoleAuthorizer;

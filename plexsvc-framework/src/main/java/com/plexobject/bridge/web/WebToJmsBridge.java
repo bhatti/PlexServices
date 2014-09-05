@@ -1,4 +1,4 @@
-package com.plexobject.bridge;
+package com.plexobject.bridge.web;
 
 import java.io.FileInputStream;
 import java.util.Collection;
@@ -117,12 +117,12 @@ public class WebToJmsBridge implements RequestHandler {
         }
     }
 
-    public void startBridge() {
+    public synchronized void startBridge() {
         jmsClient.start();
         server.start();
     }
 
-    public void stopBridge() {
+    public synchronized void stopBridge() {
         jmsClient.stop();
         server.stop();
     }

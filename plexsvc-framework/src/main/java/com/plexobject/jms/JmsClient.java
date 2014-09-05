@@ -249,6 +249,12 @@ public class JmsClient implements Lifecycle {
         }
     }
 
+    public void send(final String destName, final Map<String, Object> headers,
+            final String payload) throws JMSException, NamingException {
+        Destination destination = getDestination(destName);
+        send(destination, headers, payload);
+    }
+
     public void send(final Destination destination,
             final Map<String, Object> headers, final String payload)
             throws JMSException, NamingException {
@@ -304,6 +310,11 @@ public class JmsClient implements Lifecycle {
     public Message createTextMessage(String payload) throws JMSException,
             NamingException {
         return currentJmsSession().createTextMessage(payload);
+    }
+
+    public MessageConsumer createConsumer(final String destName)
+            throws JMSException, NamingException {
+        return createConsumer(getDestination(destName));
     }
 
     public MessageConsumer createConsumer(final Destination destination)

@@ -31,6 +31,18 @@ run {
   ]
 }
 
+task eb(type:JavaExec) {
+  main = 'com.plexobject.bugger.EBBridgeMain'
+  classpath = sourceSets.main.runtimeClasspath
+  //args project.args.split('\\s+')
+  args "bugger.properties,eb_jms_services_mapping.json".split(",")
+  systemProperties = [
+    "com.sun.management.jmxremote.ssl":"false",
+    "com.sun.management.jmxremote.authenticate":"false",
+    "com.sun.management.jmxremote.port":"9292",
+  ]
+}
+
 task bugger(type:JavaExec) {
   main = 'com.plexobject.bugger.Main'
   classpath = sourceSets.main.runtimeClasspath
@@ -39,7 +51,7 @@ task bugger(type:JavaExec) {
   systemProperties = [
     "com.sun.management.jmxremote.ssl":"false",
     "com.sun.management.jmxremote.authenticate":"false",
-    "com.sun.management.jmxremote.port":"9191",
+    "com.sun.management.jmxremote.port":"9393",
   ]
 }
 

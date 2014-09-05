@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.bus.EventBus;
-import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
@@ -66,6 +65,10 @@ public class EventBusImpl implements EventBus {
     private final AtomicLong nextSubscriberId = new AtomicLong(0);
     private final ExecutorService executor;
 
+    public EventBusImpl() {
+        this(4);
+    }
+
     public EventBusImpl(int maxDispatchThreads) {
         this.executor = Executors.newFixedThreadPool(maxDispatchThreads > 0
                 && maxDispatchThreads < 16 ? maxDispatchThreads : 1);
@@ -109,9 +112,9 @@ public class EventBusImpl implements EventBus {
     }
 
     @Override
-    public void publish(final String channel, final Object event) {
+    public void publish(final String channel, final Request request) {
         Objects.requireNonNull(channel, "channel is not specified");
-        Objects.requireNonNull(event, "event is not specified");
+        Objects.requireNonNull(request, "request is not specified");
         synchronized (channel.intern()) {
             final Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
                     .get(channel);
@@ -122,27 +125,12 @@ public class EventBusImpl implements EventBus {
                         for (HandlerAndFilter haf : handlers.values()) {
                             try {
                                 if (haf.filter == null
-                                        || haf.filter.accept(event)) {
-                                    Request request = Request
-                                            .builder()
-                                            .setResponseDispatcher(
-                                                    new AbstractResponseDispatcher() {
-                                                        @Override
-                                                        public void send(
-                                                                Object payload) {
-                                                            publish(channel,
-                                                                    payload);
-                                                        }
-
-                                                        @Override
-                                                        public void addSessionId(
-                                                                String value) {
-                                                        }
-                                                    }).build();
+                                        || haf.filter.accept(request
+                                                .getPayload())) {
                                     haf.handler.handle(request);
                                 }
                             } catch (Exception ex) {
-                                log.error("Failed to publish " + event, ex);
+                                log.error("Failed to publish " + request, ex);
                             }
                         }
                     }

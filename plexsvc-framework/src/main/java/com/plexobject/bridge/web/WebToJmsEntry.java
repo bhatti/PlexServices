@@ -1,4 +1,4 @@
-package com.plexobject.bridge;
+package com.plexobject.bridge.web;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.encode.CodecType;
