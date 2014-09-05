@@ -409,6 +409,9 @@ eb.subscribe("test-channel", new RequestHandler() {
 }, null);
 ```
 
+You can optionally pass predicate parameter with subscribe so that you only receive messages that are accepted by your predicate.
+
+
 ### Connecting EventBus to JMS for external communication
 Similar to web-to-jms bridge, PlexService provides event-bus-to-jms bridge, which allows you convert messages from JMS queue/topic into request objects and receive them via event-bus. Likewise, you can setup outgoing bridge to send messages that are published to event bus be forwarded to JMS queues/topics. The bridge also performs encoding similar to JMS or web services, e.g.
 ```java  
