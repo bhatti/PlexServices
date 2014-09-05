@@ -392,6 +392,47 @@ http.webServiceContainer=NETTY
 ```
 
 
+### EventBus for intra-process communication
+Here is an example of using EventBus publishing or subscribing messages within the same process:
+```java 
+EventBus eb = new EventBusImpl();
+// publishing a request
+Request req = Request.builder().setPayload("test").build();
+eb.publish("test-channel", req);
+
+// subscribing to receive requests
+eb.subscribe("test-channel", new RequestHandler() {
+   @Override
+   public void handle(Request request) {
+       System.out.println("Received " + request);
+   }
+}, null);
+```
+
+### Connecting EventBus to JMS for external communication
+Similar to web-to-jms bridge, PlexService provides event-bus-to-jms bridge, which allows you convert messages from JMS queue/topic into request objects and receive them via event-bus. Likewise, you can setup outgoing bridge to send messages that are published to event bus be forwarded to JMS queues/topics. The bridge also performs encoding similar to JMS or web services, e.g.
+```java  
+final String mappingJson = IOUtils
+       .toString(new FileInputStream(args[1]));
+Collection<EventBusToJmsEntry> entries = new JsonObjectCodec().decode(
+       mappingJson, new TypeReference<List<EventBusToJmsEntry>>() {
+       });
+Configuration config = new Configuration(args[0]);
+EventBus eb = new EventBusImpl();
+EventBusToJmsBridge bridge = new EventBusToJmsBridge(config, entries, eb);
+bridge.startBridge();
+```
+
+Here is a sample json file that describes mapping:
+```javascript
+[{"codecType":"JSON","type":"JMS_TO_EB_CHANNEL", "source":"queue:{scope}-query-user-service-queue",
+"target":"query-user-channel", "requestType":"com.plexobject.bugger.model.User"}, 
+{"codecType":"JSON","type":"EB_CHANNEL_TO_JMS", "source":"create-user",
+"target":"queue:{scope}-assign-bugreport-service-queue","requestType":
+"com.plexobject.bugger.model.User"}]
+```
+
+
 ### Adding Streaming Quotes Service over Websockets 
 Here is an example of creating a streaming quote server that sends real-time
 quote quotes over the websockets.

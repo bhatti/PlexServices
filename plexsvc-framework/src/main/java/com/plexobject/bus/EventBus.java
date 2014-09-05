@@ -24,7 +24,7 @@ public interface EventBus {
      * @return - subscription-id used for unsubscribing
      */
     long subscribe(String channel, RequestHandler handler,
-            Predicate<Object> filter);
+            Predicate<Request> filter);
 
     /**
      * This method unsubscriber with given id

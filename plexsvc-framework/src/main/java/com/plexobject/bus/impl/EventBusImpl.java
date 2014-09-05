@@ -28,10 +28,10 @@ public class EventBusImpl implements EventBus {
     private static class HandlerAndFilter {
         private final long id;
         private final RequestHandler handler;
-        private final Predicate<Object> filter;
+        private final Predicate<Request> filter;
 
         public HandlerAndFilter(final long id, final RequestHandler handler,
-                final Predicate<Object> filter) {
+                final Predicate<Request> filter) {
             this.id = id;
             this.handler = handler;
             this.filter = filter;
@@ -76,7 +76,7 @@ public class EventBusImpl implements EventBus {
 
     @Override
     public long subscribe(String channel, RequestHandler handler,
-            Predicate<Object> filter) {
+            Predicate<Request> filter) {
         Objects.requireNonNull(channel, "channel is not specified");
         Objects.requireNonNull(handler, "handler is not specified");
         synchronized (channel.intern()) {
@@ -125,8 +125,7 @@ public class EventBusImpl implements EventBus {
                         for (HandlerAndFilter haf : handlers.values()) {
                             try {
                                 if (haf.filter == null
-                                        || haf.filter.accept(request
-                                                .getPayload())) {
+                                        || haf.filter.accept(request)) {
                                     haf.handler.handle(request);
                                 }
                             } catch (Exception ex) {

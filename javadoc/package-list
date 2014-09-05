@@ -1,4 +1,5 @@
-com.plexobject.bridge
+com.plexobject.bridge.eb
+com.plexobject.bridge.web
 com.plexobject.bus
 com.plexobject.bus.impl
 com.plexobject.domain

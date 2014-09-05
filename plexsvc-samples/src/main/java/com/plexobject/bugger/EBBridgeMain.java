@@ -13,6 +13,8 @@ import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bus.EventBus;
 import com.plexobject.bus.impl.EventBusImpl;
 import com.plexobject.encode.json.JsonObjectCodec;
+import com.plexobject.handler.Request;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
@@ -40,6 +42,14 @@ public class EBBridgeMain {
         // startJmsBroker();
 
         EventBus eb = new EventBusImpl();
+        eb.subscribe("test-channel", new RequestHandler() {
+            @Override
+            public void handle(Request request) {
+                System.out.println("Received " + request);
+            }
+        }, null);
+        Request req = Request.builder().setPayload("test").build();
+        eb.publish("test-channel", req);
         EventBusToJmsBridge bridge = new EventBusToJmsBridge(config, entries,
                 eb);
         bridge.startBridge();
