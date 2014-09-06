@@ -61,7 +61,10 @@ RequestHandler {
     }
 }
 ```
-
+You can invoke the service with HTTP request, e.g.
+```bash 
+curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/users" -d "{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"
+```
 
 ### Defining a Web service over Websockets for creating a user
 ```java 
@@ -88,7 +91,7 @@ Note that we use URL format for endpoints for websockets, but it can be in any f
 
 ### Accessing Websocket services from Javascript
 ```javascript 
-var ws = new WebSocket("ws://127.0.0.1:8181/users");
+var ws = new WebSocket("ws://127.0.0.1:8181/ws");
 ws.onopen = function() {
   var req = {"payload":"", "endpoint":"/login", "method":"POST", "username":"scott", "password":"pass"};
   ws.send(JSON.stringify(req));
@@ -185,7 +188,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
 ### Consuming Websocket based service for creating bug-report 
 ```javascript
  
-var ws = new WebSocket("ws://127.0.0.1:8181/users");
+var ws = new WebSocket("ws://127.0.0.1:8181/ws");
 ws.onopen = function() {
   var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", 
     "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", 
