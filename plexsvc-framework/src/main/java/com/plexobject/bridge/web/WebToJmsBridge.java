@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.encode.json.JsonObjectCodec;
+import com.plexobject.handler.Handler;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
@@ -80,41 +81,49 @@ public class WebToJmsBridge implements RequestHandler {
         params.putAll(request.getProperties());
         params.putAll(request.getHeaders());
         try {
-            jmsClient.sendReceive(entry.getDestination(), params,
-                    request.getPayload(),
-                    new com.plexobject.handler.Handler<Response>() {
-                        @Override
-                        public void handle(Response reply) {
-                            try {
-                                for (String name : reply.getHeaderNames()) {
-                                    request.getResponseDispatcher()
-                                            .setProperty(name,
-                                                    reply.getHeader(name));
-                                }
-                                for (String name : reply.getPropertyNames()) {
-                                    request.getResponseDispatcher()
-                                            .setProperty(name,
-                                                    reply.getProperty(name));
-                                }
-                                // dispatcher.setCodecType(CodecType.TEXT);
-                                request.getResponseDispatcher().setCodecType(
-                                        entry.getCodecType());
-                                request.getResponseDispatcher().send(
-                                        reply.getPayload());
-                                log.info("Replying back " + entry + ", reply "
-                                        + reply + ", params " + params
-                                        + ", dispatcher" + ": "
-                                        + request.getResponseDispatcher());
-                            } catch (Exception e) {
-                                log.error("Could not send back websocket "
-                                        + reply, e);
-                            }
-                        }
-
-                    }, false);
+            if (entry.isAsynchronous()) {
+                jmsClient.send(entry.getDestination(), params,
+                        request.getPayload());
+                request.getResponseDispatcher().setCodecType(
+                        entry.getCodecType());
+                request.getResponseDispatcher().send("");
+            } else {
+                jmsClient.sendReceive(entry.getDestination(), params,
+                        request.getPayload(),
+                        sendbackReply(request, entry, params), true);
+            }
         } catch (Exception e) {
             log.error("Failed to send request", e);
         }
+    }
+
+    private Handler<Response> sendbackReply(Request request,
+            final WebToJmsEntry entry, Map<String, Object> params) {
+        return new com.plexobject.handler.Handler<Response>() {
+            @Override
+            public void handle(Response reply) {
+                try {
+                    for (String name : reply.getHeaderNames()) {
+                        request.getResponseDispatcher().setProperty(name,
+                                reply.getHeader(name));
+                    }
+                    for (String name : reply.getPropertyNames()) {
+                        request.getResponseDispatcher().setProperty(name,
+                                reply.getProperty(name));
+                    }
+                    // dispatcher.setCodecType(CodecType.TEXT);
+                    request.getResponseDispatcher().setCodecType(
+                            entry.getCodecType());
+                    request.getResponseDispatcher().send(reply.getPayload());
+                    log.info("Replying back " + entry + ", reply " + reply
+                            + ", params " + params + ", dispatcher" + ": "
+                            + request.getResponseDispatcher());
+                } catch (Exception e) {
+                    log.error("Could not send back websocket " + reply, e);
+                }
+            }
+
+        };
     }
 
     public synchronized void startBridge() {

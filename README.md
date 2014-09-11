@@ -57,13 +57,14 @@ RequestHandler {
       User user = request.getPayload();
       user.validate();
       User saved = userRepository.save(user);
-      request.getResponseBuilder().send(saved);
+      request.getResponseDispatcher().send(saved);
     }
 }
 ```
 You can invoke the service with HTTP request, e.g.
 ```bash 
-curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/users" -d "{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"
+curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/users" 
+  -d "{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"
 ```
 
 ### Defining a Web service over Websockets for creating a user
@@ -82,7 +83,7 @@ RequestHandler {
       User user = request.getPayload();
       user.validate();
       User saved = userRepository.save(user);
-      request.getResponseBuilder().send(saved);
+      request.getResponseDispatcher().send(saved);
     }
 }
 ```
@@ -93,7 +94,8 @@ Note that we use URL format for endpoints for websockets, but it can be in any f
 ```javascript 
 var ws = new WebSocket("ws://127.0.0.1:8181/ws");
 ws.onopen = function() {
-  var req = {"payload":"", "endpoint":"/login", "method":"POST", "username":"scott", "password":"pass"};
+  var req = {"payload":"", "endpoint":"/login", "method":"POST", 
+    "username":"scott", "password":"pass"};
   ws.send(JSON.stringify(req));
 };
 
@@ -124,11 +126,12 @@ public class CreateUserService extends AbstractUserService implements RequestHan
       User user = request.getPayload();
       user.validate();
       User saved = userRepository.save(user);
-      request.getResponseBuilder().send(saved);
+      request.getResponseDispatcher().send(saved);
     }
 }
 ```
-  The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexService will serialize POJO classes into JSON when delivering messages over JMS.
+
+The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexService will serialize POJO classes into JSON when delivering messages over JMS.
 
 
 ### Defining a REST service with parameterized URLs
@@ -148,15 +151,15 @@ public class CreateBugReportService extends AbstractBugReportService implements 
         BugReport report = request.getPayload();
         report.validate();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseBuilder().send(saved);
+        request.getResponseDispatcher().send(saved);
       }
 }
 ```
 
-  The http end-point or URL can also store variables, but unlike end-points for
-  queues/topics, they are populated using http parameters. For example, projectId
-  parameter would be populated from URL in above example. PlexService will serialize POJO 
-  classes into JSON when delivering messages over HTTP.
+The http end-point or URL can also store variables, but unlike end-points for
+queues/topics, they are populated using http parameters. For example, projectId
+parameter would be populated from URL in above example. PlexService will serialize POJO 
+classes into JSON when delivering messages over HTTP.
 
 ### Defining a Websocket based service to create bug-report 
 ```java 
@@ -175,13 +178,13 @@ public class CreateBugReportService extends AbstractBugReportService implements
         BugReport report = request.getPayload();
         report.validate();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseBuilder().send(saved);
+        request.getResponseDispatcher().send(saved);
     }
 
 }
 ```
 
-  For websocket based services, the parameters are passed explicitly by consumer. 
+For websocket based services, the parameters are passed explicitly by consumer. 
 PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.
 
 
@@ -207,7 +210,7 @@ ws.onerror = function(err) {
 };
 ```
 
-  For websocket based services, the parameters are passed explicitly by consumer. 
+For websocket based services, the parameters are passed explicitly by consumer. 
 PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.
 
 ### Defining a REST service for querying users
@@ -228,7 +231,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
             return true;
             }
             });
-        request.getResponseBuilder().send(users);
+        request.getResponseDispatcher().send(users);
       }
   }
 ```
@@ -252,7 +255,7 @@ public class QueryUserService extends AbstractUserService implements RequestHand
             return true;
             }
             });
-        request.getResponseBuilder().send(users);
+        request.getResponseDispatcher().send(users);
       }
 }
 ```
@@ -367,8 +370,17 @@ bridge.startBridge();
   {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}","method":"POST",
     "destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
   {"codecType":"JSON","path":"/login","method":"POST",
-    "destination":"queue:{scope}-login-service-queue","timeoutSecs":30}]
+    "destination":"queue:{scope}-login-service-queue","timeoutSecs":30},
+  {"codecType":"JSON","path":"/logs","method":"POST",
+    "destination":"queue:{scope}-log-service-queue","asynchronous":true}]
 ```
+
+The web bridge supports both synchronous and asynchronous requests. When the
+configuration defines asynchronous flag as true then message is sent to JMS
+but, it does not wait for response. When asynchronous flag is false (by
+default), then message is sent to JMS and the web server waits for the response
+from the JMS handler. If it doesn't receive the message within timeout then an
+error is returned to the web client.
 
 ### Configuring JMS provider in configuration
 Here is how you can specify JMS container in properties file, which is passed
@@ -469,9 +481,9 @@ public class QuoteServer implements RequestHandler {
                         "action not specified").end();
         Action action = Action.valueOf(actionVal.toUpperCase());
         if (action == Action.SUBSCRIBE) {
-            quoteStreamer.add(symbol, request.getResponseBuilder());
+            quoteStreamer.add(symbol, request.getResponseDispatcher());
         } else {
-            quoteStreamer.remove(symbol, request.getResponseBuilder());
+            quoteStreamer.remove(symbol, request.getResponseDispatcher());
         }
     }
 

@@ -160,7 +160,7 @@ public class JmsClient implements Lifecycle {
         }
     }
 
-    public void sendReceive(final String destName,
+    public Closeable sendReceive(final String destName,
             final Map<String, Object> headers, final String payload,
             final Handler<Response> handler, final boolean singleUseOnly)
             throws JMSException, NamingException {
@@ -175,6 +175,7 @@ public class JmsClient implements Lifecycle {
             public void close() {
                 try {
                     consumer.close();
+                    log.info("Closing consumer for dest " + destName);
                 } catch (JMSException e) {
                     log.warn("Failed to close", e);
                 }
@@ -220,6 +221,7 @@ public class JmsClient implements Lifecycle {
         createProducer(destination).send(reqMsg);
         log.info("Sent '" + payload + "' to " + destination + ", headers "
                 + headers);
+        return closeable;
     }
 
     private void setHeaders(final Map<String, Object> headers, Message reqMsg)

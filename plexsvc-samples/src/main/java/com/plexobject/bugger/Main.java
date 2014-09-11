@@ -28,6 +28,7 @@ import com.plexobject.bugger.service.bugreport.CreateBugReportService;
 import com.plexobject.bugger.service.bugreport.QueryBugReportService;
 import com.plexobject.bugger.service.bugreport.QueryProjectBugReportService;
 import com.plexobject.bugger.service.bugreport.UpdateBugReportService;
+import com.plexobject.bugger.service.log.LogService;
 import com.plexobject.bugger.service.project.CreateProjectService;
 import com.plexobject.bugger.service.project.QueryProjectService;
 import com.plexobject.bugger.service.project.UpdateProjectService;
@@ -81,6 +82,7 @@ public class Main {
 
     private Collection<RequestHandler> addServices() {
         Collection<RequestHandler> services = new HashSet<>();
+        services.add(new LogService());
         services.add(new CreateUserService(userRepository));
         services.add(new UpdateUserService(userRepository));
         services.add(new QueryUserService(userRepository));
