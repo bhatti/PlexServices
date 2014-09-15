@@ -246,6 +246,7 @@ public class JmsClient implements Lifecycle {
             } else if (value instanceof Double) {
                 reqMsg.setDoubleProperty(name, (Double) value);
             } else {
+                log.info("*** key " + name + ", value " + value);
                 reqMsg.setStringProperty(e.getKey(), e.getValue().toString());
             }
         }

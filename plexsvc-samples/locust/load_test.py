@@ -6,14 +6,14 @@ import time
 session_id = 4
 
 def login(l):
-  response = l.client.post("/login", {"username":"scott", "password":"pass"}) 
+  response = l.client.post("/login?username=scott&password=pass", {}) 
   if len(response.headers) > 0:
     session_id = response.headers['PlexSessionId']
   else:
     print "failed to login %s" % (response,) 
 
 def assign_bugreport(l):
-  l.client.post("/projects/2/bugreports/2/assign", {"assignedTo":"scott"}, headers={"PlexSessionId":session_id}) 
+  l.client.post("/projects/2/bugreports/2/assign?assignedTo=scott", {}, headers={"PlexSessionId":session_id}) 
 
 def query_users(l):
   response = l.client.get("/users", headers={"PlexSessionId":session_id})
@@ -45,10 +45,10 @@ def delete_user(l):
   response = l.client.post("/users/3/delete", headers={"PlexSessionId":session_id})
 
 def add_member(l):
-  response = l.client.post("/projects/2/membership/add", {"projectLead":"true", "assignedTo":"scott"}, headers={"PlexSessionId":session_id}) 
+  response = l.client.post("/projects/2/membership/add?projectLead=true&assignedTo=scott", {}, headers={"PlexSessionId":session_id}) 
 
 def remove_member(l):
-  response = l.client.post("/projects/2/membership/remove", {"projectLead":"true", "assignedTo":"scott"}, headers={"PlexSessionId":session_id}) 
+  response = l.client.post("/projects/2/membership/remove?projectLead=true&assignedTo=scott", {}, headers={"PlexSessionId":session_id}) 
 
 
 class LoadTestTask(TaskSet):

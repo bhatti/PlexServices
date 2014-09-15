@@ -12,7 +12,8 @@ import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Response;
 
-public class JettyWebsocketResponseDispatcher extends AbstractResponseDispatcher {
+public class JettyWebsocketResponseDispatcher extends
+        AbstractResponseDispatcher {
     private static final Logger log = LoggerFactory
             .getLogger(JettyWebsocketResponseDispatcher.class);
     private final Session session;
@@ -28,10 +29,6 @@ public class JettyWebsocketResponseDispatcher extends AbstractResponseDispatcher
 
     @Override
     public void send(Object payload) {
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        if (sessionId != null) {
-            addSessionId(sessionId);
-        }
         try {
             Response response = new Response(properties,
                     new HashMap<String, Object>(), payload);

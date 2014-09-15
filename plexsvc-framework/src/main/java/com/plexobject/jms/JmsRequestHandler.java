@@ -14,7 +14,6 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -59,17 +58,16 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
         try {
             Map<String, Object> params = JmsClient.getParams(message);
             final String textPayload = txtMessage.getText();
-            String sessionId = (String) params.get(Constants.SESSION_ID);
             log.info("Received " + textPayload + " for " + config.endpoint()
                     + " " + handler.getClass().getSimpleName() + ", headers "
-                    + params + ", session " + sessionId);
+                    + params);
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsClient, message.getJMSReplyTo());
             dispatcher.setCodecType(config.codec());
 
             Request req = Request.builder().setMethod(Method.MESSAGE)
-                    .setParameters(params).setPayload(textPayload)
-                    .setSessionId(sessionId).setResponseDispatcher(dispatcher)
+                    .setProperties(params).setPayload(textPayload)
+                    .setResponseDispatcher(dispatcher)
                     .build();
 
             serviceRegistry.invoke(req, handler);

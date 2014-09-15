@@ -14,7 +14,6 @@ import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.Handledable;
@@ -68,14 +67,12 @@ public class JettyAsyncWebRequestHandler extends JettyWebRequestHandler {
                 }, baseRequest, response);
         Map<String, Object> headers = getHeaders(baseRequest);
         Map<String, Object> params = getParams(baseRequest);
-        String sessionId = (String) headers.get(Constants.SESSION_ID);
         String payload = IOUtils.toString(baseRequest.getInputStream());
 
         com.plexobject.handler.Request req = com.plexobject.handler.Request
                 .builder().setMethod(method).setEndpoint(uri)
-                .setParameters(params).setHeaders(headers).setPayload(payload)
-                .setSessionId(sessionId).setResponseDispatcher(dispatcher)
-                .build();
+                .setProperties(params).setHeaders(headers).setPayload(payload)
+                .setResponseDispatcher(dispatcher).build();
         handler.handle(req);
     }
 

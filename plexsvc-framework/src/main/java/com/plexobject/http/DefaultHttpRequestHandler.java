@@ -5,7 +5,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig;
@@ -49,8 +48,6 @@ public class DefaultHttpRequestHandler implements RequestHandler {
         // dispatcher.setContentType(config.codec()
         // .getContentType());
 
-        String sessionId = (String) request.getHeader(Constants.SESSION_ID);
-        request.setSessionId(sessionId);
         serviceRegistry.invoke(request, handler);
     }
 }

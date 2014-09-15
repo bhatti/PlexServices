@@ -31,10 +31,6 @@ public class NettyWebsocketResponseDispatcher extends
 
     @Override
     public void send(Object payload) {
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        if (sessionId != null) {
-            addSessionId(sessionId);
-        }
         try {
             Response response = new Response(properties,
                     new HashMap<String, Object>(), payload);

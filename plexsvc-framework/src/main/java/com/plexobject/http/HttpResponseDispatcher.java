@@ -29,8 +29,10 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
     }
 
     public void addSessionId(String value) {
-        properties.put(Constants.SESSION_ID, value);
-        response.addCookie(Constants.SESSION_ID, value);
+        if (value != null) {
+            properties.put(Constants.SESSION_ID, value);
+            response.addCookie(Constants.SESSION_ID, value);
+        }
     }
 
     protected void doSend(String payload) {

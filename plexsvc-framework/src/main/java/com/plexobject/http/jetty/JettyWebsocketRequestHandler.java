@@ -9,7 +9,6 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
@@ -51,12 +50,10 @@ public class JettyWebsocketRequestHandler {
             AbstractResponseDispatcher dispatcher = new JettyWebsocketResponseDispatcher(
                     session);
 
-            String sessionId = (String) headers.get(Constants.SESSION_ID);
-
             com.plexobject.handler.Request req = com.plexobject.handler.Request
                     .builder().setMethod(Method.MESSAGE).setEndpoint(endpoint)
-                    .setParameters(params).setHeaders(headers)
-                    .setPayload(textPayload).setSessionId(sessionId)
+                    .setProperties(params).setHeaders(headers)
+                    .setPayload(textPayload)
                     .setResponseDispatcher(dispatcher).build();
 
             handler.handle(req);

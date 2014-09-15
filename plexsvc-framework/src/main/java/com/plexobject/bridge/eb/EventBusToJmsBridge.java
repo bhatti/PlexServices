@@ -108,7 +108,7 @@ public class EventBusToJmsBridge {
                         jmsClient, message.getJMSReplyTo()) : null;
                 dispatcher.setCodecType(entry.getCodecType());
                 Request req = Request.builder().setMethod(Method.MESSAGE)
-                        .setParameters(params).setPayload(payload)
+                        .setProperties(params).setPayload(payload)
                         .setSessionId(sessionId)
                         .setResponseDispatcher(dispatcher).build();
                 log.info("Forwarding " + entry + "'s message " + req);

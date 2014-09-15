@@ -32,7 +32,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
@@ -167,12 +166,10 @@ public class NettyWebsocketRequestHandler extends
         AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
                 ctx.channel());
 
-        String sessionId = (String) headers.get(Constants.SESSION_ID);
-
         Request req = Request.builder().setMethod(Method.MESSAGE)
-                .setEndpoint(endpoint).setParameters(params)
+                .setEndpoint(endpoint).setProperties(params)
                 .setHeaders(headers).setPayload(textPayload)
-                .setSessionId(sessionId).setResponseDispatcher(dispatcher)
+                .setResponseDispatcher(dispatcher)
                 .build();
 
         handler.handle(req);

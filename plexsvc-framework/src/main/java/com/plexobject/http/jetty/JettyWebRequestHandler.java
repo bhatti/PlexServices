@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -20,6 +22,9 @@ import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.util.IOUtils;
 
 public class JettyWebRequestHandler extends AbstractHandler {
+    private static final Logger log = LoggerFactory
+            .getLogger(JettyWebRequestHandler.class);
+
     protected final RequestHandler handler;
 
     public JettyWebRequestHandler(RequestHandler handler) {
@@ -35,17 +40,16 @@ public class JettyWebRequestHandler extends AbstractHandler {
         Method method = Method.valueOf(baseRequest.getMethod());
         String uri = baseRequest.getPathInfo();
         Map<String, Object> headers = getHeaders(baseRequest);
-        String sessionId = (String) headers.get(Constants.SESSION_ID);
-        
+
         Map<String, Object> params = getParams(baseRequest);
         String payload = IOUtils.toString(baseRequest.getInputStream());
 
         com.plexobject.handler.Request req = com.plexobject.handler.Request
                 .builder().setMethod(method).setEndpoint(uri)
-                .setParameters(params).setHeaders(headers).setPayload(payload)
-                .setSessionId(sessionId).setResponseDispatcher(dispatcher)
-                .build();
-        
+                .setProperties(params).setHeaders(headers).setPayload(payload)
+                .setResponseDispatcher(dispatcher).build();
+        log.info("Received " + req);
+
         handler.handle(req);
     }
 

@@ -26,12 +26,10 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
-            log.info("could not authenticate " + sessionId + " -- "
-                    + request);
-
+            log.info("could not authenticate " + sessionId + " -- " + request);
             throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
                     request.getSessionId(), "failed to validate session-id:"
-                            + sessionId);
+                            + sessionId + ", request " + request);
         }
         for (String role : roles) {
             if (!user.getRoles().contains(role)) {
