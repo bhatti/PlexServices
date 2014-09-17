@@ -38,7 +38,7 @@ public class QuoteCache {
                             + symbol + "&f=nsl1op");
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     url.openStream()));
-            String line = in.readLine();
+            String line = in.readLine().replaceAll("N/A", "0");
             String company = line.substring(1, line.indexOf("\",\""));
             String[] priceToks = line.substring(line.lastIndexOf("\",") + 2)
                     .split(",");

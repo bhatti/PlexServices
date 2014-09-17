@@ -74,7 +74,7 @@ public class NettyWebsocketResponseDispatcher extends
         if (sessionId != null && otherSessionId != null) {
             return sessionId.equals(otherSessionId);
         }
-        return channel.localAddress().equals(other.channel.localAddress());
+        return channel.remoteAddress().equals(other.channel.remoteAddress());
     }
 
     @Override

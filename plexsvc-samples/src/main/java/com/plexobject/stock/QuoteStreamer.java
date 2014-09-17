@@ -61,19 +61,26 @@ public class QuoteStreamer extends TimerTask {
         }
         for (Map.Entry<String, Collection<ResponseDispatcher>> e : subscribers
                 .entrySet()) {
-            Quote q = quoteCache.getLatestQuote(e.getKey());
-            Collection<ResponseDispatcher> dispatchers = new ArrayList<>(
-                    e.getValue());
-            for (ResponseDispatcher d : dispatchers) {
-                try {
-                    d.send(q);
-                    // log.info("Sending " + q + " to " + d);
-                } catch (Exception ex) {
-                    log.error(
-                            "Failed to stream, removing it from future publications",
-                            ex);
-                    remove(e.getKey(), d);
+            try {
+                Quote q = quoteCache.getLatestQuote(e.getKey());
+                Collection<ResponseDispatcher> dispatchers = new ArrayList<>(
+                        e.getValue());
+                int n = 0;
+                for (ResponseDispatcher d : dispatchers) {
+                    try {
+                        d.send(q);
+                        log.info(n + "/" + dispatchers.size() + ": Sending "
+                                + q + " to " + d);
+                        n++;
+                    } catch (Exception ex) {
+                        log.error(
+                                "Failed to stream, removing it from future publications",
+                                ex);
+                        remove(e.getKey(), d);
+                    }
                 }
+            } catch (Exception ex) {
+                log.error("Failed to get quote for " + e.getKey(), ex);
             }
         }
     }
