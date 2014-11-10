@@ -83,13 +83,13 @@ public class WebToJmsBridge implements RequestHandler {
         try {
             if (entry.isAsynchronous()) {
                 jmsClient.send(entry.getDestination(), params,
-                        request.getPayload());
+                        (String) request.getPayload());
                 request.getResponseDispatcher().setCodecType(
                         entry.getCodecType());
                 request.getResponseDispatcher().send("");
             } else {
                 jmsClient.sendReceive(entry.getDestination(), params,
-                        request.getPayload(),
+                        (String) request.getPayload(),
                         sendbackReply(request, entry, params), true);
             }
         } catch (Exception e) {
@@ -97,8 +97,8 @@ public class WebToJmsBridge implements RequestHandler {
         }
     }
 
-    private Handler<Response> sendbackReply(Request request,
-            final WebToJmsEntry entry, Map<String, Object> params) {
+    private Handler<Response> sendbackReply(final Request request,
+            final WebToJmsEntry entry, final Map<String, Object> params) {
         return new com.plexobject.handler.Handler<Response>() {
             @Override
             public void handle(Response reply) {

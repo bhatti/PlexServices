@@ -70,6 +70,11 @@ public class JettyResponseDispatcher extends HttpResponseDispatcher {
             public void sendError(int sc, String msg) throws IOException {
                 response.sendError(sc, msg);
             }
+
+            @Override
+            public String getContentType() {
+                return response.getContentType();
+            }
         };
     }
 }

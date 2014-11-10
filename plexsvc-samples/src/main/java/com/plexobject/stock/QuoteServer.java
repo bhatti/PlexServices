@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
-import com.plexobject.bugger.Main;
 import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
@@ -62,7 +61,7 @@ public class QuoteServer implements RequestHandler {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.err.println("Usage: java " + Main.class.getName()
+            System.err.println("Usage: java " + QuoteServer.class.getName()
                     + " properties-file");
             System.exit(1);
         }
@@ -81,7 +80,7 @@ public class QuoteServer implements RequestHandler {
         }
         //
         Collection<RequestHandler> services = new ArrayList<>();
-        services.add(new QuoteServer());
+        services.add(service);
         //
         ServiceRegistry serviceRegistry = new ServiceRegistry(config, services,
                 null);

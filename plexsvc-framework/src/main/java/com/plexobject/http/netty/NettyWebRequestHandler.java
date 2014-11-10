@@ -47,9 +47,9 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
         if (msg instanceof HttpRequest) {
-            HttpRequest request = (HttpRequest) msg;
+            final HttpRequest request = (HttpRequest) msg;
 
             if (HttpHeaders.is100ContinueExpected(request)) {
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));

@@ -261,6 +261,58 @@ public class QueryUserService extends AbstractUserService implements RequestHand
 ```
   The end-point can contain variables such as scope that are initialized from configuration.
 
+### Creating a static file server
+Though, PlexService framework is meant for REST or messaging based services,
+but here is an example of creating a simple static file server:
+
+```java 
+@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+public class StaticFileServer implements RequestHandler {
+    private File webFolder;
+
+    public StaticFileServer(String webdir) throws IOException {
+        this.webFolder = new File(webdir);
+        if (!webFolder.exists()) {
+            throw new FileNotFoundException(webdir + " does not exist");
+        }
+    }
+
+    @Override
+    public void handle(Request request) {
+        String path = request.getEndpoint().replaceAll("^.static.", "");
+        try {
+            if (new File(path).isAbsolute()) {
+                throw new IOException("Absolute path '" + path
+                        + "' not allowed");
+            }
+            final String canonicalDirPath = webFolder.getCanonicalPath()
+                    + File.separator;
+            final File filePath = new File(webFolder, path);
+
+            if (!filePath.getCanonicalPath().startsWith(canonicalDirPath)) {
+                request.getResponseDispatcher().send(
+                        new IOException("Relative path '" + path
+                                + "' not allowed"));
+            }
+            String extension = filePath.getName().substring(
+                    filePath.getName().lastIndexOf('.'));
+            String contentType = contentType = Files.probeContentType(filePath.toPath());
+            if (contentType != null) {
+                request.getResponseDispatcher().setProperty(
+                        HttpResponse.CONTENT_TYPE, contentType);
+            }
+            //
+            request.getResponseDispatcher()
+                    .send(new String(Files.readAllBytes(Paths.get(filePath
+                            .toURI()))));
+        } catch (IOException e) {
+            request.getResponseDispatcher().send(e);
+        }
+    }
+}
+```
+  The end-point can contain variables such as scope that are initialized from configuration.
+
 ### Defining role-based security
 ```java 
 public class BuggerRoleAuthorizer implements RoleAuthorizer {

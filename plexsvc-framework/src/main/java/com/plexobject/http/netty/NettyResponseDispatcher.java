@@ -25,17 +25,13 @@ import com.plexobject.http.HttpResponse;
 import com.plexobject.http.HttpResponseDispatcher;
 
 public class NettyResponseDispatcher extends HttpResponseDispatcher {
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONNECTION = "Connection";
-    private static final String CONTENT_LENGTH = "Content-Length";
-
     public NettyResponseDispatcher(final Handledable handledable,
             final HttpRequest request, final ChannelHandlerContext ctx) {
         super(handledable, getHttpResponse(request, ctx));
     }
 
     private static HttpResponse getHttpResponse(final HttpRequest request,
-            ChannelHandlerContext ctx) {
+            final ChannelHandlerContext ctx) {
         final boolean keepAlive = HttpHeaders.isKeepAlive(request);
         return new HttpResponse() {
             private final Map<String, String> headers = new HashMap<>();
@@ -47,6 +43,11 @@ public class NettyResponseDispatcher extends HttpResponseDispatcher {
             @Override
             public void setContentType(String type) {
                 headers.put(CONTENT_TYPE, type);
+            }
+
+            @Override
+            public String getContentType() {
+                return headers.get(CONTENT_TYPE);
             }
 
             @Override
@@ -120,6 +121,7 @@ public class NettyResponseDispatcher extends HttpResponseDispatcher {
                 ctx.writeAndFlush(response).addListener(
                         ChannelFutureListener.CLOSE);
             }
+
         };
     }
 }

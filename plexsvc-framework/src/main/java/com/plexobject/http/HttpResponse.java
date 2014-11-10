@@ -3,6 +3,9 @@ package com.plexobject.http;
 import java.io.IOException;
 
 public interface HttpResponse {
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONNECTION = "Connection";
+    public static final String CONTENT_LENGTH = "Content-Length";
 
     /**
      * Status code (100) indicating the client can continue.
@@ -267,6 +270,8 @@ public interface HttpResponse {
     public static final int SC_HTTP_VERSION_NOT_SUPPORTED = 505;
 
     void setContentType(String type);
+
+    String getContentType();
 
     void addCookie(String name, String value);
 

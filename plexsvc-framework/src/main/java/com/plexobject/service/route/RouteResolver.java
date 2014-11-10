@@ -30,6 +30,8 @@ public class RouteResolver<T> {
             this.level = level;
             if (pathFragment.startsWith("{")) {
                 parameter = pathFragment.replaceAll("[{}]", "");
+            } else if (pathFragment.startsWith("*")) {
+                    parameter = pathFragment.replaceAll("\\*.*", "");
             } else {
                 parameter = null;
             }
@@ -174,5 +176,4 @@ public class RouteResolver<T> {
         }
         return parent.find(fragments, 1, parameters);
     }
-
 }

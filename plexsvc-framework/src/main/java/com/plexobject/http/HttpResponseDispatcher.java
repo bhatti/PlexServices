@@ -43,8 +43,12 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
             return;
         }
         try {
-            if (codecType != null) {
-                response.setContentType(codecType.getContentType());
+            if (codecType != null && response.getContentType() == null) {
+                String contentType = (String) properties
+                        .get(HttpResponse.CONTENT_TYPE);
+                if (contentType == null) {
+                    response.setContentType(codecType.getContentType());
+                }
             }
             response.setStatus(getStatus());
             //

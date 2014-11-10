@@ -241,9 +241,10 @@ public class ServiceRegistry implements ServiceGateway {
             Object payload = config.requestClass() != Void.class ? ObjectCodecFactory
                     .getInstance()
                     .getObjectCodec(config.codec())
-                    .decode(request.getPayload(), config.requestClass(),
+                    .decode((String) request.getPayload(), config.requestClass(),
                             request.getProperties())
                     : null;
+
             request.setPayload(payload);
             try {
                 if (authorizer != null && config.rolesAllowed() != null
