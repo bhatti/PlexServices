@@ -27,6 +27,7 @@ git clone git@github.com:bhatti/PlexService.git
 - Compile and build jar file using
 
 ```
+cd plexsvc-framework
 ./gradlew jar
 ```
 

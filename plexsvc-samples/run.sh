@@ -1,4 +1,4 @@
-#gradle distZip
-gradle compileJava dist
-#gradle run -Pargs="bugger.properties http_jms_services_mapping.json"
-gradle bugger -Pargs="bugger.properties http_jms_services_mapping.json"
+#./gradlew distZip
+./gradlew compileJava dist
+#./gradlew run -Pargs="bugger.properties http_jms_services_mapping.json"
+./gradlew bugger -Pargs="bugger.properties http_jms_services_mapping.json"
