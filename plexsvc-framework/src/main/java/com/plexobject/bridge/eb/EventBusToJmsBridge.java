@@ -25,13 +25,12 @@ import com.plexobject.jms.JmsClient;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.util.Configuration;
 
 public class EventBusToJmsBridge {
     private static final Logger log = LoggerFactory
             .getLogger(EventBusToJmsBridge.class);
 
-    private static class EBListener implements RequestHandler, Lifecycle {
+    public static class EBListener implements RequestHandler, Lifecycle {
         private final JmsClient jmsClient;
         private final EventBus eb;
         private final EventBusToJmsEntry entry;
@@ -78,7 +77,7 @@ public class EventBusToJmsBridge {
         }
     }
 
-    private static class JmsListener implements MessageListener,
+    public static class JmsListener implements MessageListener,
             ExceptionListener, Lifecycle {
         private final JmsClient jmsClient;
         private final EventBus eb;
@@ -106,13 +105,14 @@ public class EventBusToJmsBridge {
                                 params);
                 AbstractResponseDispatcher dispatcher = message.getJMSReplyTo() != null ? new JmsResponseDispatcher(
                         jmsClient, message.getJMSReplyTo()) : null;
-                dispatcher.setCodecType(entry.getCodecType());
+                if (dispatcher != null) {
+                    dispatcher.setCodecType(entry.getCodecType());                    
+                }
                 Request req = Request.builder().setMethod(Method.MESSAGE)
                         .setProperties(params).setPayload(payload)
                         .setSessionId(sessionId)
                         .setResponseDispatcher(dispatcher).build();
                 log.info("Forwarding " + entry + "'s message " + req);
-
                 eb.publish(entry.getTarget(), req);
             } catch (Exception e) {
                 log.error("Failed to handle request", e);
@@ -160,14 +160,23 @@ public class EventBusToJmsBridge {
     private final Map<EventBusToJmsEntry, EBListener> ebListeners = new ConcurrentHashMap<>();
     private final Map<EventBusToJmsEntry, JmsListener> jmsListeners = new ConcurrentHashMap<>();
 
-    public EventBusToJmsBridge(Configuration config,
-            Collection<EventBusToJmsEntry> entries, EventBus eb) throws JMSException {
-        this.jmsClient = new JmsClient(config);
+    public EventBusToJmsBridge(JmsClient jmsClient,
+            Collection<EventBusToJmsEntry> entries, EventBus eb)
+            throws JMSException {
+        this.jmsClient = jmsClient;
         this.eb = eb;
 
         for (EventBusToJmsEntry e : entries) {
             add(e);
         }
+    }
+
+    public EBListener getEBListener(EventBusToJmsEntry e) {
+        return ebListeners.get(e);
+    }
+
+    public JmsListener getJmsListener(EventBusToJmsEntry e) {
+        return jmsListeners.get(e);
     }
 
     public synchronized void add(EventBusToJmsEntry e) {
