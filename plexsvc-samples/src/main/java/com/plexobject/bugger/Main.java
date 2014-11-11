@@ -200,8 +200,6 @@ public class Main {
         }
         Main main = new Main(args[0]);
         main.run();
-        log.info("**** Started services");
-
         if (args.length > 1) {
             final String mappingJson = IOUtils.toString(new FileInputStream(
                     args[1]));
@@ -209,9 +207,7 @@ public class Main {
                     mappingJson, new TypeReference<List<WebToJmsEntry>>() {
                     });
             Configuration config = new Configuration(args[0]);
-            WebToJmsBridge bridge = new WebToJmsBridge(config, entries,
-                    GatewayType.HTTP);
-            bridge.startBridge();
+            WebToJmsBridge.createAndStart(config, entries, GatewayType.HTTP);
         }
         Thread.currentThread().join();
     }

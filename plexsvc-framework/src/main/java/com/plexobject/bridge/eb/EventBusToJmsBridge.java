@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.bus.EventBus;
+import com.plexobject.bus.impl.EventBusImpl;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -25,6 +26,7 @@ import com.plexobject.jms.JmsClient;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.util.Configuration;
 
 public class EventBusToJmsBridge {
     private static final Logger log = LoggerFactory
@@ -106,7 +108,7 @@ public class EventBusToJmsBridge {
                 AbstractResponseDispatcher dispatcher = message.getJMSReplyTo() != null ? new JmsResponseDispatcher(
                         jmsClient, message.getJMSReplyTo()) : null;
                 if (dispatcher != null) {
-                    dispatcher.setCodecType(entry.getCodecType());                    
+                    dispatcher.setCodecType(entry.getCodecType());
                 }
                 Request req = Request.builder().setMethod(Method.MESSAGE)
                         .setProperties(params).setPayload(payload)
@@ -222,6 +224,15 @@ public class EventBusToJmsBridge {
         for (JmsListener l : jmsListeners.values()) {
             l.stop();
         }
+    }
+
+    public static void startAndCreate(Configuration config,
+            Collection<EventBusToJmsEntry> entries) throws JMSException {
+        EventBus eb = new EventBusImpl();
+        JmsClient jmsClient = new JmsClient(config);
+        EventBusToJmsBridge bridge = new EventBusToJmsBridge(jmsClient,
+                entries, eb);
+        bridge.startBridge();
     }
 
 }

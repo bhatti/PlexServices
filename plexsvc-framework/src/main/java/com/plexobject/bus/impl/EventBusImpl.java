@@ -24,6 +24,7 @@ import com.plexobject.predicate.Predicate;
 public class EventBusImpl implements EventBus {
     private static final Logger log = LoggerFactory
             .getLogger(EventBusImpl.class);
+    private static final int DEFAULT_MAX_DISPATCH_THREADS = 4;
 
     private static class HandlerAndFilter {
         private final long id;
@@ -66,7 +67,7 @@ public class EventBusImpl implements EventBus {
     private final ExecutorService executor;
 
     public EventBusImpl() {
-        this(4);
+        this(DEFAULT_MAX_DISPATCH_THREADS);
     }
 
     public EventBusImpl(int maxDispatchThreads) {

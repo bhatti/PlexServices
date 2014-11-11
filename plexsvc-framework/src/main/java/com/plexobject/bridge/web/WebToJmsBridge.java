@@ -38,41 +38,40 @@ public class WebToJmsBridge implements RequestHandler {
     private static final Logger log = LoggerFactory
             .getLogger(WebToJmsBridge.class);
     private final JmsClient jmsClient;
-    private final Lifecycle server;
-
+    private Lifecycle server;
+    //
     private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
 
-    public WebToJmsBridge(Configuration config,
-            Collection<WebToJmsEntry> entries, GatewayType gatewayType)
-            throws JMSException {
-        this.jmsClient = new JmsClient(config);
-
-        this.server = HttpServerFactory.getHttpServer(gatewayType, config,
-                this, true);
+    public WebToJmsBridge(JmsClient jmsClient, Collection<WebToJmsEntry> entries) {
+        this.jmsClient = jmsClient;
 
         for (WebToJmsEntry e : entries) {
-            RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
-                    .get(e.getMethod());
-            if (entryPaths == null) {
-                entryPaths = new RouteResolver<WebToJmsEntry>();
-                entriesPathsByMethod.put(e.getMethod(), entryPaths);
-            }
-            if (entryPaths.get(e.getPath(), new HashMap<String, Object>()) != null) {
-                throw new IllegalStateException(
-                        "Mapping is already registered for " + e);
-            }
-            entryPaths.put(e.getPath(), e);
-            log.info("Adding " + gatewayType + "->JMS mapping for "
-                    + e.getShortString());
+            add(e);
         }
+    }
+
+    public void setServer(Lifecycle server) {
+        this.server = server;
+    }
+
+    public void add(WebToJmsEntry e) {
+        RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod.get(e
+                .getMethod());
+        if (entryPaths == null) {
+            entryPaths = new RouteResolver<WebToJmsEntry>();
+            entriesPathsByMethod.put(e.getMethod(), entryPaths);
+        }
+        if (entryPaths.get(e.getPath(), new HashMap<String, Object>()) != null) {
+            throw new IllegalStateException(
+                    "Mapping is already registered for " + e);
+        }
+        entryPaths.put(e.getPath(), e);
+        log.info("Adding Web->JMS mapping for " + e.getShortString());
     }
 
     @Override
     public void handle(Request request) {
-        RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
-                .get(request.getMethod());
-        final WebToJmsEntry entry = entryPaths != null ? entryPaths.get(
-                request.getEndpoint(), request.getProperties()) : null;
+        final WebToJmsEntry entry = getMappingEntry(request);
 
         if (entry == null) {
             log.warn("Unknown request received " + request.getPayload()
@@ -100,7 +99,15 @@ public class WebToJmsBridge implements RequestHandler {
         }
     }
 
-    private Handler<Response> sendbackReply(final Request request,
+    WebToJmsEntry getMappingEntry(Request request) {
+        RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
+                .get(request.getMethod());
+        final WebToJmsEntry entry = entryPaths != null ? entryPaths.get(
+                request.getEndpoint(), request.getProperties()) : null;
+        return entry;
+    }
+
+    Handler<Response> sendbackReply(final Request request,
             final WebToJmsEntry entry, final Map<String, Object> params) {
         return new com.plexobject.handler.Handler<Response>() {
             @Override
@@ -139,6 +146,18 @@ public class WebToJmsBridge implements RequestHandler {
         server.stop();
     }
 
+    public static void createAndStart(Configuration config,
+            Collection<WebToJmsEntry> entries, GatewayType gatewayType)
+            throws JMSException {
+        JmsClient jmsClient = new JmsClient(config);
+        WebToJmsBridge bridge = new WebToJmsBridge(jmsClient, entries);
+        Lifecycle server = HttpServerFactory.getHttpServer(gatewayType, config,
+                bridge, true);
+        bridge.setServer(server);
+        bridge.startBridge();
+
+    }
+
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
             System.err.println("Usage: java " + WebToJmsBridge.class.getName()
@@ -151,10 +170,7 @@ public class WebToJmsBridge implements RequestHandler {
                 mappingJson, new TypeReference<List<WebToJmsEntry>>() {
                 });
         Configuration config = new Configuration(args[0]);
-
-        WebToJmsBridge bridge = new WebToJmsBridge(config, entries,
-                GatewayType.HTTP);
-        bridge.startBridge();
+        createAndStart(config, entries, GatewayType.HTTP);
         Thread.currentThread().join();
     }
 

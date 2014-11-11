@@ -74,9 +74,8 @@ public class QuoteServer implements RequestHandler {
             Collection<WebToJmsEntry> entries = Arrays
                     .asList(new WebToJmsEntry(CodecType.JSON, "/quotes",
                             serviceConfig.method(), serviceConfig.endpoint(), 5));
-            WebToJmsBridge bridge = new WebToJmsBridge(config, entries,
+            WebToJmsBridge.createAndStart(config, entries,
                     GatewayType.WEBSOCKET);
-            bridge.startBridge();
         }
         //
         Collection<RequestHandler> services = new ArrayList<>();

@@ -1,11 +1,10 @@
 package com.plexobject.bridge.eb;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 import com.plexobject.bridge.eb.EventBusToJmsBridgeTest.TestUser;
-import com.plexobject.bridge.eb.EventBusToJmsEntry.Type;
 import com.plexobject.encode.CodecType;
 
 public class EventBusToJmsEntryTest {
