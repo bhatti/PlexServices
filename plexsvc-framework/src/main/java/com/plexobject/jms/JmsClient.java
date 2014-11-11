@@ -268,7 +268,7 @@ public class JmsClient implements Lifecycle {
     public void send(final Destination destination,
             final Map<String, Object> headers, final String payload)
             throws JMSException, NamingException {
-        Message m = currentJmsSession().createTextMessage(payload);
+        Message m = createTextMessage(payload);
         setHeaders(headers, m);
 
         MessageProducer msgProducer = createProducer(destination);
