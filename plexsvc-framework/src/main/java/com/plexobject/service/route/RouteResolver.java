@@ -143,8 +143,8 @@ public class RouteResolver<T> {
     public boolean remove(String path) {
         Node<T> node = getNode(path, new HashMap<String, Object>());
         if (node != null) {
-            node.parent.children.remove(node);
-            return true;
+            servicesByPath.remove(path);
+            return node.parent.children.remove(node.pathFragment) != null;
         }
         return false;
     }

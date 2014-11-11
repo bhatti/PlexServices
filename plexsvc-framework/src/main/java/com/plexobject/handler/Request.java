@@ -75,7 +75,7 @@ public class Request extends AbstractPayload {
     Request() {
     }
 
-    Request(Method method, String endpoint,
+    public Request(Method method, String endpoint,
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             final AbstractResponseDispatcher responseBuilder) {

@@ -1,5 +1,6 @@
 package com.plexobject.domain;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -75,6 +76,10 @@ public class ValidationException extends RuntimeException {
             return this;
         }
 
+        public ValidationException build() {
+            return new ValidationException(message, cause, errors);
+        }
+
         public void end() {
             if (errors.size() > 0) {
                 throw new ValidationException(message, cause, errors);
@@ -82,20 +87,20 @@ public class ValidationException extends RuntimeException {
         }
     }
 
-    private final Set<Error> errors;
+    private final Collection<Error> errors;
 
     public ValidationException(String message, Throwable cause,
-            final Set<Error> errors) {
+            final Collection<Error> errors) {
         super(message, cause);
         this.errors = errors;
     }
 
-    public ValidationException(String message, final Set<Error> errors) {
+    public ValidationException(String message, final Collection<Error> errors) {
         super(message);
         this.errors = errors;
     }
 
-    public Set<Error> getErrors() {
+    public Collection<Error> getErrors() {
         return errors;
     }
 

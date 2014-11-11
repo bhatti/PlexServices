@@ -141,7 +141,10 @@ public class ServiceRegistry implements ServiceGateway {
         if (gateway == null) {
             return false;
         }
-        return gateway.remove(h);
+        if (gateway.remove(h)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
