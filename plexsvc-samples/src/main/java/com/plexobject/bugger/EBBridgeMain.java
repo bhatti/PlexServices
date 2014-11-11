@@ -35,7 +35,7 @@ public class EBBridgeMain {
                 mappingJson, new TypeReference<List<EventBusToJmsEntry>>() {
                 });
         Configuration config = new Configuration(args[0]);
-        // startJmsBroker();
+        startJmsBroker();
         EventBusToJmsBridge.startAndCreate(config, entries);
         Thread.currentThread().join();
     }
