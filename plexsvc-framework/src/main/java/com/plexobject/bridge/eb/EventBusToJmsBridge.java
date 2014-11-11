@@ -161,7 +161,7 @@ public class EventBusToJmsBridge {
     private final Map<EventBusToJmsEntry, JmsListener> jmsListeners = new ConcurrentHashMap<>();
 
     public EventBusToJmsBridge(Configuration config,
-            Collection<EventBusToJmsEntry> entries, EventBus eb) {
+            Collection<EventBusToJmsEntry> entries, EventBus eb) throws JMSException {
         this.jmsClient = new JmsClient(config);
         this.eb = eb;
 

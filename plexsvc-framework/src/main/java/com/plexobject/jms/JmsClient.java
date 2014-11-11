@@ -53,7 +53,7 @@ public class JmsClient implements Lifecycle {
     private static boolean sendJmsHeaders;
     private boolean running;
 
-    public JmsClient(Configuration config) {
+    public JmsClient(Configuration config) throws JMSException {
         this.config = config;
         transactedSession = config.getBoolean("jms.trasactedSession");
         sendJmsHeaders = config.getBoolean("jms.sendJmsHeaders");
@@ -89,6 +89,10 @@ public class JmsClient implements Lifecycle {
                 connection = connectionFactory.createConnection();
             }
             log.info("Created JMS connection " + connection);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (JMSException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -125,12 +129,16 @@ public class JmsClient implements Lifecycle {
         return running;
     }
 
+    public MessageProducer createProducer(final String destName)
+            throws JMSException, NamingException {
+        return createProducer(getDestination(destName));
+    }
+
     public MessageProducer createProducer(final Destination destination)
             throws JMSException, NamingException {
         String destName = getDestName(destination).intern();
         synchronized (destName) {
             MessageProducer producer = null;
-
             Map<String, MessageProducer> producers = null;
             if (!(destination instanceof TemporaryQueue)) {
                 producers = currentProducers.get();
@@ -164,8 +172,7 @@ public class JmsClient implements Lifecycle {
             final Map<String, Object> headers, final String payload,
             final Handler<Response> handler, final boolean singleUseOnly)
             throws JMSException, NamingException {
-        Destination destination = getDestination(destName);
-        Message reqMsg = currentJmsSession().createTextMessage(payload);
+        Message reqMsg = createTextMessage(payload);
         setHeaders(headers, reqMsg);
         final TemporaryQueue replyTo = currentJmsSession()
                 .createTemporaryQueue();
@@ -218,8 +225,8 @@ public class JmsClient implements Lifecycle {
         };
         consumer.setMessageListener(listener);
         reqMsg.setJMSReplyTo(replyTo);
-        createProducer(destination).send(reqMsg);
-        log.info("Sent '" + payload + "' to " + destination + ", headers "
+        createProducer(destName).send(reqMsg);
+        log.info("Sent '" + payload + "' to " + destName + ", headers "
                 + headers);
         return closeable;
     }

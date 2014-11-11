@@ -30,7 +30,7 @@ public class JmsServiceGateway extends AbstractServiceGateway {
         super(config, serviceRegistry);
     }
 
-    private synchronized JmsClient getJmsClient() {
+    private synchronized JmsClient getJmsClient() throws JMSException {
         if (_jmsClient == null) {
             _jmsClient = new JmsClient(config);
         }

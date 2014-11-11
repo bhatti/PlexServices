@@ -36,14 +36,14 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
     }
 
     protected void doSend(String payload) {
-        String location = (String) properties.get(Constants.LOCATION);
+        String location = (String) properties.get(HttpResponse.LOCATION);
 
         if (location != null) {
             redirect(location);
             return;
         }
         try {
-            if (codecType != null && response.getContentType() == null) {
+            if (codecType != null) {
                 String contentType = (String) properties
                         .get(HttpResponse.CONTENT_TYPE);
                 if (contentType == null) {

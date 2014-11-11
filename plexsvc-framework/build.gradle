@@ -17,6 +17,7 @@ dependencies {
 
     testCompile 'junit:junit:4.11'
     testCompile 'com.googlecode.jmockit:jmockit:1.7'
+    testCompile 'org.apache.activemq:activemq-all:5.10.0'
 }
 
 configurations { 

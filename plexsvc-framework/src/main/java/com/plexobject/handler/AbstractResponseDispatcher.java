@@ -17,7 +17,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
             .getLogger(AbstractResponseDispatcher.class);
 
     protected static final String[] HEADER_PROPERTIES = new String[] {
-            Constants.STATUS, Constants.LOCATION, Constants.SESSION_ID };
+            HttpResponse.STATUS, HttpResponse.LOCATION, Constants.SESSION_ID };
     protected CodecType codecType;
     private int status = HttpResponse.SC_OK;
     protected final Map<String, Object> properties = new HashMap<>();
@@ -73,7 +73,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         if (status > 0) {
             return status;
         } else {
-            Object status = properties.get(Constants.STATUS);
+            Object status = properties.get(HttpResponse.STATUS);
             if (status != null) {
                 if (status instanceof Integer) {
                     return (Integer) status;

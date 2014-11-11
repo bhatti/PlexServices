@@ -6,6 +6,8 @@ public interface HttpResponse {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONNECTION = "Connection";
     public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String STATUS = "status";
+    public static final String LOCATION = "location";
 
     /**
      * Status code (100) indicating the client can continue.

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.jms.JMSException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +43,8 @@ public class WebToJmsBridge implements RequestHandler {
     private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
 
     public WebToJmsBridge(Configuration config,
-            Collection<WebToJmsEntry> entries, GatewayType gatewayType) {
+            Collection<WebToJmsEntry> entries, GatewayType gatewayType)
+            throws JMSException {
         this.jmsClient = new JmsClient(config);
 
         this.server = HttpServerFactory.getHttpServer(gatewayType, config,

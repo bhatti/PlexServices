@@ -15,15 +15,14 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.DefaultHttpServiceGateway;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.HttpServerFactory;
 import com.plexobject.jms.JmsServiceGateway;
 import com.plexobject.metrics.ServiceMetrics;
@@ -241,8 +240,8 @@ public class ServiceRegistry implements ServiceGateway {
             Object payload = config.requestClass() != Void.class ? ObjectCodecFactory
                     .getInstance()
                     .getObjectCodec(config.codec())
-                    .decode((String) request.getPayload(), config.requestClass(),
-                            request.getProperties())
+                    .decode((String) request.getPayload(),
+                            config.requestClass(), request.getProperties())
                     : null;
 
             request.setPayload(payload);
@@ -261,7 +260,7 @@ public class ServiceRegistry implements ServiceGateway {
                         HttpResponse.SC_UNAUTHORIZED);
                 if (e.getLocation() != null) {
                     request.getResponseDispatcher().setProperty(
-                            Constants.LOCATION, e.getLocation());
+                            HttpResponse.LOCATION, e.getLocation());
                 }
                 request.getResponseDispatcher().send(e);
             } catch (ValidationException e) {
