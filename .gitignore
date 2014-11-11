@@ -13,4 +13,5 @@ hs_err_pid*
 bin/
 .gradle/
 .classpath
-.settings
+.settings 
+plexsvc-samples/s3.properties
