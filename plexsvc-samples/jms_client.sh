@@ -1,4 +1,4 @@
-gradle compileJava dist
+./gradlew compileJava dist
 CLASSPATH=build/classes/main
 for j in build/dist/lib/*jar 
 do 

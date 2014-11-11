@@ -1,3 +1,3 @@
-#gradle distZip
-gradle compileJava dist
-gradle quote -Pargs="bugger.properties"
+#./gradlew distZip
+./gradlew compileJava dist
+./gradlew quote -Pargs="bugger.properties"
