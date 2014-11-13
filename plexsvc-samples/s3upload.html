@@ -52,3 +52,44 @@
       </script>
    </body>
 </html>
+<!-- 
+Bucket policy to allow server-side encryption
+{
+    "Version": "2012-10-17",
+    "Id": "PutObjPolicy",
+    "Statement": [
+        {
+            "Sid": "DenyUnEncryptedObjectUploads",
+            "Effect": "Deny",
+            "Principal": {
+                "AWS": "*"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::shahbhat/*",
+            "Condition": {
+                "StringNotEquals": {
+                    "s3:x-amz-server-side-encryption": "AES256"
+                }
+            }
+        }
+    ]
+}
+
+
+
+cors policy
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <CORSRule>
+        <AllowedOrigin>*</AllowedOrigin>
+        <AllowedMethod>PUT</AllowedMethod>
+        <AllowedMethod>POST</AllowedMethod>
+        <AllowedMethod>DELETE</AllowedMethod>
+        <MaxAgeSeconds>30000</MaxAgeSeconds>
+        <ExposeHeader>ETag</ExposeHeader>
+        <AllowedHeader>*</AllowedHeader>
+        <AllowedHeader>Authorization</AllowedHeader>
+    </CORSRule>
+</CORSConfiguration>
+
+-->
