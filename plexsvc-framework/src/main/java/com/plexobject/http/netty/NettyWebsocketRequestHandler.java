@@ -153,13 +153,14 @@ public class NettyWebsocketRequestHandler extends
 
         Request rawRequest = codec.decode(jsonMsg, Request.class, params);
 
-        for (String name : rawRequest.getPropertyNames()) {
-            params.put(name, rawRequest.getProperty(name));
-        }
+
         String endpoint = rawRequest.getEndpoint();
         if (endpoint == null) {
             log.error("Unknown request without endpoint " + jsonMsg);
             return;
+        }
+        for (String name : rawRequest.getPropertyNames()) {
+            params.put(name, rawRequest.getProperty(name));
         }
 
         final String textPayload = codec.encode(rawRequest.getPayload());
