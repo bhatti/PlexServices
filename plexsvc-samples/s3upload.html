@@ -32,7 +32,8 @@
                      'Cache-Control': 'max-age=3600'
                   },
                   xAmzHeadersAtInitiate : {
-                     'x-amz-acl': 'public-read'
+                      'x-amz-acl': 'private',
+                      'x-amz-server-side-encryption': 'AES256'
                   },
                   signParams: {
                      foo: 'bar'
