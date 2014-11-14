@@ -11,16 +11,12 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 import javax.net.ssl.SSLException;
 
@@ -165,15 +161,4 @@ public class NettyHttpServer implements Lifecycle {
         }
     }
 
-    public static String toString(HttpRequest request) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Method:" + request.getMethod());
-        sb.append(", Path:" + request.getUri());
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-        for (Map.Entry<String, List<String>> e : decoder.parameters()
-                .entrySet()) {
-            sb.append(", " + e.getKey() + " -> " + e.getValue());
-        }
-        return sb.toString();
-    }
 }

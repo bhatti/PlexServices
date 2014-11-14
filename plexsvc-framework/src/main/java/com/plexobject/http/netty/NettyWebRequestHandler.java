@@ -153,4 +153,15 @@ public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
         return result;
     }
 
+    public static String toString(HttpRequest request) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Method:" + request.getMethod());
+        sb.append(", Path:" + request.getUri());
+        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
+        for (Map.Entry<String, List<String>> e : decoder.parameters()
+                .entrySet()) {
+            sb.append(", " + e.getKey() + " -> " + e.getValue());
+        }
+        return sb.toString();
+    }
 }
