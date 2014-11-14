@@ -1,7 +1,7 @@
 package com.plexobject.encode;
 
 public enum CodecType {
-	JSON, GSON, HTML, XML, TEXT, BINARY;
+	JSON, GSON, HTML, XML, TEXT;
 	public String getContentType() {
 		switch (this) {
 		case XML:
@@ -10,8 +10,6 @@ public enum CodecType {
 			return "text/html";
 		case TEXT:
 			return "application/text";
-		case BINARY:
-			return "application/binary";
 		case JSON:
         case GSON:
 		default:

@@ -38,6 +38,8 @@ public class JsonObjectCodec extends AbstractObjectCodec {
         }
         if (obj instanceof String) {
             return (String) obj;
+        } else if (obj instanceof CharSequence) {
+            return obj.toString();
         }
 
         try {
@@ -61,7 +63,7 @@ public class JsonObjectCodec extends AbstractObjectCodec {
     public <T> T decode(String text, final TypeReference<T> type) {
         try {
             return mapper.readValue(text, type);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("Failed to decode " + text, e);
         }
     }
@@ -72,7 +74,7 @@ public class JsonObjectCodec extends AbstractObjectCodec {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T jsonDecode(String text, Class<?> type) {
+    <T> T jsonDecode(String text, Class<?> type) {
         if (text == null || text.length() == 0) {
             return null;
         }

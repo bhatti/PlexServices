@@ -39,11 +39,11 @@ public class JmsClientTest {
         }
 
         @Override
-        public void onMessage(Message message) {
+        public void onMessage(final Message message) {
             messages.add(message);
             try {
                 if (message.getJMSReplyTo() != null) {
-                    client.send(message.getJMSReplyTo(), new HashMap<>(),
+                    client.send(message.getJMSReplyTo(), new HashMap<String, Object>(),
                             ((TextMessage) message).getText());
                 }
             } catch (JMSException e) {

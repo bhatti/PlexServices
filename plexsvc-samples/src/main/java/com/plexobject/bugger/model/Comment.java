@@ -3,11 +3,8 @@ package com.plexobject.bugger.model;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.msgpack.annotation.Message;
-
 import com.plexobject.domain.ValidationException;
 
-@Message
 @XmlRootElement
 public class Comment extends Document {
 	private Long projectId;

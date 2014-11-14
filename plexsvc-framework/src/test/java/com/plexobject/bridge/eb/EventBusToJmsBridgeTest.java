@@ -81,7 +81,7 @@ public class EventBusToJmsBridgeTest {
                 "queue:{scope}-query-user-service-queue", "query-user-channel",
                 TestUser.class.getName());
         bridge.add(entry);
-        JmsListener listener = bridge.getJmsListener(entry);
+        final JmsListener listener = bridge.getJmsListener(entry);
         new Expectations() {
             {
                 jmsClient.start();
@@ -128,8 +128,8 @@ public class EventBusToJmsBridgeTest {
         EBListener listener = bridge.getEBListener(entry);
         new Expectations() {
             {
-                jmsClient.send("queue:{scope}-assign-bugreport-service-queue", (Map<String, Object>) any,
-                        anyString);
+                jmsClient.send("queue:{scope}-assign-bugreport-service-queue",
+                        (Map<String, Object>) any, anyString);
             }
         };
         Map<String, Object> properties = new HashMap<>();
@@ -152,7 +152,7 @@ public class EventBusToJmsBridgeTest {
                 "queue:{scope}-assign-bugreport-service-queue",
                 TestUser.class.getName());
         bridge.add(entry);
-        EBListener listener = bridge.getEBListener(entry);
+        final EBListener listener = bridge.getEBListener(entry);
         new Expectations() {
             {
                 eb.subscribe("create-user", listener, null);

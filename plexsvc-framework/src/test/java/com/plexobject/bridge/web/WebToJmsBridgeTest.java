@@ -102,7 +102,7 @@ public class WebToJmsBridgeTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testHandleSynchronous() throws Exception {
-        WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
+        final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
                 Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5);
         entry.setAsynchronous(false);
         bridge.add(entry);
@@ -110,8 +110,8 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = new Request(Method.GET, "/w", properties, headers,
-                payload, new AbstractResponseDispatcher() {
+        final Request request = new Request(Method.GET, "/w", properties,
+                headers, payload, new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 

@@ -3,7 +3,6 @@ package com.plexobject.encode;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.plexobject.encode.binary.BinaryObjectCodec;
 import com.plexobject.encode.gson.GsonObjectCodec;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.encode.text.TextObjectCodec;
@@ -23,7 +22,6 @@ public class ObjectCodecFactory {
         encoders.put(CodecType.JSON, new JsonObjectCodec());
         encoders.put(CodecType.GSON, new GsonObjectCodec());
         encoders.put(CodecType.TEXT, new TextObjectCodec());
-        encoders.put(CodecType.BINARY, new BinaryObjectCodec());
         encoders.put(CodecType.XML, new XmlObjectCodec());
     }
 

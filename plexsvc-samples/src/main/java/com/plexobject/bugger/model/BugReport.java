@@ -10,11 +10,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.msgpack.annotation.Message;
-
 import com.plexobject.domain.ValidationException;
 
-@Message
 @XmlRootElement
 public class BugReport extends Document {
 	public enum State {

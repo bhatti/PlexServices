@@ -7,13 +7,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.msgpack.annotation.Message;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Validatable;
 import com.plexobject.domain.ValidationException;
 
-@Message
 @XmlRootElement
 public class User implements Validatable {
     private Long id;

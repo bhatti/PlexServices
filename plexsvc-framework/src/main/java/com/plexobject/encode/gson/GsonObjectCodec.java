@@ -84,6 +84,8 @@ public class GsonObjectCodec extends AbstractObjectCodec {
         }
         if (obj instanceof String) {
             return (String) obj;
+        } else if (obj instanceof CharSequence) {
+            return obj.toString();
         }
         return gson.toJson(obj);
     }
