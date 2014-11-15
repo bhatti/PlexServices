@@ -3,7 +3,6 @@ package com.plexobject.ping;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.activemq.broker.BrokerService;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -18,14 +17,6 @@ import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
 public class Main {
-	private static void startJmsBroker() throws Exception {
-		BrokerService broker = new BrokerService();
-
-		broker.addConnector("tcp://localhost:61616");
-
-		broker.start();
-	}
-
 	public static void main(String[] args) throws Exception {
 		if (args.length < 2) {
 			System.err.println("Usage: java " + Main.class.getName()
@@ -39,18 +30,17 @@ public class Main {
 
 		String type = args[1];
 
+		// ensure activemq is already running
 		if ("jmswebsocket".equalsIgnoreCase(type)) {
-			startJmsBroker();
 			Collection<WebToJmsEntry> entries = Arrays
 					.asList(new WebToJmsEntry(CodecType.JSON, "/ping",
-							Method.MESSAGE, "queue:ping", 5));
+							Method.GET, "queue:ping", 5));
 			WebToJmsBridge.createAndStart(config, entries,
 					GatewayType.WEBSOCKET);
 		} else if ("jmsweb".equalsIgnoreCase(type)) {
-			startJmsBroker();
 			Collection<WebToJmsEntry> entries = Arrays
 					.asList(new WebToJmsEntry(CodecType.JSON, "/ping",
-							Method.MESSAGE, "queue:ping", 5));
+							Method.GET, "queue:ping", 5));
 			WebToJmsBridge.createAndStart(config, entries, GatewayType.HTTP);
 		} else if ("websocket".equalsIgnoreCase(type)) {
 			ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);

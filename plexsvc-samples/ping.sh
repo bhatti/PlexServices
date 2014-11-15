@@ -5,4 +5,6 @@ do
   CLASSPATH=$CLASSPATH:$j
 done
 export CLASSPATH 
-java -Dlog4j.configuration=log4j.xml com.plexobject.ping.Main ping.properties web 
+#java -Dlog4j.configuration=log4j.xml com.plexobject.ping.Main ping.properties web 
+#java -Dlog4j.configuration=log4j.xml com.plexobject.ping.Main ping.properties websocket
+java -Dlog4j.configuration=log4j.xml com.plexobject.ping.Main ping.properties jmsweb
