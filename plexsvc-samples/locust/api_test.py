@@ -51,16 +51,16 @@ def remove_member(l):
   response = l.client.post("/projects/2/membership/remove?projectLead=true&assignedTo=scott", {}, headers={"PlexSessionId":session_id}) 
 
 
-class LoadTestTask(TaskSet):
+class APITestTask(TaskSet):
   tasks = [login, query_users, add_user, delete_user, add_project, update_project, query_projects, query_project_bugreports, query_bugreports, assign_bugreport, add_member, remove_member]
 #  @task
 #  def page404(self):
 #    self.client.get("/does_not_exist") 
 
-class LoadTestUser(HttpLocust):
+class APITestUser(HttpLocust):
   host = "http://127.0.0.1:8089"
   min_wait = 1000
   max_wait = 10000 
-  task_set = LoadTestTask 
+  task_set = APITestTask 
 
 

@@ -262,6 +262,28 @@ public class QueryUserService extends AbstractUserService implements RequestHand
 ```
   The end-point can contain variables such as scope that are initialized from configuration.
 
+
+### Overriding service configuration at runtime 
+In addition to defining service configurations via annotations, you can also override them at runtime, e.g.
+```java 
+public class PingService implements RequestHandler {
+  @Override
+  public void handle(Request request) {
+    String data = request.getProperty("data");
+    request.getResponseDispatcher().send(data);
+  }
+}
+
+...
+    ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+    PingService pingService = new PingService();
+    serviceRegistry.add(pingService, new ServiceConfigDesc(
+        Method.MESSAGE, GatewayType.WEBSOCKET, Void.class,
+        CodecType.JSON, "1.0", "/ping", true, new String[0]));
+    serviceRegistry.start();
+```
+
+
 ### Creating a static file server
 Though, PlexService framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:
@@ -346,24 +368,22 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
 
 ### Registering services and starting service container
 ```java 
-Collection<RequestHandler> services = new HashSet<>();
-services.add(new CreateUserService(userRepository));
-services.add(new UpdateUserService(userRepository));
-services.add(new QueryUserService(userRepository));
-services.add(new DeleteUserService(userRepository));
-services.add(new LoginService(userRepository));
-services.add(new CreateProjectService(projectRepository, userRepository));
-services.add(new UpdateProjectService(projectRepository, userRepository));
-services.add(new QueryProjectService(projectRepository, userRepository));
-services.add(new AddProjectMemberService(projectRepository, userRepository));
-services.add(new RemoveProjectMemberService(projectRepository, userRepository));
-services.add(new CreateBugReportService(bugreportRepository, userRepository));
-services.add(new UpdateBugReportService(bugreportRepository, userRepository));
-services.add(new QueryBugReportService(bugreportRepository, userRepository));
-services.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
-
-services.add(new AssignBugReportService(bugreportRepository, userRepository));
-serviceRegistry = new ServiceRegistry(config, services, new BuggerRoleAuthorizer(userRepository));
+serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(userRepository));
+serviceRegistry.add(new CreateUserService(userRepository));
+serviceRegistry.add(new UpdateUserService(userRepository));
+serviceRegistry.add(new QueryUserService(userRepository));
+serviceRegistry.add(new DeleteUserService(userRepository));
+serviceRegistry.add(new LoginService(userRepository));
+serviceRegistry.add(new CreateProjectService(projectRepository, userRepository));
+serviceRegistry.add(new UpdateProjectService(projectRepository, userRepository));
+serviceRegistry.add(new QueryProjectService(projectRepository, userRepository));
+serviceRegistry.add(new AddProjectMemberService(projectRepository, userRepository));
+serviceRegistry.add(new RemoveProjectMemberService(projectRepository, userRepository));
+serviceRegistry.add(new CreateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new UpdateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new QueryBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new AssignBugReportService(bugreportRepository, userRepository));
 serviceRegistry.start();
 
 ```
@@ -543,10 +563,9 @@ public class QuoteServer implements RequestHandler {
     public static void main(String[] args) throws Exception {
         Configuration config = new Configuration(args[0]);
         QuoteServer service = new QuoteServer();
-        Collection<RequestHandler> services = new ArrayList<>();
-        services.add(new QuoteServer());
         //
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, services, null);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        serviceRegistry.add(new QuoteServer());
         serviceRegistry.start();
         Thread.currentThread().join();
     }

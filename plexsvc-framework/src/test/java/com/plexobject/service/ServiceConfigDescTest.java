@@ -22,14 +22,14 @@ public class ServiceConfigDescTest {
     @Test
     public void testCreateWithHandler() {
         ServiceConfigDesc desc = new ServiceConfigDesc(WebService.class);
-        assertEquals(Method.GET, desc.getMethod());
-        assertEquals(GatewayType.HTTP, desc.getGatewayType());
+        assertEquals(Method.GET, desc.method());
+        assertEquals(GatewayType.HTTP, desc.gateway());
         assertEquals(Void.class, desc.getRequestClass());
-        assertEquals(CodecType.JSON, desc.getCodecType());
-        assertEquals("1.0", desc.getVersion());
-        assertEquals("/w", desc.getEndpoint());
-        assertTrue(desc.isRecordStatsdMetrics());
-        assertEquals("employee", desc.getRolesAllowed()[0]);
+        assertEquals(CodecType.JSON, desc.codec());
+        assertEquals("1.0", desc.version());
+        assertEquals("/w", desc.endpoint());
+        assertTrue(desc.recordStatsdMetrics());
+        assertEquals("employee", desc.rolesAllowed()[0]);
         assertTrue(desc.toString().contains("Desc"));
     }
 }

@@ -1,6 +1,5 @@
 package com.plexobject.stock;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -24,67 +23,63 @@ import com.plexobject.util.Configuration;
 // @ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, endpoint
 // = "queue:quotes-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QuoteServer implements RequestHandler {
-    public enum Action {
-        SUBSCRIBE, UNSUBSCRIBE
-    }
+	public enum Action {
+		SUBSCRIBE, UNSUBSCRIBE
+	}
 
-    static final Logger log = LoggerFactory.getLogger(QuoteServer.class);
+	static final Logger log = LoggerFactory.getLogger(QuoteServer.class);
 
-    private QuoteStreamer quoteStreamer = new QuoteStreamer();
+	private QuoteStreamer quoteStreamer = new QuoteStreamer();
 
-    @Override
-    public void handle(Request request) {
-        String symbol = request.getProperty("symbol");
-        String actionVal = request.getProperty("action");
-        log.info("Received " + request);
-        ValidationException
-                .builder()
-                .assertNonNull(symbol, "undefined_symbol", "symbol",
-                        "symbol not specified")
-                .assertNonNull(actionVal, "undefined_action", "action",
-                        "action not specified").end();
-        Action action = Action.valueOf(actionVal.toUpperCase());
-        if (action == Action.SUBSCRIBE) {
-            quoteStreamer.add(symbol, request.getResponseDispatcher());
-        } else {
-            quoteStreamer.remove(symbol, request.getResponseDispatcher());
-        }
-    }
+	@Override
+	public void handle(Request request) {
+		String symbol = request.getProperty("symbol");
+		String actionVal = request.getProperty("action");
+		log.info("Received " + request);
+		ValidationException
+				.builder()
+				.assertNonNull(symbol, "undefined_symbol", "symbol",
+						"symbol not specified")
+				.assertNonNull(actionVal, "undefined_action", "action",
+						"action not specified").end();
+		Action action = Action.valueOf(actionVal.toUpperCase());
+		if (action == Action.SUBSCRIBE) {
+			quoteStreamer.add(symbol, request.getResponseDispatcher());
+		} else {
+			quoteStreamer.remove(symbol, request.getResponseDispatcher());
+		}
+	}
 
-    private static void startJmsBroker() throws Exception {
-        BrokerService broker = new BrokerService();
+	private static void startJmsBroker() throws Exception {
+		BrokerService broker = new BrokerService();
 
-        broker.addConnector("tcp://localhost:61616");
+		broker.addConnector("tcp://localhost:61616");
 
-        broker.start();
-    }
+		broker.start();
+	}
 
-    public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            System.err.println("Usage: java " + QuoteServer.class.getName()
-                    + " properties-file");
-            System.exit(1);
-        }
-        Configuration config = new Configuration(args[0]);
-        QuoteServer service = new QuoteServer();
-        ServiceConfig serviceConfig = service.getClass().getAnnotation(
-                ServiceConfig.class);
-        if (serviceConfig.gateway() == GatewayType.JMS) {
-            startJmsBroker();
-            Collection<WebToJmsEntry> entries = Arrays
-                    .asList(new WebToJmsEntry(CodecType.JSON, "/quotes",
-                            serviceConfig.method(), serviceConfig.endpoint(), 5));
-            WebToJmsBridge.createAndStart(config, entries,
-                    GatewayType.WEBSOCKET);
-        }
-        //
-        Collection<RequestHandler> services = new ArrayList<>();
-        services.add(service);
-        //
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, services,
-                null);
-
-        serviceRegistry.start();
-        Thread.currentThread().join();
-    }
+	public static void main(String[] args) throws Exception {
+		if (args.length < 2) {
+			System.err.println("Usage: java " + QuoteServer.class.getName()
+					+ " properties-file");
+			System.exit(1);
+		}
+		Configuration config = new Configuration(args[0]);
+		QuoteServer service = new QuoteServer();
+		ServiceConfig serviceConfig = service.getClass().getAnnotation(
+				ServiceConfig.class);
+		if (serviceConfig.gateway() == GatewayType.JMS) {
+			startJmsBroker();
+			Collection<WebToJmsEntry> entries = Arrays
+					.asList(new WebToJmsEntry(CodecType.JSON, "/quotes",
+							serviceConfig.method(), serviceConfig.endpoint(), 5));
+			WebToJmsBridge.createAndStart(config, entries,
+					GatewayType.WEBSOCKET);
+		}
+		//
+		ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+		serviceRegistry.add(service);
+		serviceRegistry.start();
+		Thread.currentThread().join();
+	}
 }

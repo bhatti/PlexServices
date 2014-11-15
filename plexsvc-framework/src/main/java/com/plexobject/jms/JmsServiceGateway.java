@@ -11,7 +11,7 @@ import javax.naming.NamingException;
 
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.AbstractServiceGateway;
-import com.plexobject.service.ServiceConfig;
+import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
@@ -22,112 +22,111 @@ import com.plexobject.util.Configuration;
  *
  */
 public class JmsServiceGateway extends AbstractServiceGateway {
-    private JmsClient _jmsClient;
-    private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
+	private JmsClient _jmsClient;
+	private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
 
-    public JmsServiceGateway(final Configuration config,
-            final ServiceRegistry serviceRegistry) throws Exception {
-        super(config, serviceRegistry);
-    }
+	public JmsServiceGateway(final Configuration config,
+			final ServiceRegistry serviceRegistry) throws Exception {
+		super(config, serviceRegistry);
+	}
 
-    private synchronized JmsClient getJmsClient() throws JMSException {
-        if (_jmsClient == null) {
-            _jmsClient = new JmsClient(config);
-        }
-        return _jmsClient;
-    }
+	private synchronized JmsClient getJmsClient() throws JMSException {
+		if (_jmsClient == null) {
+			_jmsClient = new JmsClient(config);
+		}
+		return _jmsClient;
+	}
 
-    public void init() {
-    }
+	public void init() {
+	}
 
-    @Override
-    protected synchronized void doStart() throws Exception {
-        getJmsClient().start();
-    }
+	@Override
+	protected synchronized void doStart() throws Exception {
+		getJmsClient().start();
+	}
 
-    @Override
-    protected void doStop() throws Exception {
-        getJmsClient().stop();
-    }
+	@Override
+	protected void doStop() throws Exception {
+		getJmsClient().stop();
+	}
 
-    @Override
-    public Collection<RequestHandler> getHandlers() {
-        return new ArrayList<RequestHandler>(
-                jmsHandlersByRequestHandler.keySet());
-    }
+	@Override
+	public Collection<RequestHandler> getHandlers() {
+		return new ArrayList<RequestHandler>(
+				jmsHandlersByRequestHandler.keySet());
+	}
 
-    @Override
-    public synchronized void add(RequestHandler h) {
-        JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.get(h);
-        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
-        if (config == null) {
-            throw new IllegalArgumentException("service handler " + h
-                    + " doesn't define ServiceConfig annotation");
-        }
+	@Override
+	public synchronized void add(RequestHandler h) {
+		JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.get(h);
+		ServiceConfigDesc config = serviceRegistry.getServiceConfig(h);
+		if (config == null) {
+			throw new IllegalArgumentException("service handler " + h
+					+ " doesn't define ServiceConfig annotation");
+		}
 
-        String destName = config.endpoint();
+		String destName = config.endpoint();
 
-        if (jmsHandler != null) {
-            throw new IllegalStateException(
-                    "RequestHandler is already registered for " + destName);
-        }
+		if (jmsHandler != null) {
+			throw new IllegalStateException(
+					"RequestHandler is already registered for " + destName);
+		}
 
-        try {
-            Destination dest = getJmsClient().getDestination(
-                    getDestinationName(h));
-            jmsHandler = new JmsRequestHandler(serviceRegistry, getJmsClient(),
-                    dest, h);
-            jmsHandlersByRequestHandler.put(h, jmsHandler);
-            log.info("Adding JMS service " + h.getClass().getSimpleName()
-                    + " for " + dest + ", codec " + config.codec());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add service handler " + h, e);
-        }
-    }
+		try {
+			Destination dest = getJmsClient().getDestination(
+					getDestinationName(h));
+			jmsHandler = new JmsRequestHandler(serviceRegistry, getJmsClient(),
+					dest, h);
+			jmsHandlersByRequestHandler.put(h, jmsHandler);
+			log.info("Adding JMS service " + h.getClass().getSimpleName()
+					+ " for " + dest + ", codec " + config.codec());
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to add service handler " + h, e);
+		}
+	}
 
-    @Override
-    public synchronized boolean remove(RequestHandler h) {
-        JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.remove(h);
+	@Override
+	public synchronized boolean remove(RequestHandler h) {
+		JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.remove(h);
 
-        try {
-            if (jmsHandler != null) {
-                jmsHandler.close();
-                ServiceConfig config = h.getClass().getAnnotation(
-                        ServiceConfig.class);
-                log.info("Removing service " + h.getClass().getSimpleName()
-                        + " for " + config.endpoint());
-                return true;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to remove service handler " + h,
-                    e);
-        }
-        return false;
-    }
+		try {
+			if (jmsHandler != null) {
+				jmsHandler.close();
+				ServiceConfigDesc config = serviceRegistry.getServiceConfig(h);
+				log.info("Removing service " + h.getClass().getSimpleName()
+						+ " for " + config.endpoint());
+				return true;
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to remove service handler " + h,
+					e);
+		}
+		return false;
+	}
 
-    @Override
-    public boolean exists(RequestHandler handler) {
-        JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.get(handler);
-        return jmsHandler != null;
-    }
+	@Override
+	public boolean exists(RequestHandler handler) {
+		JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.get(handler);
+		return jmsHandler != null;
+	}
 
-    // queue:name
-    // topic:name
-    // optionally add {param}, that are initialized from configuration, e.g.
-    // queue:{scope}-create-project-service-queue
-    // topic:{scope}-notification-topic
-    private String getDestinationName(RequestHandler h) throws JMSException,
-            NamingException {
-        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+	// queue:name
+	// topic:name
+	// optionally add {param}, that are initialized from configuration, e.g.
+	// queue:{scope}-create-project-service-queue
+	// topic:{scope}-notification-topic
+	private String getDestinationName(RequestHandler h) throws JMSException,
+			NamingException {
+		ServiceConfigDesc config = serviceRegistry.getServiceConfig(h);
 
-        String destName = config.endpoint();
-        if (destName == null || destName.length() == 0) {
-            throw new IllegalArgumentException(
-                    "service handler "
-                            + h
-                            + "'s destination endpoint is empty, it should be like queue:name or topic:name");
-        }
-        return destName;
-    }
+		String destName = config.endpoint();
+		if (destName == null || destName.length() == 0) {
+			throw new IllegalArgumentException(
+					"service handler "
+							+ h
+							+ "'s destination endpoint is empty, it should be like queue:name or topic:name");
+		}
+		return destName;
+	}
 
 }

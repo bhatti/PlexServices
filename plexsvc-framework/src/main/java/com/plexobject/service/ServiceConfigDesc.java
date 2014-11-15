@@ -40,11 +40,11 @@ public class ServiceConfigDesc {
         this.rolesAllowed = rolesAllowed;
     }
 
-    public Method getMethod() {
+    public Method method() {
         return method;
     }
 
-    public GatewayType getGatewayType() {
+    public GatewayType gateway() {
         return gatewayType;
     }
 
@@ -52,23 +52,23 @@ public class ServiceConfigDesc {
         return requestClass;
     }
 
-    public CodecType getCodecType() {
+    public CodecType codec() {
         return codecType;
     }
 
-    public String getVersion() {
+    public String version() {
         return version;
     }
 
-    public String getEndpoint() {
+    public String endpoint() {
         return endpoint;
     }
 
-    public boolean isRecordStatsdMetrics() {
+    public boolean recordStatsdMetrics() {
         return recordStatsdMetrics;
     }
 
-    public String[] getRolesAllowed() {
+	public String[] rolesAllowed() {
         return rolesAllowed;
     }
 

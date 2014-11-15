@@ -47,6 +47,12 @@
     <priority value="WARN" />
   </category>
 
+  <category name="io.netty">
+    <priority value="warn"/>
+    <appender-ref ref="Console"/>
+  </category>
+
+
   <root>
     <level value="${root.log.level}"/>
     <!--appender-ref ref="FILE"/-->

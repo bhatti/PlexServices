@@ -43,263 +43,264 @@ import com.timgroup.statsd.StatsDClient;
  *
  */
 public class ServiceRegistry implements ServiceGateway {
-    private static final Logger log = LoggerFactory
-            .getLogger(ServiceRegistry.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(ServiceRegistry.class);
 
-    private final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
-    private final RoleAuthorizer authorizer;
-    private boolean running;
-    private final StatsDClient statsd;
-    private ServiceMetricsRegistry serviceMetricsRegistry;
-    private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+	private final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
+	private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
+	private final RoleAuthorizer authorizer;
+	private boolean running;
+	private final StatsDClient statsd;
+	private ServiceMetricsRegistry serviceMetricsRegistry;
+	private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
-    public ServiceRegistry(Configuration config,
-            Collection<RequestHandler> services, RoleAuthorizer authorizer) {
-        this.authorizer = authorizer;
-        this.gateways.putAll(getDefaultGateways(config, authorizer));
-        String statsdHost = config.getProperty("statsd.host");
-        if (statsdHost != null) {
-            String servicePrefix = "";
-            for (RequestHandler handler : services) {
-                servicePrefix = handler.getClass().getPackage().getName();
-                int lastDot = servicePrefix.lastIndexOf(".");
-                servicePrefix = servicePrefix.substring(lastDot + 1);
-            }
-            this.statsd = new NonBlockingStatsDClient(config.getProperty(
-                    "statsd.prefix", servicePrefix), statsdHost,
-                    config.getInteger("statsd.port", 8125));
-        } else {
-            this.statsd = null;
-        }
-        this.serviceMetricsRegistry = new ServiceMetricsRegistry(statsd);
-        // registering handlers
-        for (RequestHandler handler : services) {
-            add(handler);
-        }
-    }
+	public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
+		this.authorizer = authorizer;
+		this.gateways.putAll(getDefaultGateways(config, authorizer));
+		String statsdHost = config.getProperty("statsd.host");
+		if (statsdHost != null) {
+			String servicePrefix = config.getProperty("serviceConfigs", "");
+			this.statsd = new NonBlockingStatsDClient(config.getProperty(
+					"statsd.prefix", servicePrefix), statsdHost,
+					config.getInteger("statsd.port", 8125));
+		} else {
+			this.statsd = null;
+		}
+		serviceMetricsRegistry = new ServiceMetricsRegistry(this, statsd);
+	}
 
-    @Override
-    public synchronized boolean isRunning() {
-        return running;
-    }
+	@Override
+	public synchronized boolean isRunning() {
+		return running;
+	}
 
-    @Override
-    public synchronized void add(RequestHandler h) {
-        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
-        Objects.requireNonNull(config, "service handler " + h
-                + " doesn't define ServiceConfig annotation");
-        ServiceGateway gateway = gateways.get(config.gateway());
-        Objects.requireNonNull(gateway,
-                "Unsupported gateway for service handler " + h);
-        if (!gateway.exists(h)) {
-            registerMetricsJMX(h);
-            registerServiceHandlerLifecycle(h);
-            gateway.add(h);
-        }
-    }
+	public ServiceConfigDesc getServiceConfig(RequestHandler h) {
+		ServiceConfigDesc config = handlerConfigs.get(h);
+		if (config == null) {
+			config = new ServiceConfigDesc(h.getClass());
+		}
+		return config;
+	}
 
-    public ServiceMetricsRegistry getServiceMetricsRegistry() {
-        return serviceMetricsRegistry;
-    }
+	@Override
+	public void add(RequestHandler h) {
+		add(h, new ServiceConfigDesc(h.getClass()));
+	}
 
-    private void registerServiceHandlerLifecycle(RequestHandler h) {
-        String objName = getPackageName(h) + h.getClass().getSimpleName()
-                + ":type=Lifecycle";
-        try {
-            mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
-                    new ObjectName(objName));
-        } catch (InstanceAlreadyExistsException e) {
-        } catch (Exception e) {
-            log.error("Could not register mbean " + objName, e);
-        }
-    }
+	public synchronized void add(RequestHandler h, ServiceConfigDesc config) {
+		Objects.requireNonNull(config, "service handler " + h
+				+ " doesn't define ServiceConfig annotation");
+		ServiceGateway gateway = gateways.get(config.gateway());
+		Objects.requireNonNull(gateway,
+				"Unsupported gateway for service handler " + h);
+		if (!gateway.exists(h)) {
+			registerMetricsJMX(h);
+			registerServiceHandlerLifecycle(h);
+			gateway.add(h);
+		}
+	}
 
-    private static String getPackageName(RequestHandler h) {
-        return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
-                + ".";
-    }
+	public synchronized ServiceMetricsRegistry getServiceMetricsRegistry() {
+		return serviceMetricsRegistry;
+	}
 
-    private void registerMetricsJMX(RequestHandler h) {
-        String objName = getPackageName(h) + h.getClass().getSimpleName()
-                + ":type=Metrics";
-        ServiceMetrics metrics = serviceMetricsRegistry.getServiceMetrics(h
-                .getClass());
-        try {
-            mbs.registerMBean(metrics, new ObjectName(objName));
-        } catch (InstanceAlreadyExistsException e) {
-        } catch (Exception e) {
-            log.error("Could not register mbean " + objName, e);
-        }
-    }
+	private void registerServiceHandlerLifecycle(RequestHandler h) {
+		String objName = getPackageName(h) + h.getClass().getSimpleName()
+				+ ":type=Lifecycle";
+		try {
+			mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
+					new ObjectName(objName));
+		} catch (InstanceAlreadyExistsException e) {
+		} catch (Exception e) {
+			log.error("Could not register mbean " + objName, e);
+		}
+	}
 
-    @Override
-    public synchronized boolean remove(RequestHandler h) {
-        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
-        Objects.requireNonNull(config, "config" + h
-                + " doesn't define ServiceConfig annotation");
-        ServiceGateway gateway = gateways.get(config.gateway());
-        if (gateway == null) {
-            return false;
-        }
-        if (gateway.remove(h)) {
-            return true;
-        }
-        return false;
-    }
+	private static String getPackageName(RequestHandler h) {
+		return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
+				+ ".";
+	}
 
-    @Override
-    public boolean exists(RequestHandler h) {
-        ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
-        Objects.requireNonNull(config, "config" + h
-                + " doesn't define ServiceConfig annotation");
-        ServiceGateway gateway = gateways.get(config.gateway());
-        if (gateway == null) {
-            return false;
-        }
-        return gateway.exists(h);
-    }
+	private void registerMetricsJMX(RequestHandler h) {
+		String objName = getPackageName(h) + h.getClass().getSimpleName()
+				+ ":type=Metrics";
+		ServiceMetrics metrics = serviceMetricsRegistry.getServiceMetrics(h);
+		try {
+			mbs.registerMBean(metrics, new ObjectName(objName));
+		} catch (InstanceAlreadyExistsException e) {
+		} catch (Exception e) {
+			log.error("Could not register mbean " + objName, e);
+		}
+	}
 
-    @Override
-    public synchronized Collection<RequestHandler> getHandlers() {
-        Collection<RequestHandler> handlers = new ArrayList<>();
-        for (ServiceGateway g : gateways.values()) {
-            handlers.addAll(g.getHandlers());
-        }
-        return handlers;
-    }
+	@Override
+	public synchronized boolean remove(RequestHandler h) {
+		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+		Objects.requireNonNull(config, "config" + h
+				+ " doesn't define ServiceConfig annotation");
+		ServiceGateway gateway = gateways.get(config.gateway());
+		if (gateway == null) {
+			return false;
+		}
+		if (gateway.remove(h)) {
+			return true;
+		}
+		return false;
+	}
 
-    private Map<ServiceConfig.GatewayType, ServiceGateway> getDefaultGateways(
-            Configuration config, RoleAuthorizer authorizer) {
-        final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
-        try {
-            gateways.put(
-                    ServiceConfig.GatewayType.HTTP,
-                    getHttpServiceGateway(
-                            GatewayType.HTTP,
-                            config,
-                            authorizer,
-                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
-            gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
-                    config, this));
-            gateways.put(
-                    ServiceConfig.GatewayType.WEBSOCKET,
-                    getHttpServiceGateway(
-                            GatewayType.WEBSOCKET,
-                            config,
-                            authorizer,
-                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
-            return gateways;
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add gateways", e);
-        }
-    }
+	@Override
+	public boolean exists(RequestHandler h) {
+		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+		Objects.requireNonNull(config, "config" + h
+				+ " doesn't define ServiceConfig annotation");
+		ServiceGateway gateway = gateways.get(config.gateway());
+		if (gateway == null) {
+			return false;
+		}
+		return gateway.exists(h);
+	}
 
-    @Override
-    public synchronized void start() {
-        for (ServiceGateway g : gateways.values()) {
-            if (g.getHandlers().size() > 0) {
-                g.start();
-            }
-        }
-        running = true;
-    }
+	@Override
+	public synchronized Collection<RequestHandler> getHandlers() {
+		Collection<RequestHandler> handlers = new ArrayList<>();
+		for (ServiceGateway g : gateways.values()) {
+			handlers.addAll(g.getHandlers());
+		}
+		return handlers;
+	}
 
-    @Override
-    public synchronized void stop() {
-        for (ServiceGateway g : gateways.values()) {
-            if (g.getHandlers().size() > 0) {
-                g.stop();
-            }
-        }
-        running = false;
-    }
+	private Map<ServiceConfig.GatewayType, ServiceGateway> getDefaultGateways(
+			Configuration config, RoleAuthorizer authorizer) {
+		final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
+		try {
+			gateways.put(
+					ServiceConfig.GatewayType.HTTP,
+					getHttpServiceGateway(
+							GatewayType.HTTP,
+							config,
+							authorizer,
+							new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
+			gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
+					config, this));
+			gateways.put(
+					ServiceConfig.GatewayType.WEBSOCKET,
+					getHttpServiceGateway(
+							GatewayType.WEBSOCKET,
+							config,
+							authorizer,
+							new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
+			return gateways;
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to add gateways", e);
+		}
+	}
 
-    /**
-     * This method executes handler by encoding the payload to proper java class
-     * and enforces security set by the underlying application.
-     * 
-     * @param request
-     * @param handler
-     */
-    public void invoke(Request request, RequestHandler handler) {
-        if (handler != null) {
-            final long started = System.currentTimeMillis();
-            ServiceMetrics metrics = serviceMetricsRegistry
-                    .getServiceMetrics(handler.getClass());
+	@Override
+	public synchronized void start() {
+		for (ServiceGateway g : gateways.values()) {
+			if (g.getHandlers().size() > 0) {
+				g.start();
+			}
+		}
+		running = true;
+	}
 
-            ServiceConfig config = handler.getClass().getAnnotation(
-                    ServiceConfig.class);
-            if (log.isDebugEnabled()) {
-                log.debug("Received request for handler "
-                        + handler.getClass().getSimpleName() + ", gateway "
-                        + config.gateway() + ", payload "
-                        + request.getPayload() + ", params "
-                        + request.getProperties());
-            }
+	@Override
+	public synchronized void stop() {
+		for (ServiceGateway g : gateways.values()) {
+			if (g.getHandlers().size() > 0) {
+				g.stop();
+			}
+		}
+		running = false;
+	}
 
-            // override payload in request
-            Object payload = config.requestClass() != Void.class ? ObjectCodecFactory
-                    .getInstance()
-                    .getObjectCodec(config.codec())
-                    .decode((String) request.getPayload(),
-                            config.requestClass(), request.getProperties())
-                    : null;
+	/**
+	 * This method executes handler by encoding the payload to proper java class
+	 * and enforces security set by the underlying application.
+	 * 
+	 * @param request
+	 * @param handler
+	 */
+	public void invoke(Request request, RequestHandler handler) {
+		if (handler != null) {
+			final long started = System.currentTimeMillis();
+			ServiceMetrics metrics = serviceMetricsRegistry
+					.getServiceMetrics(handler);
 
-            request.setPayload(payload);
-            try {
-                if (authorizer != null && config.rolesAllowed() != null
-                        && config.rolesAllowed().length > 0
-                        && !config.rolesAllowed()[0].equals("")) {
-                    authorizer.authorize(request, config.rolesAllowed());
-                }
-                handler.handle(request);
-                metrics.addResponseTime(System.currentTimeMillis() - started);
-            } catch (AuthException e) {
-                metrics.incrementErrors();
+			ServiceConfig config = handler.getClass().getAnnotation(
+					ServiceConfig.class);
+			if (log.isDebugEnabled()) {
+				log.debug("Received request for handler "
+						+ handler.getClass().getSimpleName() + ", gateway "
+						+ config.gateway() + ", payload "
+						+ request.getPayload() + ", params "
+						+ request.getProperties());
+			}
 
-                request.getResponseDispatcher().setStatus(
-                        HttpResponse.SC_UNAUTHORIZED);
-                if (e.getLocation() != null) {
-                    request.getResponseDispatcher().setProperty(
-                            HttpResponse.LOCATION, e.getLocation());
-                }
-                request.getResponseDispatcher().send(e);
-            } catch (ValidationException e) {
-                metrics.incrementErrors();
+			// override payload in request
+			Object payload = config.requestClass() != Void.class ? ObjectCodecFactory
+					.getInstance()
+					.getObjectCodec(config.codec())
+					.decode((String) request.getPayload(),
+							config.requestClass(), request.getProperties())
+					: null;
 
-                request.getResponseDispatcher().setStatus(
-                        HttpResponse.SC_BAD_REQUEST);
-                request.getResponseDispatcher().send(e);
-            } catch (Exception e) {
-                metrics.incrementErrors();
+			request.setPayload(payload);
+			try {
+				if (authorizer != null && config.rolesAllowed() != null
+						&& config.rolesAllowed().length > 0
+						&& !config.rolesAllowed()[0].equals("")) {
+					authorizer.authorize(request, config.rolesAllowed());
+				}
+				handler.handle(request);
+				metrics.addResponseTime(System.currentTimeMillis() - started);
+			} catch (AuthException e) {
+				metrics.incrementErrors();
 
-                request.getResponseDispatcher().setStatus(
-                        HttpResponse.SC_INTERNAL_SERVER_ERROR);
-                request.getResponseDispatcher().send(e);
-            }
-        } else {
-            log.warn("Received Unknown request params "
-                    + request.getProperties() + ", payload "
-                    + request.getPayload());
-            request.getResponseDispatcher().setCodecType(CodecType.HTML);
-            request.getResponseDispatcher()
-                    .setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponseDispatcher().send("page not found");
-        }
-    }
+				request.getResponseDispatcher().setStatus(
+						HttpResponse.SC_UNAUTHORIZED);
+				if (e.getLocation() != null) {
+					request.getResponseDispatcher().setProperty(
+							HttpResponse.LOCATION, e.getLocation());
+				}
+				request.getResponseDispatcher().send(e);
+			} catch (ValidationException e) {
+				metrics.incrementErrors();
 
-    private ServiceGateway getHttpServiceGateway(
-            final GatewayType type,
-            final Configuration config,
-            final RoleAuthorizer authorizer,
-            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
-        RequestHandler executor = new DefaultHttpRequestHandler(this,
-                requestHandlerPathsByMethod);
-        Lifecycle server = HttpServerFactory.getHttpServer(type, config,
-                executor, false);
-        return new DefaultHttpServiceGateway(config, this,
-                requestHandlerPathsByMethod, server);
-    }
+				request.getResponseDispatcher().setStatus(
+						HttpResponse.SC_BAD_REQUEST);
+				request.getResponseDispatcher().send(e);
+			} catch (Exception e) {
+				metrics.incrementErrors();
+
+				request.getResponseDispatcher().setStatus(
+						HttpResponse.SC_INTERNAL_SERVER_ERROR);
+				request.getResponseDispatcher().send(e);
+			}
+		} else {
+			log.warn("Received Unknown request params "
+					+ request.getProperties() + ", payload "
+					+ request.getPayload());
+			request.getResponseDispatcher().setCodecType(CodecType.HTML);
+			request.getResponseDispatcher()
+					.setStatus(HttpResponse.SC_NOT_FOUND);
+			request.getResponseDispatcher().send("page not found");
+		}
+	}
+
+	private ServiceGateway getHttpServiceGateway(
+			final GatewayType type,
+			final Configuration config,
+			final RoleAuthorizer authorizer,
+			final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
+		RequestHandler executor = new DefaultHttpRequestHandler(this,
+				requestHandlerPathsByMethod);
+		Lifecycle server = HttpServerFactory.getHttpServer(type, config,
+				executor, false);
+		return new DefaultHttpServiceGateway(config, this,
+				requestHandlerPathsByMethod, server);
+	}
 }
