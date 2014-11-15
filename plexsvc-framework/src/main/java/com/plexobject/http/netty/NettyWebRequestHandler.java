@@ -32,136 +32,136 @@ import com.plexobject.service.ServiceConfig.Method;
 
 @Sharable
 public class NettyWebRequestHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger log = LoggerFactory
-            .getLogger(NettyWebRequestHandler.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(NettyWebRequestHandler.class);
 
-    private final RequestHandler handler;
+	private final RequestHandler handler;
 
-    public NettyWebRequestHandler(RequestHandler handler) {
-        this.handler = handler;
-    }
+	public NettyWebRequestHandler(RequestHandler handler) {
+		this.handler = handler;
+	}
 
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.flush();
-    }
+	@Override
+	public void channelReadComplete(ChannelHandlerContext ctx) {
+		ctx.flush();
+	}
 
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-        if (msg instanceof HttpRequest) {
-            final HttpRequest request = (HttpRequest) msg;
+	@Override
+	public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
+		if (msg instanceof HttpRequest) {
+			final HttpRequest request = (HttpRequest) msg;
 
-            if (HttpHeaders.is100ContinueExpected(request)) {
-                ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
-                return;
-            }
+			if (HttpHeaders.is100ContinueExpected(request)) {
+				ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
+				return;
+			}
 
-            AbstractResponseDispatcher dispatcher = new NettyResponseDispatcher(
-                    new Handledable() {
-                        @Override
-                        public void setHandled(boolean h) {
-                            if (request instanceof LastHttpContent) {
-                                ctx.close();
-                            }
-                        }
-                    }, request, ctx);
-            String payload = null;
+			AbstractResponseDispatcher dispatcher = new NettyResponseDispatcher(
+					new Handledable() {
+						@Override
+						public void setHandled(boolean h) {
+							if (request instanceof LastHttpContent) {
+								ctx.close();
+							}
+						}
+					}, request, ctx);
+			String payload = null;
 
-            if (request instanceof HttpContent) {
-                HttpContent content = (HttpContent) request;
-                payload = content.content().toString(CharsetUtil.UTF_8);
-            }
-            Method method = Method.valueOf(request.getMethod().name());
-            String uri = request.getUri();
-            int n = uri.indexOf("?");
-            if (n != -1) {
-                uri = uri.substring(0, n);
-            }
-            Map<String, Object> headers = getHeaders(request);
+			if (request instanceof HttpContent) {
+				HttpContent content = (HttpContent) request;
+				payload = content.content().toString(CharsetUtil.UTF_8);
+			}
+			Method method = Method.valueOf(request.getMethod().name());
+			String uri = request.getUri();
+			int n = uri.indexOf("?");
+			if (n != -1) {
+				uri = uri.substring(0, n);
+			}
+			Map<String, Object> headers = getHeaders(request);
 
-            Map<String, Object> params = getParams(request);
+			Map<String, Object> params = getParams(request);
 
-            Request req = Request.builder().setMethod(method).setEndpoint(uri)
-                    .setProperties(params).setHeaders(headers)
-                    .setPayload(payload).setResponseDispatcher(dispatcher)
-                    .build();
-            log.info("Received " + req);
-            handler.handle(req);
+			Request req = Request.builder().setMethod(method).setEndpoint(uri)
+					.setProperties(params).setHeaders(headers)
+					.setPayload(payload).setResponseDispatcher(dispatcher)
+					.build();
+			log.info("Received " + req);
+			handler.handle(req);
 
-        }
-    }
+		}
+	}
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ctx.fireChannelActive();
-    }
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		ctx.fireChannelActive();
+	}
 
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ctx.fireChannelInactive();
-    }
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		ctx.fireChannelInactive();
+	}
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-            throws Exception {
-        log.warn("exceptionCaught: Channel failed with remote address "
-                + ctx.channel().remoteAddress(), cause.getCause());
-    }
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+			throws Exception {
+		log.warn("exceptionCaught: Channel failed with remote address "
+				+ ctx.channel().remoteAddress(), cause);
+	}
 
-    public static Map<String, Object> getParams(HttpRequest request) {
-        Map<String, Object> params = new HashMap<>();
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-        for (Map.Entry<String, List<String>> e : decoder.parameters()
-                .entrySet()) {
-            params.put(e.getKey(), e.getValue().get(0));
-        }
+	public static Map<String, Object> getParams(HttpRequest request) {
+		Map<String, Object> params = new HashMap<>();
+		QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
+		for (Map.Entry<String, List<String>> e : decoder.parameters()
+				.entrySet()) {
+			params.put(e.getKey(), e.getValue().get(0));
+		}
 
-        // if (request.getMethod() == HttpMethod.POST) {
-        // ChannelBuffer content = request.getDecoderResult();
-        // if (content.readable()) {
-        // String param = content.toString(WaarpStringUtils.UTF8);
-        // QueryStringDecoder queryStringDecoder2 = new QueryStringDecoder(
-        // "/?" + param);
-        // params = queryStringDecoder2.getParameters();
-        // } else {
-        // params = null;
-        // }
-        // }
-        // params.put(Constants.HOST, request.getRemoteHost());
-        return params;
+		// if (request.getMethod() == HttpMethod.POST) {
+		// ChannelBuffer content = request.getDecoderResult();
+		// if (content.readable()) {
+		// String param = content.toString(WaarpStringUtils.UTF8);
+		// QueryStringDecoder queryStringDecoder2 = new QueryStringDecoder(
+		// "/?" + param);
+		// params = queryStringDecoder2.getParameters();
+		// } else {
+		// params = null;
+		// }
+		// }
+		// params.put(Constants.HOST, request.getRemoteHost());
+		return params;
 
-    }
+	}
 
-    public static Map<String, Object> getHeaders(HttpRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        String cookieString = request.headers().get(COOKIE);
-        if (cookieString != null) {
-            Set<Cookie> cookies = CookieDecoder.decode(cookieString);
-            if (!cookies.isEmpty()) {
-                // Reset the cookies if necessary.
-                for (Cookie cookie : cookies) {
-                    result.put(cookie.getName(), cookie.getValue());
-                    // response.headers().add(SET_COOKIE,
-                    // ServerCookieEncoder.encode(cookie));
-                }
-            }
-        }
-        for (String name : request.headers().names()) {
-            String value = request.headers().get(name);
-            result.put(name, value);
-        }
-        return result;
-    }
+	public static Map<String, Object> getHeaders(HttpRequest request) {
+		Map<String, Object> result = new HashMap<>();
+		String cookieString = request.headers().get(COOKIE);
+		if (cookieString != null) {
+			Set<Cookie> cookies = CookieDecoder.decode(cookieString);
+			if (!cookies.isEmpty()) {
+				// Reset the cookies if necessary.
+				for (Cookie cookie : cookies) {
+					result.put(cookie.getName(), cookie.getValue());
+					// response.headers().add(SET_COOKIE,
+					// ServerCookieEncoder.encode(cookie));
+				}
+			}
+		}
+		for (String name : request.headers().names()) {
+			String value = request.headers().get(name);
+			result.put(name, value);
+		}
+		return result;
+	}
 
-    public static String toString(HttpRequest request) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Method:" + request.getMethod());
-        sb.append(", Path:" + request.getUri());
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-        for (Map.Entry<String, List<String>> e : decoder.parameters()
-                .entrySet()) {
-            sb.append(", " + e.getKey() + " -> " + e.getValue());
-        }
-        return sb.toString();
-    }
+	public static String toString(HttpRequest request) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Method:" + request.getMethod());
+		sb.append(", Path:" + request.getUri());
+		QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
+		for (Map.Entry<String, List<String>> e : decoder.parameters()
+				.entrySet()) {
+			sb.append(", " + e.getKey() + " -> " + e.getValue());
+		}
+		return sb.toString();
+	}
 }

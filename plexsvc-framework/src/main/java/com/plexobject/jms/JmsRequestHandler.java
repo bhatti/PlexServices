@@ -57,9 +57,6 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
 		try {
 			Map<String, Object> params = JmsClient.getParams(message);
 			final String textPayload = txtMessage.getText();
-			log.info("Received " + textPayload + " for " + config.endpoint()
-					+ " " + handler.getClass().getSimpleName() + ", headers "
-					+ params);
 			AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
 					jmsClient, message.getJMSReplyTo());
 			dispatcher.setCodecType(config.codec());
@@ -67,6 +64,10 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
 			Request req = Request.builder().setMethod(Method.MESSAGE)
 					.setProperties(params).setPayload(textPayload)
 					.setResponseDispatcher(dispatcher).build();
+
+			log.info("Received " + textPayload + " for " + config.endpoint()
+					+ " " + handler.getClass().getSimpleName() + ", headers "
+					+ params);
 
 			serviceRegistry.invoke(req, handler);
 		} catch (JMSException e) {

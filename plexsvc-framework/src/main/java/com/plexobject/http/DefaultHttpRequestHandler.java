@@ -38,6 +38,12 @@ public class DefaultHttpRequestHandler implements RequestHandler {
 		RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
 				.get(request.getEndpoint(), request.getProperties()) : null;
 		if (handler == null) {
+			request.getResponseDispatcher()
+					.setStatus(HttpResponse.SC_NOT_FOUND);
+			request.getResponseDispatcher().send(
+					"Unknown request received " + request.getPayload() + "/"
+							+ request.getProperties());
+
 			log.error("Unknown request received " + request.getPayload() + "/"
 					+ request.getProperties());
 			return;

@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
@@ -29,6 +32,8 @@ public class Main {
 					+ " properties-file [web|websocket|jmsweb|jmswebsocket]");
 			System.exit(1);
 		}
+		BasicConfigurator.configure();
+		LogManager.getRootLogger().setLevel(Level.INFO);
 		Configuration config = new Configuration(args[0]);
 		PingService pingService = new PingService();
 
@@ -55,9 +60,9 @@ public class Main {
 			serviceRegistry.start();
 		} else {
 			ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-			serviceRegistry.add(pingService, new ServiceConfigDesc(
-					Method.MESSAGE, GatewayType.HTTP, Void.class,
-					CodecType.JSON, "1.0", "/ping", true, new String[0]));
+			serviceRegistry.add(pingService, new ServiceConfigDesc(Method.GET,
+					GatewayType.HTTP, Void.class, CodecType.JSON, "1.0",
+					"/ping", true, new String[0]));
 			serviceRegistry.start();
 		}
 		Thread.currentThread().join();

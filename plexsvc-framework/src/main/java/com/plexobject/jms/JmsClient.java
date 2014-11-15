@@ -169,10 +169,10 @@ public class JmsClient implements Lifecycle {
     }
 
     public Closeable sendReceive(final String destName,
-            final Map<String, Object> headers, final String payload,
+            final Map<String, Object> headers, final String reqPayload,
             final Handler<Response> handler, final boolean singleUseOnly)
             throws JMSException, NamingException {
-        Message reqMsg = createTextMessage(payload);
+        Message reqMsg = createTextMessage(reqPayload);
         setHeaders(headers, reqMsg);
         final TemporaryQueue replyTo = currentJmsSession()
                 .createTemporaryQueue();
@@ -200,11 +200,11 @@ public class JmsClient implements Lifecycle {
                 try {
                     final Map<String, Object> params = JmsClient
                             .getParams(message);
-                    final String text = respMsg.getText();
-                    log.info(destName + ": Received " + text
-                            + " in response to " + payload + ", params "
+                    final String respText = respMsg.getText();
+                    log.info(destName + ": Received " + respText
+                            + " in response to " + reqPayload + ", params "
                             + headers);
-                    final Response response = new Response(params, params, text);
+                    final Response response = new Response(params, params, respText);
                     handler.handle(response);
                     if (singleUseOnly) {
                         try {
@@ -226,7 +226,7 @@ public class JmsClient implements Lifecycle {
         consumer.setMessageListener(listener);
         reqMsg.setJMSReplyTo(replyTo);
         createProducer(destName).send(reqMsg);
-        log.info("Sent '" + payload + "' to " + destName + ", headers "
+        log.info("Sent '" + reqPayload + "' to " + destName + ", headers "
                 + headers);
         return closeable;
     }

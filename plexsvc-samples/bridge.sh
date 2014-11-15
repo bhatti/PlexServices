@@ -6,3 +6,4 @@ do
 done
 export CLASSPATH 
 java com.plexobject.bridge.web.WebToJmsBridge bugger.properties http_jms_services_mapping.json
+

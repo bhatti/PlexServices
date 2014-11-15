@@ -90,6 +90,7 @@ public class ServiceRegistry implements ServiceGateway {
 	public synchronized void add(RequestHandler h, ServiceConfigDesc config) {
 		Objects.requireNonNull(config, "service handler " + h
 				+ " doesn't define ServiceConfig annotation");
+		handlerConfigs.put(h, config);
 		ServiceGateway gateway = gateways.get(config.gateway());
 		Objects.requireNonNull(gateway,
 				"Unsupported gateway for service handler " + h);
@@ -135,7 +136,7 @@ public class ServiceRegistry implements ServiceGateway {
 
 	@Override
 	public synchronized boolean remove(RequestHandler h) {
-		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+		ServiceConfigDesc config = getServiceConfig(h);
 		Objects.requireNonNull(config, "config" + h
 				+ " doesn't define ServiceConfig annotation");
 		ServiceGateway gateway = gateways.get(config.gateway());
@@ -150,7 +151,7 @@ public class ServiceRegistry implements ServiceGateway {
 
 	@Override
 	public boolean exists(RequestHandler h) {
-		ServiceConfig config = h.getClass().getAnnotation(ServiceConfig.class);
+		ServiceConfigDesc config = getServiceConfig(h);
 		Objects.requireNonNull(config, "config" + h
 				+ " doesn't define ServiceConfig annotation");
 		ServiceGateway gateway = gateways.get(config.gateway());
@@ -230,8 +231,7 @@ public class ServiceRegistry implements ServiceGateway {
 			ServiceMetrics metrics = serviceMetricsRegistry
 					.getServiceMetrics(handler);
 
-			ServiceConfig config = handler.getClass().getAnnotation(
-					ServiceConfig.class);
+			ServiceConfigDesc config = getServiceConfig(handler);
 			if (log.isDebugEnabled()) {
 				log.debug("Received request for handler "
 						+ handler.getClass().getSimpleName() + ", gateway "
@@ -247,8 +247,17 @@ public class ServiceRegistry implements ServiceGateway {
 					.decode((String) request.getPayload(),
 							config.requestClass(), request.getProperties())
 					: null;
-
-			request.setPayload(payload);
+			if (payload != null) {
+				request.setPayload(payload);
+			} else if (request.getPayload() != null) {
+				String[] nvArr = request.getPayload().toString().split("&");
+				for (String nvStr : nvArr) {
+					String[] nv = nvStr.split("=");
+					if (nv.length == 2) {
+						request.setProperty(nv[0], nv[1]);
+					}
+				}
+			}
 			try {
 				if (authorizer != null && config.rolesAllowed() != null
 						&& config.rolesAllowed().length > 0

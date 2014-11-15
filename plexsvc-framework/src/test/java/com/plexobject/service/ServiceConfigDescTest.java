@@ -24,7 +24,7 @@ public class ServiceConfigDescTest {
         ServiceConfigDesc desc = new ServiceConfigDesc(WebService.class);
         assertEquals(Method.GET, desc.method());
         assertEquals(GatewayType.HTTP, desc.gateway());
-        assertEquals(Void.class, desc.getRequestClass());
+        assertEquals(Void.class, desc.requestClass());
         assertEquals(CodecType.JSON, desc.codec());
         assertEquals("1.0", desc.version());
         assertEquals("/w", desc.endpoint());

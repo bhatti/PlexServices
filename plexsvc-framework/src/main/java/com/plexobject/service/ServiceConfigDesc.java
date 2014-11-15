@@ -48,7 +48,7 @@ public class ServiceConfigDesc {
         return gatewayType;
     }
 
-    public Class<?> getRequestClass() {
+	public Class<?> requestClass() {
         return requestClass;
     }
 
