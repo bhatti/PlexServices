@@ -2,12 +2,13 @@
 
 ##Overview
 
-PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
+PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
 
 PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
 
+PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to automatically expose them through HTTP or websocket interfaces.
 
-PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets that listen to JMS queues/topics. For example, you may use JMS for all internal services and then create a bridge to automatically expose them through HTTP or websocket interfaces.
+For intra-process communication, PlexService provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.
 
 PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
 
@@ -416,7 +417,7 @@ serviceRegistry.start();
 ```
 
 
-### Creating Http/Websocket to JMS bridge 
+### Creating Http/Websocket bridge for JMS services
 Here is how you can setup bridge between HTTP/Websocket and JMS based services. 
 ```java 
   Configuration config = new Configuration(configFile);
@@ -573,7 +574,7 @@ public class QuoteServer implements RequestHandler {
 }
 
 ```
-Here is the streaing server that pushes the updates to web clients:
+Here is the streaming server that pushes the updates to web clients:
 ```java 
 public class QuoteStreamer extends TimerTask {
     private int delay = 1000;
