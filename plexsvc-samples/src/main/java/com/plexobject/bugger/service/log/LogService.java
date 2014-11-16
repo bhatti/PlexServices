@@ -7,13 +7,13 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.GatewayType;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-// @ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class,
+// @ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class,
 // endpoint = "/logs", method = Method.POST,
 // contentType = "application/json")
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, endpoint = "queue:{scope}-log-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, endpoint = "queue:{scope}-log-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class LogService implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LogService.class);
 

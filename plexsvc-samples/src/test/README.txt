@@ -15,4 +15,6 @@ To run a single test, specify test name, e.g.
 python bugs_test.py BugsTest.test_create_bug_report
 python bugs_test.py BugsTest.test_list_project_bug_report
 python bugs_test.py BugsTest.test_assign_bugreport
-
+python ping_test.py PingTest.test_ping_ws_loop
+python ping_test.py PingTest.test_ping
+python ping_test.py PingTest.test_ping_ws

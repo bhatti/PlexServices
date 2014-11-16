@@ -11,10 +11,10 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.GatewayType;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, endpoint = "/sign_auth", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/sign_auth", method = Method.GET, codec = CodecType.JSON)
 public class S3SignService implements RequestHandler {
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     private String key;

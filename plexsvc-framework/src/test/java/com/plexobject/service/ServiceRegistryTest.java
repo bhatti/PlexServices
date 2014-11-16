@@ -3,7 +3,6 @@ package com.plexobject.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -22,8 +21,8 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.util.Configuration;
 
 public class ServiceRegistryTest {
@@ -61,7 +60,7 @@ public class ServiceRegistryTest {
 	private List<Request> requests = new ArrayList<>();
 
 	//
-	@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = Void.class, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
+	@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = Void.class, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
 	public class WebsocketService implements RequestHandler {
 
 		@Override
@@ -70,7 +69,7 @@ public class ServiceRegistryTest {
 		}
 	}
 
-	@ServiceConfig(gateway = GatewayType.HTTP, requestClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+	@ServiceConfig(protocol = Protocol.HTTP, requestClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
 	public class WebService implements RequestHandler {
 		@Override
 		public void handle(Request request) {
@@ -78,7 +77,7 @@ public class ServiceRegistryTest {
 		}
 	}
 
-	@ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, endpoint = "queue:test", method = Method.MESSAGE, codec = CodecType.JSON)
+	@ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, endpoint = "queue:test", method = Method.MESSAGE, codec = CodecType.JSON)
 	public class JmsService implements RequestHandler {
 		@Override
 		public void handle(Request request) {
@@ -156,8 +155,8 @@ public class ServiceRegistryTest {
 		Map<String, Object> headers = new HashMap<>();
 		String payload = "{}";
 
-		Request request = new Request(Method.GET, "/w", properties, headers,
-				payload, new AbstractResponseDispatcher() {
+		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+				properties, headers, payload, new AbstractResponseDispatcher() {
 					@Override
 					public void addSessionId(String value) {
 
@@ -175,15 +174,15 @@ public class ServiceRegistryTest {
 		Map<String, Object> headers = new HashMap<>();
 		String payload = "test";
 
-		Request request = new Request(Method.GET, "/w", properties, headers,
-				payload, new AbstractResponseDispatcher() {
+		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+				properties, headers, payload, new AbstractResponseDispatcher() {
 					@Override
 					public void addSessionId(String value) {
 					}
 				});
 		RequestHandler h = new WebsocketService();
 		registry.invoke(request, h);
-		assertNull(request.getPayload());
+		assertEquals("test", request.getPayload());
 	}
 
 	@Test
@@ -194,8 +193,8 @@ public class ServiceRegistryTest {
 		Map<String, Object> headers = new HashMap<>();
 		String payload = "{\"username\":\"john\"}";
 
-		Request request = new Request(Method.GET, "/w", properties, headers,
-				payload, new AbstractResponseDispatcher() {
+		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+				properties, headers, payload, new AbstractResponseDispatcher() {
 					@Override
 					public void addSessionId(String value) {
 					}
@@ -214,8 +213,8 @@ public class ServiceRegistryTest {
 		Map<String, Object> headers = new HashMap<>();
 		String payload = "{}";
 		final StringBuilder response = new StringBuilder();
-		Request request = new Request(Method.GET, "/w", properties, headers,
-				payload, new AbstractResponseDispatcher() {
+		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+				properties, headers, payload, new AbstractResponseDispatcher() {
 					{
 						setCodecType(CodecType.TEXT);
 					}
@@ -244,8 +243,8 @@ public class ServiceRegistryTest {
 		Map<String, Object> headers = new HashMap<>();
 		String payload = "{}";
 		final StringBuilder response = new StringBuilder();
-		Request request = new Request(Method.GET, "/w", properties, headers,
-				payload, new AbstractResponseDispatcher() {
+		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+				properties, headers, payload, new AbstractResponseDispatcher() {
 					{
 						setCodecType(CodecType.TEXT);
 					}
@@ -273,8 +272,8 @@ public class ServiceRegistryTest {
 		Map<String, Object> headers = new HashMap<>();
 		String payload = "{}";
 		final StringBuilder response = new StringBuilder();
-		Request request = new Request(Method.GET, "/w", properties, headers,
-				payload, new AbstractResponseDispatcher() {
+		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+				properties, headers, payload, new AbstractResponseDispatcher() {
 					{
 						setCodecType(CodecType.TEXT);
 					}
@@ -303,8 +302,8 @@ public class ServiceRegistryTest {
 		Map<String, Object> headers = new HashMap<>();
 		String payload = "{}";
 		final StringBuilder response = new StringBuilder();
-		Request request = new Request(Method.GET, "/w", properties, headers,
-				payload, new AbstractResponseDispatcher() {
+		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+				properties, headers, payload, new AbstractResponseDispatcher() {
 					{
 						setCodecType(CodecType.TEXT);
 					}

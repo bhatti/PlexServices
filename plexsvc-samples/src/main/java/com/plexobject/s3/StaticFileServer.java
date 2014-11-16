@@ -13,10 +13,10 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.GatewayType;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private Map<String, String> mimeTypes = new HashMap<String, String>() {
         private static final long serialVersionUID = 1L;

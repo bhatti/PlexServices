@@ -1,13 +1,13 @@
 package com.plexobject.bridge.web;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.jms.JMSException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +19,13 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.http.HttpServerFactory;
 import com.plexobject.jms.JmsClient;
-import com.plexobject.service.Lifecycle;
-import com.plexobject.service.ServiceConfig.GatewayType;
+import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.ServiceConfig.Protocol;
+import com.plexobject.service.ServiceConfigDesc;
+import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.route.RouteResolver;
-import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
 /**
@@ -35,24 +35,32 @@ import com.plexobject.util.IOUtils;
  * @author shahzad bhatti
  *
  */
-public class WebToJmsBridge implements RequestHandler {
+public class WebToJmsBridge implements RequestHandler, LifecycleAware {
 	private static final Logger log = LoggerFactory
 			.getLogger(WebToJmsBridge.class);
 	private final JmsClient jmsClient;
-	private Lifecycle server;
 	//
 	private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
 
-	public WebToJmsBridge(JmsClient jmsClient, Collection<WebToJmsEntry> entries) {
+	public WebToJmsBridge(JmsClient jmsClient,
+			Collection<WebToJmsEntry> entries, ServiceRegistry serviceRegistry) {
 		this.jmsClient = jmsClient;
 
 		for (WebToJmsEntry e : entries) {
 			add(e);
 		}
-	}
+		//
+		for (WebToJmsEntry e : entries) {
+			serviceRegistry.add(this,
+					new ServiceConfigDesc(e.getMethod(), Protocol.HTTP,
+							Void.class, e.getCodecType(), null, e.getPath(),
+							true, new String[0]));
+			serviceRegistry.add(this,
+					new ServiceConfigDesc(e.getMethod(), Protocol.WEBSOCKET,
+							Void.class, e.getCodecType(), null, e.getPath(),
+							true, new String[0]));
+		}
 
-	public void setServer(Lifecycle server) {
-		this.server = server;
 	}
 
 	public void add(WebToJmsEntry e) {
@@ -141,42 +149,28 @@ public class WebToJmsBridge implements RequestHandler {
 		};
 	}
 
-	public synchronized void startBridge() {
-		jmsClient.start();
-		server.start();
-	}
-
-	public synchronized void stopBridge() {
-		jmsClient.stop();
-		server.stop();
-	}
-
-	public static void createAndStart(Configuration config,
-			Collection<WebToJmsEntry> entries, GatewayType gatewayType)
-			throws JMSException {
-		JmsClient jmsClient = new JmsClient(config);
-		WebToJmsBridge bridge = new WebToJmsBridge(jmsClient, entries);
-		Lifecycle server = HttpServerFactory.getHttpServer(gatewayType, config,
-				bridge, true);
-		bridge.setServer(server);
-		bridge.startBridge();
-
-	}
-
-	public static void main(String[] args) throws Exception {
-		if (args.length != 2) {
-			System.err.println("Usage: java " + WebToJmsBridge.class.getName()
-					+ " properties-file mapping-json-file");
-			System.exit(1);
-		}
-		final String mappingJson = IOUtils
-				.toString(new FileInputStream(args[1]));
-		Collection<WebToJmsEntry> entries = new JsonObjectCodec().decode(
-				mappingJson, new TypeReference<List<WebToJmsEntry>>() {
+	public static Collection<WebToJmsEntry> load(File file) throws IOException {
+		final String mappingJson = IOUtils.toString(new FileInputStream(file));
+		return new JsonObjectCodec().decode(mappingJson,
+				new TypeReference<List<WebToJmsEntry>>() {
 				});
-		Configuration config = new Configuration(args[0]);
-		createAndStart(config, entries, GatewayType.HTTP);
-		Thread.currentThread().join();
 	}
 
+	@Override
+	public void onCreated() {
+	}
+
+	@Override
+	public void onDestroyed() {
+	}
+
+	@Override
+	public void onStarted() {
+		jmsClient.start();
+	}
+
+	@Override
+	public void onStopped() {
+		jmsClient.stop();
+	}
 }

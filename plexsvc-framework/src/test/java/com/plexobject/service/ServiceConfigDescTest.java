@@ -8,11 +8,11 @@ import org.junit.Test;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.ServiceConfig.GatewayType;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
 public class ServiceConfigDescTest {
-    @ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, version = "1.0", endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, version = "1.0", endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -23,7 +23,7 @@ public class ServiceConfigDescTest {
     public void testCreateWithHandler() {
         ServiceConfigDesc desc = new ServiceConfigDesc(WebService.class);
         assertEquals(Method.GET, desc.method());
-        assertEquals(GatewayType.HTTP, desc.gateway());
+        assertEquals(Protocol.HTTP, desc.protocol());
         assertEquals(Void.class, desc.requestClass());
         assertEquals(CodecType.JSON, desc.codec());
         assertEquals("1.0", desc.version());

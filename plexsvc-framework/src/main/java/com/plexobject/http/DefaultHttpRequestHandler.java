@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
@@ -38,14 +39,20 @@ public class DefaultHttpRequestHandler implements RequestHandler {
 		RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
 				.get(request.getEndpoint(), request.getProperties()) : null;
 		if (handler == null) {
+			request.getResponseDispatcher().setCodecType(CodecType.TEXT);
 			request.getResponseDispatcher()
 					.setStatus(HttpResponse.SC_NOT_FOUND);
 			request.getResponseDispatcher().send(
 					"Unknown request received " + request.getPayload() + "/"
-							+ request.getProperties());
+							+ request.getProperties() + " for method "
+							+ request.getMethod() + ", protocol "
+							+ request.getProtocol());
 
 			log.error("Unknown request received " + request.getPayload() + "/"
-					+ request.getProperties());
+					+ request.getProperties() + " for method "
+					+ request.getMethod() + ", protocol "
+					+ request.getProtocol() + ", available "
+					+ requestHandlerPathsByMethod);
 			return;
 		}
 		ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);

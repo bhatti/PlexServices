@@ -1,7 +1,7 @@
 package com.plexobject.service;
 
 /**
- * This interface defines lifecycle methods, which are used by service gateways
+ * This interface defines lifecycle methods, which are used by service containers
  * 
  * @author shahzad bhatti
  *

@@ -41,163 +41,160 @@ import java.util.concurrent.TimeUnit;
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.util.Configuration;
 
 public class TestWebUtils {
-    private static class WebSocketClientHandler extends
-            SimpleChannelInboundHandler<Object> {
-        private final CountDownLatch latch;
-        private final List<String> responses;
-        private final WebSocketClientHandshaker handshaker;
-        private ChannelPromise handshakeFuture;
+	private static class WebSocketClientHandler extends
+			SimpleChannelInboundHandler<Object> {
+		private final CountDownLatch latch;
+		private final List<String> responses;
+		private final WebSocketClientHandshaker handshaker;
+		private ChannelPromise handshakeFuture;
 
-        private WebSocketClientHandler(final CountDownLatch latch,
-                final List<String> responses,
-                final WebSocketClientHandshaker handshaker) {
-            this.latch = latch;
-            this.responses = responses;
-            this.handshaker = handshaker;
-        }
+		private WebSocketClientHandler(final CountDownLatch latch,
+				final List<String> responses,
+				final WebSocketClientHandshaker handshaker) {
+			this.latch = latch;
+			this.responses = responses;
+			this.handshaker = handshaker;
+		}
 
-        public ChannelFuture handshakeFuture() {
-            return handshakeFuture;
-        }
+		public ChannelFuture handshakeFuture() {
+			return handshakeFuture;
+		}
 
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) {
-            handshakeFuture = ctx.newPromise();
-        }
+		@Override
+		public void handlerAdded(ChannelHandlerContext ctx) {
+			handshakeFuture = ctx.newPromise();
+		}
 
-        @Override
-        public void channelActive(ChannelHandlerContext ctx) {
-            handshaker.handshake(ctx.channel());
-        }
+		@Override
+		public void channelActive(ChannelHandlerContext ctx) {
+			handshaker.handshake(ctx.channel());
+		}
 
-        @Override
-        public void channelInactive(ChannelHandlerContext ctx) {
-        }
+		@Override
+		public void channelInactive(ChannelHandlerContext ctx) {
+		}
 
-        @Override
-        public void channelRead0(ChannelHandlerContext ctx, Object msg)
-                throws Exception {
-            Channel ch = ctx.channel();
-            if (!handshaker.isHandshakeComplete()) {
-                handshaker.finishHandshake(ch, (FullHttpResponse) msg);
-                handshakeFuture.setSuccess();
-                return;
-            }
+		@Override
+		public void channelRead0(ChannelHandlerContext ctx, Object msg)
+				throws Exception {
+			Channel ch = ctx.channel();
+			if (!handshaker.isHandshakeComplete()) {
+				handshaker.finishHandshake(ch, (FullHttpResponse) msg);
+				handshakeFuture.setSuccess();
+				return;
+			}
 
-            if (msg instanceof FullHttpResponse) {
-                FullHttpResponse response = (FullHttpResponse) msg;
-                throw new IllegalStateException(
-                        "Unexpected FullHttpResponse (getStatus="
-                                + response.getStatus()
-                                + ", content="
-                                + response.content()
-                                        .toString(CharsetUtil.UTF_8) + ')');
-            }
+			if (msg instanceof FullHttpResponse) {
+				FullHttpResponse response = (FullHttpResponse) msg;
+				throw new IllegalStateException(
+						"Unexpected FullHttpResponse (getStatus="
+								+ response.getStatus()
+								+ ", content="
+								+ response.content()
+										.toString(CharsetUtil.UTF_8) + ')');
+			}
 
-            WebSocketFrame frame = (WebSocketFrame) msg;
-            if (frame instanceof TextWebSocketFrame) {
-                TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
-                responses.add(textFrame.text());
-                latch.countDown();
-            } else if (frame instanceof CloseWebSocketFrame) {
-                ch.close();
-            }
-        }
+			WebSocketFrame frame = (WebSocketFrame) msg;
+			if (frame instanceof TextWebSocketFrame) {
+				TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
+				responses.add(textFrame.text());
+				latch.countDown();
+			} else if (frame instanceof CloseWebSocketFrame) {
+				ch.close();
+			}
+		}
 
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            cause.printStackTrace();
-            if (!handshakeFuture.isDone()) {
-                handshakeFuture.setFailure(cause);
-            }
-            ctx.close();
-        }
-    }
+		@Override
+		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+			cause.printStackTrace();
+			if (!handshakeFuture.isDone()) {
+				handshakeFuture.setFailure(cause);
+			}
+			ctx.close();
+		}
+	}
 
-    public static String sendReceiveWebsocketRequest(int port, String data)
-            throws Exception {
-        final EventLoopGroup group = new NioEventLoopGroup();
-        final URI uri = new URI("ws://127.0.0.1:" + port + "/ws");
-        final CountDownLatch latch = new CountDownLatch(1);
-        final List<String> responses = new ArrayList<>();
+	public static String sendReceiveWebsocketRequest(int port, String data)
+			throws Exception {
+		final EventLoopGroup group = new NioEventLoopGroup();
+		final URI uri = new URI("ws://127.0.0.1:" + port + "/ws");
+		final CountDownLatch latch = new CountDownLatch(1);
+		final List<String> responses = new ArrayList<>();
 
-        final WebSocketClientHandler handler = new WebSocketClientHandler(
-                latch, responses,
-                WebSocketClientHandshakerFactory.newHandshaker(uri,
-                        WebSocketVersion.V13, null, false,
-                        new DefaultHttpHeaders()));
-        final boolean ssl = "wss".equalsIgnoreCase(uri.getScheme());
-        final SslContext sslCtx;
-        if (ssl) {
-            SelfSignedCertificate ssc = new SelfSignedCertificate();
-            sslCtx = SslContext.newServerContext(ssc.certificate(),
-                    ssc.privateKey());
-        } else {
-            sslCtx = null;
-        }
+		final WebSocketClientHandler handler = new WebSocketClientHandler(
+				latch, responses,
+				WebSocketClientHandshakerFactory.newHandshaker(uri,
+						WebSocketVersion.V13, null, false,
+						new DefaultHttpHeaders()));
+		final boolean ssl = "wss".equalsIgnoreCase(uri.getScheme());
+		final SslContext sslCtx;
+		if (ssl) {
+			SelfSignedCertificate ssc = new SelfSignedCertificate();
+			sslCtx = SslContext.newServerContext(ssc.certificate(),
+					ssc.privateKey());
+		} else {
+			sslCtx = null;
+		}
 
-        Bootstrap b = new Bootstrap();
-        b.group(group).channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) {
-                        ChannelPipeline p = ch.pipeline();
-                        if (sslCtx != null) {
-                            p.addLast(sslCtx.newHandler(ch.alloc(),
-                                    uri.getHost(), uri.getPort()));
-                        }
-                        p.addLast(new HttpClientCodec(),
-                                new HttpObjectAggregator(8192), handler);
-                    }
-                });
+		Bootstrap b = new Bootstrap();
+		b.group(group).channel(NioSocketChannel.class)
+				.handler(new ChannelInitializer<SocketChannel>() {
+					@Override
+					protected void initChannel(SocketChannel ch) {
+						ChannelPipeline p = ch.pipeline();
+						if (sslCtx != null) {
+							p.addLast(sslCtx.newHandler(ch.alloc(),
+									uri.getHost(), uri.getPort()));
+						}
+						p.addLast(new HttpClientCodec(),
+								new HttpObjectAggregator(8192), handler);
+					}
+				});
 
-        final Channel channel = b.connect(uri.getHost(), uri.getPort()).sync()
-                .channel();
-        handler.handshakeFuture().sync();
-        WebSocketFrame frame = new TextWebSocketFrame(data);
-        channel.writeAndFlush(frame);
-        latch.await(2, TimeUnit.SECONDS);
-        group.shutdownGracefully();
-        return responses.size() > 0 ? responses.get(0) : null;
-    }
+		final Channel channel = b.connect(uri.getHost(), uri.getPort()).sync()
+				.channel();
+		handler.handshakeFuture().sync();
+		WebSocketFrame frame = new TextWebSocketFrame(data);
+		channel.writeAndFlush(frame);
+		latch.await(2, TimeUnit.SECONDS);
+		group.shutdownGracefully();
+		return responses.size() > 0 ? responses.get(0) : null;
+	}
 
-    public static String sendReceivePostRequest(int port, String postData)
-            throws Exception {
-        URL url = new URL("http://localhost:" + port);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setDoOutput(true);
-        connection.setDoInput(true);
-        connection.setInstanceFollowRedirects(false);
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestProperty("charset", "utf-8");
-        connection.setRequestProperty("Content-Length",
-                "" + Integer.toString(postData.getBytes().length));
-        connection.setUseCaches(false);
-        DataOutputStream out = new DataOutputStream(
-                connection.getOutputStream());
-        out.writeBytes(postData);
-        out.flush();
+	public static String sendReceivePostRequest(int port, String postData)
+			throws Exception {
+		URL url = new URL("http://localhost:" + port);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setDoOutput(true);
+		connection.setDoInput(true);
+		connection.setInstanceFollowRedirects(false);
+		connection.setRequestMethod("POST");
+		connection.setRequestProperty("Content-Type", "application/json");
+		connection.setRequestProperty("charset", "utf-8");
+		connection.setRequestProperty("Content-Length",
+				"" + Integer.toString(postData.getBytes().length));
+		connection.setUseCaches(false);
+		DataOutputStream out = new DataOutputStream(
+				connection.getOutputStream());
+		out.writeBytes(postData);
+		out.flush();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                connection.getInputStream()));
-        String line = reader.readLine();
-        reader.close();
-        out.close();
-        connection.disconnect();
-        return line;
-    }
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		String line = reader.readLine();
+		reader.close();
+		out.close();
+		connection.disconnect();
+		return line;
+	}
 
-    public static Lifecycle createHttpServer(HttpServiceContainer container,
-            GatewayType type, int port, RequestHandler handler) {
-        Properties props = new Properties();
-        props.setProperty("http.webServiceContainer", container.name());
-        props.setProperty(Constants.HTTP_PORT, String.valueOf(port));
-        Configuration config = new Configuration(props);
-        return HttpServerFactory.getHttpServer(type, config, handler, true);
-    }
+	public static Lifecycle createHttpServer(int port, RequestHandler handler) {
+		Properties props = new Properties();
+		props.setProperty(Constants.HTTP_PORT, String.valueOf(port));
+		Configuration config = new Configuration(props);
+		return HttpServerFactory.getHttpServer(config, handler);
+	}
 }

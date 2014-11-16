@@ -19,8 +19,6 @@ class BaseAuthTest(unittest.TestCase):
   # default setup method
   def setUp(self):
     self._cookie = ''
-    #self.authenticate()
-    pass
 
   @property
   def cookie(self):
@@ -41,9 +39,13 @@ class BaseAuthTest(unittest.TestCase):
     except: 
       return r.text
 
-  def ws_send_recv(self, msg):
+  def ws_connect(self):
     # https://pypi.python.org/pypi/websocket-client/
     ws = create_connection("ws://localhost:8181/ws")
+    return ws
+
+  def ws_send_recv(self, msg):
+    ws = self.ws_connect()
     ws.send(msg)
     result =  ws.recv()
     try:

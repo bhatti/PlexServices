@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.AbstractServiceGateway;
+import com.plexobject.service.AbstractServiceContainer;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.ServiceConfig.Method;
@@ -15,11 +15,17 @@ import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 
-public class DefaultHttpServiceGateway extends AbstractServiceGateway {
+/**
+ * This is default implementation of HTTP based service container
+ * 
+ * @author shahzad bhatti
+ *
+ */
+public class DefaultHttpServiceContainer extends AbstractServiceContainer {
 	private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
 	private final Lifecycle server;
 
-	public DefaultHttpServiceGateway(
+	public DefaultHttpServiceContainer(
 			final Configuration config,
 			final ServiceRegistry serviceRegistry,
 			final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,
@@ -119,7 +125,7 @@ public class DefaultHttpServiceGateway extends AbstractServiceGateway {
 
 	@Override
 	public String toString() {
-		return "DefaultHttpServiceGateway [requestHandlerPathsByMethod="
+		return "DefaultHttpServiceContainer [requestHandlerPathsByMethod="
 				+ requestHandlerPathsByMethod + ", server=" + server + "]";
 	}
 }

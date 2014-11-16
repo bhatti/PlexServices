@@ -10,22 +10,22 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.AbstractServiceGateway;
+import com.plexobject.service.AbstractServiceContainer;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
 /**
- * This class provides gateway to internal services over JMS
+ * This class provides service container for JMS based handlers
  * 
  * @author shahzad bhatti
  *
  */
-public class JmsServiceGateway extends AbstractServiceGateway {
+public class JmsServiceContainer extends AbstractServiceContainer {
 	private JmsClient _jmsClient;
 	private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
 
-	public JmsServiceGateway(final Configuration config,
+	public JmsServiceContainer(final Configuration config,
 			final ServiceRegistry serviceRegistry) throws Exception {
 		super(config, serviceRegistry);
 	}

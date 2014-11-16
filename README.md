@@ -2,15 +2,15 @@
 
 ##Overview
 
-PlexService is a simple Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides basic support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define gateway types, encoding scheme, end-points, roles, etc. 
+PlexService is a simple Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides basic support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. 
 
 PlexService supports role-based security, which are enforced before accessing underlying services. 
 
-PlexService also provides web-to-jms bridge for accessing services over http or websockets that listen to JMS queues/topics. 
+PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets that listen to JMS queues/topics. 
 
 PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
 
-PlexService supports jetty 9.0+ and Netty 4.0+ for hosting web services and you can use http or websockets transport for your services. 
+PlexService supports Netty 4.0+ for hosting web services and you can use http or websockets transport for your services. 
 
 PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
@@ -35,7 +35,7 @@ cd plexsvc-framework
 
 
 ##Version
-- 0.3
+- 0.5
 
 ##License
 - MIT
@@ -44,7 +44,7 @@ cd plexsvc-framework
 
 ### Defining a REST service for creating a user
 ```java 
-@ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.HTTP, requestClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
 public class CreateUserService extends AbstractUserService implements
@@ -70,7 +70,7 @@ curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http:/
 
 ### Defining a Web service over Websockets for creating a user
 ```java 
-@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
 public class CreateUserService extends AbstractUserService implements
@@ -113,7 +113,7 @@ ws.onerror = function(err) {
 
 ### Defining a JMS service for creating a user
 ```java 
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
@@ -137,7 +137,7 @@ The developer can use variables in end-point of queues, which are populated from
 
 ### Defining a REST service with parameterized URLs
 ```java 
-@ServiceConfig(gateway = GatewayType.HTTP, requestClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.HTTP, requestClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = Method.POST, 
       codec = CodecType.JSON)
@@ -164,7 +164,7 @@ classes into JSON when delivering messages over HTTP.
 
 ### Defining a Websocket based service to create bug-report 
 ```java 
-@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", 
       method = Method.MESSAGE, codec = CodecType.JSON)
 public class CreateBugReportService extends AbstractBugReportService implements
@@ -216,7 +216,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
 
 ### Defining a REST service for querying users
 ```java 
-  @ServiceConfig(gateway = GatewayType.HTTP, requestClass = User.class, 
+  @ServiceConfig(protocol = Protocol.HTTP, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
       codec = CodecType.JSON)
   public class QueryUserService extends AbstractUserService implements
@@ -240,7 +240,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
 
 ### Defining a JMS service for querying users
 ```java 
-@ServiceConfig(gateway = GatewayType.JMS, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, requestClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
@@ -278,7 +278,7 @@ public class PingService implements RequestHandler {
     ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
     PingService pingService = new PingService();
     serviceRegistry.add(pingService, new ServiceConfigDesc(
-        Method.MESSAGE, GatewayType.WEBSOCKET, Void.class,
+        Method.MESSAGE, Protocol.WEBSOCKET, Void.class,
         CodecType.JSON, "1.0", "/ping", true, new String[0]));
     serviceRegistry.start();
 ```
@@ -289,7 +289,7 @@ Though, PlexService framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:
 
 ```java 
-@ServiceConfig(gateway = GatewayType.HTTP, requestClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private File webFolder;
 
@@ -389,29 +389,21 @@ serviceRegistry.start();
 ```
 
 
-### Creating Http to JMS bridge
+### Creating Http/Websocket to JMS bridge 
+Here is how you can setup bridge between HTTP/Websocket and JMS based services. 
 ```java 
-  final String mappingJson = IOUtils.toString(new FileInputStream( args[1]));
-Collection<HttpToJmsEntry> entries = new JsonObjectCodec().decode(
-    mappingJson, new TypeReference<List<HttpToJmsEntry>>() {
-    });
-WebToJmsBridge bridge = new WebToJmsBridge(new Configuration(args[0]), entries, GatewayType.HTTP);
-bridge.startBridge();
+  Configuration config = new Configuration(configFile);
+  Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(mappingFile));
+  ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+  JmsClient jmsClient = new JmsClient(config);
+  new WebToJmsBridge(jmsClient, entries, serviceRegistry);
+  serviceRegistry.start();
 ```
+Note that with above configuration, you can access your services either with HTTP or Websocket
 
 
 
-### Creating Websocket to JMS bridge
-```java 
-  final String mappingJson = IOUtils.toString(new FileInputStream( args[1]));
-Collection<HttpToJmsEntry> entries = new JsonObjectCodec().decode(
-    mappingJson, new TypeReference<List<HttpToJmsEntry>>() {
-    });
-WebToJmsBridge bridge = new WebToJmsBridge(new Configuration(args[0]), entries, GatewayType.WEBSOCKET);
-bridge.startBridge();
-```
-
-  Here is JSON configuration for bridge:
+  Here is sample JSON configuration for bridge:
 ```javascript 
   [
   {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
@@ -466,19 +458,6 @@ jms.connectionFactoryLookup=ConnectionFactory
 In above example, we are using ActiveMQ as JMS container 
 
 
-### Configuring HTTP container in configuration
-Here is how you can specify container for your web services in properties file:
-to the runtime.
-```bash
-http.webServiceContainer=JETTY 
-```
-In above example, we are using Jetty embedded server for hosting web services.
-We can switch to Netty embedded server by changing configuration file
-as follows:
-```bash
-http.webServiceContainer=NETTY 
-```
-
 
 ### EventBus for intra-process communication
 Here is an example of using EventBus publishing or subscribing messages within the same process:
@@ -503,15 +482,10 @@ You can optionally pass predicate parameter with subscribe so that you only rece
 ### Connecting EventBus to JMS for external communication
 Similar to web-to-jms bridge, PlexService provides event-bus-to-jms bridge, which allows you convert messages from JMS queue/topic into request objects and receive them via event-bus. Likewise, you can setup outgoing bridge to send messages that are published to event bus be forwarded to JMS queues/topics. The bridge also performs encoding similar to JMS or web services, e.g.
 ```java  
-final String mappingJson = IOUtils
-       .toString(new FileInputStream(args[1]));
-Collection<EventBusToJmsEntry> entries = new JsonObjectCodec().decode(
-       mappingJson, new TypeReference<List<EventBusToJmsEntry>>() {
-       });
 Configuration config = new Configuration(args[0]);
-EventBus eb = new EventBusImpl();
-EventBusToJmsBridge bridge = new EventBusToJmsBridge(config, entries, eb);
-bridge.startBridge();
+Collection<EventBusToJmsEntry> entries = EventBusToJmsBridge.load(new File(args[1]));
+EventBusToJmsBridge.run(config, entries);
+
 ```
 
 Here is a sample json file that describes mapping:
@@ -530,7 +504,7 @@ quote quotes over the websockets.
 
 
 ```java 
-@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = Void.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = Void.class, 
   endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QuoteServer implements RequestHandler {
     public enum Action {

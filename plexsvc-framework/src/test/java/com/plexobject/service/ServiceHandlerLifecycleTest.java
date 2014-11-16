@@ -13,13 +13,13 @@ import org.junit.Test;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.ServiceConfig.GatewayType;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
 import com.plexobject.util.Configuration;
 
 public class ServiceHandlerLifecycleTest {
-	@ServiceConfig(gateway = GatewayType.HTTP, requestClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+	@ServiceConfig(protocol = Protocol.HTTP, requestClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
 	public class WebService implements RequestHandler {
 		@Override
 		public void handle(Request request) {
@@ -53,7 +53,8 @@ public class ServiceHandlerLifecycleTest {
 				registry, handler);
 		assertEquals(0, registry.getHandlers().size());
 		handlerLifecycle.start();
-		assertEquals(1, registry.getHandlers().size());
+		assertEquals("handlers " + registry.getHandlers(), 1, registry
+				.getHandlers().size());
 		assertTrue(handlerLifecycle.isRunning());
 		handlerLifecycle.stop();
 		assertEquals(0, registry.getHandlers().size());

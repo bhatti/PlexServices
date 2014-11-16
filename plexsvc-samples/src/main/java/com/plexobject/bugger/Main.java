@@ -1,15 +1,16 @@
 package com.plexobject.bugger;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.bugger.model.BugReport;
@@ -39,12 +40,10 @@ import com.plexobject.bugger.service.user.LoginService;
 import com.plexobject.bugger.service.user.QueryUserService;
 import com.plexobject.bugger.service.user.UpdateUserService;
 import com.plexobject.encode.CodecType;
-import com.plexobject.encode.json.JsonObjectCodec;
-import com.plexobject.service.ServiceConfig.GatewayType;
+import com.plexobject.jms.JmsClient;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
-import com.plexobject.util.IOUtils;
 
 public class Main {
 	private static final Logger log = LoggerFactory.getLogger(Main.class);
@@ -196,16 +195,19 @@ public class Main {
 					+ " properties-file [bridge-mapping-file.json]");
 			System.exit(1);
 		}
+		BasicConfigurator.configure();
+		LogManager.getRootLogger().setLevel(Level.INFO);
+
 		Main main = new Main(args[0]);
 		main.run();
 		if (args.length > 1) {
-			final String mappingJson = IOUtils.toString(new FileInputStream(
+			Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
 					args[1]));
-			Collection<WebToJmsEntry> entries = new JsonObjectCodec().decode(
-					mappingJson, new TypeReference<List<WebToJmsEntry>>() {
-					});
 			Configuration config = new Configuration(args[0]);
-			WebToJmsBridge.createAndStart(config, entries, GatewayType.HTTP);
+			ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+			JmsClient jmsClient = new JmsClient(config);
+			new WebToJmsBridge(jmsClient, entries, serviceRegistry);
+			serviceRegistry.start();
 		}
 		Thread.currentThread().join();
 	}

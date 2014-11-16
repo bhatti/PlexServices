@@ -13,14 +13,15 @@ import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.jms.JmsClient;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
-@ServiceConfig(gateway = GatewayType.WEBSOCKET, requestClass = Void.class, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
-// @ServiceConfig(gateway = GatewayType.JMS, requestClass = Void.class, endpoint
+@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = Void.class, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+// @ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, endpoint
 // = "queue:quotes-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QuoteServer implements RequestHandler {
 	public enum Action {
@@ -68,16 +69,17 @@ public class QuoteServer implements RequestHandler {
 		QuoteServer service = new QuoteServer();
 		ServiceConfig serviceConfig = service.getClass().getAnnotation(
 				ServiceConfig.class);
-		if (serviceConfig.gateway() == GatewayType.JMS) {
+		ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+
+		if (serviceConfig.protocol() == Protocol.JMS) {
 			startJmsBroker();
 			Collection<WebToJmsEntry> entries = Arrays
 					.asList(new WebToJmsEntry(CodecType.JSON, "/quotes",
 							serviceConfig.method(), serviceConfig.endpoint(), 5));
-			WebToJmsBridge.createAndStart(config, entries,
-					GatewayType.WEBSOCKET);
+			JmsClient jmsClient = new JmsClient(config);
+			new WebToJmsBridge(jmsClient, entries, serviceRegistry);
 		}
 		//
-		ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
 		serviceRegistry.add(service);
 		serviceRegistry.start();
 		Thread.currentThread().join();

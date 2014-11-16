@@ -16,13 +16,13 @@ public @interface ServiceConfig {
         GET, POST, PUT, DELETE, HEAD, MESSAGE
     }
 
-    public enum GatewayType {
+    public enum Protocol {
         HTTP, WEBSOCKET, JMS, EVENT_BUS
     }
 
     Class<?> requestClass();
 
-    GatewayType gateway();
+	Protocol protocol();
 
     CodecType codec() default CodecType.JSON;
 

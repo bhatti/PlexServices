@@ -5,12 +5,12 @@ import java.util.Collection;
 import com.plexobject.handler.RequestHandler;
 
 /**
- * This interface defines gateway for adding/removing handlers
+ * This interface defines service containers that executes handlers
  * 
  * @author shahzad bhatti
  *
  */
-public interface ServiceGateway extends Lifecycle {
+public interface ServiceContainer extends Lifecycle {
 	void add(RequestHandler handler);
 
 	boolean remove(RequestHandler handler);

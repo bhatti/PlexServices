@@ -1,9 +1,9 @@
 package com.plexobject.service;
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,15 +21,14 @@ import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.DefaultHttpRequestHandler;
-import com.plexobject.http.DefaultHttpServiceGateway;
+import com.plexobject.http.DefaultHttpServiceContainer;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.HttpServerFactory;
-import com.plexobject.jms.JmsServiceGateway;
+import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.ServiceConfig.GatewayType;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
@@ -42,11 +41,11 @@ import com.timgroup.statsd.StatsDClient;
  * @author shahzad bhatti
  *
  */
-public class ServiceRegistry implements ServiceGateway {
+public class ServiceRegistry implements ServiceContainer {
 	private static final Logger log = LoggerFactory
 			.getLogger(ServiceRegistry.class);
 
-	private final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
+	private final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
 	private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
 	private final RoleAuthorizer authorizer;
 	private boolean running;
@@ -56,7 +55,7 @@ public class ServiceRegistry implements ServiceGateway {
 
 	public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
 		this.authorizer = authorizer;
-		this.gateways.putAll(getDefaultGateways(config, authorizer));
+		this.containers.putAll(getDefaultServiceContainers(config, authorizer));
 		String statsdHost = config.getProperty("statsd.host");
 		if (statsdHost != null) {
 			String servicePrefix = config.getProperty("serviceConfigs", "");
@@ -91,13 +90,13 @@ public class ServiceRegistry implements ServiceGateway {
 		Objects.requireNonNull(config, "service handler " + h
 				+ " doesn't define ServiceConfig annotation");
 		handlerConfigs.put(h, config);
-		ServiceGateway gateway = gateways.get(config.gateway());
-		Objects.requireNonNull(gateway,
-				"Unsupported gateway for service handler " + h);
-		if (!gateway.exists(h)) {
+		ServiceContainer container = containers.get(config.protocol());
+		Objects.requireNonNull(container,
+				"Unsupported container for service handler " + h);
+		if (!container.exists(h)) {
 			registerMetricsJMX(h);
 			registerServiceHandlerLifecycle(h);
-			gateway.add(h);
+			container.add(h);
 		}
 	}
 
@@ -139,11 +138,11 @@ public class ServiceRegistry implements ServiceGateway {
 		ServiceConfigDesc config = getServiceConfig(h);
 		Objects.requireNonNull(config, "config" + h
 				+ " doesn't define ServiceConfig annotation");
-		ServiceGateway gateway = gateways.get(config.gateway());
-		if (gateway == null) {
+		ServiceContainer container = containers.get(config.protocol());
+		if (container == null) {
 			return false;
 		}
-		if (gateway.remove(h)) {
+		if (container.remove(h)) {
 			return true;
 		}
 		return false;
@@ -154,53 +153,45 @@ public class ServiceRegistry implements ServiceGateway {
 		ServiceConfigDesc config = getServiceConfig(h);
 		Objects.requireNonNull(config, "config" + h
 				+ " doesn't define ServiceConfig annotation");
-		ServiceGateway gateway = gateways.get(config.gateway());
-		if (gateway == null) {
+		ServiceContainer container = containers.get(config.protocol());
+		if (container == null) {
 			return false;
 		}
-		return gateway.exists(h);
+		return container.exists(h);
 	}
 
 	@Override
 	public synchronized Collection<RequestHandler> getHandlers() {
-		Collection<RequestHandler> handlers = new ArrayList<>();
-		for (ServiceGateway g : gateways.values()) {
+		Collection<RequestHandler> handlers = new HashSet<>();
+		for (ServiceContainer g : containers.values()) {
 			handlers.addAll(g.getHandlers());
 		}
 		return handlers;
 	}
 
-	private Map<ServiceConfig.GatewayType, ServiceGateway> getDefaultGateways(
+	private Map<ServiceConfig.Protocol, ServiceContainer> getDefaultServiceContainers(
 			Configuration config, RoleAuthorizer authorizer) {
-		final Map<ServiceConfig.GatewayType, ServiceGateway> gateways = new HashMap<>();
+		final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
+		ServiceContainer webServiceContainer = getHttpServiceContainer(config,
+				authorizer,
+				new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>());
 		try {
-			gateways.put(
-					ServiceConfig.GatewayType.HTTP,
-					getHttpServiceGateway(
-							GatewayType.HTTP,
-							config,
-							authorizer,
-							new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
-			gateways.put(ServiceConfig.GatewayType.JMS, new JmsServiceGateway(
+			containers.put(ServiceConfig.Protocol.HTTP, webServiceContainer);
+			containers.put(ServiceConfig.Protocol.JMS, new JmsServiceContainer(
 					config, this));
-			gateways.put(
-					ServiceConfig.GatewayType.WEBSOCKET,
-					getHttpServiceGateway(
-							GatewayType.WEBSOCKET,
-							config,
-							authorizer,
-							new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>()));
-			return gateways;
+			containers.put(ServiceConfig.Protocol.WEBSOCKET,
+					webServiceContainer);
+			return containers;
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to add gateways", e);
+			throw new RuntimeException("Failed to add containers", e);
 		}
 	}
 
 	@Override
 	public synchronized void start() {
-		for (ServiceGateway g : gateways.values()) {
+		for (ServiceContainer g : containers.values()) {
 			if (g.getHandlers().size() > 0) {
 				g.start();
 			}
@@ -210,7 +201,7 @@ public class ServiceRegistry implements ServiceGateway {
 
 	@Override
 	public synchronized void stop() {
-		for (ServiceGateway g : gateways.values()) {
+		for (ServiceContainer g : containers.values()) {
 			if (g.getHandlers().size() > 0) {
 				g.stop();
 			}
@@ -234,8 +225,8 @@ public class ServiceRegistry implements ServiceGateway {
 			ServiceConfigDesc config = getServiceConfig(handler);
 			if (log.isDebugEnabled()) {
 				log.debug("Received request for handler "
-						+ handler.getClass().getSimpleName() + ", gateway "
-						+ config.gateway() + ", payload "
+						+ handler.getClass().getSimpleName() + ", protocol "
+						+ config.protocol() + ", payload "
 						+ request.getPayload() + ", params "
 						+ request.getProperties());
 			}
@@ -300,16 +291,14 @@ public class ServiceRegistry implements ServiceGateway {
 		}
 	}
 
-	private ServiceGateway getHttpServiceGateway(
-			final GatewayType type,
+	private ServiceContainer getHttpServiceContainer(
 			final Configuration config,
 			final RoleAuthorizer authorizer,
 			final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
 		RequestHandler executor = new DefaultHttpRequestHandler(this,
 				requestHandlerPathsByMethod);
-		Lifecycle server = HttpServerFactory.getHttpServer(type, config,
-				executor, false);
-		return new DefaultHttpServiceGateway(config, this,
+		Lifecycle server = HttpServerFactory.getHttpServer(config, executor);
+		return new DefaultHttpServiceContainer(config, this,
 				requestHandlerPathsByMethod, server);
 	}
 }
