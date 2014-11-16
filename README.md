@@ -2,15 +2,16 @@
 
 ##Overview
 
-PlexService is a simple Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides basic support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. 
+PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
 
-PlexService supports role-based security, which are enforced before accessing underlying services. 
+PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
 
-PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets that listen to JMS queues/topics. 
+
+PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets that listen to JMS queues/topics. For example, you may use JMS for all internal services and then create a bridge to automatically expose them through HTTP or websocket interfaces.
 
 PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
 
-PlexService supports Netty 4.0+ for hosting web services and you can use http or websockets transport for your services. 
+PlexService uses Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
 
 PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 

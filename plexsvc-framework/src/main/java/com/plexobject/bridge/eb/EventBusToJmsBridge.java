@@ -40,7 +40,7 @@ public class EventBusToJmsBridge implements Lifecycle {
 	private static final Logger log = LoggerFactory
 			.getLogger(EventBusToJmsBridge.class);
 
-	public static class EBListener implements RequestHandler, Lifecycle {
+	static class EBListener implements RequestHandler, Lifecycle {
 		private final JmsClient jmsClient;
 		private final EventBus eb;
 		private final EventBusToJmsEntry entry;
@@ -87,8 +87,8 @@ public class EventBusToJmsBridge implements Lifecycle {
 		}
 	}
 
-	public static class JmsListener implements MessageListener,
-			ExceptionListener, Lifecycle {
+	static class JmsListener implements MessageListener, ExceptionListener,
+			Lifecycle {
 		private final JmsClient jmsClient;
 		private final EventBus eb;
 		private final EventBusToJmsEntry entry;
