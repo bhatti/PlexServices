@@ -81,5 +81,4 @@ public class NettyWebsocketResponseDispatcher extends
     public String toString() {
         return "WebsocketResponse " + channel;
     }
-
 }

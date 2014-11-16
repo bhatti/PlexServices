@@ -73,5 +73,4 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
 	public final synchronized boolean isRunning() {
 		return running;
 	}
-
 }

@@ -63,5 +63,4 @@ public class NettyHttpServerTest {
 		assertEquals(PING, requests.get(0).getPayload());
 		assertEquals(PONG, response);
 	}
-
 }

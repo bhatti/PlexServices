@@ -382,5 +382,4 @@ public class JmsClient implements Lifecycle {
         }
         return currentSession.get();
     }
-
 }

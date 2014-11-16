@@ -40,5 +40,4 @@ public class ServiceHandlerLifecycle implements ServiceHandlerLifecycleMBean {
 		return registry.getServiceMetricsRegistry().getServiceMetrics(handler)
 				.getSummary();
 	}
-
 }

@@ -255,5 +255,4 @@ public class JmsClientTest {
 		properties.put("jms.providerUrl", "tcp://localhost:61616");
 		return broker;
 	}
-
 }

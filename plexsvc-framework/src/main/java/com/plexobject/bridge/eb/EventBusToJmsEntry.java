@@ -117,5 +117,4 @@ public class EventBusToJmsEntry {
             return false;
         return true;
     }
-
 }

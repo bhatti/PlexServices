@@ -31,7 +31,6 @@ public class RequestHandlerPathsTest {
         public String toString() {
             return name;
         }
-
     }
 
     static class TestData {

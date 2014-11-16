@@ -40,5 +40,4 @@ public class JmsResponseDispatcher extends AbstractResponseDispatcher {
     public void addSessionId(String value) {
         properties.put(Constants.SESSION_ID, value);
     }
-
 }

@@ -334,5 +334,4 @@ public class ServiceRegistryTest {
 		properties.put("jms.providerUrl", "tcp://localhost:61616");
 		return broker;
 	}
-
 }

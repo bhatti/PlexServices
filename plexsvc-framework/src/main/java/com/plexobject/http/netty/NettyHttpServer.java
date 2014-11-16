@@ -161,5 +161,4 @@ public class NettyHttpServer implements Lifecycle {
 			throw new RuntimeException(e);
 		}
 	}
-
 }

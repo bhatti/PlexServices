@@ -81,5 +81,4 @@ public class ServiceConfigDesc {
                 + recordStatsdMetrics + ", rolesALlowed="
                 + Arrays.toString(rolesAllowed) + "]";
     }
-
 }

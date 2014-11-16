@@ -62,11 +62,20 @@ RequestHandler {
       request.getResponseDispatcher().send(saved);
     }
 }
+
+
 ```
 You can invoke the service with HTTP request, e.g.
 ```bash 
 curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/users" 
   -d "{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"
+```
+
+```
+Here is a sample python client for accessing these services
+```python
+    resp = requests.post('http://localhost:8181/login', data={'password': password, 'username': username})
+    json_resp = json.loads(resp.text)
 ```
 
 ### Defining a Web service over Websockets for creating a user

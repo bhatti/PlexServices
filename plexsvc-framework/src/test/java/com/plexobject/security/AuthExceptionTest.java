@@ -22,5 +22,4 @@ public class AuthExceptionTest {
         assertNull(e.getLocation());
         assertEquals("sessionId", e.getSessionId());
     }
-
 }
