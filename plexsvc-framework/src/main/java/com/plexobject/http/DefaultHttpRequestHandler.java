@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.route.RouteResolver;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.service.route.RouteResolver;
 
 /**
  * This class looks up http handler by route and executes its handler

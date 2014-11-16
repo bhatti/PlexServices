@@ -1,4 +1,4 @@
-package com.plexobject.service.route;
+package com.plexobject.route;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,24 +16,28 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <T>
  */
 public class RouteResolver<T> {
-    private static class Node<T> {
+    static class Node<T> {
         private final String pathFragment;
         private final String parameter;
         private final int level;
+        private final boolean wild;
         private Node<T> parent;
         private final Map<String, Node<T>> children = new HashMap<>();
         private T object;
 
-        private Node(Node<T> parent, String pathFragment, int level) {
+        Node(Node<T> parent, String pathFragment, int level) {
             this.parent = parent;
             this.pathFragment = pathFragment;
             this.level = level;
             if (pathFragment.startsWith("{")) {
                 parameter = pathFragment.replaceAll("[{}]", "");
+                wild = false;
             } else if (pathFragment.startsWith("*")) {
-                    parameter = pathFragment.replaceAll("\\*.*", "");
+                parameter = pathFragment.replaceAll("\\*.*", "");
+                wild = true;
             } else {
                 parameter = null;
+                wild = false;
             }
         }
 
@@ -56,6 +60,9 @@ public class RouteResolver<T> {
 
         private Node<T> find(String[] fragments, int index,
                 Map<String, Object> parameters) {
+            if (wild) {
+                return this;
+            }
             if (parent == null
                     || isParameterPath()
                     || (index < fragments.length && pathFragment
@@ -81,8 +88,7 @@ public class RouteResolver<T> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + ((pathFragment == null) ? 0 : pathFragment.hashCode());
+            result = prime * result + pathFragment.hashCode();
             return result;
         }
 
@@ -96,12 +102,8 @@ public class RouteResolver<T> {
             if (getClass() != obj.getClass())
                 return false;
             Node<T> other = (Node<T>) obj;
-            if (pathFragment == null) {
-                if (other.pathFragment != null)
-                    return false;
-            } else if (!pathFragment.equals(other.pathFragment))
-                return false;
-            return true;
+            return pathFragment.equals(other.pathFragment)
+                    && level == other.level;
         }
 
         @Override

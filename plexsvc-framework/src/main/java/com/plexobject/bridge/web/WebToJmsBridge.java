@@ -20,12 +20,12 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.jms.JmsClient;
+import com.plexobject.route.RouteResolver;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.IOUtils;
 
 /**

@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.route.RouteResolver;
 import com.plexobject.service.AbstractServiceContainer;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.service.route.RouteResolver;
 import com.plexobject.util.Configuration;
 
 /**
