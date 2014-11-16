@@ -292,6 +292,7 @@ And then at runtime, override configuration, e.g.
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(Method.MESSAGE)
+                            .setEndpoint("queue:ping")
                             .setProtocol(Protocol.JMS)
                             .build());
     serviceRegistry.add(
