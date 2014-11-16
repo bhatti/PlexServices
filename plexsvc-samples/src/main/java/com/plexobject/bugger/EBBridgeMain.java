@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.Collection;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 
 import com.plexobject.bridge.eb.EventBusToJmsBridge;
 import com.plexobject.bridge.eb.EventBusToJmsEntry;
@@ -25,6 +28,9 @@ public class EBBridgeMain {
 					+ " properties-file mapping-json-file");
 			System.exit(1);
 		}
+		BasicConfigurator.configure();
+		LogManager.getRootLogger().setLevel(Level.INFO);
+
 		Configuration config = new Configuration(args[0]);
 		Collection<EventBusToJmsEntry> entries = EventBusToJmsBridge
 				.load(new File(args[1]));
