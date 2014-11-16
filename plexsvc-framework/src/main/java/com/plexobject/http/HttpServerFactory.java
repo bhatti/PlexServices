@@ -15,11 +15,11 @@ import com.plexobject.util.Configuration;
  *
  */
 public class HttpServerFactory {
-	public static Lifecycle getHttpServer(final Configuration config,
-			final RequestHandler executor) {
-		SimpleChannelInboundHandler<Object> webHandler = new NettyWebRequestHandler(
-				executor, config.getDefaultWebsocketUri(), config.isSsl(),
-				config.getDefaultCodecType());
-		return new NettyHttpServer(config, webHandler);
-	}
+    public static Lifecycle getHttpServer(final Configuration config,
+            final RequestHandler executor) {
+        SimpleChannelInboundHandler<Object> webHandler = new NettyWebRequestHandler(
+                executor, config.getDefaultWebsocketUri(), config.isSsl(),
+                config.getDefaultCodecType());
+        return new NettyHttpServer(config, webHandler);
+    }
 }

@@ -9,9 +9,9 @@ import java.util.Map;
  *
  */
 public interface ObjectCodec {
-	CodecType getType();
+    CodecType getType();
 
-	<T> String encode(T obj);
+    <T> String encode(T obj);
 
-	<T> T decode(String text, Class<?> type, Map<String, Object> params);
+    <T> T decode(String text, Class<?> type, Map<String, Object> params);
 }

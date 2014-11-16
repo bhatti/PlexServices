@@ -13,16 +13,16 @@ import com.plexobject.service.ServiceConfig.Method;
 @ServiceConfig(protocol = Protocol.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class CreateUserService extends AbstractUserService implements
         RequestHandler {
-	public CreateUserService(UserRepository userRepository) {
-		super(userRepository);
-	}
+    public CreateUserService(UserRepository userRepository) {
+        super(userRepository);
+    }
 
-	@Override
-	public void handle(Request request) {
-		User user = request.getPayload();
-		user.validate();
-		User saved = userRepository.save(user);
-		request.getResponseDispatcher().send(saved);
-	}
+    @Override
+    public void handle(Request request) {
+        User user = request.getPayload();
+        user.validate();
+        User saved = userRepository.save(user);
+        request.getResponseDispatcher().send(saved);
+    }
 
 }

@@ -32,103 +32,103 @@ import com.plexobject.util.Configuration;
 
 @RunWith(JMockit.class)
 public class WebToJmsBridgeTest {
-	public static class TestUser {
+    public static class TestUser {
 
-	}
+    }
 
-	@Mocked
-	private JmsClient jmsClient;
-	@Mocked
-	private EventBus eb;
-	@Mocked
-	private MessageConsumer consumer;
-	@Mocked
-	private TextMessage message;
+    @Mocked
+    private JmsClient jmsClient;
+    @Mocked
+    private EventBus eb;
+    @Mocked
+    private MessageConsumer consumer;
+    @Mocked
+    private TextMessage message;
 
-	private WebToJmsBridge bridge;
+    private WebToJmsBridge bridge;
 
-	@Before
-	public void setUp() throws Exception {
-		ServiceRegistry serviceRegistry = new ServiceRegistry(
-				new Configuration(new Properties()), null);
-		bridge = new WebToJmsBridge(jmsClient, new ArrayList<WebToJmsEntry>(),
-				serviceRegistry);
-	}
+    @Before
+    public void setUp() throws Exception {
+        ServiceRegistry serviceRegistry = new ServiceRegistry(
+                new Configuration(new Properties()), null);
+        bridge = new WebToJmsBridge(jmsClient, new ArrayList<WebToJmsEntry>(),
+                serviceRegistry);
+    }
 
-	@Test
-	public void testAdd() throws Exception {
-		WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-				Method.GET, "destination", 5);
-		bridge.add(entry);
-		Map<String, Object> properties = new HashMap<>();
-		Map<String, Object> headers = new HashMap<>();
-		String payload = "{}";
+    @Test
+    public void testAdd() throws Exception {
+        WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
+                Method.GET, "destination", 5);
+        bridge.add(entry);
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> headers = new HashMap<>();
+        String payload = "{}";
 
-		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-				properties, headers, payload, new AbstractResponseDispatcher() {
-					@Override
-					public void addSessionId(String value) {
+        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+                properties, headers, payload, new AbstractResponseDispatcher() {
+                    @Override
+                    public void addSessionId(String value) {
 
-					}
-				});
-		assertNotNull(bridge.getMappingEntry(request));
-	}
+                    }
+                });
+        assertNotNull(bridge.getMappingEntry(request));
+    }
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testHandleAsynchronous() throws Exception {
-		WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-				Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5);
-		entry.setAsynchronous(true);
-		bridge.add(entry);
-		Map<String, Object> properties = new HashMap<>();
-		Map<String, Object> headers = new HashMap<>();
-		String payload = "{}";
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testHandleAsynchronous() throws Exception {
+        WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
+                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5);
+        entry.setAsynchronous(true);
+        bridge.add(entry);
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> headers = new HashMap<>();
+        String payload = "{}";
 
-		Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-				properties, headers, payload, new AbstractResponseDispatcher() {
-					@Override
-					public void addSessionId(String value) {
+        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+                properties, headers, payload, new AbstractResponseDispatcher() {
+                    @Override
+                    public void addSessionId(String value) {
 
-					}
-				});
+                    }
+                });
 
-		new Expectations() {
-			{
-				jmsClient.send("queue:{scope}-assign-bugreport-service-queue",
-						(Map<String, Object>) any, anyString);
-			}
-		};
-		bridge.handle(request);
-	}
+        new Expectations() {
+            {
+                jmsClient.send("queue:{scope}-assign-bugreport-service-queue",
+                        (Map<String, Object>) any, anyString);
+            }
+        };
+        bridge.handle(request);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testHandleSynchronous() throws Exception {
-		final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-				Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5);
-		entry.setAsynchronous(false);
-		bridge.add(entry);
-		Map<String, Object> properties = new HashMap<>();
-		Map<String, Object> headers = new HashMap<>();
-		String payload = "{}";
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testHandleSynchronous() throws Exception {
+        final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
+                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5);
+        entry.setAsynchronous(false);
+        bridge.add(entry);
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> headers = new HashMap<>();
+        String payload = "{}";
 
-		final Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-				properties, headers, payload, new AbstractResponseDispatcher() {
-					@Override
-					public void addSessionId(String value) {
+        final Request request = new Request(Protocol.HTTP, Method.GET, "/w",
+                properties, headers, payload, new AbstractResponseDispatcher() {
+                    @Override
+                    public void addSessionId(String value) {
 
-					}
-				});
+                    }
+                });
 
-		new Expectations() {
-			{
-				jmsClient.sendReceive(entry.getDestination(),
-						(Map<String, Object>) any,
-						(String) request.getPayload(), (Handler<Response>) any,
-						true);
-			}
-		};
-		bridge.handle(request);
-	}
+        new Expectations() {
+            {
+                jmsClient.sendReceive(entry.getDestination(),
+                        (Map<String, Object>) any,
+                        (String) request.getPayload(), (Handler<Response>) any,
+                        true);
+            }
+        };
+        bridge.handle(request);
+    }
 }

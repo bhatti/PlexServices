@@ -46,169 +46,169 @@ import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
 public class Main {
-	private static final Logger log = LoggerFactory.getLogger(Main.class);
-	private static final int DEFAULT_TIMEOUT_SECS = 5;
-	private static final CodecType DEFAULT_CODEC = CodecType.JSON;
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final int DEFAULT_TIMEOUT_SECS = 5;
+    private static final CodecType DEFAULT_CODEC = CodecType.JSON;
 
-	private final CommentRepository commentRepository = new CommentRepository();
-	private final UserRepository userRepository = new UserRepository();
-	private final ProjectRepository projectRepository = new ProjectRepository();
-	private final BugReportRepository bugreportRepository = new BugReportRepository();
-	private final ServiceRegistry serviceRegistry;
-	private final Configuration config;
+    private final CommentRepository commentRepository = new CommentRepository();
+    private final UserRepository userRepository = new UserRepository();
+    private final ProjectRepository projectRepository = new ProjectRepository();
+    private final BugReportRepository bugreportRepository = new BugReportRepository();
+    private final ServiceRegistry serviceRegistry;
+    private final Configuration config;
 
-	public Main(String propertyFile) throws Exception {
-		this.config = new Configuration(propertyFile);
-		startJmsBroker();
-		populateTestData();
-		//
-		serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
-				userRepository));
-		addServices(serviceRegistry);
-	}
+    public Main(String propertyFile) throws Exception {
+        this.config = new Configuration(propertyFile);
+        startJmsBroker();
+        populateTestData();
+        //
+        serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
+                userRepository));
+        addServices(serviceRegistry);
+    }
 
-	private void startJmsBroker() throws Exception {
-		log.info("Starting ActiveMQ JMS broker");
-		BrokerService broker = new BrokerService();
+    private void startJmsBroker() throws Exception {
+        log.info("Starting ActiveMQ JMS broker");
+        BrokerService broker = new BrokerService();
 
-		broker.addConnector("tcp://localhost:61616");
+        broker.addConnector("tcp://localhost:61616");
 
-		broker.start();
-	}
+        broker.start();
+    }
 
-	private void addServices(ServiceRegistry serviceRegistry) {
-		serviceRegistry.add(new LogService());
-		serviceRegistry.add(new CreateUserService(userRepository));
-		serviceRegistry.add(new UpdateUserService(userRepository));
-		serviceRegistry.add(new QueryUserService(userRepository));
-		serviceRegistry.add(new DeleteUserService(userRepository));
-		serviceRegistry.add(new LoginService(userRepository));
+    private void addServices(ServiceRegistry serviceRegistry) {
+        serviceRegistry.add(new LogService());
+        serviceRegistry.add(new CreateUserService(userRepository));
+        serviceRegistry.add(new UpdateUserService(userRepository));
+        serviceRegistry.add(new QueryUserService(userRepository));
+        serviceRegistry.add(new DeleteUserService(userRepository));
+        serviceRegistry.add(new LoginService(userRepository));
 
-		//
-		serviceRegistry.add(new CreateProjectService(projectRepository,
-				userRepository));
-		serviceRegistry.add(new UpdateProjectService(projectRepository,
-				userRepository));
-		serviceRegistry.add(new QueryProjectService(projectRepository,
-				userRepository));
-		serviceRegistry.add(new AddProjectMemberService(projectRepository,
-				userRepository));
-		serviceRegistry.add(new RemoveProjectMemberService(projectRepository,
-				userRepository));
-		//
-		serviceRegistry.add(new CreateBugReportService(bugreportRepository,
-				userRepository));
-		serviceRegistry.add(new UpdateBugReportService(bugreportRepository,
-				userRepository));
-		serviceRegistry.add(new QueryBugReportService(bugreportRepository,
-				userRepository));
-		serviceRegistry.add(new QueryProjectBugReportService(
-				bugreportRepository, userRepository));
+        //
+        serviceRegistry.add(new CreateProjectService(projectRepository,
+                userRepository));
+        serviceRegistry.add(new UpdateProjectService(projectRepository,
+                userRepository));
+        serviceRegistry.add(new QueryProjectService(projectRepository,
+                userRepository));
+        serviceRegistry.add(new AddProjectMemberService(projectRepository,
+                userRepository));
+        serviceRegistry.add(new RemoveProjectMemberService(projectRepository,
+                userRepository));
+        //
+        serviceRegistry.add(new CreateBugReportService(bugreportRepository,
+                userRepository));
+        serviceRegistry.add(new UpdateBugReportService(bugreportRepository,
+                userRepository));
+        serviceRegistry.add(new QueryBugReportService(bugreportRepository,
+                userRepository));
+        serviceRegistry.add(new QueryProjectBugReportService(
+                bugreportRepository, userRepository));
 
-		serviceRegistry.add(new AssignBugReportService(bugreportRepository,
-				userRepository));
-	}
+        serviceRegistry.add(new AssignBugReportService(bugreportRepository,
+                userRepository));
+    }
 
-	private void populateTestData() {
-		userRepository.save(new User("alex", "pass", "alex@plexobject.com",
-				"Employee"));
-		userRepository.save(new User("jeff", "pass", "jeff@plexobject.com",
-				"Employee", "Manager"));
-		userRepository.save(new User("scott", "pass", "scott@plexobject.com",
-				"Employee", "Manager", "Administrator"));
-		userRepository.save(new User("erica", "pass", "erica@plexobject.com",
-				"Employee"));
-		Project proj = projectRepository.save(new Project("bugger"));
+    private void populateTestData() {
+        userRepository.save(new User("alex", "pass", "alex@plexobject.com",
+                "Employee"));
+        userRepository.save(new User("jeff", "pass", "jeff@plexobject.com",
+                "Employee", "Manager"));
+        userRepository.save(new User("scott", "pass", "scott@plexobject.com",
+                "Employee", "Manager", "Administrator"));
+        userRepository.save(new User("erica", "pass", "erica@plexobject.com",
+                "Employee"));
+        Project proj = projectRepository.save(new Project("bugger"));
 
-		proj.setTitle("Bugger");
-		proj.setDescription("Bugger Desc");
-		proj.setProjectLead("erica");
-		proj.addMembers("alex");
-		BugReport bugReport = bugreportRepository.save(new BugReport(
-				"story-101"));
-		bugReport
-				.setTitle("As a user I would like to login so that I can access Bugger System");
-		bugReport
-				.setDescription("As a user I would like to login so that I can access Bugger System");
-		bugReport.setAssignedTo("erica");
-		bugReport.setDevelopedBy("erica");
-		bugReport.setProjectId(proj.getId());
-		bugReport.setPriority(Priority.HIGH);
-		Comment comment = commentRepository.save(new Comment(
-				"This is a great story."));
-		comment.setBugId(bugReport.getId());
-		bugReport.addComment(comment);
-	}
+        proj.setTitle("Bugger");
+        proj.setDescription("Bugger Desc");
+        proj.setProjectLead("erica");
+        proj.addMembers("alex");
+        BugReport bugReport = bugreportRepository.save(new BugReport(
+                "story-101"));
+        bugReport
+                .setTitle("As a user I would like to login so that I can access Bugger System");
+        bugReport
+                .setDescription("As a user I would like to login so that I can access Bugger System");
+        bugReport.setAssignedTo("erica");
+        bugReport.setDevelopedBy("erica");
+        bugReport.setProjectId(proj.getId());
+        bugReport.setPriority(Priority.HIGH);
+        Comment comment = commentRepository.save(new Comment(
+                "This is a great story."));
+        comment.setBugId(bugReport.getId());
+        bugReport.addComment(comment);
+    }
 
-	void run() throws InterruptedException {
-		serviceRegistry.start();
-		// WebToJmsBridge.run(config, getJmsToJmsEntries());
-	}
+    void run() throws InterruptedException {
+        serviceRegistry.start();
+        // WebToJmsBridge.run(config, getJmsToJmsEntries());
+    }
 
-	static Collection<WebToJmsEntry> getJmsToJmsEntries() {
-		return Arrays.asList(new WebToJmsEntry(DEFAULT_CODEC,
-				"/projects/{projectId}/bugreports/{id}/assign", Method.POST,
-				"queue:{scope}-assign-bugreport-service-queue",
-				DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-				"/projects/{projectId}/bugreports", Method.GET,
-				"queue:{scope}-query-project-bugreport-service-queue",
-				DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-				"/users", Method.GET, "queue:{scope}-query-user-service-queue",
-				DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-				"/projects", Method.GET,
-				"queue:{scope}-query-projects-service", DEFAULT_TIMEOUT_SECS),
-				new WebToJmsEntry(DEFAULT_CODEC, "/bugreports", Method.GET,
-						"queue:{scope}-bugreports-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/projects/{id}/membership/add", Method.POST,
-						"queue:{scope}-add-project-member-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/projects/{id}/membership/remove", Method.POST,
-						"queue:{scope}-remove-project-member-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/projects/{projectId}/bugreports", Method.POST,
-						"queue:{scope}-create-bugreport-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/users", Method.POST,
-						"queue:{scope}-create-user-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/projects", Method.POST,
-						"queue:{scope}-create-projects-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/users/{id}", Method.POST,
-						"queue:{scope}-update-user-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/users/{id}/delete", Method.POST,
-						"queue:{scope}-delete-user-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/projects/{id}", Method.POST,
-						"queue:{scope}-update-project-service-queue",
-						DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
-						"/projects/{projectId}/bugreports/{id}", Method.POST,
-						"queue:{scope}-update-bugreport-service-queue",
-						DEFAULT_TIMEOUT_SECS));
-	}
+    static Collection<WebToJmsEntry> getJmsToJmsEntries() {
+        return Arrays.asList(new WebToJmsEntry(DEFAULT_CODEC,
+                "/projects/{projectId}/bugreports/{id}/assign", Method.POST,
+                "queue:{scope}-assign-bugreport-service-queue",
+                DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                "/projects/{projectId}/bugreports", Method.GET,
+                "queue:{scope}-query-project-bugreport-service-queue",
+                DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                "/users", Method.GET, "queue:{scope}-query-user-service-queue",
+                DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                "/projects", Method.GET,
+                "queue:{scope}-query-projects-service", DEFAULT_TIMEOUT_SECS),
+                new WebToJmsEntry(DEFAULT_CODEC, "/bugreports", Method.GET,
+                        "queue:{scope}-bugreports-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/projects/{id}/membership/add", Method.POST,
+                        "queue:{scope}-add-project-member-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/projects/{id}/membership/remove", Method.POST,
+                        "queue:{scope}-remove-project-member-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/projects/{projectId}/bugreports", Method.POST,
+                        "queue:{scope}-create-bugreport-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/users", Method.POST,
+                        "queue:{scope}-create-user-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/projects", Method.POST,
+                        "queue:{scope}-create-projects-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/users/{id}", Method.POST,
+                        "queue:{scope}-update-user-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/users/{id}/delete", Method.POST,
+                        "queue:{scope}-delete-user-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/projects/{id}", Method.POST,
+                        "queue:{scope}-update-project-service-queue",
+                        DEFAULT_TIMEOUT_SECS), new WebToJmsEntry(DEFAULT_CODEC,
+                        "/projects/{projectId}/bugreports/{id}", Method.POST,
+                        "queue:{scope}-update-bugreport-service-queue",
+                        DEFAULT_TIMEOUT_SECS));
+    }
 
-	public static void main(String[] args) throws Exception {
-		if (args.length < 2) {
-			System.err.println("Usage: java " + Main.class.getName()
-					+ " properties-file [bridge-mapping-file.json]");
-			System.exit(1);
-		}
-		BasicConfigurator.configure();
-		LogManager.getRootLogger().setLevel(Level.INFO);
+    public static void main(String[] args) throws Exception {
+        if (args.length < 2) {
+            System.err.println("Usage: java " + Main.class.getName()
+                    + " properties-file [bridge-mapping-file.json]");
+            System.exit(1);
+        }
+        BasicConfigurator.configure();
+        LogManager.getRootLogger().setLevel(Level.INFO);
 
-		Main main = new Main(args[0]);
-		main.run();
-		if (args.length > 1) {
-			Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
-					args[1]));
-			Configuration config = new Configuration(args[0]);
-			ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-			JmsClient jmsClient = new JmsClient(config);
-			new WebToJmsBridge(jmsClient, entries, serviceRegistry);
-			serviceRegistry.start();
-		}
-		Thread.currentThread().join();
-	}
+        Main main = new Main(args[0]);
+        main.run();
+        if (args.length > 1) {
+            Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
+                    args[1]));
+            Configuration config = new Configuration(args[0]);
+            ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+            JmsClient jmsClient = new JmsClient(config);
+            new WebToJmsBridge(jmsClient, entries, serviceRegistry);
+            serviceRegistry.start();
+        }
+        Thread.currentThread().join();
+    }
 }

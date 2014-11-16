@@ -272,9 +272,10 @@ public class QueryUserService extends AbstractUserService implements RequestHand
   The end-point can contain variables such as scope that are initialized from configuration.
 
 
-### Overriding service configuration at runtime 
-In addition to defining service configurations via annotations, you can also override them at runtime, e.g.
+### Overriding service configuration at runtime and deploying same service via different protocols
+In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.
 ```java 
+@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
 public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
@@ -283,15 +284,31 @@ public class PingService implements RequestHandler {
   }
 }
 
+And then at runtime, override configuration, e.g.
 ...
     ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
     PingService pingService = new PingService();
-    serviceRegistry.add(pingService, new ServiceConfigDesc(
-        Method.MESSAGE, Protocol.WEBSOCKET, Void.class,
-        CodecType.JSON, "1.0", "/ping", true, new String[0]));
+    serviceRegistry.add(
+                    pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.MESSAGE)
+                            .setProtocol(Protocol.JMS)
+                            .build());
+    serviceRegistry.add(
+                    pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.MESSAGE)
+                            .setProtocol(Protocol.WEBSOCKET)
+                            .build());
+    serviceRegistry.add(pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                            .build());
+
     serviceRegistry.start();
 ```
 
+Alternatively, you can also deploy a service via JMS protocol and then use web-to-jms bridge to expose the service via HTTP/Websocket protocols.
 
 ### Creating a static file server
 Though, PlexService framework is meant for REST or messaging based services,

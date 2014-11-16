@@ -1,13 +1,13 @@
 package com.plexobject.service;
 
 public interface ServiceHandlerLifecycleMBean {
-	void start();
+    void start();
 
-	void stop();
+    void stop();
 
-	boolean isRunning();
+    boolean isRunning();
 
-	int ping();
+    int ping();
 
-	String getSummary();
+    String getSummary();
 }

@@ -19,7 +19,7 @@ import com.plexobject.encode.Employee;
 public class JsonObjectCodecTest {
     private static class Obj {
         @SuppressWarnings("unused")
-		private String name;
+        private String name;
     }
 
     JsonObjectCodec instance = new JsonObjectCodec();

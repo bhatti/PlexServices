@@ -22,7 +22,7 @@ public @interface ServiceConfig {
 
     Class<?> requestClass();
 
-	Protocol protocol();
+    Protocol protocol();
 
     CodecType codec() default CodecType.JSON;
 

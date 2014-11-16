@@ -15,20 +15,20 @@ import com.plexobject.service.ServiceConfig.Method;
 @ServiceConfig(protocol = Protocol.JMS, requestClass = Project.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-update-project-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class UpdateProjectService extends AbstractProjectService implements
         RequestHandler {
-	public UpdateProjectService(ProjectRepository projectRepository,
-	        UserRepository userRepository) {
-		super(projectRepository, userRepository);
-	}
+    public UpdateProjectService(ProjectRepository projectRepository,
+            UserRepository userRepository) {
+        super(projectRepository, userRepository);
+    }
 
-	@Override
-	public void handle(Request request) {
-		Project project = request.getPayload();
-		ValidationException
-		        .builder()
-		        .assertNonNull(project.getId(), "undefined_id", "id",
-		                "id not specified").end();
+    @Override
+    public void handle(Request request) {
+        Project project = request.getPayload();
+        ValidationException
+                .builder()
+                .assertNonNull(project.getId(), "undefined_id", "id",
+                        "id not specified").end();
 
-		Project saved = projectRepository.save(project);
-		request.getResponseDispatcher().send(saved);
-	}
+        Project saved = projectRepository.save(project);
+        request.getResponseDispatcher().send(saved);
+    }
 }

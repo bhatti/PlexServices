@@ -20,25 +20,25 @@ import com.plexobject.service.ServiceConfig.Method;
 @ServiceConfig(protocol = Protocol.JMS, requestClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-query-comments-service-queue", method = Method.GET, codec = CodecType.JSON)
 public class QueryCommentService extends AbstractBugReportService implements
         RequestHandler {
-	public QueryCommentService(BugReportRepository bugReportRepository,
-	        UserRepository userRepository) {
-		super(bugReportRepository, userRepository);
-	}
+    public QueryCommentService(BugReportRepository bugReportRepository,
+            UserRepository userRepository) {
+        super(bugReportRepository, userRepository);
+    }
 
-	@Override
-	public void handle(Request request) {
-		final Collection<Comment> comments = new ArrayList<>();
-		Collection<BugReport> reports = bugReportRepository
-		        .getAll(new Predicate<BugReport>() {
+    @Override
+    public void handle(Request request) {
+        final Collection<Comment> comments = new ArrayList<>();
+        Collection<BugReport> reports = bugReportRepository
+                .getAll(new Predicate<BugReport>() {
 
-			        @Override
-			        public boolean accept(BugReport report) {
-				        return true;
-			        }
-		        });
-		for (BugReport r : reports) {
-			comments.addAll(r.getComments());
-		}
-		request.getResponseDispatcher().send(comments);
-	}
+                    @Override
+                    public boolean accept(BugReport report) {
+                        return true;
+                    }
+                });
+        for (BugReport r : reports) {
+            comments.addAll(r.getComments());
+        }
+        request.getResponseDispatcher().send(comments);
+    }
 }

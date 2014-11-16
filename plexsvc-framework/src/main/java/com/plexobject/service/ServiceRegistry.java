@@ -42,263 +42,263 @@ import com.timgroup.statsd.StatsDClient;
  *
  */
 public class ServiceRegistry implements ServiceContainer {
-	private static final Logger log = LoggerFactory
-			.getLogger(ServiceRegistry.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(ServiceRegistry.class);
 
-	private final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
-	private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
-	private final RoleAuthorizer authorizer;
-	private boolean running;
-	private final StatsDClient statsd;
-	private ServiceMetricsRegistry serviceMetricsRegistry;
-	private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    private final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
+    private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
+    private final RoleAuthorizer authorizer;
+    private boolean running;
+    private final StatsDClient statsd;
+    private ServiceMetricsRegistry serviceMetricsRegistry;
+    private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
-	public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
-		this.authorizer = authorizer;
-		this.containers.putAll(getDefaultServiceContainers(config, authorizer));
-		String statsdHost = config.getProperty("statsd.host");
-		if (statsdHost != null) {
-			String servicePrefix = config.getProperty("serviceConfigs", "");
-			this.statsd = new NonBlockingStatsDClient(config.getProperty(
-					"statsd.prefix", servicePrefix), statsdHost,
-					config.getInteger("statsd.port", 8125));
-		} else {
-			this.statsd = null;
-		}
-		serviceMetricsRegistry = new ServiceMetricsRegistry(this, statsd);
-	}
+    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
+        this.authorizer = authorizer;
+        this.containers.putAll(getDefaultServiceContainers(config, authorizer));
+        String statsdHost = config.getProperty("statsd.host");
+        if (statsdHost != null) {
+            String servicePrefix = config.getProperty("serviceConfigs", "");
+            this.statsd = new NonBlockingStatsDClient(config.getProperty(
+                    "statsd.prefix", servicePrefix), statsdHost,
+                    config.getInteger("statsd.port", 8125));
+        } else {
+            this.statsd = null;
+        }
+        serviceMetricsRegistry = new ServiceMetricsRegistry(this, statsd);
+    }
 
-	@Override
-	public synchronized boolean isRunning() {
-		return running;
-	}
+    @Override
+    public synchronized boolean isRunning() {
+        return running;
+    }
 
-	public ServiceConfigDesc getServiceConfig(RequestHandler h) {
-		ServiceConfigDesc config = handlerConfigs.get(h);
-		if (config == null) {
-			config = new ServiceConfigDesc(h.getClass());
-		}
-		return config;
-	}
+    public ServiceConfigDesc getServiceConfig(RequestHandler h) {
+        ServiceConfigDesc config = handlerConfigs.get(h);
+        if (config == null) {
+            config = new ServiceConfigDesc(h);
+        }
+        return config;
+    }
 
-	@Override
-	public void add(RequestHandler h) {
-		add(h, new ServiceConfigDesc(h.getClass()));
-	}
+    @Override
+    public void add(RequestHandler h) {
+        add(h, new ServiceConfigDesc(h));
+    }
 
-	public synchronized void add(RequestHandler h, ServiceConfigDesc config) {
-		Objects.requireNonNull(config, "service handler " + h
-				+ " doesn't define ServiceConfig annotation");
-		handlerConfigs.put(h, config);
-		ServiceContainer container = containers.get(config.protocol());
-		Objects.requireNonNull(container,
-				"Unsupported container for service handler " + h);
-		if (!container.exists(h)) {
-			registerMetricsJMX(h);
-			registerServiceHandlerLifecycle(h);
-			container.add(h);
-		}
-	}
+    public synchronized void add(RequestHandler h, ServiceConfigDesc config) {
+        Objects.requireNonNull(config, "service handler " + h
+                + " doesn't define ServiceConfig annotation");
+        handlerConfigs.put(h, config);
+        ServiceContainer container = containers.get(config.protocol());
+        Objects.requireNonNull(container,
+                "Unsupported container for service handler " + h);
+        if (!container.exists(h)) {
+            registerMetricsJMX(h);
+            registerServiceHandlerLifecycle(h);
+            container.add(h);
+        }
+    }
 
-	public synchronized ServiceMetricsRegistry getServiceMetricsRegistry() {
-		return serviceMetricsRegistry;
-	}
+    public synchronized ServiceMetricsRegistry getServiceMetricsRegistry() {
+        return serviceMetricsRegistry;
+    }
 
-	private void registerServiceHandlerLifecycle(RequestHandler h) {
-		String objName = getPackageName(h) + h.getClass().getSimpleName()
-				+ ":type=Lifecycle";
-		try {
-			mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
-					new ObjectName(objName));
-		} catch (InstanceAlreadyExistsException e) {
-		} catch (Exception e) {
-			log.error("Could not register mbean " + objName, e);
-		}
-	}
+    private void registerServiceHandlerLifecycle(RequestHandler h) {
+        String objName = getPackageName(h) + h.getClass().getSimpleName()
+                + ":type=Lifecycle";
+        try {
+            mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
+                    new ObjectName(objName));
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (Exception e) {
+            log.error("Could not register mbean " + objName, e);
+        }
+    }
 
-	private static String getPackageName(RequestHandler h) {
-		return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
-				+ ".";
-	}
+    private static String getPackageName(RequestHandler h) {
+        return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
+                + ".";
+    }
 
-	private void registerMetricsJMX(RequestHandler h) {
-		String objName = getPackageName(h) + h.getClass().getSimpleName()
-				+ ":type=Metrics";
-		ServiceMetrics metrics = serviceMetricsRegistry.getServiceMetrics(h);
-		try {
-			mbs.registerMBean(metrics, new ObjectName(objName));
-		} catch (InstanceAlreadyExistsException e) {
-		} catch (Exception e) {
-			log.error("Could not register mbean " + objName, e);
-		}
-	}
+    private void registerMetricsJMX(RequestHandler h) {
+        String objName = getPackageName(h) + h.getClass().getSimpleName()
+                + ":type=Metrics";
+        ServiceMetrics metrics = serviceMetricsRegistry.getServiceMetrics(h);
+        try {
+            mbs.registerMBean(metrics, new ObjectName(objName));
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (Exception e) {
+            log.error("Could not register mbean " + objName, e);
+        }
+    }
 
-	@Override
-	public synchronized boolean remove(RequestHandler h) {
-		ServiceConfigDesc config = getServiceConfig(h);
-		Objects.requireNonNull(config, "config" + h
-				+ " doesn't define ServiceConfig annotation");
-		ServiceContainer container = containers.get(config.protocol());
-		if (container == null) {
-			return false;
-		}
-		if (container.remove(h)) {
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public synchronized boolean remove(RequestHandler h) {
+        ServiceConfigDesc config = getServiceConfig(h);
+        Objects.requireNonNull(config, "config" + h
+                + " doesn't define ServiceConfig annotation");
+        ServiceContainer container = containers.get(config.protocol());
+        if (container == null) {
+            return false;
+        }
+        if (container.remove(h)) {
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public boolean exists(RequestHandler h) {
-		ServiceConfigDesc config = getServiceConfig(h);
-		Objects.requireNonNull(config, "config" + h
-				+ " doesn't define ServiceConfig annotation");
-		ServiceContainer container = containers.get(config.protocol());
-		if (container == null) {
-			return false;
-		}
-		return container.exists(h);
-	}
+    @Override
+    public boolean exists(RequestHandler h) {
+        ServiceConfigDesc config = getServiceConfig(h);
+        Objects.requireNonNull(config, "config" + h
+                + " doesn't define ServiceConfig annotation");
+        ServiceContainer container = containers.get(config.protocol());
+        if (container == null) {
+            return false;
+        }
+        return container.exists(h);
+    }
 
-	@Override
-	public synchronized Collection<RequestHandler> getHandlers() {
-		Collection<RequestHandler> handlers = new HashSet<>();
-		for (ServiceContainer g : containers.values()) {
-			handlers.addAll(g.getHandlers());
-		}
-		return handlers;
-	}
+    @Override
+    public synchronized Collection<RequestHandler> getHandlers() {
+        Collection<RequestHandler> handlers = new HashSet<>();
+        for (ServiceContainer g : containers.values()) {
+            handlers.addAll(g.getHandlers());
+        }
+        return handlers;
+    }
 
-	private Map<ServiceConfig.Protocol, ServiceContainer> getDefaultServiceContainers(
-			Configuration config, RoleAuthorizer authorizer) {
-		final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
-		ServiceContainer webServiceContainer = getHttpServiceContainer(config,
-				authorizer,
-				new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>());
-		try {
-			containers.put(ServiceConfig.Protocol.HTTP, webServiceContainer);
-			containers.put(ServiceConfig.Protocol.JMS, new JmsServiceContainer(
-					config, this));
-			containers.put(ServiceConfig.Protocol.WEBSOCKET,
-					webServiceContainer);
-			return containers;
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to add containers", e);
-		}
-	}
+    private Map<ServiceConfig.Protocol, ServiceContainer> getDefaultServiceContainers(
+            Configuration config, RoleAuthorizer authorizer) {
+        final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
+        ServiceContainer webServiceContainer = getHttpServiceContainer(config,
+                authorizer,
+                new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>());
+        try {
+            containers.put(ServiceConfig.Protocol.HTTP, webServiceContainer);
+            containers.put(ServiceConfig.Protocol.JMS, new JmsServiceContainer(
+                    config, this));
+            containers.put(ServiceConfig.Protocol.WEBSOCKET,
+                    webServiceContainer);
+            return containers;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add containers", e);
+        }
+    }
 
-	@Override
-	public synchronized void start() {
-		for (ServiceContainer g : containers.values()) {
-			if (g.getHandlers().size() > 0) {
-				g.start();
-			}
-		}
-		running = true;
-	}
+    @Override
+    public synchronized void start() {
+        for (ServiceContainer g : containers.values()) {
+            if (g.getHandlers().size() > 0) {
+                g.start();
+            }
+        }
+        running = true;
+    }
 
-	@Override
-	public synchronized void stop() {
-		for (ServiceContainer g : containers.values()) {
-			if (g.getHandlers().size() > 0) {
-				g.stop();
-			}
-		}
-		running = false;
-	}
+    @Override
+    public synchronized void stop() {
+        for (ServiceContainer g : containers.values()) {
+            if (g.getHandlers().size() > 0) {
+                g.stop();
+            }
+        }
+        running = false;
+    }
 
-	/**
-	 * This method executes handler by encoding the payload to proper java class
-	 * and enforces security set by the underlying application.
-	 * 
-	 * @param request
-	 * @param handler
-	 */
-	public void invoke(Request request, RequestHandler handler) {
-		if (handler != null) {
-			final long started = System.currentTimeMillis();
-			ServiceMetrics metrics = serviceMetricsRegistry
-					.getServiceMetrics(handler);
+    /**
+     * This method executes handler by encoding the payload to proper java class
+     * and enforces security set by the underlying application.
+     * 
+     * @param request
+     * @param handler
+     */
+    public void invoke(Request request, RequestHandler handler) {
+        if (handler != null) {
+            final long started = System.currentTimeMillis();
+            ServiceMetrics metrics = serviceMetricsRegistry
+                    .getServiceMetrics(handler);
 
-			ServiceConfigDesc config = getServiceConfig(handler);
-			if (log.isDebugEnabled()) {
-				log.debug("Received request for handler "
-						+ handler.getClass().getSimpleName() + ", protocol "
-						+ config.protocol() + ", payload "
-						+ request.getPayload() + ", params "
-						+ request.getProperties());
-			}
+            ServiceConfigDesc config = getServiceConfig(handler);
+            if (log.isDebugEnabled()) {
+                log.debug("Received request for handler "
+                        + handler.getClass().getSimpleName() + ", protocol "
+                        + config.protocol() + ", payload "
+                        + request.getPayload() + ", params "
+                        + request.getProperties());
+            }
 
-			// override payload in request
-			Object payload = config.requestClass() != Void.class ? ObjectCodecFactory
-					.getInstance()
-					.getObjectCodec(config.codec())
-					.decode((String) request.getPayload(),
-							config.requestClass(), request.getProperties())
-					: null;
-			if (payload != null) {
-				request.setPayload(payload);
-			} else if (request.getPayload() != null) {
-				String[] nvArr = request.getPayload().toString().split("&");
-				for (String nvStr : nvArr) {
-					String[] nv = nvStr.split("=");
-					if (nv.length == 2) {
-						request.setProperty(nv[0], nv[1]);
-					}
-				}
-			}
-			try {
-				if (authorizer != null && config.rolesAllowed() != null
-						&& config.rolesAllowed().length > 0
-						&& !config.rolesAllowed()[0].equals("")) {
-					authorizer.authorize(request, config.rolesAllowed());
-				}
-				handler.handle(request);
-				metrics.addResponseTime(System.currentTimeMillis() - started);
-			} catch (AuthException e) {
-				metrics.incrementErrors();
+            // override payload in request
+            Object payload = config.requestClass() != Void.class ? ObjectCodecFactory
+                    .getInstance()
+                    .getObjectCodec(config.codec())
+                    .decode((String) request.getPayload(),
+                            config.requestClass(), request.getProperties())
+                    : null;
+            if (payload != null) {
+                request.setPayload(payload);
+            } else if (request.getPayload() != null) {
+                String[] nvArr = request.getPayload().toString().split("&");
+                for (String nvStr : nvArr) {
+                    String[] nv = nvStr.split("=");
+                    if (nv.length == 2) {
+                        request.setProperty(nv[0], nv[1]);
+                    }
+                }
+            }
+            try {
+                if (authorizer != null && config.rolesAllowed() != null
+                        && config.rolesAllowed().length > 0
+                        && !config.rolesAllowed()[0].equals("")) {
+                    authorizer.authorize(request, config.rolesAllowed());
+                }
+                handler.handle(request);
+                metrics.addResponseTime(System.currentTimeMillis() - started);
+            } catch (AuthException e) {
+                metrics.incrementErrors();
 
-				request.getResponseDispatcher().setStatus(
-						HttpResponse.SC_UNAUTHORIZED);
-				if (e.getLocation() != null) {
-					request.getResponseDispatcher().setProperty(
-							HttpResponse.LOCATION, e.getLocation());
-				}
-				request.getResponseDispatcher().send(e);
-			} catch (ValidationException e) {
-				metrics.incrementErrors();
+                request.getResponseDispatcher().setStatus(
+                        HttpResponse.SC_UNAUTHORIZED);
+                if (e.getLocation() != null) {
+                    request.getResponseDispatcher().setProperty(
+                            HttpResponse.LOCATION, e.getLocation());
+                }
+                request.getResponseDispatcher().send(e);
+            } catch (ValidationException e) {
+                metrics.incrementErrors();
 
-				request.getResponseDispatcher().setStatus(
-						HttpResponse.SC_BAD_REQUEST);
-				request.getResponseDispatcher().send(e);
-			} catch (Exception e) {
-				metrics.incrementErrors();
+                request.getResponseDispatcher().setStatus(
+                        HttpResponse.SC_BAD_REQUEST);
+                request.getResponseDispatcher().send(e);
+            } catch (Exception e) {
+                metrics.incrementErrors();
 
-				request.getResponseDispatcher().setStatus(
-						HttpResponse.SC_INTERNAL_SERVER_ERROR);
-				request.getResponseDispatcher().send(e);
-			}
-		} else {
-			log.warn("Received Unknown request params "
-					+ request.getProperties() + ", payload "
-					+ request.getPayload());
-			request.getResponseDispatcher().setCodecType(CodecType.HTML);
-			request.getResponseDispatcher()
-					.setStatus(HttpResponse.SC_NOT_FOUND);
-			request.getResponseDispatcher().send("page not found");
-		}
-	}
+                request.getResponseDispatcher().setStatus(
+                        HttpResponse.SC_INTERNAL_SERVER_ERROR);
+                request.getResponseDispatcher().send(e);
+            }
+        } else {
+            log.warn("Received Unknown request params "
+                    + request.getProperties() + ", payload "
+                    + request.getPayload());
+            request.getResponseDispatcher().setCodecType(CodecType.HTML);
+            request.getResponseDispatcher()
+                    .setStatus(HttpResponse.SC_NOT_FOUND);
+            request.getResponseDispatcher().send("page not found");
+        }
+    }
 
-	private ServiceContainer getHttpServiceContainer(
-			final Configuration config,
-			final RoleAuthorizer authorizer,
-			final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
-		RequestHandler executor = new DefaultHttpRequestHandler(this,
-				requestHandlerPathsByMethod);
-		Lifecycle server = HttpServerFactory.getHttpServer(config, executor);
-		return new DefaultHttpServiceContainer(config, this,
-				requestHandlerPathsByMethod, server);
-	}
+    private ServiceContainer getHttpServiceContainer(
+            final Configuration config,
+            final RoleAuthorizer authorizer,
+            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
+        RequestHandler executor = new DefaultHttpRequestHandler(this,
+                requestHandlerPathsByMethod);
+        Lifecycle server = HttpServerFactory.getHttpServer(config, executor);
+        return new DefaultHttpServiceContainer(config, this,
+                requestHandlerPathsByMethod, server);
+    }
 }
