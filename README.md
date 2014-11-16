@@ -71,7 +71,6 @@ curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http:/
   -d "{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"
 ```
 
-```
 Here is a sample python client for accessing these services
 ```python
     resp = requests.post('http://localhost:8181/login', data={'password': password, 'username': username})
