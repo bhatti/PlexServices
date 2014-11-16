@@ -377,13 +377,13 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
-          throw new AuthException(Constants.SC_UNAUTHORIZED,
+          throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
               request.getSessionId(), request.getRemoteAddress(),
               "failed to validate session-id");
         }
         for (String role : roles) {
           if (!user.getRoles().contains(role)) {
-            throw new AuthException(Constants.SC_UNAUTHORIZED,
+            throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
                 request.getSessionId(), request.getRemoteAddress(),
                 "failed to match role");
           }
