@@ -24,6 +24,7 @@ import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.DefaultHttpServiceContainer;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.HttpServerFactory;
+import com.plexobject.jms.JmsClient;
 import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
@@ -48,13 +49,16 @@ public class ServiceRegistry implements ServiceContainer {
     private final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
     private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
     private final RoleAuthorizer authorizer;
+    private final JmsClient jmsClient;
     private boolean running;
     private final StatsDClient statsd;
     private ServiceMetricsRegistry serviceMetricsRegistry;
     private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
-    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
+    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer,
+            JmsClient jmsClient) {
         this.authorizer = authorizer;
+        this.jmsClient = jmsClient;
         this.containers.putAll(getDefaultServiceContainers(config, authorizer));
         String statsdHost = config.getProperty("statsd.host");
         if (statsdHost != null) {
@@ -178,7 +182,7 @@ public class ServiceRegistry implements ServiceContainer {
         try {
             containers.put(ServiceConfig.Protocol.HTTP, webServiceContainer);
             containers.put(ServiceConfig.Protocol.JMS, new JmsServiceContainer(
-                    config, this));
+                    config, this, jmsClient));
             containers.put(ServiceConfig.Protocol.WEBSOCKET,
                     webServiceContainer);
             return containers;

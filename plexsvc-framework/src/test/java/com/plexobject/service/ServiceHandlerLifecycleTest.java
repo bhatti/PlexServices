@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
+import org.apache.activemq.broker.BrokerService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +14,9 @@ import org.junit.Test;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.ServiceConfig.Protocol;
+import com.plexobject.jms.JmsClient;
 import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
 import com.plexobject.util.Configuration;
 
@@ -34,16 +36,28 @@ public class ServiceHandlerLifecycleTest {
     }
 
     private ServiceRegistry registry;
+    private JmsClient jmsClient;
+    private BrokerService broker = new BrokerService();
 
     @Before
     public void setUp() throws Exception {
         final Properties properties = new Properties();
+        broker.addConnector("tcp://localhost:61616");
+        broker.start();
+
+        properties.put("jms.contextFactory",
+                "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
+        properties.put("jms.providerUrl", "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
-        registry = new ServiceRegistry(config, null);
+
+        jmsClient = new JmsClient(config);
+        registry = new ServiceRegistry(config, null, jmsClient);
     }
 
     @After
     public void tearDown() throws Exception {
+        broker.stop();
     }
 
     @Test

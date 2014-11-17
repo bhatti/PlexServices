@@ -78,8 +78,8 @@ public class DefaultHttpServiceContainer extends AbstractServiceContainer {
         }
         log.info("Adding Web service handler "
                 + handler.getClass().getSimpleName() + " for "
-                + config.method() + " : " + config.endpoint() + ", codec "
-                + config.codec());
+                + config.protocol() + ":" + config.method() + " : "
+                + config.endpoint() + ", codec " + config.codec());
     }
 
     @Override

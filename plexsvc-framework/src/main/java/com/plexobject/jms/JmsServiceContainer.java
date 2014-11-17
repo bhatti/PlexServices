@@ -22,32 +22,27 @@ import com.plexobject.util.Configuration;
  *
  */
 public class JmsServiceContainer extends AbstractServiceContainer {
-    private JmsClient _jmsClient;
+    private JmsClient jmsClient;
     private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
 
     public JmsServiceContainer(final Configuration config,
-            final ServiceRegistry serviceRegistry) throws Exception {
+            final ServiceRegistry serviceRegistry, JmsClient jmsClient)
+            throws Exception {
         super(config, serviceRegistry);
-    }
-
-    private synchronized JmsClient getJmsClient() throws JMSException {
-        if (_jmsClient == null) {
-            _jmsClient = new JmsClient(config);
-        }
-        return _jmsClient;
+        this.jmsClient = jmsClient;
     }
 
     public void init() {
     }
 
     @Override
-    protected synchronized void doStart() throws Exception {
-        getJmsClient().start();
+    protected void doStart() throws Exception {
+        jmsClient.start();
     }
 
     @Override
     protected void doStop() throws Exception {
-        getJmsClient().stop();
+        jmsClient.stop();
     }
 
     @Override
@@ -73,9 +68,8 @@ public class JmsServiceContainer extends AbstractServiceContainer {
         }
 
         try {
-            Destination dest = getJmsClient().getDestination(
-                    getDestinationName(h));
-            jmsHandler = new JmsRequestHandler(serviceRegistry, getJmsClient(),
+            Destination dest = jmsClient.getDestination(getDestinationName(h));
+            jmsHandler = new JmsRequestHandler(serviceRegistry, jmsClient,
                     dest, h);
             jmsHandlersByRequestHandler.put(h, jmsHandler);
             log.info("Adding JMS service " + h.getClass().getSimpleName()

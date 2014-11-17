@@ -49,10 +49,11 @@ public class WebToJmsBridgeTest {
 
     @Before
     public void setUp() throws Exception {
-        ServiceRegistry serviceRegistry = new ServiceRegistry(
-                new Configuration(new Properties()), null);
-        bridge = new WebToJmsBridge(jmsClient, new ArrayList<WebToJmsEntry>(),
-                serviceRegistry);
+        Configuration config = new Configuration(new Properties());
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
+                jmsClient);
+        bridge = new WebToJmsBridge(config, jmsClient,
+                new ArrayList<WebToJmsEntry>(), serviceRegistry);
     }
 
     @Test

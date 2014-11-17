@@ -69,14 +69,15 @@ public class QuoteServer implements RequestHandler {
         QuoteServer service = new QuoteServer();
         ServiceConfig serviceConfig = service.getClass().getAnnotation(
                 ServiceConfig.class);
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        JmsClient jmsClient = new JmsClient(config);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
+                jmsClient);
 
         if (serviceConfig.protocol() == Protocol.JMS) {
             startJmsBroker();
             Collection<WebToJmsEntry> entries = Arrays
                     .asList(new WebToJmsEntry(CodecType.JSON, "/quotes",
                             serviceConfig.method(), serviceConfig.endpoint(), 5));
-            JmsClient jmsClient = new JmsClient(config);
             new WebToJmsBridge(jmsClient, entries, serviceRegistry);
         }
         //

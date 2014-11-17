@@ -2,7 +2,7 @@ import unittest
 import random
 import string
 import base_auth_test
-import websocket
+from websocket import create_connection
 
 #
 ### Functional test for ping service
@@ -10,6 +10,8 @@ import websocket
 class PingTest(base_auth_test.BaseAuthTest):
   def setUp(self):
     super(PingTest, self).setUp()
+    #self._base_url = 'https://localhost:8181'
+    #self._ws_url = 'wss://localhost:8181/ws'
 
   def test_ping(self):
     resp = self.get('/ping?data=abc')

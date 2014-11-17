@@ -39,31 +39,28 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     private static final Logger log = LoggerFactory
             .getLogger(WebToJmsBridge.class);
     private final JmsClient jmsClient;
+    private final ServiceRegistry serviceRegistry;
     //
     private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
 
     public WebToJmsBridge(JmsClient jmsClient,
             Collection<WebToJmsEntry> entries, ServiceRegistry serviceRegistry) {
         this.jmsClient = jmsClient;
+        this.serviceRegistry = serviceRegistry;
 
         for (WebToJmsEntry e : entries) {
             add(e);
         }
-        //
-        for (WebToJmsEntry e : entries) {
-            serviceRegistry.add(this,
-                    new ServiceConfigDesc(e.getMethod(), Protocol.HTTP,
-                            Void.class, e.getCodecType(), null, e.getPath(),
-                            true, new String[0]));
-            serviceRegistry.add(this,
-                    new ServiceConfigDesc(e.getMethod(), Protocol.WEBSOCKET,
-                            Void.class, e.getCodecType(), null, e.getPath(),
-                            true, new String[0]));
-        }
-
     }
 
-    public void add(WebToJmsEntry e) {
+    public void add(WebToJmsEntry httpEntry) {
+        addHttp(httpEntry);
+        WebToJmsEntry websocketEntry = new WebToJmsEntry(httpEntry);
+        websocketEntry.setMethod(Method.MESSAGE);
+        addWebsocket(websocketEntry);
+    }
+
+    private void addHttp(WebToJmsEntry e) {
         RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod.get(e
                 .getMethod());
         if (entryPaths == null) {
@@ -75,7 +72,31 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     "Mapping is already registered for " + e);
         }
         entryPaths.put(e.getPath(), e);
+        // adding mapping for http
+        serviceRegistry.add(this, new ServiceConfigDesc(e.getMethod(),
+                Protocol.HTTP, Void.class, e.getCodecType(), null, e.getPath(),
+                true, new String[0]));
         log.info("Adding Web->JMS mapping for " + e.getShortString());
+    }
+
+    private void addWebsocket(WebToJmsEntry e) {
+        RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod.get(e
+                .getMethod());
+        if (entryPaths == null) {
+            entryPaths = new RouteResolver<WebToJmsEntry>();
+            entriesPathsByMethod.put(e.getMethod(), entryPaths);
+        }
+        if (entryPaths.get(e.getPath(), new HashMap<String, Object>()) != null) {
+            throw new IllegalStateException(
+                    "Mapping is already registered for " + e);
+        }
+        entryPaths.put(e.getPath(), e);
+        // adding mapping for webscoket
+        serviceRegistry.add(this,
+                new ServiceConfigDesc(e.getMethod(), Protocol.WEBSOCKET,
+                        Void.class, e.getCodecType(), null, e.getPath(), true,
+                        new String[0]));
+        log.info("Adding Websocket->JMS mapping for " + e.getShortString());
     }
 
     @Override
@@ -87,11 +108,12 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     .setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponseDispatcher().send(
                     "Unknown request received " + request.getPayload());
-            log.warn("Unknown request received " + request.getPayload()
+            log.warn("!!!Unknown request received " + request.getPayload()
                     + ", registered " + entriesPathsByMethod.keySet() + ": "
                     + entriesPathsByMethod.values());
             return;
         }
+        log.info("** Handling " + request + ", mapping " + entry);
         Map<String, Object> params = new HashMap<>();
         params.putAll(request.getProperties());
         params.putAll(request.getHeaders());
@@ -173,4 +195,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     public void onStopped() {
         jmsClient.stop();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return false;
+    }
+
 }

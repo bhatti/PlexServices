@@ -204,7 +204,8 @@ public class JmsClient implements Lifecycle {
                     log.info(destName + ": Received " + respText
                             + " in response to " + reqPayload + ", params "
                             + headers);
-                    final Response response = new Response(params, params, respText);
+                    final Response response = new Response(params, params,
+                            respText);
                     handler.handle(response);
                     if (singleUseOnly) {
                         try {

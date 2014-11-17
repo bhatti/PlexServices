@@ -43,16 +43,25 @@ public class DefaultHttpRequestHandler implements RequestHandler {
             request.getResponseDispatcher()
                     .setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponseDispatcher().send(
-                    "Unknown request received " + request.getPayload() + "/"
-                            + request.getProperties() + " for method "
-                            + request.getMethod() + ", protocol "
-                            + request.getProtocol());
+                    "Unknown request received payload " + request.getPayload()
+                            + " for endpoint " + request.getEndpoint()
+                            + ",  method " + request.getMethod()
+                            + ", protocol " + request.getProtocol()
+                            + ", properties " + request.getProperties());
 
-            log.error("Unknown request received " + request.getPayload() + "/"
-                    + request.getProperties() + " for method "
-                    + request.getMethod() + ", protocol "
-                    + request.getProtocol() + ", available "
-                    + requestHandlerPathsByMethod);
+            log.error("** Unknown request received payload "
+                    + request.getPayload()
+                    + " for endpoint "
+                    + request.getEndpoint()
+                    + ",  method "
+                    + request.getMethod()
+                    + ", protocol "
+                    + request.getProtocol()
+                    + ", properties "
+                    + request.getProperties()
+                    + ", available requestHandlerPaths "
+                    + (requestHandlerPaths != null ? requestHandlerPaths
+                            : requestHandlerPathsByMethod));
             return;
         }
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);

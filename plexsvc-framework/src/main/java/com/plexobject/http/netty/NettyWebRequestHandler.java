@@ -103,8 +103,8 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                     BAD_REQUEST));
             return;
         }
-
-        if (wsPath != null && wsPath.equals(req.getUri())) {
+        String uri = req.getUri();
+        if (wsPath != null && wsPath.equals(uri)) {
             // Handshake
             WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
                     getWebSocketLocation(req), null, false);
@@ -140,7 +140,6 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                 payload = content.content().toString(CharsetUtil.UTF_8);
             }
             Method method = Method.valueOf(req.getMethod().name());
-            String uri = req.getUri();
             int n = uri.indexOf("?");
             if (n != -1) {
                 uri = uri.substring(0, n);
@@ -152,7 +151,8 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                     .setMethod(method).setEndpoint(uri).setProperties(params)
                     .setHeaders(headers).setPayload(payload)
                     .setResponseDispatcher(dispatcher).build();
-            log.info("Received " + handlerReq);
+            log.info("HTTP Received URI '" + uri + "', wsPath '" + wsPath
+                    + "', request " + handlerReq);
             handler.handle(handlerReq);
         }
 

@@ -22,6 +22,10 @@ public class WebToJmsEntry {
 
     }
 
+    public WebToJmsEntry(WebToJmsEntry e) {
+        this(e.codecType, e.path, e.method, e.destination, e.timeoutSecs);
+    }
+
     public WebToJmsEntry(CodecType codecType, String path, Method method,
             String destination, int timeoutSecs) {
         this.codecType = codecType;

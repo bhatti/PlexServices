@@ -57,14 +57,22 @@ public class Main {
     private final ServiceRegistry serviceRegistry;
     private final Configuration config;
 
-    public Main(String propertyFile) throws Exception {
+    public Main(String propertyFile, String mappingFile) throws Exception {
         this.config = new Configuration(propertyFile);
+
+        JmsClient jmsClient = new JmsClient(config);
+        serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
+                userRepository), jmsClient);
+        if (propertyFile != null) {
+            Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
+                    mappingFile));
+            new WebToJmsBridge(jmsClient, entries, serviceRegistry);
+        }
         startJmsBroker();
         populateTestData();
         //
-        serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
-                userRepository));
         addServices(serviceRegistry);
+        serviceRegistry.start();
     }
 
     private void startJmsBroker() throws Exception {
@@ -197,18 +205,9 @@ public class Main {
         }
         BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.INFO);
-
-        Main main = new Main(args[0]);
+        Main main = new Main(args[0], args.length > 1 ? args[1] : null);
         main.run();
-        if (args.length > 1) {
-            Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
-                    args[1]));
-            Configuration config = new Configuration(args[0]);
-            ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-            JmsClient jmsClient = new JmsClient(config);
-            new WebToJmsBridge(jmsClient, entries, serviceRegistry);
-            serviceRegistry.start();
-        }
+
         Thread.currentThread().join();
     }
 }

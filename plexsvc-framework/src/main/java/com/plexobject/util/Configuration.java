@@ -52,7 +52,11 @@ public class Configuration {
     }
 
     public String getProperty(final String key, final String def) {
-        return properties.getProperty(key, def);
+        String val = properties.getProperty(key, def);
+        if (val != null) {
+            val = val.trim();
+        }
+        return val;
     }
 
     public int getInteger(final String key) {

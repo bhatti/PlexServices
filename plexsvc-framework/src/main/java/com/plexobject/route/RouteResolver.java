@@ -132,12 +132,14 @@ public class RouteResolver<T> {
     public void put(String path, T object) {
         Objects.requireNonNull(path, "null path");
         Objects.requireNonNull(object, "null object");
+        path = path.trim();
         servicesByPath.put(path, object);
         String[] fragments = path.split("/");
         root.add(fragments, 1, object);
     }
 
     public T get(String path, Map<String, Object> parameters) {
+        path = path.trim();
         Node<T> node = getNode(path, parameters);
         return node != null ? node.object : null;
     }

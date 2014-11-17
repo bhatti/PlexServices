@@ -15,10 +15,9 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 import java.io.File;
-
-import javax.net.ssl.SSLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +36,10 @@ public class NettyHttpServer implements Lifecycle {
     private static final Logger log = LoggerFactory
             .getLogger(NettyHttpServer.class);
 
-    private static final String CERT_FILE = "certFile";
-    private static final String KEY_PASSWORD = "keyPassword";
-    private static final String KEY_FILE = "keyFile";
+    private static final String SSL_SELF_SIGNED = "https.selfSigned";
+    private static final String SSL_CERT_FILE = "https.certFile";
+    private static final String SSL_KEY_PASSWORD = "https.keyPassword";
+    private static final String SSL_KEY_FILE = "https.keyFile";
     private static final int DEFAULT_HTTP_PORT = 8181;
 
     // private static final String HTTP_THREADS_COUNT = "httpThreadsCount";
@@ -88,20 +88,45 @@ public class NettyHttpServer implements Lifecycle {
 
         // int httpsPort = config.getInteger(HTTPS_PORT, DEFAULT_HTTPS_PORT);
         // int httpTimeoutSecs = config.getInteger(HTTP_TIMEOUT_SECS, 10);
-        String certPath = config.getProperty(CERT_FILE);
-        String keyFilePath = config.getProperty(KEY_FILE);
-        String keyPassword = config.getProperty(KEY_PASSWORD);
+        String certPath = config.getProperty(SSL_CERT_FILE);
+        String keyFilePath = config.getProperty(SSL_KEY_FILE);
+        String keyPassword = config.getProperty(SSL_KEY_PASSWORD);
+        boolean selfSigned = config.getBoolean(SSL_SELF_SIGNED);
         SslContext sslCtx = null;
-        if (certPath != null && keyFilePath != null && keyPassword != null) {
+        if (selfSigned) {
+            try {
+                SelfSignedCertificate ssc = new SelfSignedCertificate();
+                sslCtx = SslContext.newServerContext(ssc.certificate(),
+                        ssc.privateKey());
+                log.info("********** Enabled self-signed SSL support");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else if (certPath != null && keyFilePath != null
+                && keyPassword != null) {
             // SelfSignedCertificate ssc = new SelfSignedCertificate();
             // sslCtx = SslContext.newServerContext(ssc.certificate(),
             // ssc.privateKey());
+            File certFile = new File(certPath);
+            File keyFile = new File(keyFilePath);
+            if (!certFile.exists()) {
+                throw new RuntimeException("Cert File "
+                        + certFile.getAbsolutePath() + " does not exist");
+            }
+            if (!keyFile.exists()) {
+                throw new RuntimeException("Key File "
+                        + keyFile.getAbsolutePath() + " does not exist");
+            }
             try {
-                sslCtx = SslContext.newServerContext(new File(certPath),
-                        new File(keyFilePath), keyPassword);
-            } catch (SSLException e) {
+                sslCtx = SslContext.newServerContext(certFile, keyFile,
+                        keyPassword);
+                log.info("********** Enabled SSL support");
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            log.info("********** No SSL support " + certPath + ", "
+                    + keyFilePath + ", " + keyPassword);
         }
         bootstrap = new ServerBootstrap();
         bootstrap.option(ChannelOption.SO_BACKLOG, 1024);

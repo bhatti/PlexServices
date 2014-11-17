@@ -30,7 +30,9 @@ public class Main {
         PingService pingService = new PingService();
 
         String type = args[1];
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        JmsClient jmsClient = new JmsClient(config);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
+                jmsClient);
 
         // ensure activemq is already running
         if ("jms".equalsIgnoreCase(type)) {
@@ -42,8 +44,7 @@ public class Main {
                             .setEndpoint("queue:ping").build());
             Collection<WebToJmsEntry> entries = Arrays
                     .asList(new WebToJmsEntry(CodecType.JSON, "/ping",
-                            Method.MESSAGE, "queue:ping", 5));
-            JmsClient jmsClient = new JmsClient(config);
+                            Method.GET, "queue:ping", 5));
             new WebToJmsBridge(jmsClient, entries, serviceRegistry);
         } else {
             serviceRegistry.add(
