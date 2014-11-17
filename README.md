@@ -21,6 +21,8 @@ PlexService is designed on following design principles:
 
 - Easily deployable: PlexService framework provides embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
 
+- Operational Support: PlexService provides monitoring, statistics and logging support for ease of operational support.
+
 ## Major Features
 - PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
 
