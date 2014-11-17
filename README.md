@@ -1,21 +1,40 @@
-#PlexService - REST/Messaging based Micro-Service Framework
+#PlexService - Light-weight Micro-Service Framework for building high performance and secured applications 
 
 ##Overview
 
-PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
+PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. 
 
-PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
+## Design Principles 
+PlexService is designed on following design principles:
 
-PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to automatically expose them through HTTP or websocket interfaces.
+- Not MVC framework - PlexService is only meant for services and it's not general purpose MVC framework.
 
-For intra-process communication, PlexService provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.
+- Not Invented Here: PlexService leverages other 3rd party frameworks and libraries such as Log4j, Netty, JaxB, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
 
-PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
+- Minimize Dependencies: Despite NIH, PlexService minimizes the dependencies of 3rd party libraries. 
 
-PlexService uses Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
+- Technology indpendent: PlexService provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexService provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
 
-PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
+- Configurable: PlexService uses simple annotations for describing services but allows them to override the properties at run-time.
 
+- Encourage messaging based services: Though, PlexService supports both messaging based services and web services, but it prefers messaging based services and provides web bridge to expose them externally. It also encourages use of event-bus for internal communication. 
+
+- Easily deployable: PlexService framework provides embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
+
+## Major Features
+- PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
+
+- PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
+
+- PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to automatically expose them through HTTP or websocket interfaces.
+
+- For intra-process communication, PlexService provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.
+
+- PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
+
+- PlexService uses Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
+
+- PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
 ##Building
 - Download and install <a href="http://www.gradle.org/downloads">Gradle</a>.

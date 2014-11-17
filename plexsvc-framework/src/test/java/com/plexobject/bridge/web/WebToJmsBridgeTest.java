@@ -52,8 +52,8 @@ public class WebToJmsBridgeTest {
         Configuration config = new Configuration(new Properties());
         ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
                 jmsClient);
-        bridge = new WebToJmsBridge(config, jmsClient,
-                new ArrayList<WebToJmsEntry>(), serviceRegistry);
+        bridge = new WebToJmsBridge(jmsClient, new ArrayList<WebToJmsEntry>(),
+                serviceRegistry);
     }
 
     @Test
