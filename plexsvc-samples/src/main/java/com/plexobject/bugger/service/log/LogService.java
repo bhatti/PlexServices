@@ -10,10 +10,10 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-// @ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class,
+// @ServiceConfig(protocol = Protocol.HTTP, 
 // endpoint = "/logs", method = Method.POST,
 // contentType = "application/json")
-@ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, endpoint = "queue:{scope}-log-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, endpoint = "queue:{scope}-log-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class LogService implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LogService.class);
 

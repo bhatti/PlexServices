@@ -14,7 +14,7 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/sign_auth", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/sign_auth", method = Method.GET, codec = CodecType.JSON)
 public class S3SignService implements RequestHandler {
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     private String key;

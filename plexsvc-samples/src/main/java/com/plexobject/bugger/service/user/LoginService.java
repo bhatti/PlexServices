@@ -13,8 +13,8 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-//@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/login", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, endpoint = "queue:{scope}-login-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+//@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/login", method = Method.POST, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, endpoint = "queue:{scope}-login-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class LoginService extends AbstractUserService implements RequestHandler {
     public LoginService(UserRepository userRepository) {
         super(userRepository);

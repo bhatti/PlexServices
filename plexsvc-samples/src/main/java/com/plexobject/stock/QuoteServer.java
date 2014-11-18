@@ -20,8 +20,8 @@ import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = Void.class, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
-// @ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, endpoint
+@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+// @ServiceConfig(protocol = Protocol.JMS, endpoint
 // = "queue:quotes-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QuoteServer implements RequestHandler {
     public enum Action {

@@ -2,7 +2,9 @@ package com.plexobject.service;
 
 import java.util.Arrays;
 
+import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
+import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.service.ServiceConfig.Protocol;
 
@@ -27,6 +29,20 @@ public class ServiceConfigDesc {
         private String[] rolesAllowed;
 
         public Builder() {
+        }
+
+        public Builder(WebToJmsEntry e) {
+            if (e != null) {
+                this.method = e.getMethod();
+                this.protocol = e.getMethod() == Method.MESSAGE ? Protocol.WEBSOCKET
+                        : Protocol.HTTP;
+                this.requestClass = null;
+                this.codecType = e.getCodecType();
+                this.version = null;
+                this.endpoint = e.getPath();
+                this.recordStatsdMetrics = true;
+                this.rolesAllowed = null;
+            }
         }
 
         public Builder(Object handler) {
@@ -156,7 +172,11 @@ public class ServiceConfigDesc {
         return rolesAllowed;
     }
 
-    public static Builder builder(Object handler) {
+    public static Builder builder(WebToJmsEntry e) {
+        return new Builder(e);
+    }
+
+    public static Builder builder(RequestHandler handler) {
         return new Builder(handler);
     }
 

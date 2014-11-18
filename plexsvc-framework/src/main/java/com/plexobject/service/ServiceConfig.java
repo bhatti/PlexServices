@@ -20,7 +20,7 @@ public @interface ServiceConfig {
         HTTP, WEBSOCKET, JMS, EVENT_BUS
     }
 
-    Class<?> requestClass();
+    Class<?> requestClass() default Void.class;
 
     Protocol protocol();
 

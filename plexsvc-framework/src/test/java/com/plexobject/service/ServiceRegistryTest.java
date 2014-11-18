@@ -61,7 +61,7 @@ public class ServiceRegistryTest {
     private List<Request> requests = new ArrayList<>();
 
     //
-    @ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = Void.class, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
     public class WebsocketService implements RequestHandler {
 
         @Override
@@ -78,7 +78,7 @@ public class ServiceRegistryTest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, endpoint = "queue:test", method = Method.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue:test", method = Method.MESSAGE, codec = CodecType.JSON)
     public class JmsService implements RequestHandler {
         @Override
         public void handle(Request request) {

@@ -16,7 +16,7 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private Map<String, String> mimeTypes = new HashMap<String, String>() {
         private static final long serialVersionUID = 1L;

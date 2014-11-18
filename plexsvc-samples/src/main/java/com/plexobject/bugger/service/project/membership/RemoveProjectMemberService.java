@@ -12,8 +12,8 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceConfig.Method;
 
-//@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/remove", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, requestClass = Void.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-remove-project-member-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+//@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/remove", method = Method.POST, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Manager", endpoint = "queue:{scope}-remove-project-member-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class RemoveProjectMemberService extends AbstractProjectService
         implements RequestHandler {
     public RemoveProjectMemberService(ProjectRepository projectRepository,
