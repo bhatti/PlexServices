@@ -11,7 +11,7 @@ public class ServiceConfigDesc implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Method method;
     private final Protocol protocol;
-    private final Class<?> requestClass;
+    private final Class<?> payloadClass;
     private final CodecType codecType;
     private final String version;
     private final String endpoint;
@@ -21,7 +21,7 @@ public class ServiceConfigDesc implements Serializable {
     public static class Builder {
         private Method method;
         private Protocol protocol;
-        private Class<?> requestClass;
+        private Class<?> payloadClass;
         private CodecType codecType;
         private String version;
         private String endpoint;
@@ -36,7 +36,7 @@ public class ServiceConfigDesc implements Serializable {
                 this.method = e.getMethod();
                 this.protocol = e.getMethod() == Method.MESSAGE ? Protocol.WEBSOCKET
                         : Protocol.HTTP;
-                this.requestClass = null;
+                this.payloadClass = null;
                 this.codecType = e.getCodecType();
                 this.version = null;
                 this.endpoint = e.getEndpoint();
@@ -57,7 +57,7 @@ public class ServiceConfigDesc implements Serializable {
             if (config != null) {
                 this.method = config.method();
                 this.protocol = config.protocol();
-                this.requestClass = config.requestClass();
+                this.payloadClass = config.payloadClass();
                 this.codecType = config.codec();
                 this.version = config.version();
                 this.endpoint = config.endpoint();
@@ -76,8 +76,8 @@ public class ServiceConfigDesc implements Serializable {
             return this;
         }
 
-        public Builder setRequestClass(Class<?> requestClass) {
-            this.requestClass = requestClass;
+        public Builder setPayloadClass(Class<?> payloadClass) {
+            this.payloadClass = payloadClass;
             return this;
         }
 
@@ -107,7 +107,7 @@ public class ServiceConfigDesc implements Serializable {
         }
 
         public ServiceConfigDesc build() {
-            return new ServiceConfigDesc(method, protocol, requestClass,
+            return new ServiceConfigDesc(method, protocol, payloadClass,
                     codecType, version, endpoint, recordStatsdMetrics,
                     rolesAllowed);
         }
@@ -122,17 +122,17 @@ public class ServiceConfigDesc implements Serializable {
     }
 
     public ServiceConfigDesc(ServiceConfig config) {
-        this(config.method(), config.protocol(), config.requestClass(), config
+        this(config.method(), config.protocol(), config.payloadClass(), config
                 .codec(), config.version(), config.endpoint(), config
                 .recordStatsdMetrics(), config.rolesAllowed());
     }
 
     public ServiceConfigDesc(Method method, Protocol protocol,
-            Class<?> requestClass, CodecType codecType, String version,
+            Class<?> payloadClass, CodecType codecType, String version,
             String endpoint, boolean recordStatsdMetrics, String[] rolesAllowed) {
         this.method = method;
         this.protocol = protocol;
-        this.requestClass = requestClass;
+        this.payloadClass = payloadClass;
         this.codecType = codecType;
         this.version = version;
         this.endpoint = endpoint;
@@ -148,8 +148,8 @@ public class ServiceConfigDesc implements Serializable {
         return protocol;
     }
 
-    public Class<?> requestClass() {
-        return requestClass;
+    public Class<?> payloadClass() {
+        return payloadClass;
     }
 
     public CodecType codec() {
@@ -183,7 +183,7 @@ public class ServiceConfigDesc implements Serializable {
     @Override
     public String toString() {
         return "ServiceConfigDesc [method=" + method + ", protocol=" + protocol
-                + ", requestClass=" + requestClass + ", codecType=" + codecType
+                + ", payloadClass=" + payloadClass + ", codecType=" + codecType
                 + ", version=" + version + ", endpoint=" + endpoint
                 + ", recordStatsdMetrics=" + recordStatsdMetrics
                 + ", rolesALlowed=" + Arrays.toString(rolesAllowed) + "]";

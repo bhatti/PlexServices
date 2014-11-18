@@ -67,7 +67,7 @@ cd plexsvc-framework
 
 ### Defining a REST service for creating a user
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
 public class CreateUserService extends AbstractUserService implements
@@ -101,7 +101,7 @@ Here is a sample python client for accessing these services
 
 ### Defining a Web service over Websockets for creating a user
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
 public class CreateUserService extends AbstractUserService implements
@@ -144,7 +144,7 @@ ws.onerror = function(err) {
 
 ### Defining a JMS service for creating a user
 ```java 
-@ServiceConfig(protocol = Protocol.JMS, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
@@ -168,7 +168,7 @@ The developer can use variables in end-point of queues, which are populated from
 
 ### Defining a REST service with parameterized URLs
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, requestClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.HTTP, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = Method.POST, 
       codec = CodecType.JSON)
@@ -195,7 +195,7 @@ classes into JSON when delivering messages over HTTP.
 
 ### Defining a Websocket based service to create bug-report 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", 
       method = Method.MESSAGE, codec = CodecType.JSON)
 public class CreateBugReportService extends AbstractBugReportService implements
@@ -247,7 +247,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
 
 ### Defining a REST service for querying users
 ```java 
-  @ServiceConfig(protocol = Protocol.HTTP, requestClass = User.class, 
+  @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
       codec = CodecType.JSON)
   public class QueryUserService extends AbstractUserService implements
@@ -271,7 +271,7 @@ PlexService automatically passes any json parameters sent as part of request, wh
 
 ### Defining a JMS service for querying users
 ```java 
-@ServiceConfig(protocol = Protocol.JMS, requestClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
@@ -297,7 +297,7 @@ public class QueryUserService extends AbstractUserService implements RequestHand
 ### Overriding service configuration at runtime and deploying same service via different protocols
 In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
 public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
@@ -338,7 +338,7 @@ Though, PlexService framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:
 
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private File webFolder;
 
@@ -563,7 +563,7 @@ quote quotes over the websockets.
 
 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, requestClass = Void.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = Void.class, 
   endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QuoteServer implements RequestHandler {
     public enum Action {

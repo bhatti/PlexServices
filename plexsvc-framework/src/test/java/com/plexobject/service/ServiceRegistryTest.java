@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.activemq.broker.BrokerService;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.plexobject.domain.ValidationException;
@@ -68,7 +70,7 @@ public class ServiceRegistryTest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, requestClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -84,10 +86,22 @@ public class ServiceRegistryTest {
         }
     }
 
+    private static BrokerService broker;
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        broker = startBroker();
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        broker.stop();
+    }
+
     @Test
     public void testCreateWithoutEmptyServices() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
 
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
@@ -98,9 +112,8 @@ public class ServiceRegistryTest {
     @Test
     public void testCreateServices() throws Exception {
         properties.put("statsd.host", "localhost");
-        BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
 
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
@@ -109,13 +122,12 @@ public class ServiceRegistryTest {
         registry.add(new JmsService());
         assertEquals(3, registry.getHandlers().size());
         assertNotNull(registry.getServiceMetricsRegistry());
-        broker.stop();
     }
 
     @Test
     public void testAddRemoveService() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         RequestHandler h = new WebService();
@@ -134,7 +146,7 @@ public class ServiceRegistryTest {
     @Test
     public void testUnknownRemove() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         RequestHandler h = new WebService();
@@ -145,7 +157,7 @@ public class ServiceRegistryTest {
     @Test
     public void testStartStop() throws Exception {
         properties.put("statsd.host", "localhost");
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
@@ -161,7 +173,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeNull() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         Map<String, Object> properties = new HashMap<>();
@@ -182,7 +194,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebsocket() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         Map<String, Object> properties = new HashMap<>();
@@ -203,7 +215,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWeb() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         Map<String, Object> properties = new HashMap<>();
@@ -225,7 +237,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithAuthExceptionAndRedirect() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         Map<String, Object> properties = new HashMap<>();
@@ -257,7 +269,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithAuthException() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         Map<String, Object> properties = new HashMap<>();
@@ -288,7 +300,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithValidationException() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         Map<String, Object> properties = new HashMap<>();
@@ -320,7 +332,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithException() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient =  newJmsClient();
+        final JmsClient jmsClient = newJmsClient();
         ServiceRegistry registry = new ServiceRegistry(config, authorizer,
                 jmsClient);
         Map<String, Object> properties = new HashMap<>();
@@ -357,7 +369,8 @@ public class ServiceRegistryTest {
         return new JmsClient(config);
     }
 
-    private BrokerService startBroker() throws Exception {
+    private static BrokerService startBroker() throws Exception {
+        Properties properties = new Properties();
         BrokerService broker = new BrokerService();
         broker.addConnector("tcp://localhost:61616");
         broker.start();

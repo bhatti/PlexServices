@@ -11,8 +11,8 @@ import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
-//@ServiceConfig(protocol = Protocol.HTTP, requestClass = Project.class, rolesAllowed = "Manager", endpoint = "/projects", method = Method.POST, contentType = "application/json")
-@ServiceConfig(protocol = Protocol.JMS, requestClass = Project.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-create-projects-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+//@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "/projects", method = Method.POST, contentType = "application/json")
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-create-projects-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class CreateProjectService extends AbstractProjectService implements
         RequestHandler {
     public CreateProjectService(ProjectRepository projectRepository,

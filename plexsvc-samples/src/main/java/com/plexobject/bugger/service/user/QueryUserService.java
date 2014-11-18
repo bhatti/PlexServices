@@ -12,8 +12,8 @@ import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
-//@ServiceConfig(protocol = Protocol.HTTP, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+//@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements
         RequestHandler {
     public QueryUserService(UserRepository userRepository) {

@@ -12,7 +12,7 @@ import com.plexobject.encode.CodecType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ServiceConfig {
-    Class<?> requestClass() default Void.class;
+    Class<?> payloadClass() default Void.class;
 
     Protocol protocol();
 

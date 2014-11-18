@@ -259,11 +259,11 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
             }
 
             // override payload in request
-            Object payload = config.requestClass() != Void.class ? ObjectCodecFactory
+            Object payload = config.payloadClass() != Void.class ? ObjectCodecFactory
                     .getInstance()
                     .getObjectCodec(config.codec())
                     .decode((String) request.getPayload(),
-                            config.requestClass(), request.getProperties())
+                            config.payloadClass(), request.getProperties())
                     : null;
             if (payload != null) {
                 request.setPayload(payload);
