@@ -1,19 +1,42 @@
-#PlexService - REST/Messaging based Micro-Service Framework
+#PlexService - Light-weight Micro-Service Framework for building high performance and secured applications 
 
 ##Overview
 
-PlexService is a simple Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. PlexService framework provides provides basic support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. 
+PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. 
 
-PlexService supports role-based security, which are enforced before accessing underlying services. 
+## Design Principles 
+PlexService is designed on following design principles:
 
-PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets that listen to JMS queues/topics. 
+- Not MVC framework - PlexService is only meant for services and it's not general purpose MVC framework.
 
-PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
+- Not Invented Here: PlexService leverages other 3rd party frameworks and libraries such as Log4j, Netty, JaxB, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
 
-PlexService supports Netty 4.0+ for hosting web services and you can use http or websockets transport for your services. 
+- Minimize Dependencies: Despite NIH, PlexService minimizes the dependencies of 3rd party libraries. 
 
-PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
+- Technology indpendent: PlexService provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexService provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
 
+- Configurable: PlexService uses simple annotations for describing services but allows them to override the properties at run-time.
+
+- Encourage messaging based services: Though, PlexService supports both messaging based services and web services, but it prefers messaging based services and provides web bridge to expose them externally. It also encourages use of event-bus for internal communication. 
+
+- Easily deployable: PlexService framework provides embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
+
+- Operational Support: PlexService provides monitoring, statistics and logging support for ease of operational support.
+
+## Major Features
+- PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
+
+- PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
+
+- PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to expose them through HTTP or websocket interfaces.
+
+- For intra-process communication, PlexService provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.
+
+- PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
+
+- PlexService uses Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
+
+- PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
 ##Building
 - Download and install <a href="http://www.gradle.org/downloads">Gradle</a>.
@@ -61,11 +84,19 @@ RequestHandler {
       request.getResponseDispatcher().send(saved);
     }
 }
+
+
 ```
 You can invoke the service with HTTP request, e.g.
 ```bash 
 curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http://127.0.0.1:8181/users" 
   -d "{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"
+```
+
+Here is a sample python client for accessing these services
+```python
+    resp = requests.post('http://localhost:8181/login', data={'password': password, 'username': username})
+    json_resp = json.loads(resp.text)
 ```
 
 ### Defining a Web service over Websockets for creating a user
@@ -263,9 +294,10 @@ public class QueryUserService extends AbstractUserService implements RequestHand
   The end-point can contain variables such as scope that are initialized from configuration.
 
 
-### Overriding service configuration at runtime 
-In addition to defining service configurations via annotations, you can also override them at runtime, e.g.
+### Overriding service configuration at runtime and deploying same service via different protocols
+In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.
 ```java 
+@ServiceConfig(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
 public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
@@ -274,15 +306,32 @@ public class PingService implements RequestHandler {
   }
 }
 
+And then at runtime, override configuration, e.g.
 ...
     ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
     PingService pingService = new PingService();
-    serviceRegistry.add(pingService, new ServiceConfigDesc(
-        Method.MESSAGE, Protocol.WEBSOCKET, Void.class,
-        CodecType.JSON, "1.0", "/ping", true, new String[0]));
+    serviceRegistry.add(
+                    pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.MESSAGE)
+                            .setEndpoint("queue:ping")
+                            .setProtocol(Protocol.JMS)
+                            .build());
+    serviceRegistry.add(
+                    pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.MESSAGE)
+                            .setProtocol(Protocol.WEBSOCKET)
+                            .build());
+    serviceRegistry.add(pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                            .build());
+
     serviceRegistry.start();
 ```
 
+Alternatively, you can also deploy a service via JMS protocol and then use web-to-jms bridge to expose the service via HTTP/Websocket protocols.
 
 ### Creating a static file server
 Though, PlexService framework is meant for REST or messaging based services,
@@ -350,13 +399,13 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
-          throw new AuthException(Constants.SC_UNAUTHORIZED,
+          throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
               request.getSessionId(), request.getRemoteAddress(),
               "failed to validate session-id");
         }
         for (String role : roles) {
           if (!user.getRoles().contains(role)) {
-            throw new AuthException(Constants.SC_UNAUTHORIZED,
+            throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
                 request.getSessionId(), request.getRemoteAddress(),
                 "failed to match role");
           }
@@ -389,7 +438,7 @@ serviceRegistry.start();
 ```
 
 
-### Creating Http/Websocket to JMS bridge 
+### Creating Http or Websocket bridge for JMS services
 Here is how you can setup bridge between HTTP/Websocket and JMS based services. 
 ```java 
   Configuration config = new Configuration(configFile);
@@ -406,39 +455,49 @@ Note that with above configuration, you can access your services either with HTT
   Here is sample JSON configuration for bridge:
 ```javascript 
   [
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
     "destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports","method":"GET",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports","method":"GET",
     "destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users","method":"GET",
+  {"codecType":"JSON","endpoint":"/users","method":"GET",
     "destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects","method":"GET",
+  {"codecType":"JSON","endpoint":"/projects","method":"GET",
     "destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
-  {"codecType":"JSON","path":"/bugreports","method":"GET",
+  {"codecType":"JSON","endpoint":"/bugreports","method":"GET",
     "destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{id}/membership/add","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{id}/membership/add","method":"POST",
     "destination":"queue:{scope}-add-project-member-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{id}/membership/remove","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{id}/membership/remove","method":"POST",
     "destination":"queue:{scope}-remove-project-member-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports","method":"POST",
     "destination":"queue:{scope}-create-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users","method":"POST",
+  {"codecType":"JSON","endpoint":"/users","method":"POST",
     "destination":"queue:{scope}-create-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects","method":"POST",
     "destination":"queue:{scope}-create-projects-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users/{id}","method":"POST",
+  {"codecType":"JSON","endpoint":"/users/{id}","method":"POST",
     "destination":"queue:{scope}-update-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users/{id}/delete","method":"POST",
+  {"codecType":"JSON","endpoint":"/users/{id}/delete","method":"POST",
     "destination":"queue:{scope}-delete-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{id}","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{id}","method":"POST",
     "destination":"queue:{scope}-update-project-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports/{id}","method":"POST",
     "destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/login","method":"POST",
+  {"codecType":"JSON","endpoint":"/login","method":"POST",
     "destination":"queue:{scope}-login-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/logs","method":"POST",
-    "destination":"queue:{scope}-log-service-queue","asynchronous":true}]
+  {"codecType":"JSON","endpoint":"/logs","method":"POST",
+    "destination":"queue:{scope}-log-service-queue","asynchronous":true},
+  {"codecType":"JSON","endpoint":"query-project-bugreport-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
+  {"codecType":"JSON","endpoint":"query-user-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
+  {"codecType":"JSON","endpoint":"projects-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
+  {"codecType":"JSON","endpoint":"bugreports-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30}]
 ```
+Note that Method types of GET/POST will use HTTP based bridge and method type
+of MESSAGE will use Websocket based bridge.
 
 The web bridge supports both synchronous and asynchronous requests. When the
 configuration defines asynchronous flag as true then message is sent to JMS
@@ -546,7 +605,7 @@ public class QuoteServer implements RequestHandler {
 }
 
 ```
-Here is the streaing server that pushes the updates to web clients:
+Here is the streaming server that pushes the updates to web clients:
 ```java 
 public class QuoteStreamer extends TimerTask {
     private int delay = 1000;
