@@ -1,0 +1,680 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Untitled Document.md</title><style></style></head><body>
+        <h1 id="plexservice-light-weight-micro-service-framework-for-building-high-performance-and-secured-applications">PlexService - Light-weight Micro-Service Framework for building high performance and secured applications</h1>
+        <h2 id="overview">Overview</h2>
+        <p>PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. </p>
+        <h2 id="design-principles">Design Principles</h2>
+        <p>PlexService is designed on following design principles:</p>
+        <ul>
+            <li><p>Not MVC framework - PlexService is only meant for services and it&#39;s not general purpose MVC framework.</p>
+            </li>
+            <li><p>Not Invented Here: PlexService leverages other 3rd party frameworks and libraries such as Log4j, Netty, JaxB, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.</p>
+            </li>
+            <li><p>Minimize Dependencies: Despite NIH, PlexService minimizes the dependencies of 3rd party libraries. </p>
+            </li>
+            <li><p>Technology indpendent: PlexService provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexService provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.</p>
+            </li>
+            <li><p>Configurable: PlexService uses simple annotations for describing services but allows them to override the properties at run-time.</p>
+            </li>
+            <li><p>Encourage messaging based services: Though, PlexService supports both messaging based services and web services, but it prefers messaging based services and provides web bridge to expose them externally. It also encourages use of event-bus for internal communication. </p>
+            </li>
+            <li><p>Easily deployable: PlexService framework provides embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.</p>
+            </li>
+            <li><p>Operational Support: PlexService provides monitoring, statistics and logging support for ease of operational support.</p>
+            </li>
+        </ul>
+        <h2 id="major-features">Major Features</h2>
+        <ul>
+            <li><p>PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.</p>
+            </li>
+            <li><p>PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.</p>
+            </li>
+            <li><p>PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to expose them through HTTP or websocket interfaces.</p>
+            </li>
+            <li><p>For intra-process communication, PlexService provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.</p>
+            </li>
+            <li><p>PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.</p>
+            </li>
+            <li><p>PlexService uses Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.</p>
+            </li>
+            <li><p>PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. </p>
+            </li>
+        </ul>
+        <h2 id="building">Building</h2>
+        <ul>
+            <li>Download and install &lt;a href=&quot;http://www.gradle.org/downloads&quot;&gt;Gradle&lt;/a&gt;.</li>
+            <li>Download and install &lt;a href=&quot;http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html&quot;&gt;Java 8&lt;/a&gt;.</li>
+            <li>Checkout code using </li>
+        </ul>
+<pre><code>git clone git@github.com:bhatti/PlexService.git
+</code></pre><ul>
+        <li>Compile and build jar file using</li>
+    </ul>
+<pre><code>cd plexsvc-framework
+./gradlew jar
+</code></pre><ul>
+    <li>Copy and add jar file manually in your application.</li>
+</ul>
+<h2 id="version">Version</h2>
+<ul>
+    <li>0.5</li>
+</ul>
+<h2 id="license">License</h2>
+<ul>
+    <li>MIT</li>
+</ul>
+<h2 id="defining-services">Defining Services</h2>
+<h3 id="defining-a-rest-service-for-creating-a-user">Defining a REST service for creating a user</h3>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, requestClass = User.class, 
+    rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = Method.POST, 
+    codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span>
+<span class="hljs-title">RequestHandler</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CreateUserService</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
+    <span class="hljs-keyword">super</span>(userRepository);
+  }
+
+  <span class="hljs-annotation">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+      User user = request.getPayload();
+      user.validate();
+      User saved = userRepository.save(user);
+      request.getResponseDispatcher().send(saved);
+    }
+}
+</code></pre>
+<p>You can invoke the service with HTTP request, e.g.</p>
+<pre><code class="lang-bash">curl --cookie cookies.txt -k -H <span class="hljs-string">"Content-Type: application/json"</span> -X POST <span class="hljs-string">"http://127.0.0.1:8181/users"</span> 
+  <span class="hljs-operator">-d</span> <span class="hljs-string">"{\"username\":\"david\",\"password\":\"pass\",\"email\":\"david@plexobject.com\",\"roles\":[\"Employee\"]}"</span>
+</code></pre>
+<p>Here is a sample python client for accessing these services</p>
+<pre><code class="lang-python">    resp = requests.post(<span class="hljs-string">'http://localhost:8181/login'</span>, data={<span class="hljs-string">'password'</span>: password, <span class="hljs-string">'username'</span>: username})
+    json_resp = json.loads(resp.text)
+</code></pre>
+<h3 id="defining-a-web-service-over-websockets-for-creating-a-user">Defining a Web service over Websockets for creating a user</h3>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.WEBSOCKET, requestClass = User.class, 
+    rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = Method.POST, 
+    codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span>
+<span class="hljs-title">RequestHandler</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CreateUserService</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
+    <span class="hljs-keyword">super</span>(userRepository);
+  }
+
+  <span class="hljs-annotation">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+      User user = request.getPayload();
+      user.validate();
+      User saved = userRepository.save(user);
+      request.getResponseDispatcher().send(saved);
+    }
+}
+</code></pre>
+<p>Note that we use URL format for endpoints for websockets, but it can be in any format as long it&#39;s unique for a service.</p>
+<h3 id="accessing-websocket-services-from-javascript">Accessing Websocket services from Javascript</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> ws = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-string">"ws://127.0.0.1:8181/ws"</span>);
+ws.onopen = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> req = {<span class="hljs-string">"payload"</span>:<span class="hljs-string">""</span>, <span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/login"</span>, <span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>, 
+    <span class="hljs-string">"username"</span>:<span class="hljs-string">"scott"</span>, <span class="hljs-string">"password"</span>:<span class="hljs-string">"pass"</span>};
+  ws.send(<span class="hljs-built_in">JSON</span>.stringify(req));
+};
+
+ws.onmessage = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(evt)</span> </span>{
+  alert(<span class="hljs-string">"Message: "</span> + evt.data);
+};
+
+ws.onclose = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+};
+
+ws.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> </span>{
+};
+</code></pre>
+<h3 id="defining-a-jms-service-for-creating-a-user">Defining a JMS service for creating a user</h3>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.JMS, requestClass = User.class, 
+      rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"queue:{scope}-create-user-service-queue"</span>, 
+      method = Method.MESSAGE, 
+      codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CreateUserService</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
+    <span class="hljs-keyword">super</span>(userRepository);
+    }
+
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+      User user = request.getPayload();
+      user.validate();
+      User saved = userRepository.save(user);
+      request.getResponseDispatcher().send(saved);
+    }
+}
+</code></pre>
+<p>The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexService will serialize POJO classes into JSON when delivering messages over JMS.</p>
+<h3 id="defining-a-rest-service-with-parameterized-urls">Defining a REST service with parameterized URLs</h3>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, requestClass = BugReport.class, 
+      rolesAllowed = <span class="hljs-string">"Employee"</span>, endpoint = <span class="hljs-string">"/projects/{projectId}/bugreports"</span>, 
+      method = Method.POST, 
+      codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateBugReportService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractBugReportService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CreateBugReportService</span><span class="hljs-params">(BugReportRepository bugReportRepository,
+        UserRepository userRepository)</span> </span>{
+      <span class="hljs-keyword">super</span>(bugReportRepository, userRepository);
+    }
+
+    <span class="hljs-annotation">@Override</span>
+      <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+        BugReport report = request.getPayload();
+        report.validate();
+        BugReport saved = bugReportRepository.save(report);
+        request.getResponseDispatcher().send(saved);
+      }
+}
+</code></pre>
+<p>The http end-point or URL can also store variables, but unlike end-points for
+queues/topics, they are populated using http parameters. For example, projectId
+parameter would be populated from URL in above example. PlexService will serialize POJO 
+classes into JSON when delivering messages over HTTP.</p>
+<h3 id="defining-a-websocket-based-service-to-create-bug-report">Defining a Websocket based service to create bug-report</h3>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.WEBSOCKET, requestClass = BugReport.class, 
+      rolesAllowed = <span class="hljs-string">"Employee"</span>, endpoint = <span class="hljs-string">"queue:{scope}-create-bugreport-service-queue"</span>, 
+      method = Method.MESSAGE, codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateBugReportService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractBugReportService</span> <span class="hljs-keyword">implements</span>
+        <span class="hljs-title">RequestHandler</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CreateBugReportService</span><span class="hljs-params">(BugReportRepository bugReportRepository,
+            UserRepository userRepository)</span> </span>{
+        <span class="hljs-keyword">super</span>(bugReportRepository, userRepository);
+    }
+
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+        BugReport report = request.getPayload();
+        report.validate();
+        BugReport saved = bugReportRepository.save(report);
+        request.getResponseDispatcher().send(saved);
+    }
+
+}
+</code></pre>
+<p>For websocket based services, the parameters are passed explicitly by consumer. 
+PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.</p>
+<h3 id="consuming-websocket-based-service-for-creating-bug-report">Consuming Websocket based service for creating bug-report</h3>
+<pre><code class="lang-javascript">
+<span class="hljs-keyword">var</span> ws = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-string">"ws://127.0.0.1:8181/ws"</span>);
+ws.onopen = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> req = {<span class="hljs-string">"payload"</span>:{<span class="hljs-string">"title"</span>:<span class="hljs-string">"my title"</span>, <span class="hljs-string">"description"</span>:<span class="hljs-string">"my description"</span>,<span class="hljs-string">"bugNumber"</span>:<span class="hljs-string">"story-201"</span>, 
+    <span class="hljs-string">"assignedTo"</span>:<span class="hljs-string">"mike"</span>, <span class="hljs-string">"developedBy"</span>:<span class="hljs-string">"mike"</span>},<span class="hljs-string">"PlexSessionID"</span>:<span class="hljs-string">"4"</span>, 
+      <span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/2/bugreports/2/assign"</span>, <span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>};
+  ws.send(<span class="hljs-built_in">JSON</span>.stringify(req));
+};
+
+ws.onmessage = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(evt)</span> </span>{
+  alert(<span class="hljs-string">"Message: "</span> + evt.data);
+};
+
+ws.onclose = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+};
+
+ws.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> </span>{
+};
+</code></pre>
+<p>For websocket based services, the parameters are passed explicitly by consumer. 
+PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.</p>
+<h3 id="defining-a-rest-service-for-querying-users">Defining a REST service for querying users</h3>
+<pre><code class="lang-java">  <span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, requestClass = User.class, 
+      rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = Method.GET, 
+      codec = CodecType.JSON)
+  <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QueryUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span>
+  <span class="hljs-title">RequestHandler</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">QueryUserService</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
+      <span class="hljs-keyword">super</span>(userRepository);
+    }
+    <span class="hljs-annotation">@Override</span>
+      <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+        Collection&lt;User&gt; users = userRepository.getAll(<span class="hljs-keyword">new</span> Predicate&lt;User&gt;() {
+            <span class="hljs-annotation">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">accept</span><span class="hljs-params">(User u)</span> </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+            }
+            });
+        request.getResponseDispatcher().send(users);
+      }
+  }
+</code></pre>
+<h3 id="defining-a-jms-service-for-querying-users">Defining a JMS service for querying users</h3>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.JMS, requestClass = User.class, 
+      rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"queue:{scope}-query-user-service-queue"</span>, 
+      method = Method.MESSAGE, 
+      codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QueryUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">QueryUserService</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
+      <span class="hljs-keyword">super</span>(userRepository);
+    }
+    <span class="hljs-annotation">@Override</span>
+      <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+        Collection&lt;User&gt; users = userRepository.getAll(<span class="hljs-keyword">new</span> Predicate&lt;User&gt;() {
+            <span class="hljs-annotation">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">accept</span><span class="hljs-params">(User u)</span> </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+            }
+            });
+        request.getResponseDispatcher().send(users);
+      }
+}
+</code></pre>
+<p>  The end-point can contain variables such as scope that are initialized from configuration.</p>
+<h3 id="overriding-service-configuration-at-runtime-and-deploying-same-service-via-different-protocols">Overriding service configuration at runtime and deploying same service via different protocols</h3>
+<p>In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.</p>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = <span class="hljs-string">"/ping"</span>, method = Method.GET, codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PingService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
+  <span class="hljs-annotation">@Override</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+    String data = request.getProperty(<span class="hljs-string">"data"</span>);
+    request.getResponseDispatcher().send(data);
+  }
+}
+
+And then at runtime, override configuration, e.g.
+...
+    ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, <span class="hljs-keyword">null</span>);
+    PingService pingService = <span class="hljs-keyword">new</span> PingService();
+    serviceRegistry.add(
+                    pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.MESSAGE)
+                            .setEndpoint(<span class="hljs-string">"queue:ping"</span>)
+                            .setProtocol(Protocol.JMS)
+                            .build());
+    serviceRegistry.add(
+                    pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.MESSAGE)
+                            .setProtocol(Protocol.WEBSOCKET)
+                            .build());
+    serviceRegistry.add(pingService,
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                            .build());
+
+    serviceRegistry.start();
+</code></pre>
+<p>Alternatively, you can also deploy a service via JMS protocol and then use web-to-jms bridge to expose the service via HTTP/Websocket protocols.</p>
+<h3 id="creating-a-static-file-server">Creating a static file server</h3>
+<p>Though, PlexService framework is meant for REST or messaging based services,
+but here is an example of creating a simple static file server:</p>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, requestClass = Void.class, endpoint = <span class="hljs-string">"/static/*"</span>, method = Method.GET, codec = CodecType.TEXT)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StaticFileServer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
+    <span class="hljs-keyword">private</span> File webFolder;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">StaticFileServer</span><span class="hljs-params">(String webdir)</span> <span class="hljs-keyword">throws</span> IOException </span>{
+        <span class="hljs-keyword">this</span>.webFolder = <span class="hljs-keyword">new</span> File(webdir);
+        <span class="hljs-keyword">if</span> (!webFolder.exists()) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> FileNotFoundException(webdir + <span class="hljs-string">" does not exist"</span>);
+        }
+    }
+
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+        String path = request.getEndpoint().replaceAll(<span class="hljs-string">"^.static."</span>, <span class="hljs-string">""</span>);
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> File(path).isAbsolute()) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Absolute path '"</span> + path
+                        + <span class="hljs-string">"' not allowed"</span>);
+            }
+            <span class="hljs-keyword">final</span> String canonicalDirPath = webFolder.getCanonicalPath()
+                    + File.separator;
+            <span class="hljs-keyword">final</span> File filePath = <span class="hljs-keyword">new</span> File(webFolder, path);
+
+            <span class="hljs-keyword">if</span> (!filePath.getCanonicalPath().startsWith(canonicalDirPath)) {
+                request.getResponseDispatcher().send(
+                        <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Relative path '"</span> + path
+                                + <span class="hljs-string">"' not allowed"</span>));
+            }
+            String extension = filePath.getName().substring(
+                    filePath.getName().lastIndexOf(<span class="hljs-string">'.'</span>));
+            String contentType = contentType = Files.probeContentType(filePath.toPath());
+            <span class="hljs-keyword">if</span> (contentType != <span class="hljs-keyword">null</span>) {
+                request.getResponseDispatcher().setProperty(
+                        HttpResponse.CONTENT_TYPE, contentType);
+            }
+            <span class="hljs-comment">//</span>
+            request.getResponseDispatcher()
+                    .send(<span class="hljs-keyword">new</span> String(Files.readAllBytes(Paths.get(filePath
+                            .toURI()))));
+        } <span class="hljs-keyword">catch</span> (IOException e) {
+            request.getResponseDispatcher().send(e);
+        }
+    }
+}
+</code></pre>
+<p>  The end-point can contain variables such as scope that are initialized from configuration.</p>
+<h3 id="defining-role-based-security">Defining role-based security</h3>
+<pre><code class="lang-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BuggerRoleAuthorizer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RoleAuthorizer</span> </span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> UserRepository userRepository;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">BuggerRoleAuthorizer</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
+      <span class="hljs-keyword">this</span>.userRepository = userRepository;
+    }
+
+    <span class="hljs-annotation">@Override</span>
+      <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">authorize</span><span class="hljs-params">(Request request, String[] roles)</span> <span class="hljs-keyword">throws</span> AuthException </span>{
+        String sessionId = request.getSessionId();
+        User user = userRepository.getUserBySessionId(sessionId);
+        <span class="hljs-keyword">if</span> (user == <span class="hljs-keyword">null</span>) {
+          <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AuthException(HttpResponse.SC_UNAUTHORIZED,
+              request.getSessionId(), request.getRemoteAddress(),
+              <span class="hljs-string">"failed to validate session-id"</span>);
+        }
+        <span class="hljs-keyword">for</span> (String role : roles) {
+          <span class="hljs-keyword">if</span> (!user.getRoles().contains(role)) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AuthException(HttpResponse.SC_UNAUTHORIZED,
+                request.getSessionId(), request.getRemoteAddress(),
+                <span class="hljs-string">"failed to match role"</span>);
+          }
+        }
+      }
+}
+</code></pre>
+<h3 id="registering-services-and-starting-service-container">Registering services and starting service container</h3>
+<pre><code class="lang-java">serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, <span class="hljs-keyword">new</span> BuggerRoleAuthorizer(userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> CreateUserService(userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> UpdateUserService(userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> QueryUserService(userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> DeleteUserService(userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> LoginService(userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> CreateProjectService(projectRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> UpdateProjectService(projectRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> QueryProjectService(projectRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> AddProjectMemberService(projectRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> RemoveProjectMemberService(projectRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> CreateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> UpdateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> QueryBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> QueryProjectBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(<span class="hljs-keyword">new</span> AssignBugReportService(bugreportRepository, userRepository));
+serviceRegistry.start();
+</code></pre>
+<h3 id="creating-http-or-websocket-bridge-for-jms-services">Creating Http or Websocket bridge for JMS services</h3>
+<p>Here is how you can setup bridge between HTTP/Websocket and JMS based services. </p>
+<pre><code class="lang-java">  Configuration config = <span class="hljs-keyword">new</span> Configuration(configFile);
+  Collection&lt;WebToJmsEntry&gt; entries = WebToJmsBridge.load(<span class="hljs-keyword">new</span> File(mappingFile));
+  ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, <span class="hljs-keyword">null</span>);
+  JmsClient jmsClient = <span class="hljs-keyword">new</span> JmsClient(config);
+  <span class="hljs-keyword">new</span> WebToJmsBridge(jmsClient, entries, serviceRegistry);
+  serviceRegistry.start();
+</code></pre>
+<p>Note that with above configuration, you can access your services either with HTTP or Websocket</p>
+<p>  Here is sample JSON configuration for bridge:</p>
+<pre><code class="lang-javascript">  [
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/{projectId}/bugreports/{id}/assign"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-assign-bugreport-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/{projectId}/bugreports"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"GET"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-query-project-bugreport-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/users"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"GET"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-query-user-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"GET"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-query-projects-service"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/bugreports"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"GET"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-bugreports-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/{id}/membership/add"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-add-project-member-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/{id}/membership/remove"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-remove-project-member-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/{projectId}/bugreports"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-create-bugreport-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/users"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-create-user-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-create-projects-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/users/{id}"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-update-user-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/users/{id}/delete"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-delete-user-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/{id}"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-update-project-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/projects/{projectId}/bugreports/{id}"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-update-bugreport-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/login"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-login-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/logs"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"POST"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-log-service-queue"</span>,<span class="hljs-string">"asynchronous"</span>:<span class="hljs-literal">true</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"query-project-bugreport-ws"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"MESSAGE"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-query-project-bugreport-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"query-user-ws"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"MESSAGE"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-query-user-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"projects-ws"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"MESSAGE"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-query-projects-service"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>},
+  {<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"bugreports-ws"</span>,<span class="hljs-string">"method"</span>:<span class="hljs-string">"MESSAGE"</span>,
+    <span class="hljs-string">"destination"</span>:<span class="hljs-string">"queue:{scope}-bugreports-service-queue"</span>,<span class="hljs-string">"timeoutSecs"</span>:<span class="hljs-number">30</span>}]
+</code></pre>
+<p>Note that Method types of GET/POST will use HTTP based bridge and method type
+of MESSAGE will use Websocket based bridge.</p>
+<p>The web bridge supports both synchronous and asynchronous requests. When the
+configuration defines asynchronous flag as true then message is sent to JMS
+but, it does not wait for response. When asynchronous flag is false (by
+default), then message is sent to JMS and the web server waits for the response
+from the JMS handler. If it doesn&#39;t receive the message within timeout then an
+error is returned to the web client.</p>
+<h3 id="configuring-jms-provider-in-configuration">Configuring JMS provider in configuration</h3>
+<p>Here is how you can specify JMS container in properties file, which is passed
+to the runtime.</p>
+<pre><code class="lang-bash">jms.contextFactory=org.apache.activemq.jndi.ActiveMQInitialContextFactory
+jms.providerUrl=tcp://localhost:<span class="hljs-number">61616</span>
+jms.connectionFactoryLookup=ConnectionFactory
+</code></pre>
+<p>In above example, we are using ActiveMQ as JMS container </p>
+<h3 id="eventbus-for-intra-process-communication">EventBus for intra-process communication</h3>
+<p>Here is an example of using EventBus publishing or subscribing messages within the same process:</p>
+<pre><code class="lang-java">EventBus eb = <span class="hljs-keyword">new</span> EventBusImpl();
+<span class="hljs-comment">// publishing a request</span>
+Request req = Request.builder().setPayload(<span class="hljs-string">"test"</span>).build();
+eb.publish(<span class="hljs-string">"test-channel"</span>, req);
+
+<span class="hljs-comment">// subscribing to receive requests</span>
+eb.subscribe(<span class="hljs-string">"test-channel"</span>, <span class="hljs-keyword">new</span> RequestHandler() {
+   <span class="hljs-annotation">@Override</span>
+   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+       System.out.println(<span class="hljs-string">"Received "</span> + request);
+   }
+}, <span class="hljs-keyword">null</span>);
+</code></pre>
+<p>You can optionally pass predicate parameter with subscribe so that you only receive messages that are accepted by your predicate.</p>
+<h3 id="connecting-eventbus-to-jms-for-external-communication">Connecting EventBus to JMS for external communication</h3>
+<p>Similar to web-to-jms bridge, PlexService provides event-bus-to-jms bridge, which allows you convert messages from JMS queue/topic into request objects and receive them via event-bus. Likewise, you can setup outgoing bridge to send messages that are published to event bus be forwarded to JMS queues/topics. The bridge also performs encoding similar to JMS or web services, e.g.</p>
+<pre><code class="lang-java">Configuration config = <span class="hljs-keyword">new</span> Configuration(args[<span class="hljs-number">0</span>]);
+Collection&lt;EventBusToJmsEntry&gt; entries = EventBusToJmsBridge.load(<span class="hljs-keyword">new</span> File(args[<span class="hljs-number">1</span>]));
+EventBusToJmsBridge.run(config, entries);
+</code></pre>
+<p>Here is a sample json file that describes mapping:</p>
+<pre><code class="lang-javascript">[{<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"JMS_TO_EB_CHANNEL"</span>, <span class="hljs-string">"source"</span>:<span class="hljs-string">"queue:{scope}-query-user-service-queue"</span>,
+<span class="hljs-string">"target"</span>:<span class="hljs-string">"query-user-channel"</span>, <span class="hljs-string">"requestType"</span>:<span class="hljs-string">"com.plexobject.bugger.model.User"</span>}, 
+{<span class="hljs-string">"codecType"</span>:<span class="hljs-string">"JSON"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"EB_CHANNEL_TO_JMS"</span>, <span class="hljs-string">"source"</span>:<span class="hljs-string">"create-user"</span>,
+<span class="hljs-string">"target"</span>:<span class="hljs-string">"queue:{scope}-assign-bugreport-service-queue"</span>,<span class="hljs-string">"requestType"</span>:
+<span class="hljs-string">"com.plexobject.bugger.model.User"</span>}]
+</code></pre>
+<h3 id="adding-streaming-quotes-service-over-websockets">Adding Streaming Quotes Service over Websockets</h3>
+<p>Here is an example of creating a streaming quote server that sends real-time
+quote quotes over the websockets.</p>
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.WEBSOCKET, requestClass = Void.class, 
+  endpoint = <span class="hljs-string">"/quotes"</span>, method = Method.MESSAGE, codec = CodecType.JSON)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QuoteServer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> Action {
+        SUBSCRIBE, UNSUBSCRIBE
+    }
+
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Logger log = LoggerFactory.getLogger(QuoteServer.class);
+
+    <span class="hljs-keyword">private</span> QuoteStreamer quoteStreamer = <span class="hljs-keyword">new</span> QuoteStreamer();
+
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
+        String symbol = request.getProperty(<span class="hljs-string">"symbol"</span>);
+        String actionVal = request.getProperty(<span class="hljs-string">"action"</span>);
+        log.info(<span class="hljs-string">"Received "</span> + request);
+        ValidationException
+                .builder()
+                .assertNonNull(symbol, <span class="hljs-string">"undefined_symbol"</span>, <span class="hljs-string">"symbol"</span>,
+                        <span class="hljs-string">"symbol not specified"</span>)
+                .assertNonNull(actionVal, <span class="hljs-string">"undefined_action"</span>, <span class="hljs-string">"action"</span>,
+                        <span class="hljs-string">"action not specified"</span>).end();
+        Action action = Action.valueOf(actionVal.toUpperCase());
+        <span class="hljs-keyword">if</span> (action == Action.SUBSCRIBE) {
+            quoteStreamer.add(symbol, request.getResponseDispatcher());
+        } <span class="hljs-keyword">else</span> {
+            quoteStreamer.remove(symbol, request.getResponseDispatcher());
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        Configuration config = <span class="hljs-keyword">new</span> Configuration(args[<span class="hljs-number">0</span>]);
+        QuoteServer service = <span class="hljs-keyword">new</span> QuoteServer();
+        <span class="hljs-comment">//</span>
+        ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, <span class="hljs-keyword">null</span>);
+        serviceRegistry.add(<span class="hljs-keyword">new</span> QuoteServer());
+        serviceRegistry.start();
+        Thread.currentThread().join();
+    }
+}
+</code></pre>
+<p>Here is the streaming server that pushes the updates to web clients:</p>
+<pre><code class="lang-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QuoteStreamer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TimerTask</span> </span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> delay = <span class="hljs-number">1000</span>;
+    <span class="hljs-keyword">private</span> Map&lt;String, Collection&lt;ResponseDispatcher&gt;&gt; subscribers = 
+      <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;&gt;();
+    <span class="hljs-keyword">private</span> QuoteCache quoteCache = <span class="hljs-keyword">new</span> QuoteCache();
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Timer timer = <span class="hljs-keyword">new</span> Timer(<span class="hljs-keyword">true</span>);
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">QuoteStreamer</span><span class="hljs-params">()</span> </span>{
+        timer.schedule(<span class="hljs-keyword">this</span>, delay, delay);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">add</span><span class="hljs-params">(String symbol, ResponseDispatcher dispatcher)</span> </span>{
+        symbol = symbol.toUpperCase();
+        <span class="hljs-keyword">synchronized</span> (symbol.intern()) {
+            Collection&lt;ResponseDispatcher&gt; dispatchers = subscribers
+                    .get(symbol);
+            <span class="hljs-keyword">if</span> (dispatchers == <span class="hljs-keyword">null</span>) {
+                dispatchers = <span class="hljs-keyword">new</span> HashSet&lt;ResponseDispatcher&gt;();
+                subscribers.put(symbol, dispatchers);
+            }
+            dispatchers.add(dispatcher);
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">remove</span><span class="hljs-params">(String symbol, ResponseDispatcher dispatcher)</span> </span>{
+        symbol = symbol.toUpperCase();
+        <span class="hljs-keyword">synchronized</span> (symbol.intern()) {
+            Collection&lt;ResponseDispatcher&gt; dispatchers = subscribers
+                    .get(symbol);
+            <span class="hljs-keyword">if</span> (dispatchers != <span class="hljs-keyword">null</span>) {
+                dispatchers.remove(dispatcher);
+            }
+        }
+    }
+
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">for</span> (Map.Entry&lt;String, Collection&lt;ResponseDispatcher&gt;&gt; e : subscribers
+                .entrySet()) {
+            Quote q = quoteCache.getLatestQuote(e.getKey());
+            Collection&lt;ResponseDispatcher&gt; dispatchers = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(
+                    e.getValue());
+            <span class="hljs-keyword">for</span> (ResponseDispatcher d : dispatchers) {
+                <span class="hljs-keyword">try</span> {
+                    d.send(q);
+                } <span class="hljs-keyword">catch</span> (Exception ex) {
+                    remove(e.getKey(), d);
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<p>Here is a javascript client that subscribes to the streaming quotes:</p>
+<pre><code class="lang-javascript">   &lt;script&gt;
+      <span class="hljs-keyword">var</span> ws = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-string">"ws://127.0.0.1:8181/ws"</span>);
+      ws.onopen = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+      };
+      <span class="hljs-keyword">var</span> lasts = {};
+      ws.onmessage = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(evt)</span> </span>{
+        <span class="hljs-comment">//console.log(evt.data);</span>
+        <span class="hljs-keyword">var</span> quote = <span class="hljs-built_in">JSON</span>.parse(evt.data).payload;
+        <span class="hljs-keyword">var</span> d = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(quote.timestamp);
+        $(<span class="hljs-string">'#time'</span>).text(d.toString());
+        $(<span class="hljs-string">'#company'</span>).text(quote.company);
+        $(<span class="hljs-string">'#last'</span>).text(quote.last.toFixed(<span class="hljs-number">2</span>));
+        <span class="hljs-keyword">var</span> prev = lasts[quote.company];
+        <span class="hljs-keyword">if</span> (prev != <span class="hljs-literal">undefined</span>) {
+          <span class="hljs-keyword">var</span> change = quote.last - prev;
+          <span class="hljs-keyword">if</span> (change &gt;= <span class="hljs-number">0</span>) {
+            $(<span class="hljs-string">'#change'</span>).css({<span class="hljs-string">'background-color'</span>:<span class="hljs-string">'green'</span>});
+          } <span class="hljs-keyword">else</span> {
+            $(<span class="hljs-string">'#change'</span>).css({<span class="hljs-string">'background-color'</span>:<span class="hljs-string">'red'</span>});
+          }
+          $(<span class="hljs-string">'#change'</span>).text(change.toFixed(<span class="hljs-number">2</span>));
+        } <span class="hljs-keyword">else</span> {
+          $(<span class="hljs-string">'#change'</span>).text(<span class="hljs-string">'N/A'</span>);
+        }
+        lasts[quote.company] = quote.last;
+      };
+
+      ws.onclose = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+      };
+
+      ws.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> </span>{
+      };
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">send</span><span class="hljs-params">(payload)</span> </span>{
+        $(<span class="hljs-string">'#input'</span>).text(payload);
+        ws.send(payload);
+      }
+      $(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        $(<span class="hljs-string">"#subscribe"</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+          <span class="hljs-keyword">var</span> symbol = $(<span class="hljs-string">"#symbol"</span>).val();
+          <span class="hljs-keyword">var</span> req = {<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/quotes"</span>, <span class="hljs-string">"symbol"</span>:symbol, <span class="hljs-string">"action"</span>:<span class="hljs-string">"subscribe"</span>};
+          send(<span class="hljs-built_in">JSON</span>.stringify(req));
+        });
+      });
+      $(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        $(<span class="hljs-string">"#unsubscribe"</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+          <span class="hljs-keyword">var</span> symbol = $(<span class="hljs-string">"#symbol"</span>).val();                                                                                            
+          <span class="hljs-keyword">var</span> req = {<span class="hljs-string">"endpoint"</span>:<span class="hljs-string">"/quotes"</span>, <span class="hljs-string">"symbol"</span>:symbol, <span class="hljs-string">"action"</span>:<span class="hljs-string">"unsubscribe"</span>};
+          send(<span class="hljs-built_in">JSON</span>.stringify(req));
+        });
+      });
+   <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript"></span></span>
+</code></pre>
+<p>Here is the html form that displays quotes:</p>
+<pre><code class="lang-html">  <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">form</span>&gt;</span>
+      Symbol:<span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"text"</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"symbol"</span> <span class="hljs-attribute">value</span>=<span class="hljs-value">"AAPL"</span> <span class="hljs-attribute">size</span>=<span class="hljs-value">"4"</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"button"</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"subscribe"</span> <span class="hljs-attribute">value</span>=<span class="hljs-value">"Subscribe"</span>/&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">input</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"button"</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"unsubscribe"</span> <span class="hljs-attribute">value</span>=<span class="hljs-value">"Unsubscribe"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">form</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">br</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">table</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"quotes"</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"quote"</span> <span class="hljs-attribute">width</span>=<span class="hljs-value">"600"</span> <span class="hljs-attribute">border</span>=<span class="hljs-value">"2"</span> <span class="hljs-attribute">cellpadding</span>=<span class="hljs-value">"0"</span> <span class="hljs-attribute">cellspacing</span>=<span class="hljs-value">"3"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">thead</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">tr</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">th</span>&gt;</span>Time<span class="hljs-tag">&lt;/<span class="hljs-title">th</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">th</span>&gt;</span>Company<span class="hljs-tag">&lt;/<span class="hljs-title">th</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">th</span>&gt;</span>Last<span class="hljs-tag">&lt;/<span class="hljs-title">th</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">th</span>&gt;</span>Change<span class="hljs-tag">&lt;/<span class="hljs-title">th</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">tr</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-title">thead</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">tbody</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">tr</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">td</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"time"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">td</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">td</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"company"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">td</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">td</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"last"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">td</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-title">td</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"change"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">td</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">tr</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-title">tbody</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">table</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+</code></pre>
+<h2 id="api-doc">API Doc</h2>
+<p><a href="http://bhatti.github.io/PlexService/javadoc/">Java Doc</a></p>
+<h2 id="sample-application">Sample Application</h2>
+<pre><code>  You can view a full-fledged sample application under plexsvc-sample folder for detailed examples of services and various configurations.
+</code></pre><h2 id="support-or-contact">Support or Contact</h2>
+<pre><code>  Email bhatti AT plexobject DOT com for any questions or suggestions.
+</code></pre>
+</body></html>
