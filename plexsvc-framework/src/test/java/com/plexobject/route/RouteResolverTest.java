@@ -55,7 +55,7 @@ public class RouteResolverTest {
         }
     }
 
-    RouteResolver<RequestHandler> requestHandlerPaths = new RouteResolver<>();
+    RouteResolver<RequestHandler> requestHandlerEndpoints = new RouteResolver<>();
 
     private static TestData[] TEST_DATA = {
             new TestData("/", "Root", "/"),
@@ -82,7 +82,7 @@ public class RouteResolverTest {
     @Before
     public void setUp() throws Exception {
         for (TestData td : TEST_DATA) {
-            requestHandlerPaths.put(td.handlerUrl, new TestHandler(
+            requestHandlerEndpoints.put(td.handlerUrl, new TestHandler(
                     td.handlerName));
         }
     }
@@ -94,10 +94,10 @@ public class RouteResolverTest {
     @Test
     public void testGetHandler() {
         Map<String, Object> parameters = new HashMap<>();
-        assertNull(requestHandlerPaths.get("/xxx", parameters));
+        assertNull(requestHandlerEndpoints.get("/xxx", parameters));
         for (TestData td : TEST_DATA) {
-            RequestHandler h = requestHandlerPaths
-                    .get(td.searchUrl, parameters);
+            RequestHandler h = requestHandlerEndpoints.get(td.searchUrl,
+                    parameters);
             assertNotNull("Could not find " + td, h);
             for (Map.Entry<String, String> e : td.params.entrySet()) {
                 assertEquals("Expecting " + e.getKey() + "==" + e.getValue(),
@@ -107,34 +107,43 @@ public class RouteResolverTest {
     }
 
     @Test
+    public void testWebsocketPutGet() {
+        Map<String, Object> parameters = new HashMap<>();
+        final TestHandler h = new TestHandler("name");
+        requestHandlerEndpoints.put("query-project-bugreport", h);
+        assertEquals(h, requestHandlerEndpoints.get("query-project-bugreport", parameters));
+        assertTrue(requestHandlerEndpoints.getObjects().contains(h));
+    }
+
+    @Test
     public void testSimplePutGet() {
         Map<String, Object> parameters = new HashMap<>();
         final TestHandler h = new TestHandler("name");
-        requestHandlerPaths.put("/path", h);
-        assertEquals(h, requestHandlerPaths.get("/path", parameters));
-        assertTrue(requestHandlerPaths.getObjects().contains(h));
+        requestHandlerEndpoints.put("/endpoint", h);
+        assertEquals(h, requestHandlerEndpoints.get("/endpoint", parameters));
+        assertTrue(requestHandlerEndpoints.getObjects().contains(h));
     }
 
     @Test
     public void testSimplePutRemove() {
         Map<String, Object> parameters = new HashMap<>();
         final TestHandler h = new TestHandler("name");
-        requestHandlerPaths.put("/path", h);
-        assertEquals(h, requestHandlerPaths.get("/path", parameters));
-        assertTrue(requestHandlerPaths.remove("/path"));
-        assertNull(requestHandlerPaths.get("/path", parameters));
-        assertFalse(requestHandlerPaths.remove("/path"));
+        requestHandlerEndpoints.put("/endpoint", h);
+        assertEquals(h, requestHandlerEndpoints.get("/endpoint", parameters));
+        assertTrue(requestHandlerEndpoints.remove("/endpoint"));
+        assertNull(requestHandlerEndpoints.get("/endpoint", parameters));
+        assertFalse(requestHandlerEndpoints.remove("/endpoint"));
     }
 
     @Test
     public void testParameterizedPutGet() {
         Map<String, Object> parameters = new HashMap<>();
         final TestHandler h = new TestHandler("name");
-        requestHandlerPaths.put(
+        requestHandlerEndpoints.put(
                 "/users/{user_id}/projects/{project_id}/reports/{id}", h);
-        assertEquals(h, requestHandlerPaths.get(
+        assertEquals(h, requestHandlerEndpoints.get(
                 "/users/1/projects/2/reports/3", parameters));
-        assertTrue(requestHandlerPaths.getObjects().contains(h));
+        assertTrue(requestHandlerEndpoints.getObjects().contains(h));
         assertEquals("3", parameters.get("id"));
         assertEquals("2", parameters.get("project_id"));
         assertEquals("1", parameters.get("user_id"));
@@ -144,51 +153,51 @@ public class RouteResolverTest {
     public void testWildPutGet() {
         Map<String, Object> parameters = new HashMap<>();
         final TestHandler h = new TestHandler("name");
-        requestHandlerPaths.put("/users/*", h);
-        assertEquals(h, requestHandlerPaths.get("/users/1/2", parameters));
-        assertNull(requestHandlerPaths.get("/users2/1/2", parameters));
-        assertNotNull(requestHandlerPaths.get("/", parameters));
-        assertTrue(requestHandlerPaths.getObjects().contains(h));
+        requestHandlerEndpoints.put("/users/*", h);
+        assertEquals(h, requestHandlerEndpoints.get("/users/1/2", parameters));
+        assertNull(requestHandlerEndpoints.get("/users2/1/2", parameters));
+        assertNotNull(requestHandlerEndpoints.get("/", parameters));
+        assertTrue(requestHandlerEndpoints.getObjects().contains(h));
     }
 
     @Test
     public void testParameterizedPutRemove() {
         Map<String, Object> parameters = new HashMap<>();
         final TestHandler h = new TestHandler("name");
-        requestHandlerPaths.put(
+        requestHandlerEndpoints.put(
                 "/users/{user_id}/projects/{project_id}/reports/{id}", h);
-        assertEquals(h, requestHandlerPaths.get(
+        assertEquals(h, requestHandlerEndpoints.get(
                 "/users/1/projects/2/reports/3", parameters));
-        assertTrue(requestHandlerPaths
+        assertTrue(requestHandlerEndpoints
                 .remove("/users/{user_id}/projects/{project_id}/reports/{id}"));
-        assertNull(requestHandlerPaths.get("/users/1/projects/2/reports/3",
+        assertNull(requestHandlerEndpoints.get("/users/1/projects/2/reports/3",
                 parameters));
-        assertFalse(requestHandlerPaths
+        assertFalse(requestHandlerEndpoints
                 .remove("/users/{user_id}/projects/{project_id}/reports/{id}"));
     }
 
     @Test
     public void testToString() {
         final TestHandler h = new TestHandler("name");
-        requestHandlerPaths.put("/path", h);
-        assertTrue(requestHandlerPaths.toString(), requestHandlerPaths
-                .toString().contains("path"));
+        requestHandlerEndpoints.put("/endpoint", h);
+        assertTrue(requestHandlerEndpoints.toString(), requestHandlerEndpoints
+                .toString().contains("endpoint"));
     }
 
     @Test
     public void testNodeHash() {
-        Node<Object> node1 = new Node<Object>(null, "path1", 1);
-        Node<Object> node2 = new Node<Object>(null, "path2", 2);
-        Node<Object> node2a = new Node<Object>(null, "path2", 2);
+        Node<Object> node1 = new Node<Object>(null, "endpoint1", 1);
+        Node<Object> node2 = new Node<Object>(null, "endpoint2", 2);
+        Node<Object> node2a = new Node<Object>(null, "endpoint2", 2);
         assertFalse(node1.hashCode() == node2.hashCode());
         assertEquals(node2.hashCode(), node2a.hashCode());
     }
 
     @Test
     public void testNodeEquals() {
-        Node<Object> node1 = new Node<Object>(null, "path1", 1);
-        Node<Object> node2 = new Node<Object>(null, "path2", 2);
-        Node<Object> node2a = new Node<Object>(null, "path2", 2);
+        Node<Object> node1 = new Node<Object>(null, "endpoint1", 1);
+        Node<Object> node2 = new Node<Object>(null, "endpoint2", 2);
+        Node<Object> node2a = new Node<Object>(null, "endpoint2", 2);
         assertFalse(node1.equals(node2));
         assertFalse(node1.equals(null));
         assertFalse(node1.equals(3));
@@ -198,7 +207,7 @@ public class RouteResolverTest {
 
     @Test
     public void testNodeToString() {
-        Node<Object> node1 = new Node<Object>(null, "path1", 1);
-        assertTrue(node1.toString(), node1.toString().contains("path1"));
+        Node<Object> node1 = new Node<Object>(null, "endpoint1", 1);
+        assertTrue(node1.toString(), node1.toString().contains("endpoint1"));
     }
 }

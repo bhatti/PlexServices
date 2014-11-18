@@ -22,8 +22,6 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.JmsClient;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.util.Configuration;
 
 public class ServiceRegistryTest {

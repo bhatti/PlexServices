@@ -1,6 +1,6 @@
 package com.plexobject.bus.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +15,8 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
-import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceConfig.Protocol;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 
 public class EventBusImplTest {
     private RequestHandler handler = new RequestHandler() {

@@ -31,8 +31,8 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.JmsClient;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceConfig.Protocol;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 

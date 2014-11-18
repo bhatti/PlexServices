@@ -12,9 +12,9 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.Protocol;
-import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(protocol = Protocol.HTTP, requestClass = Comment.class, rolesAllowed = "Employee", endpoint = "/comments", method = Method.GET, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, requestClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-query-comments-service-queue", method = Method.GET, codec = CodecType.JSON)

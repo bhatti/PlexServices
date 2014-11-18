@@ -22,8 +22,7 @@ import com.plexobject.http.HttpResponse;
 import com.plexobject.jms.JmsClient;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.LifecycleAware;
-import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceConfig.Protocol;
+import com.plexobject.service.Method;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.IOUtils;
@@ -41,7 +40,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     private final JmsClient jmsClient;
     private final ServiceRegistry serviceRegistry;
     //
-    private final Map<Method, RouteResolver<WebToJmsEntry>> entriesPathsByMethod = new ConcurrentHashMap<>();
+    private final Map<Method, RouteResolver<WebToJmsEntry>> entriesEndpointsByMethod = new ConcurrentHashMap<>();
 
     public WebToJmsBridge(JmsClient jmsClient,
             Collection<WebToJmsEntry> entries, ServiceRegistry serviceRegistry) {
@@ -53,42 +52,44 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
     }
 
-    public void add(WebToJmsEntry httpEntry) {
-        addHttp(httpEntry);
-        WebToJmsEntry websocketEntry = new WebToJmsEntry(httpEntry);
-        websocketEntry.setMethod(Method.MESSAGE);
-        addWebsocket(websocketEntry);
+    public void add(WebToJmsEntry e) {
+        if (e.getMethod() == Method.MESSAGE) {
+            addWebsocket(e);
+        } else {
+            addHttp(e);
+        }
     }
 
     private void addHttp(WebToJmsEntry e) {
-        RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod.get(e
-                .getMethod());
-        if (entryPaths == null) {
-            entryPaths = new RouteResolver<WebToJmsEntry>();
-            entriesPathsByMethod.put(e.getMethod(), entryPaths);
+        RouteResolver<WebToJmsEntry> entryEndpoints = entriesEndpointsByMethod
+                .get(e.getMethod());
+        if (entryEndpoints == null) {
+            entryEndpoints = new RouteResolver<WebToJmsEntry>();
+            entriesEndpointsByMethod.put(e.getMethod(), entryEndpoints);
         }
-        if (entryPaths.get(e.getPath(), new HashMap<String, Object>()) != null) {
+        if (entryEndpoints.get(e.getEndpoint(), new HashMap<String, Object>()) != null) {
             throw new IllegalStateException(
                     "Mapping is already registered for " + e);
         }
-        entryPaths.put(e.getPath(), e);
+        entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for http
         serviceRegistry.add(this, ServiceConfigDesc.builder(e).build());
         log.info("Adding Web->JMS mapping for " + e.getShortString());
     }
 
     private void addWebsocket(WebToJmsEntry e) {
-        RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod.get(e
-                .getMethod());
-        if (entryPaths == null) {
-            entryPaths = new RouteResolver<WebToJmsEntry>();
-            entriesPathsByMethod.put(e.getMethod(), entryPaths);
+        RouteResolver<WebToJmsEntry> entryEndpoints = entriesEndpointsByMethod
+                .get(e.getMethod());
+        if (entryEndpoints == null) {
+            entryEndpoints = new RouteResolver<WebToJmsEntry>();
+            entriesEndpointsByMethod.put(e.getMethod(), entryEndpoints);
         }
-        if (entryPaths.get(e.getPath(), new HashMap<String, Object>()) != null) {
+        if (entryEndpoints.get(e.getEndpoint(), new HashMap<String, Object>()) != null) {
             throw new IllegalStateException(
-                    "Mapping is already registered for " + e);
+                    "Mapping is already registered for method " + e.getMethod()
+                            + ", endpoint " + e.getEndpoint() + ", entry " + e);
         }
-        entryPaths.put(e.getPath(), e);
+        entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for webscoket
         serviceRegistry.add(this, ServiceConfigDesc.builder(e).build());
         log.info("Adding Websocket->JMS mapping for " + e.getShortString());
@@ -104,8 +105,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             request.getResponseDispatcher().send(
                     "Unknown request received " + request.getPayload());
             log.warn("!!!Unknown request received " + request.getPayload()
-                    + ", registered " + entriesPathsByMethod.keySet() + ": "
-                    + entriesPathsByMethod.values());
+                    + ", registered " + entriesEndpointsByMethod.keySet()
+                    + ": " + entriesEndpointsByMethod.values());
             return;
         }
         log.info("** Handling " + request + ", mapping " + entry);
@@ -130,10 +131,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     }
 
     WebToJmsEntry getMappingEntry(Request request) {
-        RouteResolver<WebToJmsEntry> entryPaths = entriesPathsByMethod
+        RouteResolver<WebToJmsEntry> entryEndpoints = entriesEndpointsByMethod
                 .get(request.getMethod());
-        final WebToJmsEntry entry = entryPaths != null ? entryPaths.get(
-                request.getEndpoint(), request.getProperties()) : null;
+        final WebToJmsEntry entry = entryEndpoints != null ? entryEndpoints
+                .get(request.getEndpoint(), request.getProperties()) : null;
         return entry;
     }
 
@@ -151,12 +152,11 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                         request.getResponseDispatcher().setProperty(name,
                                 reply.getProperty(name));
                     }
-                    // dispatcher.setCodecType(CodecType.TEXT);
                     request.getResponseDispatcher().setCodecType(
                             entry.getCodecType());
                     request.getResponseDispatcher().send(reply.getPayload());
-                    log.info("Replying back " + entry + ", reply " + reply
-                            + ", params " + params + ", dispatcher" + ": "
+                    log.info("Replying back " + reply + ", params " + params
+                            + ", dispatcher" + ": "
                             + request.getResponseDispatcher());
                 } catch (Exception e) {
                     log.error("Could not send back websocket " + reply, e);

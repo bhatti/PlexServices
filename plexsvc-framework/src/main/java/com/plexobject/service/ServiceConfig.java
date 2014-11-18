@@ -12,14 +12,6 @@ import com.plexobject.encode.CodecType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ServiceConfig {
-    public enum Method {
-        GET, POST, PUT, DELETE, HEAD, MESSAGE
-    }
-
-    public enum Protocol {
-        HTTP, WEBSOCKET, JMS, EVENT_BUS
-    }
-
     Class<?> requestClass() default Void.class;
 
     Protocol protocol();

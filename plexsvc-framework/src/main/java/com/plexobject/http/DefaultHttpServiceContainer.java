@@ -10,7 +10,7 @@ import com.plexobject.route.RouteResolver;
 import com.plexobject.service.AbstractServiceContainer;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.LifecycleAware;
-import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.Method;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
@@ -22,23 +22,23 @@ import com.plexobject.util.Configuration;
  *
  */
 public class DefaultHttpServiceContainer extends AbstractServiceContainer {
-    private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
+    private final Map<Method, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod;
     private final Lifecycle server;
 
     public DefaultHttpServiceContainer(
             final Configuration config,
             final ServiceRegistry serviceRegistry,
-            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod,
+            final Map<Method, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod,
             final Lifecycle server) {
         super(config, serviceRegistry);
-        this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
+        this.requestHandlerEndpointsByMethod = requestHandlerEndpointsByMethod;
         this.server = server;
     }
 
     @Override
     public Collection<RequestHandler> getHandlers() {
         Collection<RequestHandler> handlers = new ArrayList<>();
-        for (RouteResolver<RequestHandler> rhp : requestHandlerPathsByMethod
+        for (RouteResolver<RequestHandler> rhp : requestHandlerEndpointsByMethod
                 .values()) {
             handlers.addAll(rhp.getObjects());
         }
@@ -59,20 +59,20 @@ public class DefaultHttpServiceContainer extends AbstractServiceContainer {
     public synchronized void add(RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
 
-        String path = getPath(handler, config);
+        String endpoint = getEndpoint(handler, config);
         if (exists(handler)) {
             throw new IllegalStateException(
-                    "RequestHandler is already registered for " + path);
+                    "RequestHandler is already registered for " + endpoint);
         }
-        RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
+        RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
                 .get(config.method());
-        if (requestHandlerPaths == null) {
-            requestHandlerPaths = new RouteResolver<RequestHandler>();
-            requestHandlerPathsByMethod.put(config.method(),
-                    requestHandlerPaths);
+        if (requestHandlerEndpoints == null) {
+            requestHandlerEndpoints = new RouteResolver<RequestHandler>();
+            requestHandlerEndpointsByMethod.put(config.method(),
+                    requestHandlerEndpoints);
         }
 
-        requestHandlerPaths.put(path, handler);
+        requestHandlerEndpoints.put(endpoint, handler);
         if (handler instanceof LifecycleAware) {
             ((LifecycleAware) handler).onCreated();
         }
@@ -85,13 +85,13 @@ public class DefaultHttpServiceContainer extends AbstractServiceContainer {
     @Override
     public synchronized boolean remove(RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
-        RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
+        RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
                 .get(config.method());
 
         boolean removed = false;
-        if (requestHandlerPaths != null) {
-            String path = getPath(handler, config);
-            removed = requestHandlerPaths.remove(path);
+        if (requestHandlerEndpoints != null) {
+            String endpoint = getEndpoint(handler, config);
+            removed = requestHandlerEndpoints.remove(endpoint);
             if (removed && handler instanceof LifecycleAware) {
                 ((LifecycleAware) handler).onDestroyed();
                 log.info("Removing service handler " + handler);
@@ -103,29 +103,29 @@ public class DefaultHttpServiceContainer extends AbstractServiceContainer {
     @Override
     public boolean exists(RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
-        RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
+        RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
                 .get(config.method());
 
-        if (requestHandlerPaths != null) {
-            String path = getPath(handler, config);
-            return requestHandlerPaths.get(path, new HashMap<String, Object>()) != null;
+        if (requestHandlerEndpoints != null) {
+            String endpoint = getEndpoint(handler, config);
+            return requestHandlerEndpoints.get(endpoint, new HashMap<String, Object>()) != null;
         }
         return false;
     }
 
-    private String getPath(com.plexobject.handler.RequestHandler handler,
+    private String getEndpoint(com.plexobject.handler.RequestHandler handler,
             ServiceConfigDesc config) {
-        String path = config.endpoint();
-        if (path == null || path.length() == 0) {
+        String endpoint = config.endpoint();
+        if (endpoint == null || endpoint.length() == 0) {
             throw new IllegalArgumentException("service handler " + handler
-                    + "'s path is empty");
+                    + "'s endpoint is empty");
         }
-        return path;
+        return endpoint;
     }
 
     @Override
     public String toString() {
-        return "DefaultHttpServiceContainer [requestHandlerPathsByMethod="
-                + requestHandlerPathsByMethod + ", server=" + server + "]";
+        return "DefaultHttpServiceContainer [requestHandlerEndpointsByMethod="
+                + requestHandlerEndpointsByMethod + ", server=" + server + "]";
     }
 }

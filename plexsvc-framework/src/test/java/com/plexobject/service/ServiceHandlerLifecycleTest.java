@@ -15,8 +15,6 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.JmsClient;
-import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceConfig.Protocol;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
 import com.plexobject.util.Configuration;
 

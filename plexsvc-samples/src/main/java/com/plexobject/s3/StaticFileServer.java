@@ -12,9 +12,9 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.Protocol;
-import com.plexobject.service.ServiceConfig.Method;
 
 @ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {

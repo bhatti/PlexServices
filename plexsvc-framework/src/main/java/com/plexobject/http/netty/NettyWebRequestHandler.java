@@ -47,8 +47,8 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.Handledable;
-import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceConfig.Protocol;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 
 /**
  * This class handles requests over http and websockets using Netty container

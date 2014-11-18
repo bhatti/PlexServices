@@ -140,8 +140,12 @@ public class RouteResolver<T> {
 
     public T get(String path, Map<String, Object> parameters) {
         path = path.trim();
-        Node<T> node = getNode(path, parameters);
-        return node != null ? node.object : null;
+        if (path.length() > 0 && path.charAt(0) == '/') {
+            Node<T> node = getNode(path, parameters);
+            return node != null ? node.object : null;
+        } else {
+            return servicesByPath.get(path);
+        }
     }
 
     public boolean remove(String path) {

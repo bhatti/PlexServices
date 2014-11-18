@@ -1,14 +1,14 @@
 package com.plexobject.service;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.ServiceConfig.Method;
-import com.plexobject.service.ServiceConfig.Protocol;
 
-public class ServiceConfigDesc {
+public class ServiceConfigDesc implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Method method;
     private final Protocol protocol;
     private final Class<?> requestClass;
@@ -39,7 +39,7 @@ public class ServiceConfigDesc {
                 this.requestClass = null;
                 this.codecType = e.getCodecType();
                 this.version = null;
-                this.endpoint = e.getPath();
+                this.endpoint = e.getEndpoint();
                 this.recordStatsdMetrics = true;
                 this.rolesAllowed = null;
             }

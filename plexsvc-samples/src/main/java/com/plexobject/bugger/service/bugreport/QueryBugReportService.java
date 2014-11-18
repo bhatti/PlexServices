@@ -9,9 +9,9 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.Protocol;
-import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/bugreports", method = Method.GET)
 @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue:{scope}-bugreports-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)

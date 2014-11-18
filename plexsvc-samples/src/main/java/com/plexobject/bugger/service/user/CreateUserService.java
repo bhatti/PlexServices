@@ -5,9 +5,9 @@ import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.Protocol;
-import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(protocol = Protocol.HTTP, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, requestClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)

@@ -31,7 +31,6 @@ import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.ServiceConfig.Method;
 import com.plexobject.util.Configuration;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
@@ -42,11 +41,11 @@ import com.timgroup.statsd.StatsDClient;
  * @author shahzad bhatti
  *
  */
-public class ServiceRegistry implements ServiceContainer {
+public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
     private static final Logger log = LoggerFactory
             .getLogger(ServiceRegistry.class);
 
-    private final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
+    private final Map<Protocol, ServiceContainer> containers = new HashMap<>();
     private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
     private final RoleAuthorizer authorizer;
     private final JmsClient jmsClient;
@@ -70,6 +69,13 @@ public class ServiceRegistry implements ServiceContainer {
             this.statsd = null;
         }
         serviceMetricsRegistry = new ServiceMetricsRegistry(this, statsd);
+        try {
+            mbs.registerMBean(this, new ObjectName(
+                    "PlexService:name=ServiceRegistry"));
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (Exception e) {
+            log.error("Could not register mbean for service-registry", e);
+        }
     }
 
     @Override
@@ -165,6 +171,24 @@ public class ServiceRegistry implements ServiceContainer {
     }
 
     @Override
+    public Collection<ServiceConfigDesc> getServiceConfigurations() {
+        Collection<ServiceConfigDesc> configs = new HashSet<>();
+        for (RequestHandler h : getHandlers()) {
+            configs.add(getServiceConfig(h));
+        }
+        return configs;
+    }
+
+    public String dumpServiceConfigurations() {
+        StringBuilder sb = new StringBuilder();
+        for (ServiceConfigDesc c : getServiceConfigurations()) {
+            sb.append(c.protocol() + ":" + c.method() + "->" + c.endpoint()
+                    + " " + c.codec() + "\n");
+        }
+        return sb.toString();
+    }
+
+    @Override
     public synchronized Collection<RequestHandler> getHandlers() {
         Collection<RequestHandler> handlers = new HashSet<>();
         for (ServiceContainer g : containers.values()) {
@@ -173,18 +197,17 @@ public class ServiceRegistry implements ServiceContainer {
         return handlers;
     }
 
-    private Map<ServiceConfig.Protocol, ServiceContainer> getDefaultServiceContainers(
+    private Map<Protocol, ServiceContainer> getDefaultServiceContainers(
             Configuration config, RoleAuthorizer authorizer) {
-        final Map<ServiceConfig.Protocol, ServiceContainer> containers = new HashMap<>();
+        final Map<Protocol, ServiceContainer> containers = new HashMap<>();
         ServiceContainer webServiceContainer = getHttpServiceContainer(config,
                 authorizer,
                 new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>());
         try {
-            containers.put(ServiceConfig.Protocol.HTTP, webServiceContainer);
-            containers.put(ServiceConfig.Protocol.JMS, new JmsServiceContainer(
-                    config, this, jmsClient));
-            containers.put(ServiceConfig.Protocol.WEBSOCKET,
-                    webServiceContainer);
+            containers.put(Protocol.HTTP, webServiceContainer);
+            containers.put(Protocol.JMS, new JmsServiceContainer(config, this,
+                    jmsClient));
+            containers.put(Protocol.WEBSOCKET, webServiceContainer);
             return containers;
         } catch (RuntimeException e) {
             throw e;

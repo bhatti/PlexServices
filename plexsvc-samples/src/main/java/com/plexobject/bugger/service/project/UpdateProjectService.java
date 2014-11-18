@@ -7,9 +7,9 @@ import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceConfig.Protocol;
-import com.plexobject.service.ServiceConfig.Method;
 
 //@ServiceConfig(protocol = Protocol.HTTP,requestClass = Project.class, rolesAllowed = "Manager", endpoint = "/projects/{id}", method = Method.POST, contentType = "application/json")
 @ServiceConfig(protocol = Protocol.JMS, requestClass = Project.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-update-project-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)

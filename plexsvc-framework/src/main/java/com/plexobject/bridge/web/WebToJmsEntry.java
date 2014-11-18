@@ -2,7 +2,7 @@ package com.plexobject.bridge.web;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.encode.CodecType;
-import com.plexobject.service.ServiceConfig.Method;
+import com.plexobject.service.Method;
 
 /**
  * This class defines mapping from http to jms
@@ -12,7 +12,7 @@ import com.plexobject.service.ServiceConfig.Method;
  */
 public class WebToJmsEntry {
     private CodecType codecType = CodecType.JSON;
-    private String path;
+    private String endpoint;
     private Method method;
     private String destination;
     private int timeoutSecs;
@@ -23,13 +23,13 @@ public class WebToJmsEntry {
     }
 
     public WebToJmsEntry(WebToJmsEntry e) {
-        this(e.codecType, e.path, e.method, e.destination, e.timeoutSecs);
+        this(e.codecType, e.endpoint, e.method, e.destination, e.timeoutSecs);
     }
 
-    public WebToJmsEntry(CodecType codecType, String path, Method method,
+    public WebToJmsEntry(CodecType codecType, String endpoint, Method method,
             String destination, int timeoutSecs) {
         this.codecType = codecType;
-        this.path = path;
+        this.endpoint = endpoint;
         this.method = method;
         this.destination = destination;
         this.timeoutSecs = timeoutSecs;
@@ -43,12 +43,12 @@ public class WebToJmsEntry {
         this.codecType = codecType;
     }
 
-    public String getPath() {
-        return path;
+    public String getEndpoint() {
+        return endpoint;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
     }
 
     public Method getMethod() {
@@ -86,7 +86,7 @@ public class WebToJmsEntry {
     @Override
     @JsonIgnore
     public String toString() {
-        return "WebToJmsEntry [codecType=" + codecType + ", path=" + path
+        return "WebToJmsEntry [codecType=" + codecType + ", endpoint=" + endpoint
                 + ", method=" + method + ", destination=" + destination
                 + ", timeoutSecs=" + timeoutSecs + ", asynchronous="
                 + asynchronous + "]";
@@ -94,7 +94,7 @@ public class WebToJmsEntry {
 
     @JsonIgnore
     public String getShortString() {
-        return "WebToJmsEntry [path=" + path + ", method=" + method
+        return "WebToJmsEntry [endpoint=" + endpoint + ", method=" + method
                 + ", asynchronous=" + asynchronous + ", destination="
                 + destination + "]";
     }

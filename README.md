@@ -28,7 +28,7 @@ PlexService is designed on following design principles:
 
 - PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
 
-- PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to automatically expose them through HTTP or websocket interfaces.
+- PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to expose them through HTTP or websocket interfaces.
 
 - For intra-process communication, PlexService provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.
 
@@ -438,7 +438,7 @@ serviceRegistry.start();
 ```
 
 
-### Creating Http/Websocket bridge for JMS services
+### Creating Http or Websocket bridge for JMS services
 Here is how you can setup bridge between HTTP/Websocket and JMS based services. 
 ```java 
   Configuration config = new Configuration(configFile);
@@ -455,39 +455,49 @@ Note that with above configuration, you can access your services either with HTT
   Here is sample JSON configuration for bridge:
 ```javascript 
   [
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
     "destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports","method":"GET",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports","method":"GET",
     "destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users","method":"GET",
+  {"codecType":"JSON","endpoint":"/users","method":"GET",
     "destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects","method":"GET",
+  {"codecType":"JSON","endpoint":"/projects","method":"GET",
     "destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
-  {"codecType":"JSON","path":"/bugreports","method":"GET",
+  {"codecType":"JSON","endpoint":"/bugreports","method":"GET",
     "destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{id}/membership/add","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{id}/membership/add","method":"POST",
     "destination":"queue:{scope}-add-project-member-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{id}/membership/remove","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{id}/membership/remove","method":"POST",
     "destination":"queue:{scope}-remove-project-member-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports","method":"POST",
     "destination":"queue:{scope}-create-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users","method":"POST",
+  {"codecType":"JSON","endpoint":"/users","method":"POST",
     "destination":"queue:{scope}-create-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects","method":"POST",
     "destination":"queue:{scope}-create-projects-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users/{id}","method":"POST",
+  {"codecType":"JSON","endpoint":"/users/{id}","method":"POST",
     "destination":"queue:{scope}-update-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/users/{id}/delete","method":"POST",
+  {"codecType":"JSON","endpoint":"/users/{id}/delete","method":"POST",
     "destination":"queue:{scope}-delete-user-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{id}","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{id}","method":"POST",
     "destination":"queue:{scope}-update-project-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/projects/{projectId}/bugreports/{id}","method":"POST",
+  {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports/{id}","method":"POST",
     "destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/login","method":"POST",
+  {"codecType":"JSON","endpoint":"/login","method":"POST",
     "destination":"queue:{scope}-login-service-queue","timeoutSecs":30},
-  {"codecType":"JSON","path":"/logs","method":"POST",
-    "destination":"queue:{scope}-log-service-queue","asynchronous":true}]
+  {"codecType":"JSON","endpoint":"/logs","method":"POST",
+    "destination":"queue:{scope}-log-service-queue","asynchronous":true},
+  {"codecType":"JSON","endpoint":"query-project-bugreport-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
+  {"codecType":"JSON","endpoint":"query-user-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
+  {"codecType":"JSON","endpoint":"projects-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
+  {"codecType":"JSON","endpoint":"bugreports-ws","method":"MESSAGE",
+    "destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30}]
 ```
+Note that Method types of GET/POST will use HTTP based bridge and method type
+of MESSAGE will use Websocket based bridge.
 
 The web bridge supports both synchronous and asynchronous requests. When the
 configuration defines asynchronous flag as true then message is sent to JMS
