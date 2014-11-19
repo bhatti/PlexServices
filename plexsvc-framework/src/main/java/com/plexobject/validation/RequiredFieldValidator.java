@@ -1,7 +1,6 @@
 package com.plexobject.validation;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -24,13 +23,11 @@ public class RequiredFieldValidator implements IRequiredFieldValidator {
         if (requiredFields == null) {
             return;
         }
-        RequiredField[] requiredFieldsValue = requiredFields.value();
-
-        System.out.println(Arrays.toString(requiredFieldsValue));
+        Field[] requiredFieldsValue = requiredFields.value();
 
         ValidationException.Builder validationExceptionBuilder = ValidationException
                 .builder();
-        for (RequiredField f : requiredFieldsValue) {
+        for (Field f : requiredFieldsValue) {
             try {
                 String val = getProperty(request, f.name());
                 if (val == null) {

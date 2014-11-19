@@ -9,12 +9,12 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 //@ServiceConfig(protocol = Protocol.HTTP,payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "/projects/{id}", method = Method.POST, contentType = "application/json")
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-update-project-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "id") })
+@RequiredFields({ @Field(name = "id") })
 public class UpdateProjectService extends AbstractProjectService implements
         RequestHandler {
     public UpdateProjectService(ProjectRepository projectRepository,

@@ -10,13 +10,13 @@ import com.plexobject.security.AuthException;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 //@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/login", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue:{scope}-login-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "username"),
-        @RequiredField(name = "password") })
+@RequiredFields({ @Field(name = "username"),
+        @Field(name = "password") })
 public class LoginService extends AbstractUserService implements RequestHandler {
     public LoginService(UserRepository userRepository) {
         super(userRepository);

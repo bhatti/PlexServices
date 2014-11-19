@@ -12,11 +12,11 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 @ServiceConfig(protocol = Protocol.HTTP, endpoint = "/sign_auth", method = Method.GET, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "to_sign") })
+@RequiredFields({ @Field(name = "to_sign") })
 public class S3SignService implements RequestHandler {
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     private String key;

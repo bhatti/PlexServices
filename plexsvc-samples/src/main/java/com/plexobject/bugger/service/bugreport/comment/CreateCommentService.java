@@ -11,14 +11,14 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/comments", method = Method.POST)
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue:create-project-bugreport-comment-service", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "bugNumber"),
-        @RequiredField(name = "projectId"), @RequiredField(name = "priority") })
+@RequiredFields({ @Field(name = "bugNumber"),
+        @Field(name = "projectId"), @Field(name = "priority") })
 public class CreateCommentService extends AbstractBugReportService implements
         RequestHandler {
     public CreateCommentService(BugReportRepository bugReportRepository,

@@ -10,14 +10,14 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/add", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Manager", endpoint = "queue:{scope}-add-project-member-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "assignedTo"),
-        @RequiredField(name = "projectId") })
+@RequiredFields({ @Field(name = "assignedTo"),
+        @Field(name = "projectId") })
 public class AddProjectMemberService extends AbstractProjectService implements
         RequestHandler {
     public AddProjectMemberService(ProjectRepository projectRepository,

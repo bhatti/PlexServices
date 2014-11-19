@@ -7,10 +7,10 @@ import org.junit.Test;
 
 public class RequiredFieldValidatorTest {
     @RequiredFields({
-            @RequiredField(name = "username", minLength = 6, maxLength = 12),
-            @RequiredField(name = "password", minLength = 8, maxLength = 20),
-            @RequiredField(name = "email", minLength = 6, maxLength = 100, regex = ".*@.*"),
-            @RequiredField(name = "zipcode", minLength = 5, maxLength = 5, regex = "^\\d{5}$"), })
+            @Field(name = "username", minLength = 6, maxLength = 12),
+            @Field(name = "password", minLength = 8, maxLength = 20),
+            @Field(name = "email", minLength = 6, maxLength = 100, regex = ".*@.*"),
+            @Field(name = "zipcode", minLength = 5, maxLength = 5, regex = "^\\d{5}$"), })
     private static class WithAnnotations {
     }
 

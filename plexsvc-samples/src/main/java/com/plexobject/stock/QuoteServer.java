@@ -18,14 +18,14 @@ import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
-import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
 // @ServiceConfig(protocol = Protocol.JMS, endpoint
 // = "queue:quotes-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "symbol"),
-        @RequiredField(name = "action") })
+@RequiredFields({ @Field(name = "symbol"),
+        @Field(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {
         SUBSCRIBE, UNSUBSCRIBE

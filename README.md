@@ -72,7 +72,7 @@ cd plexsvc-framework
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "username") })
+@RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements
 RequestHandler {
   public CreateUserService(UserRepository userRepository) {
@@ -106,7 +106,7 @@ json_resp = json.loads(resp.text)
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "username") })
+@RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements
 RequestHandler {
   public CreateUserService(UserRepository userRepository) {
@@ -150,7 +150,7 @@ ws.onerror = function(err) {
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "username") })
+@RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements RequestHandler {
     public CreateUserService(UserRepository userRepository) {
       super(userRepository);
@@ -174,8 +174,8 @@ The developer can use variables in end-point of queues, which are populated from
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = Method.POST, 
       codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "bugNumber"),
-        @RequiredField(name = "projectId"), @RequiredField(name = "priority")
+@RequiredFields({ @Field(name = "bugNumber"),
+        @Field(name = "projectId"), @Field(name = "priority")
         })
 public class CreateBugReportService extends AbstractBugReportService implements RequestHandler {
     public CreateBugReportService(BugReportRepository bugReportRepository,
@@ -202,8 +202,8 @@ classes into JSON when delivering messages over HTTP.
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", 
       method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "bugNumber"),
-        @RequiredField(name = "projectId"), @RequiredField(name = "priority")
+@RequiredFields({ @Field(name = "bugNumber"),
+        @Field(name = "projectId"), @Field(name = "priority")
         })
 public class CreateBugReportService extends AbstractBugReportService implements
         RequestHandler {
@@ -304,10 +304,10 @@ public class QueryUserService extends AbstractUserService implements RequestHand
 PlexService provides flexible annotations for validating input parameters or attributes of incoming rquest, e.g.
 ```java 
 @RequiredFields({
-        @RequiredField(name = "username", minLength = 6, maxLength = 12),
-        @RequiredField(name = "password", minLength = 8, maxLength = 20),
-        @RequiredField(name = "email", minLength = 6, maxLength = 100, regex = ".*@.*"),
-        @RequiredField(name = "zipcode", minLength = 5, maxLength = 5, regex = "^\\d{5}$"), })
+        @Field(name = "username", minLength = 6, maxLength = 12),
+        @Field(name = "password", minLength = 8, maxLength = 20),
+        @Field(name = "email", minLength = 6, maxLength = 100, regex = ".*@.*"),
+        @Field(name = "zipcode", minLength = 5, maxLength = 5, regex = "^\\d{5}$"), })
 ```
 Above example describes rules for validating username, password, email and zipcode. You can specify min/max size of data fields or use regex to verify the data.
 
@@ -588,8 +588,8 @@ quote quotes over the websockets.
 
 ```java 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "symbol"),
-        @RequiredField(name = "action") })
+@RequiredFields({ @Field(name = "symbol"),
+        @Field(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {
         SUBSCRIBE, UNSUBSCRIBE

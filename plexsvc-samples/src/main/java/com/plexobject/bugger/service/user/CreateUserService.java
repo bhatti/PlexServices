@@ -8,12 +8,12 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @RequiredField(name = "username") })
+@RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements
         RequestHandler {
     public CreateUserService(UserRepository userRepository) {
