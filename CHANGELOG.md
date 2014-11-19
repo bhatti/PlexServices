@@ -10,3 +10,5 @@
 
 0.5 - Integrated jms-bridge with service-registry 
 
+0.6 - Added validation support 
+

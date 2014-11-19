@@ -1,8 +1,11 @@
-package com.plexobject.domain;
+package com.plexobject.validation;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.plexobject.domain.Statusable;
+import com.plexobject.http.HttpResponse;
 
 /**
  * This exception is raised when validation error occurs
@@ -10,7 +13,7 @@ import java.util.Set;
  * @author shahzad bhatti
  *
  */
-public class ValidationException extends RuntimeException {
+public class ValidationException extends RuntimeException implements Statusable {
     private static final long serialVersionUID = 1L;
 
     public static class Error {
@@ -112,6 +115,11 @@ public class ValidationException extends RuntimeException {
     public String toString() {
         return "ValidationException [errors=" + errors + ", super "
                 + super.toString() + "]";
+    }
+
+    @Override
+    public int getStatus() {
+        return HttpResponse.SC_BAD_REQUEST;
     }
 
 }

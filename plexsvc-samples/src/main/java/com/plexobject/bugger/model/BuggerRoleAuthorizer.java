@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.handler.Request;
-import com.plexobject.http.HttpResponse;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 
@@ -27,14 +26,14 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
             log.info("could not authenticate " + sessionId + " -- " + request);
-            throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-                    request.getSessionId(), "failed to validate session-id:"
-                            + sessionId + ", request " + request);
+            throw new AuthException(request.getSessionId(),
+                    "failed to validate session-id:" + sessionId + ", request "
+                            + request);
         }
         for (String role : roles) {
             if (!user.getRoles().contains(role)) {
-                throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-                        request.getSessionId(), "failed to match role");
+                throw new AuthException(request.getSessionId(),
+                        "failed to match role");
             }
         }
     }

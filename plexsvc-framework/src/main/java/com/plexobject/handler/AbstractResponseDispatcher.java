@@ -37,6 +37,11 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         return this;
     }
 
+    public AbstractResponseDispatcher setLocation(String location) {
+        properties.put(HttpResponse.LOCATION, location);
+        return this;
+    }
+
     public void send(Object payload) {
         String sessionId = (String) properties.get(Constants.SESSION_ID);
         if (sessionId != null) {

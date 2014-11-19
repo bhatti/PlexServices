@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.validation;
 
 /**
  * This interface defines method to validate object

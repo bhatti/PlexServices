@@ -3,16 +3,21 @@ package com.plexobject.bugger.service.bugreport;
 import com.plexobject.bugger.model.BugReport;
 import com.plexobject.bugger.repository.BugReportRepository;
 import com.plexobject.bugger.repository.UserRepository;
-import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.RequiredFields;
+import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/assign", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue:{scope}-assign-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "projectId"),
+        @RequiredField(name = "bugReportId"),
+        @RequiredField(name = "assignedTo") })
 public class AssignBugReportService extends AbstractBugReportService implements
         RequestHandler {
     public AssignBugReportService(BugReportRepository bugReportRepository,
@@ -24,16 +29,7 @@ public class AssignBugReportService extends AbstractBugReportService implements
     @Override
     public void handle(Request request) {
         String bugReportId = request.getProperty("id");
-        String projectId = request.getProperty("projectId");
         String assignedTo = request.getProperty("assignedTo");
-        ValidationException
-                .builder()
-                .assertNonNull(projectId, "undefined_projectId", "projectId",
-                        "projectId not specified")
-                .assertNonNull(bugReportId, "undefined_bugReportId",
-                        "bugReportId", "bugReportId not specified")
-                .assertNonNull(assignedTo, "undefined_assignedTo",
-                        "assignedTo", "assignedTo not specified").end();
 
         BugReport report = bugReportRepository.load(Long.valueOf(bugReportId));
         ValidationException

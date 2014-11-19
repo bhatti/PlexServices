@@ -6,15 +6,17 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
-import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
+import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.RequiredFields;
 
 @ServiceConfig(protocol = Protocol.HTTP, endpoint = "/sign_auth", method = Method.GET, codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "to_sign") })
 public class S3SignService implements RequestHandler {
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     private String key;
@@ -26,10 +28,6 @@ public class S3SignService implements RequestHandler {
     @Override
     public void handle(Request request) {
         String toSign = request.getProperty("to_sign");
-        ValidationException
-                .builder()
-                .assertNonNull(toSign, "undefined_to_sign", "to_sign",
-                        "to_sign not specified").end();
         try {
             // get an hmac_sha1 key from the raw key bytes
             SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(),

@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.plexobject.domain.Validatable;
+import com.plexobject.validation.Validatable;
 
 @XmlRootElement
 public abstract class Document implements Validatable {

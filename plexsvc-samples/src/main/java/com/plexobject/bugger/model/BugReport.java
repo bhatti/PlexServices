@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.plexobject.domain.ValidationException;
+import com.plexobject.validation.ValidationException;
 
 @XmlRootElement
 public class BugReport extends Document {

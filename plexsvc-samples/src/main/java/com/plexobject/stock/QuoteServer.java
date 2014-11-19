@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
-import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -19,10 +18,14 @@ import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
+import com.plexobject.validation.RequiredField;
+import com.plexobject.validation.RequiredFields;
 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
 // @ServiceConfig(protocol = Protocol.JMS, endpoint
 // = "queue:quotes-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "symbol"),
+        @RequiredField(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {
         SUBSCRIBE, UNSUBSCRIBE
@@ -37,12 +40,6 @@ public class QuoteServer implements RequestHandler {
         String symbol = request.getProperty("symbol");
         String actionVal = request.getProperty("action");
         log.info("Received " + request);
-        ValidationException
-                .builder()
-                .assertNonNull(symbol, "undefined_symbol", "symbol",
-                        "symbol not specified")
-                .assertNonNull(actionVal, "undefined_action", "action",
-                        "action not specified").end();
         Action action = Action.valueOf(actionVal.toUpperCase());
         if (action == Action.SUBSCRIBE) {
             quoteStreamer.add(symbol, request.getResponseDispatcher());

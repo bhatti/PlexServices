@@ -26,6 +26,8 @@ PlexService is designed on following design principles:
 ## Major Features
 - PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
 
+- PlexService framework allows annotations for validating request parameters or attributes of request object.
+
 - PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
 
 - PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to expose them through HTTP or websocket interfaces.
@@ -70,6 +72,7 @@ cd plexsvc-framework
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "username") })
 public class CreateUserService extends AbstractUserService implements
 RequestHandler {
   public CreateUserService(UserRepository userRepository) {
@@ -79,7 +82,6 @@ RequestHandler {
   @Override
     public void handle(Request request) {
       User user = request.getPayload();
-      user.validate();
       User saved = userRepository.save(user);
       request.getResponseDispatcher().send(saved);
     }
@@ -104,6 +106,7 @@ Here is a sample python client for accessing these services
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
     codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "username") })
 public class CreateUserService extends AbstractUserService implements
 RequestHandler {
   public CreateUserService(UserRepository userRepository) {
@@ -113,7 +116,6 @@ RequestHandler {
   @Override
     public void handle(Request request) {
       User user = request.getPayload();
-      user.validate();
       User saved = userRepository.save(user);
       request.getResponseDispatcher().send(saved);
     }
@@ -148,6 +150,7 @@ ws.onerror = function(err) {
       rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "username") })
 public class CreateUserService extends AbstractUserService implements RequestHandler {
     public CreateUserService(UserRepository userRepository) {
     super(userRepository);
@@ -156,7 +159,6 @@ public class CreateUserService extends AbstractUserService implements RequestHan
     @Override
     public void handle(Request request) {
       User user = request.getPayload();
-      user.validate();
       User saved = userRepository.save(user);
       request.getResponseDispatcher().send(saved);
     }
@@ -172,6 +174,9 @@ The developer can use variables in end-point of queues, which are populated from
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = Method.POST, 
       codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "bugNumber"),
+        @RequiredField(name = "projectId"), @RequiredField(name = "priority")
+        })
 public class CreateBugReportService extends AbstractBugReportService implements RequestHandler {
     public CreateBugReportService(BugReportRepository bugReportRepository,
         UserRepository userRepository) {
@@ -181,7 +186,6 @@ public class CreateBugReportService extends AbstractBugReportService implements 
     @Override
       public void handle(Request request) {
         BugReport report = request.getPayload();
-        report.validate();
         BugReport saved = bugReportRepository.save(report);
         request.getResponseDispatcher().send(saved);
       }
@@ -198,6 +202,9 @@ classes into JSON when delivering messages over HTTP.
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", 
       method = Method.MESSAGE, codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "bugNumber"),
+        @RequiredField(name = "projectId"), @RequiredField(name = "priority")
+        })
 public class CreateBugReportService extends AbstractBugReportService implements
         RequestHandler {
     public CreateBugReportService(BugReportRepository bugReportRepository,
@@ -208,7 +215,6 @@ public class CreateBugReportService extends AbstractBugReportService implements
     @Override
     public void handle(Request request) {
         BugReport report = request.getPayload();
-        report.validate();
         BugReport saved = bugReportRepository.save(report);
         request.getResponseDispatcher().send(saved);
     }
@@ -294,10 +300,22 @@ public class QueryUserService extends AbstractUserService implements RequestHand
   The end-point can contain variables such as scope that are initialized from configuration.
 
 
+### Input Validation
+PlexService provides flexible annotations for validating input parameters or attributes of incoming rquest, e.g.
+```java 
+    @RequiredFields({
+            @RequiredField(name = "username", minLength = 6, maxLength = 12),
+            @RequiredField(name = "password", minLength = 8, maxLength = 20),
+            @RequiredField(name = "email", minLength = 6, maxLength = 100, regex = ".*@.*"),
+            @RequiredField(name = "zipcode", minLength = 5, maxLength = 5, regex = "^\\d{5}$"), })
+```
+Above example describes rules for validating username, password, email and zipcode. You can specify min/max size of data fields or use regex to verify the data.
+
+ 
 ### Overriding service configuration at runtime and deploying same service via different protocols
 In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
 public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
@@ -338,7 +356,7 @@ Though, PlexService framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:
 
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private File webFolder;
 
@@ -563,8 +581,9 @@ quote quotes over the websockets.
 
 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = Void.class, 
-  endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+@RequiredFields({ @RequiredField(name = "symbol"),
+        @RequiredField(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {
         SUBSCRIBE, UNSUBSCRIBE
@@ -578,13 +597,6 @@ public class QuoteServer implements RequestHandler {
     public void handle(Request request) {
         String symbol = request.getProperty("symbol");
         String actionVal = request.getProperty("action");
-        log.info("Received " + request);
-        ValidationException
-                .builder()
-                .assertNonNull(symbol, "undefined_symbol", "symbol",
-                        "symbol not specified")
-                .assertNonNull(actionVal, "undefined_action", "action",
-                        "action not specified").end();
         Action action = Action.valueOf(actionVal.toUpperCase());
         if (action == Action.SUBSCRIBE) {
             quoteStreamer.add(symbol, request.getResponseDispatcher());

@@ -15,7 +15,8 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.ValidationException;
+import com.plexobject.domain.Redirectable;
+import com.plexobject.domain.Statusable;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.Request;
@@ -29,9 +30,10 @@ import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.route.RouteResolver;
-import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.util.Configuration;
+import com.plexobject.validation.IRequiredFieldValidator;
+import com.plexobject.validation.RequiredFieldValidator;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 
@@ -52,6 +54,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
     private boolean running;
     private final StatsDClient statsd;
     private ServiceMetricsRegistry serviceMetricsRegistry;
+    private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer,
@@ -265,6 +268,12 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
                     .decode((String) request.getPayload(),
                             config.payloadClass(), request.getProperties())
                     : null;
+
+            // validate required fields
+            requiredFieldValidator.validate(handler,
+                    payload == null ? request.getProperties() : payload);
+
+            // update post parameters
             if (payload != null) {
                 request.setPayload(payload);
             } else if (request.getPayload() != null) {
@@ -276,6 +285,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
                     }
                 }
             }
+            //
             try {
                 if (authorizer != null && config.rolesAllowed() != null
                         && config.rolesAllowed().length > 0
@@ -284,27 +294,21 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
                 }
                 handler.handle(request);
                 metrics.addResponseTime(System.currentTimeMillis() - started);
-            } catch (AuthException e) {
-                metrics.incrementErrors();
-
-                request.getResponseDispatcher().setStatus(
-                        HttpResponse.SC_UNAUTHORIZED);
-                if (e.getLocation() != null) {
-                    request.getResponseDispatcher().setProperty(
-                            HttpResponse.LOCATION, e.getLocation());
-                }
-                request.getResponseDispatcher().send(e);
-            } catch (ValidationException e) {
-                metrics.incrementErrors();
-
-                request.getResponseDispatcher().setStatus(
-                        HttpResponse.SC_BAD_REQUEST);
-                request.getResponseDispatcher().send(e);
             } catch (Exception e) {
                 metrics.incrementErrors();
-
-                request.getResponseDispatcher().setStatus(
-                        HttpResponse.SC_INTERNAL_SERVER_ERROR);
+                if (e instanceof Redirectable) {
+                    if (((Redirectable) e).getLocation() != null) {
+                        request.getResponseDispatcher().setLocation(
+                                ((Redirectable) e).getLocation());
+                    }
+                }
+                if (e instanceof Statusable) {
+                    request.getResponseDispatcher().setStatus(
+                            ((Statusable) e).getStatus());
+                } else {
+                    request.getResponseDispatcher().setStatus(
+                            HttpResponse.SC_INTERNAL_SERVER_ERROR);
+                }
                 request.getResponseDispatcher().send(e);
             }
         } else {

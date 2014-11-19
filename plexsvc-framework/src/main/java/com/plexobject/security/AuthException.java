@@ -1,29 +1,32 @@
 package com.plexobject.security;
 
-public class AuthException extends RuntimeException {
+import com.plexobject.domain.Redirectable;
+import com.plexobject.domain.Statusable;
+import com.plexobject.http.HttpResponse;
+
+public class AuthException extends RuntimeException implements Redirectable,
+        Statusable {
     private static final long serialVersionUID = 1L;
-    private final int status;
     private final String sessionId;
     private String location;
 
-    public AuthException(int status, String sessionId, String location,
-            String message) {
+    public AuthException(String sessionId, String location, String message) {
         super(message);
-        this.status = status;
         this.sessionId = sessionId;
         this.location = location;
     }
 
-    public AuthException(int status, String sessionId, String message) {
+    public AuthException(String sessionId, String message) {
         super(message);
-        this.status = status;
         this.sessionId = sessionId;
     }
 
+    @Override
     public int getStatus() {
-        return status;
+        return HttpResponse.SC_UNAUTHORIZED;
     }
 
+    @Override
     public String getLocation() {
         return location;
     }

@@ -16,7 +16,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.plexobject.domain.ValidationException;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
@@ -25,6 +24,7 @@ import com.plexobject.jms.JmsClient;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.util.Configuration;
+import com.plexobject.validation.ValidationException;
 
 public class ServiceRegistryTest {
     public static class TestUser {
@@ -260,8 +260,7 @@ public class ServiceRegistryTest {
                     }
                 });
         RequestHandler h = new WebService();
-        authException = new AuthException(401, "sessionId", "location",
-                "bad auth");
+        authException = new AuthException("sessionId", "location", "bad auth");
         registry.invoke(request, h);
         assertTrue(response.toString().contains("AuthException"));
     }
@@ -292,7 +291,7 @@ public class ServiceRegistryTest {
                     }
                 });
         RequestHandler h = new WebService();
-        authException = new AuthException(401, "sessionId", "bad auth");
+        authException = new AuthException("sessionId", "bad auth");
         registry.invoke(request, h);
         assertTrue(response.toString().contains("AuthException"));
     }

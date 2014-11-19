@@ -8,17 +8,17 @@ import org.junit.Test;
 public class AuthExceptionTest {
     @Test
     public void testLocationConstructor() {
-        AuthException e = new AuthException(200, "sessionId", "location",
+        AuthException e = new AuthException("sessionId", "location",
                 "message");
-        assertEquals(200, e.getStatus());
+        assertEquals(401, e.getStatus());
         assertEquals("location", e.getLocation());
         assertEquals("sessionId", e.getSessionId());
     }
 
     @Test
     public void testMessageConstructor() {
-        AuthException e = new AuthException(200, "sessionId", "message");
-        assertEquals(200, e.getStatus());
+        AuthException e = new AuthException("sessionId", "message");
+        assertEquals(401, e.getStatus());
         assertNull(e.getLocation());
         assertEquals("sessionId", e.getSessionId());
     }
