@@ -60,7 +60,7 @@ cd plexsvc-framework
 
 
 ##Version
-- 0.5
+- 0.6
 
 ##License
 - MIT
