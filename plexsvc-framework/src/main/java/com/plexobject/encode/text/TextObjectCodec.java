@@ -37,8 +37,6 @@ public class TextObjectCodec extends AbstractObjectCodec {
                 throw new RuntimeException(
                         "Failed to find string constructor for " + type
                                 + " with " + text);
-            } catch (RuntimeException e) {
-                throw e;
             } catch (Exception e) {
                 throw new RuntimeException("Failed to instantiate " + type
                         + " with " + text, e);
