@@ -303,11 +303,11 @@ public class QueryUserService extends AbstractUserService implements RequestHand
 ### Input Validation
 PlexService provides flexible annotations for validating input parameters or attributes of incoming rquest, e.g.
 ```java 
-    @RequiredFields({
-            @RequiredField(name = "username", minLength = 6, maxLength = 12),
-            @RequiredField(name = "password", minLength = 8, maxLength = 20),
-            @RequiredField(name = "email", minLength = 6, maxLength = 100, regex = ".*@.*"),
-            @RequiredField(name = "zipcode", minLength = 5, maxLength = 5, regex = "^\\d{5}$"), })
+@RequiredFields({
+        @RequiredField(name = "username", minLength = 6, maxLength = 12),
+        @RequiredField(name = "password", minLength = 8, maxLength = 20),
+        @RequiredField(name = "email", minLength = 6, maxLength = 100, regex = ".*@.*"),
+        @RequiredField(name = "zipcode", minLength = 5, maxLength = 5, regex = "^\\d{5}$"), })
 ```
 Above example describes rules for validating username, password, email and zipcode. You can specify min/max size of data fields or use regex to verify the data.
 
