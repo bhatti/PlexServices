@@ -52,7 +52,7 @@ public class NettyHttpServer implements Lifecycle {
     // private int receiveBufferSize = 262140; // Java default
     // private int connectTimeoutMillis = 10000; // netty default
 
-    public static class NettyServerInitializer extends
+    static class NettyServerInitializer extends
             ChannelInitializer<SocketChannel> {
         private final SslContext sslCtx;
         private final ChannelInboundHandlerAdapter handler;
@@ -124,9 +124,6 @@ public class NettyHttpServer implements Lifecycle {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            log.info("********** No SSL support " + certPath + ", "
-                    + keyFilePath + ", " + keyPassword);
         }
         bootstrap = new ServerBootstrap();
         bootstrap.option(ChannelOption.SO_BACKLOG, 1024);

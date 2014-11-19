@@ -59,6 +59,7 @@ public class Main {
 
     public Main(String propertyFile, String mappingFile) throws Exception {
         this.config = new Configuration(propertyFile);
+        startJmsBroker();
 
         JmsClient jmsClient = new JmsClient(config);
         serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
@@ -68,7 +69,6 @@ public class Main {
                     mappingFile));
             new WebToJmsBridge(jmsClient, entries, serviceRegistry);
         }
-        startJmsBroker();
         populateTestData();
         //
         addServices(serviceRegistry);

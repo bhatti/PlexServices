@@ -97,8 +97,8 @@ curl --cookie cookies.txt -k -H "Content-Type: application/json" -X POST "http:/
 
 Here is a sample python client for accessing these services
 ```python
-    resp = requests.post('http://localhost:8181/login', data={'password': password, 'username': username})
-    json_resp = json.loads(resp.text)
+resp = requests.post('http://localhost:8181/login', data={'password': password, 'username': username})
+json_resp = json.loads(resp.text)
 ```
 
 ### Defining a Web service over Websockets for creating a user
@@ -153,7 +153,7 @@ ws.onerror = function(err) {
 @RequiredFields({ @RequiredField(name = "username") })
 public class CreateUserService extends AbstractUserService implements RequestHandler {
     public CreateUserService(UserRepository userRepository) {
-    super(userRepository);
+      super(userRepository);
     }
 
     @Override
@@ -253,25 +253,25 @@ PlexService automatically passes any json parameters sent as part of request, wh
 
 ### Defining a REST service for querying users
 ```java 
-  @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
-      rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
-      codec = CodecType.JSON)
-  public class QueryUserService extends AbstractUserService implements
-  RequestHandler {
-    public QueryUserService(UserRepository userRepository) {
-      super(userRepository);
-    }
-    @Override
-      public void handle(Request request) {
-        Collection<User> users = userRepository.getAll(new Predicate<User>() {
-            @Override
-            public boolean accept(User u) {
+@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
+  rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
+  codec = CodecType.JSON)
+public class QueryUserService extends AbstractUserService implements
+RequestHandler {
+public QueryUserService(UserRepository userRepository) {
+  super(userRepository);
+}
+@Override
+  public void handle(Request request) {
+    Collection<User> users = userRepository.getAll(new Predicate<User>() {
+        @Override
+        public boolean accept(User u) {
             return true;
-            }
-            });
-        request.getResponseDispatcher().send(users);
-      }
+        }
+        });
+    request.getResponseDispatcher().send(users);
   }
+}
 ```
 
 
@@ -290,7 +290,7 @@ public class QueryUserService extends AbstractUserService implements RequestHand
         Collection<User> users = userRepository.getAll(new Predicate<User>() {
             @Override
             public boolean accept(User u) {
-            return true;
+                return true;
             }
             });
         request.getResponseDispatcher().send(users);
@@ -573,6 +573,12 @@ Here is a sample json file that describes mapping:
 "target":"queue:{scope}-assign-bugreport-service-queue","requestType":
 "com.plexobject.bugger.model.User"}]
 ```
+
+
+### JMX Monitoring
+PlexService provides monitoring and management through JMX. For example, you
+can start/stop services or view statistics, e.g. 
+![JMX Support](http://bhatti.github.io/PlexService/jmx.png)
 
 
 ### Adding Streaming Quotes Service over Websockets 
