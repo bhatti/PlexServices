@@ -590,9 +590,10 @@ can start/stop services or view statistics, e.g.
 PlexService provides support to scan all services in your application that implement ServiceConfig 
 annotation and deploy them, e.g.
 ```bash
-java com.plexobject.deploy.AutoDeployer com.plexobject.stock.QuoteServer bugger.properties
+java com.plexobject.deploy.AutoDeployer com.plexobject.stock bugger.properties
 ```
-Note your services must have default constructor for this option to work.
+You need to specify package name of your services and properties file. Your services must 
+have default constructor for this option to work.
 
 ### Adding Streaming Quotes Service over Websockets 
 Here is an example of creating a streaming quote server that sends real-time
