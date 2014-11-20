@@ -2,6 +2,7 @@ com.plexobject.bridge.eb
 com.plexobject.bridge.web
 com.plexobject.bus
 com.plexobject.bus.impl
+com.plexobject.deploy
 com.plexobject.domain
 com.plexobject.encode
 com.plexobject.encode.gson

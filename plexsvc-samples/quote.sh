@@ -1,3 +1,10 @@
 #./gradlew distZip
 ./gradlew compileJava dist
-./gradlew quote -Pargs="bugger.properties"
+CLASSPATH=build/classes/main
+for j in build/dist/lib/*jar 
+do 
+  CLASSPATH=$CLASSPATH:$j
+done
+export CLASSPATH 
+
+java -cp $CLASSPATH com.plexobject.deploy.AutoDeployer com.plexobject.stock.QuoteServer bugger.properties

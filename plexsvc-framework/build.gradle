@@ -1,5 +1,5 @@
 dependencies {
-  compile 'org.slf4j:slf4j-api:1.7.7'
+    compile 'org.slf4j:slf4j-api:1.7.7'
     compile 'org.owasp.encoder:encoder:1.1.1'
     compile 'io.netty:netty-all:4.0.23.Final'
     compile 'com.google.code.gson:gson:2.3'
@@ -12,6 +12,7 @@ dependencies {
     compile 'javax.jms:jms:1.1'
     compile 'javax.jms:jms-api:1.1-rev-1'
     compile 'com.timgroup:java-statsd-client:3.0.2'
+    compile 'org.reflections:reflections:0.9.9'
 
     testCompile 'junit:junit:4.11'
     testCompile 'com.googlecode.jmockit:jmockit:1.7'
@@ -26,6 +27,8 @@ configurations {
 jar {
   manifest {
     attributes 'Implementation-Title': 'PlexService', 'Implementation-Version': version
+    attributes 'Main-Class': 'com.plexobject.deploy.AutoDeployer' 
+    attributes("Class-Path": configurations.compile.collect { it.getName() }.join(' '))
   }
 }
 

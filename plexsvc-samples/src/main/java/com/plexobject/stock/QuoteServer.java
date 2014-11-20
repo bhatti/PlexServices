@@ -1,31 +1,23 @@
 package com.plexobject.stock;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.apache.activemq.broker.BrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.bridge.web.WebToJmsBridge;
-import com.plexobject.bridge.web.WebToJmsEntry;
+import com.plexobject.deploy.AutoDeployer;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.JmsClient;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
 // @ServiceConfig(protocol = Protocol.JMS, endpoint
 // = "queue:quotes-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @Field(name = "symbol"),
-        @Field(name = "action") })
+@RequiredFields({ @Field(name = "symbol"), @Field(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {
         SUBSCRIBE, UNSUBSCRIBE
@@ -62,24 +54,8 @@ public class QuoteServer implements RequestHandler {
                     + " properties-file");
             System.exit(1);
         }
-        Configuration config = new Configuration(args[0]);
-        QuoteServer service = new QuoteServer();
-        ServiceConfig serviceConfig = service.getClass().getAnnotation(
-                ServiceConfig.class);
-        JmsClient jmsClient = new JmsClient(config);
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
-                jmsClient);
-
-        if (serviceConfig.protocol() == Protocol.JMS) {
-            startJmsBroker();
-            Collection<WebToJmsEntry> entries = Arrays
-                    .asList(new WebToJmsEntry(CodecType.JSON, "/quotes",
-                            serviceConfig.method(), serviceConfig.endpoint(), 5));
-            new WebToJmsBridge(jmsClient, entries, serviceRegistry);
-        }
-        //
-        serviceRegistry.add(service);
-        serviceRegistry.start();
+        startJmsBroker();
+        new AutoDeployer("com.plexobject.stock", args[0]).run();
         Thread.currentThread().join();
     }
 }

@@ -40,6 +40,10 @@ PlexService is designed on following design principles:
 
 - PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
+- PlexService allows you to specify the services you want to deploy or allows support to automatically 
+deplooy all services that implement ServiceConfig annotation.
+
+
 ##Building
 - Download and install <a href="http://www.gradle.org/downloads">Gradle</a>.
 - Download and install <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">Java 8</a>.
@@ -581,6 +585,15 @@ can start/stop services or view statistics, e.g.
 ![JMX Support](http://bhatti.github.io/PlexService/jmx.png)
 
 
+
+### Auto-Deploying
+PlexService provides support to scan all services in your application that implement ServiceConfig 
+annotation and deploy them, e.g.
+```bash
+java com.plexobject.deploy.AutoDeployer com.plexobject.stock.QuoteServer bugger.properties
+```
+Note your services must have default constructor for this option to work.
+
 ### Adding Streaming Quotes Service over Websockets 
 Here is an example of creating a streaming quote server that sends real-time
 quote quotes over the websockets.
@@ -613,14 +626,11 @@ public class QuoteServer implements RequestHandler {
 
     public static void main(String[] args) throws Exception {
         Configuration config = new Configuration(args[0]);
-        QuoteServer service = new QuoteServer();
-        //
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-        serviceRegistry.add(new QuoteServer());
-        serviceRegistry.start();
+        new AutoDeployer("com.plexobject.stock", args[0]).run();
         Thread.currentThread().join();
     }
 }
+
 
 ```
 Here is the streaming server that pushes the updates to web clients:
