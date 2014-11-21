@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.reflections.Reflections;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.JmsClient;
 import com.plexobject.security.RoleAuthorizer;
@@ -14,6 +15,8 @@ import com.plexobject.util.Configuration;
 public class AutoDeployer {
     private final String pkgName;
     private final String configFile;
+    @VisibleForTesting
+    ServiceRegistry serviceRegistry;
 
     public AutoDeployer(String pkgName, String configFile) {
         this.pkgName = pkgName;
@@ -31,8 +34,7 @@ public class AutoDeployer {
             roleAuthorizer = (RoleAuthorizer) Class
                     .forName(roleAuthorizerClass).newInstance();
         }
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config,
-                roleAuthorizer, jmsClient);
+        serviceRegistry = new ServiceRegistry(config, roleAuthorizer, jmsClient);
 
         Set<Class<?>> serviceClasses = reflections
                 .getTypesAnnotatedWith(ServiceConfig.class);
