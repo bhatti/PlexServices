@@ -437,29 +437,6 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
 ```
 
 
-### Registering services and starting service container
-```java 
-serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(userRepository));
-serviceRegistry.add(new CreateUserService(userRepository));
-serviceRegistry.add(new UpdateUserService(userRepository));
-serviceRegistry.add(new QueryUserService(userRepository));
-serviceRegistry.add(new DeleteUserService(userRepository));
-serviceRegistry.add(new LoginService(userRepository));
-serviceRegistry.add(new CreateProjectService(projectRepository, userRepository));
-serviceRegistry.add(new UpdateProjectService(projectRepository, userRepository));
-serviceRegistry.add(new QueryProjectService(projectRepository, userRepository));
-serviceRegistry.add(new AddProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(new RemoveProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(new CreateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new UpdateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new QueryBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new AssignBugReportService(bugreportRepository, userRepository));
-serviceRegistry.start();
-
-```
-
-
 ### Creating Http or Websocket bridge for JMS services
 Here is how you can setup bridge between HTTP/Websocket and JMS based services. 
 ```java 
@@ -586,9 +563,35 @@ can start/stop services or view statistics, e.g.
 
 
 
+### Registering services and starting service container 
+PlexService allows you to specify the services that you want to deploy in
+a container and start the container using service-registry, e.g.
+```java 
+serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(userRepository));
+serviceRegistry.add(new CreateUserService(userRepository));
+serviceRegistry.add(new UpdateUserService(userRepository));
+serviceRegistry.add(new QueryUserService(userRepository));
+serviceRegistry.add(new DeleteUserService(userRepository));
+serviceRegistry.add(new LoginService(userRepository));
+serviceRegistry.add(new CreateProjectService(projectRepository, userRepository));
+serviceRegistry.add(new UpdateProjectService(projectRepository, userRepository));
+serviceRegistry.add(new QueryProjectService(projectRepository, userRepository));
+serviceRegistry.add(new AddProjectMemberService(projectRepository, userRepository));
+serviceRegistry.add(new RemoveProjectMemberService(projectRepository, userRepository));
+serviceRegistry.add(new CreateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new UpdateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new QueryBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
+serviceRegistry.add(new AssignBugReportService(bugreportRepository, userRepository));
+serviceRegistry.start();
+
+```
+You will be able to view all of the services in JMX console at runtime.
+
+
 ### Auto-Deploying
-PlexService provides support to scan all services in your application that implement ServiceConfig 
-annotation and deploy them, e.g.
+In addition to specifying services manually for deployment, PlexService provides support to scan all services 
+in your application package that implement ServiceConfig annotation and deploy them, e.g.
 ```bash
 java com.plexobject.deploy.AutoDeployer com.plexobject.stock bugger.properties
 ```
@@ -596,7 +599,7 @@ You need to specify package name of your services and properties file. Your serv
 have default constructor for this option to work.
 
 ### Adding Streaming Quotes Service over Websockets 
-Here is an example of creating a streaming quote server that sends real-time
+Here is a small example of creating a streaming quote server that sends real-time
 quote quotes over the websockets.
 
 
@@ -626,7 +629,6 @@ public class QuoteServer implements RequestHandler {
     }
 
     public static void main(String[] args) throws Exception {
-        Configuration config = new Configuration(args[0]);
         new AutoDeployer("com.plexobject.stock", args[0]).run();
         Thread.currentThread().join();
     }
