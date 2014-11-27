@@ -21,27 +21,24 @@ public class ServiceConfigDesc implements Serializable {
     public static class Builder {
         private Method method;
         private Protocol protocol;
-        private Class<?> payloadClass;
+        private Class<?> payloadClass = Void.class;
         private CodecType codecType;
         private String version;
         private String endpoint;
         private boolean recordStatsdMetrics;
         private String[] rolesAllowed;
 
-        public Builder() {
-        }
-
         public Builder(WebToJmsEntry e) {
             if (e != null) {
                 this.method = e.getMethod();
                 this.protocol = e.getMethod() == Method.MESSAGE ? Protocol.WEBSOCKET
                         : Protocol.HTTP;
-                this.payloadClass = null;
+                this.payloadClass = Void.class;
                 this.codecType = e.getCodecType();
-                this.version = null;
+                this.version = "";
                 this.endpoint = e.getEndpoint();
                 this.recordStatsdMetrics = true;
-                this.rolesAllowed = null;
+                this.rolesAllowed = new String[0];
             }
         }
 

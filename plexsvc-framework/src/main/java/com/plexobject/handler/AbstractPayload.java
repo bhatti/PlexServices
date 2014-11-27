@@ -127,10 +127,4 @@ public abstract class AbstractPayload {
         return (T) payload;
     }
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + ".toString [properties="
-                + properties + ", payload=" + payload + "]";
-    }
-
 }

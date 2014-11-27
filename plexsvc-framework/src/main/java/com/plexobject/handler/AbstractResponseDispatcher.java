@@ -80,9 +80,9 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         } else {
             Object status = properties.get(HttpResponse.STATUS);
             if (status != null) {
-                if (status instanceof Integer) {
-                    return (Integer) status;
-                } else if (status instanceof Integer) {
+                if (status instanceof Number) {
+                    return ((Number) status).intValue();
+                } else if (status instanceof String) {
                     return Integer.parseInt((String) status);
                 }
             }
@@ -105,8 +105,9 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
             return true;
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
+        if (obj instanceof AbstractResponseDispatcher == false) {
             return false;
+        }
         AbstractResponseDispatcher other = (AbstractResponseDispatcher) obj;
 
         String sessionId = (String) properties.get(Constants.SESSION_ID);

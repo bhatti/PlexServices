@@ -24,7 +24,7 @@ public class Request extends AbstractPayload {
         private Method method;
         private String endpoint;
 
-        private AbstractResponseDispatcher responseBuilder;
+        private AbstractResponseDispatcher responseDispatcher;
 
         public Builder setProtocol(Protocol protocol) {
             this.protocol = protocol;
@@ -65,13 +65,13 @@ public class Request extends AbstractPayload {
 
         public Builder setResponseDispatcher(
                 AbstractResponseDispatcher responseBuilder) {
-            this.responseBuilder = responseBuilder;
+            this.responseDispatcher = responseBuilder;
             return this;
         }
 
         public Request build() {
             return new Request(protocol, method, endpoint, properties, headers,
-                    payload, responseBuilder);
+                    payload, responseDispatcher);
         }
     }
 
