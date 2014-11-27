@@ -21,6 +21,8 @@ PlexService is designed on following design principles:
 
 - Easily deployable: PlexService framework provides embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
 
+- Development Support: Though, you may use different Java processes to deploy services in your production environment, but you can add all of services in a single Java process during development to simplify the deployment process.
+
 - Operational Support: PlexService provides monitoring, statistics and logging support for ease of operational support.
 
 ## Major Features
@@ -567,6 +569,7 @@ can start/stop services or view statistics, e.g.
 PlexService allows you to specify the services that you want to deploy in
 a container and start the container using service-registry, e.g.
 ```java 
+Configuration config = new Configuration(args[0]);
 serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(userRepository));
 serviceRegistry.add(new CreateUserService(userRepository));
 serviceRegistry.add(new UpdateUserService(userRepository));
@@ -784,7 +787,7 @@ Here is the html form that displays quotes:
 [Java Doc](http://bhatti.github.io/PlexService/javadoc/)
 
 
-## Sample Application
+## Sample Applications
       You can view a full-fledged sample application under plexsvc-sample folder for detailed examples of services and various configurations.
 
 ## Support or Contact
