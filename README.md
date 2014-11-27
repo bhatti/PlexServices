@@ -13,9 +13,9 @@ PlexService is designed on following design principles:
 
 - Minimize Dependencies: Despite NIH, PlexService minimizes the dependencies of 3rd party libraries. 
 
-- Technology indpendent: PlexService provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexService provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
+- Technology independent services: PlexService provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexService provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
 
-- Configurable: PlexService uses simple annotations for describing services but allows them to override the properties at run-time.
+- Easily Configurable: PlexService uses simple annotations for describing services but allows them to override the properties at run-time.
 
 - Encourage messaging based services: Though, PlexService supports both messaging based services and web services, but it prefers messaging based services and provides web bridge to expose them externally. It also encourages use of event-bus for internal communication. 
 
