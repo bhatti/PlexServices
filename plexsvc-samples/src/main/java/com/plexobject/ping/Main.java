@@ -42,9 +42,10 @@ public class Main {
                             .setMethod(Method.MESSAGE)
                             .setProtocol(Protocol.JMS)
                             .setEndpoint("queue:ping").build());
-            Collection<WebToJmsEntry> entries = Arrays
-                    .asList(new WebToJmsEntry(CodecType.JSON, "/ping",
-                            Method.GET, "queue:ping", 5));
+            Collection<WebToJmsEntry> entries = Arrays.asList(
+                    new WebToJmsEntry(CodecType.JSON, "/ping", Method.GET,
+                            "queue:ping", 5), new WebToJmsEntry(CodecType.JSON,
+                            "/ping", Method.MESSAGE, "queue:ping", 5));
             new WebToJmsBridge(jmsClient, entries, serviceRegistry);
         } else {
             serviceRegistry.add(
