@@ -1,15 +1,24 @@
 package com.plexobject.encode.xml;
 
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
+import com.plexobject.util.ExceptionUtils;
+import com.plexobject.validation.ValidationException;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 /**
  * This class implements XML marshaling/unmarshaling support
@@ -18,19 +27,56 @@ import com.plexobject.encode.CodecType;
  *
  */
 public class XmlObjectCodec extends AbstractObjectCodec {
+    private final XStream xstream = new XStream(new StaxDriver());
+
+    public static class MapEntryConverter implements Converter {
+        @SuppressWarnings("rawtypes")
+        public boolean canConvert(Class clazz) {
+            return AbstractMap.class.isAssignableFrom(clazz);
+        }
+        @SuppressWarnings("rawtypes")
+        public void marshal(Object value, HierarchicalStreamWriter writer,
+                MarshallingContext context) {
+
+            AbstractMap map = (AbstractMap) value;
+            for (Object obj : map.entrySet()) {
+                Map.Entry entry = (Map.Entry) obj;
+                writer.startNode(entry.getKey().toString());
+                writer.setValue(entry.getValue().toString());
+                writer.endNode();
+            }
+
+        }
+
+        public Object unmarshal(HierarchicalStreamReader reader,
+                UnmarshallingContext context) {
+            Map<String, String> map = new HashMap<String, String>();
+
+            while (reader.hasMoreChildren()) {
+                reader.moveDown();
+                String key = reader.getNodeName(); 
+                String value = reader.getValue();
+                map.put(key, value);
+
+                reader.moveUp();
+            }
+
+            return map;
+        }
+    }
+
+    public XmlObjectCodec() {
+        xstream.alias("error", ValidationException.Error.class);
+        xstream.registerConverter(new MapEntryConverter());
+    }
+
     @Override
     public <T> String encode(T obj) {
         if (obj == null) {
             return null;
         }
         try {
-            JAXBContext contextObj = JAXBContext.newInstance(obj.getClass());
-
-            Marshaller marshallerObj = contextObj.createMarshaller();
-            marshallerObj.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            StringWriter out = new StringWriter();
-            marshallerObj.marshal(obj, out);
-            return out.toString();
+            return xstream.toXML(obj);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -66,5 +112,12 @@ public class XmlObjectCodec extends AbstractObjectCodec {
     @Override
     public CodecType getType() {
         return CodecType.XML;
+    }
+
+    public static void main(String[] args) {
+        XmlObjectCodec codec = new XmlObjectCodec();
+        Exception e = ValidationException.builder()
+                .addError("code", "field", "message").build();
+        System.out.println(codec.encode(ExceptionUtils.toErrors(e)));
     }
 }
