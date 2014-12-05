@@ -315,7 +315,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
             log.warn("Received Unknown request params "
                     + request.getProperties() + ", payload "
                     + request.getPayload());
-            request.getResponseDispatcher().setCodecType(CodecType.HTML);
+            request.getResponseDispatcher().setCodecType(CodecType.TEXT);
             request.getResponseDispatcher()
                     .setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponseDispatcher().send("page not found");

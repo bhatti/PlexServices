@@ -14,6 +14,8 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -60,7 +62,8 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             final String textPayload = txtMessage.getText();
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsClient, message.getJMSReplyTo());
-            dispatcher.setCodecType(config.codec());
+            dispatcher.setCodecType(CodecType.fromAcceptHeader(
+                    (String) params.get(Constants.ACCEPT), config.codec()));
 
             Request req = Request.builder().setProtocol(Protocol.JMS)
                     .setMethod(Method.MESSAGE).setProperties(params)

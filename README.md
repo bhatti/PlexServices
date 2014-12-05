@@ -632,7 +632,7 @@ public class QuoteServer implements RequestHandler {
     }
 
     public static void main(String[] args) throws Exception {
-        new AutoDeployer("com.plexobject.stock", args[0]).run();
+        new AutoDeployer("com.plexobject.stock", args[0]).deploy();
         Thread.currentThread().join();
     }
 }

@@ -9,7 +9,7 @@ from websocket import create_connection
 class BaseAuthTest(unittest.TestCase):
   def authenticate(self, username='erica', password='pass'):
     payload = {'password': password, 'username': username}
-    r = requests.post(self.base_ur_l + '/login', data=payload)
+    r = requests.post(self._base_url + '/login', data=payload)
     self._cookie = r.headers['Set-Cookie']
     r.text
 
@@ -37,6 +37,11 @@ class BaseAuthTest(unittest.TestCase):
       return json.loads(r.text)
     except: 
       return r.text
+
+  def get_xml(self, path):
+    headers = {'Accept': 'application/xml','cookie': self._cookie}
+    r = requests.get(self._base_url + path, headers=headers)
+    return r.text
 
   def ws_connect(self):
     # https://pypi.python.org/pypi/websocket-client/

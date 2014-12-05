@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -65,7 +66,10 @@ public class DefaultHttpRequestHandler implements RequestHandler {
             return;
         }
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
-        request.getResponseDispatcher().setCodecType(config.codec());
+        request.getResponseDispatcher().setCodecType(
+                CodecType.fromAcceptHeader(
+                        (String) request.getProperty(Constants.ACCEPT),
+                        config.codec()));
         // dispatcher.setContentType(config.codec()
         // .getContentType());
 

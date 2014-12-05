@@ -2,6 +2,12 @@ package com.plexobject.bridge.eb;
 
 import com.plexobject.encode.CodecType;
 
+/**
+ * This class stores mapping between event-bus and JMS bridge
+ * 
+ * @author shahzadbhatti
+ *
+ */
 public class EventBusToJmsEntry {
     public enum Type {
         JMS_TO_EB_CHANNEL, EB_CHANNEL_TO_JMS,

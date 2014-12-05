@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.plexobject.domain.Statusable;
 import com.plexobject.http.HttpResponse;
 
@@ -13,9 +15,11 @@ import com.plexobject.http.HttpResponse;
  * @author shahzad bhatti
  *
  */
+@XmlRootElement
 public class ValidationException extends RuntimeException implements Statusable {
     private static final long serialVersionUID = 1L;
 
+    @XmlRootElement
     public static class Error {
         public final String errorCode;
         public final String fieldName;
@@ -90,7 +94,10 @@ public class ValidationException extends RuntimeException implements Statusable 
         }
     }
 
-    private final Collection<Error> errors;
+    private Collection<Error> errors;
+
+    ValidationException() {
+    }
 
     public ValidationException(String message, Throwable cause,
             final Collection<Error> errors) {

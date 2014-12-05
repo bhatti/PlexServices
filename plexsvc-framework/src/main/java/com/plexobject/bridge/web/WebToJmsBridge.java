@@ -52,6 +52,11 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
     }
 
+    /**
+     * This method adds bridge between HTTP/Websocket and JMS
+     * 
+     * @param e
+     */
     public void add(WebToJmsEntry e) {
         if (e.getMethod() == Method.MESSAGE) {
             addWebsocket(e);
@@ -95,6 +100,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         log.info("Adding Websocket->JMS mapping for " + e.getShortString());
     }
 
+    /**
+     * This method handles web request and forwards it to the JMS queue/topic.
+     * It then listen for the response if the mapping entry is not asynchronous.
+     */
     @Override
     public void handle(Request request) {
         final WebToJmsEntry entry = getMappingEntry(request);
@@ -123,7 +132,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             } else {
                 jmsClient.sendReceive(entry.getDestination(), params,
                         (String) request.getPayload(),
-                        sendbackReply(request, entry, params), true);
+                        sendbackReply(request, entry, params));
             }
         } catch (Exception e) {
             log.error("Failed to send request", e);
@@ -181,11 +190,17 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     public void onDestroyed() {
     }
 
+    /**
+     * This method starts the bridge including JMS connection
+     */
     @Override
     public void onStarted() {
         jmsClient.start();
     }
 
+    /**
+     * This method stops the bridge including JMS connection
+     */
     @Override
     public void onStopped() {
         jmsClient.stop();

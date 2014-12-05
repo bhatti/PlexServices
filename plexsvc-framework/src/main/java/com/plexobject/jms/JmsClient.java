@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +32,7 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Promise;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.service.Lifecycle;
@@ -98,6 +100,9 @@ public class JmsClient implements Lifecycle {
         }
     }
 
+    /**
+     * This method starts JMS connection
+     */
     @Override
     public synchronized void start() {
         if (running) {
@@ -111,6 +116,9 @@ public class JmsClient implements Lifecycle {
         }
     }
 
+    /**
+     * This method stops JMS connection
+     */
     @Override
     public synchronized void stop() {
         if (!running) {
@@ -129,11 +137,27 @@ public class JmsClient implements Lifecycle {
         return running;
     }
 
+    /**
+     * This method creates producer to publish messages to JMS
+     * 
+     * @param destName
+     * @return
+     * @throws JMSException
+     * @throws NamingException
+     */
     public MessageProducer createProducer(final String destName)
             throws JMSException, NamingException {
         return createProducer(getDestination(destName));
     }
 
+    /**
+     * This method creates producer to publish messages to JMS
+     * 
+     * @param destination
+     * @return
+     * @throws JMSException
+     * @throws NamingException
+     */
     public MessageProducer createProducer(final Destination destination)
             throws JMSException, NamingException {
         String destName = getDestName(destination).intern();
@@ -168,10 +192,10 @@ public class JmsClient implements Lifecycle {
         }
     }
 
-    public Closeable sendReceive(final String destName,
+    public Future<Response> sendReceive(final String destName,
             final Map<String, Object> headers, final String reqPayload,
-            final Handler<Response> handler, final boolean singleUseOnly)
-            throws JMSException, NamingException {
+            final Handler<Response> handler) throws JMSException,
+            NamingException {
         Message reqMsg = createTextMessage(reqPayload);
         setHeaders(headers, reqMsg);
         final TemporaryQueue replyTo = currentJmsSession()
@@ -193,6 +217,7 @@ public class JmsClient implements Lifecycle {
                 }
             }
         };
+        final Promise<Response> promise = new Promise<>();
         final MessageListener listener = new MessageListener() {
             @Override
             public void onMessage(Message message) {
@@ -207,15 +232,11 @@ public class JmsClient implements Lifecycle {
                     final Response response = new Response(params, params,
                             respText);
                     handler.handle(response);
-                    if (singleUseOnly) {
-                        try {
-                            closeable.close();
-                        } catch (Exception e) {
-                            log.warn("Failed to close", e);
-                        }
-                    }
+                    promise.setValue(response);
                 } catch (Exception e) {
                     log.error("Failed to forward message " + message, e);
+                    promise.setError(e);
+                } finally {
                     try {
                         closeable.close();
                     } catch (Exception ex) {
@@ -229,7 +250,7 @@ public class JmsClient implements Lifecycle {
         createProducer(destName).send(reqMsg);
         log.info("Sent '" + reqPayload + "' to " + destName + ", headers "
                 + headers);
-        return closeable;
+        return promise;
     }
 
     private void setHeaders(final Map<String, Object> headers, Message reqMsg)

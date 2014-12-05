@@ -55,7 +55,7 @@ public class QuoteServer implements RequestHandler {
             System.exit(1);
         }
         startJmsBroker();
-        new AutoDeployer("com.plexobject.stock", args[0]).run();
+        new AutoDeployer("com.plexobject.stock", args[0]).deploy();
         Thread.currentThread().join();
     }
 }

@@ -98,7 +98,7 @@ public class NettyHttpServer implements Lifecycle {
                 SelfSignedCertificate ssc = new SelfSignedCertificate();
                 sslCtx = SslContext.newServerContext(ssc.certificate(),
                         ssc.privateKey());
-                log.info("********** Enabled self-signed SSL support");
+                log.info("Enabled self-signed SSL support");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -120,7 +120,7 @@ public class NettyHttpServer implements Lifecycle {
             try {
                 sslCtx = SslContext.newServerContext(certFile, keyFile,
                         keyPassword);
-                log.info("********** Enabled SSL support");
+                log.info("Enabled SSL support");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

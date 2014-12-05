@@ -238,7 +238,7 @@ public class JmsClientTest {
                     public void handle(Response request) {
                         payload.append((String) request.getPayload());
                     }
-                }, true);
+                });
         Thread.sleep(1000);
         broker.stop();
         assertEquals("ping", payload.toString());

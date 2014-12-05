@@ -50,12 +50,11 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         String replyText = null;
         if (payload instanceof Exception) {
             log.warn("Error received " + payload, payload);
-            Map<String, Object> attributes = ExceptionUtils
-                    .toMap((Exception) payload);
+            Map<String, Object> resp = ExceptionUtils.toErrors((Exception) payload);
             replyText = ObjectCodecFactory.getInstance()
-                    .getObjectCodec(codecType).encode(attributes);
+                    .getObjectCodec(codecType).encode(resp);
             for (String name : HEADER_PROPERTIES) {
-                Object value = attributes.get(name);
+                Object value = resp.get(name);
                 if (value != null) {
                     properties.put(name, value);
                 }

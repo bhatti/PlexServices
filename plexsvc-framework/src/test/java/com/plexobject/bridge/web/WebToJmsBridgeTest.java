@@ -126,8 +126,7 @@ public class WebToJmsBridgeTest {
             {
                 jmsClient.sendReceive(entry.getDestination(),
                         (Map<String, Object>) any,
-                        (String) request.getPayload(), (Handler<Response>) any,
-                        true);
+                        (String) request.getPayload(), (Handler<Response>) any);
             }
         };
         bridge.handle(request);

@@ -33,7 +33,7 @@ public class JmsSender {
                     System.exit(0);
                 }
             }
-        }, true);
+        });
         log.debug("Sent to " + dest + ": " + text + ", waiting for reply ");
         Thread.currentThread().join();
     }

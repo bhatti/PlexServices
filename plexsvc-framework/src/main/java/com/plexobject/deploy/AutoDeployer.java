@@ -12,6 +12,13 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
+/**
+ * This is a helper class that searches service classes that define
+ * ServiceConfig annoations and automatically deploys them.
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class AutoDeployer {
     private final String pkgName;
     private final String configFile;
@@ -23,7 +30,7 @@ public class AutoDeployer {
         this.configFile = configFile;
     }
 
-    public void run() throws Exception {
+    public void deploy() throws Exception {
         Reflections reflections = new Reflections(pkgName);
         Configuration config = new Configuration(configFile);
         JmsClient jmsClient = new JmsClient(config);
@@ -64,7 +71,7 @@ public class AutoDeployer {
                     "false");
         }
         //
-        new AutoDeployer(args[0], args[1]).run();
+        new AutoDeployer(args[0], args[1]).deploy();
         Thread.currentThread().join();
     }
 }

@@ -11,8 +11,13 @@ import javax.xml.bind.Unmarshaller;
 import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
 
+/**
+ * This class implements XML marshaling/unmarshaling support
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class XmlObjectCodec extends AbstractObjectCodec {
-
     @Override
     public <T> String encode(T obj) {
         if (obj == null) {
@@ -31,7 +36,6 @@ public class XmlObjectCodec extends AbstractObjectCodec {
         } catch (Exception e) {
             throw new RuntimeException("Failed to encode " + obj, e);
         }
-
     }
 
     @Override
@@ -61,7 +65,6 @@ public class XmlObjectCodec extends AbstractObjectCodec {
 
     @Override
     public CodecType getType() {
-        return CodecType.JSON;
+        return CodecType.XML;
     }
-
 }

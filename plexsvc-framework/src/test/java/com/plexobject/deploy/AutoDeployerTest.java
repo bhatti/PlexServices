@@ -79,7 +79,7 @@ public class AutoDeployerTest {
 
         AutoDeployer deployer = new AutoDeployer("com.plexobject.deploy",
                 propFile.getAbsolutePath());
-        deployer.run();
+        deployer.deploy();
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
         assertEquals(3, handlers.size());
@@ -92,7 +92,7 @@ public class AutoDeployerTest {
         properties.store(new FileWriter(propFile), "");
         AutoDeployer deployer = new AutoDeployer("com.plexobject.deploy",
                 propFile.getAbsolutePath());
-        deployer.run();
+        deployer.deploy();
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
         assertEquals(3, handlers.size());

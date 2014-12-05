@@ -34,7 +34,7 @@ public class ExceptionUtils {
         }
     };
 
-    public static Map<String, Object> toMap(Exception e) {
+    public static Map<String, Object> toErrors(Exception e) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(ERROR_TYPE, e.getClass().getSimpleName());
         try {

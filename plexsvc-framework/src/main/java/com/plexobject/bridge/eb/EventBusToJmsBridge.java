@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.bus.EventBus;
 import com.plexobject.bus.impl.EventBusImpl;
 import com.plexobject.domain.Constants;
+import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -36,10 +37,27 @@ import com.plexobject.service.Protocol;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
+/**
+ * This class adds bridge between event-bus and JMS bridge so that you can use
+ * event-bus and when you publish events on event-bus, they are published.
+ * Similarly, you can subscribe to channels on event-bus, which can be connected
+ * to JMS queues/topics so that when events are receied from those destinations,
+ * they are forwarded to the channel that you are listening to.
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class EventBusToJmsBridge implements Lifecycle {
     private static final Logger log = LoggerFactory
             .getLogger(EventBusToJmsBridge.class);
 
+    /**
+     * This listener listens to the channel and forwards events to the JMS
+     * queue/topics
+     * 
+     * @author shahzadbhatti
+     *
+     */
     static class EBListener implements RequestHandler, Lifecycle {
         private final JmsClient jmsClient;
         private final EventBus eb;
@@ -87,6 +105,13 @@ public class EventBusToJmsBridge implements Lifecycle {
         }
     }
 
+    /**
+     * This listener listen for events on JMS queues/topics and forwards them to
+     * the event bus channel
+     * 
+     * @author shahzadbhatti
+     *
+     */
     static class JmsListener implements MessageListener, ExceptionListener,
             Lifecycle {
         private final JmsClient jmsClient;
@@ -116,7 +141,9 @@ public class EventBusToJmsBridge implements Lifecycle {
                 AbstractResponseDispatcher dispatcher = message.getJMSReplyTo() != null ? new JmsResponseDispatcher(
                         jmsClient, message.getJMSReplyTo()) : null;
                 if (dispatcher != null) {
-                    dispatcher.setCodecType(entry.getCodecType());
+                    dispatcher.setCodecType(CodecType.fromAcceptHeader(
+                            (String) params.get(Constants.ACCEPT),
+                            entry.getCodecType()));
                 }
                 Request req = Request.builder().setProtocol(Protocol.JMS)
                         .setMethod(Method.MESSAGE).setProperties(params)
@@ -182,14 +209,33 @@ public class EventBusToJmsBridge implements Lifecycle {
         }
     }
 
+    /**
+     * This method returns listener that forwards events from event bus to JMS
+     * queues/topics.
+     * 
+     * @param e
+     * @return
+     */
     public EBListener getEBListener(EventBusToJmsEntry e) {
         return ebListeners.get(e);
     }
 
+    /**
+     * This method returns listener that forwards events from JMS destinations
+     * to event-bus.
+     * 
+     * @param e
+     * @return
+     */
     public JmsListener getJmsListener(EventBusToJmsEntry e) {
         return jmsListeners.get(e);
     }
 
+    /**
+     * This method adds mapping of bridge for event-bus and JMS
+     * 
+     * @param e
+     */
     public synchronized void add(EventBusToJmsEntry e) {
         if (e.getType() == EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS) {
             EBListener listener = new EBListener(jmsClient, eb, e);
@@ -201,6 +247,12 @@ public class EventBusToJmsBridge implements Lifecycle {
         log.info("Adding " + e);
     }
 
+    /**
+     * This method removes bridge mapping between event bus and JMS
+     * destinations.
+     * 
+     * @param e
+     */
     public synchronized void remove(EventBusToJmsEntry e) {
         if (e.getType() == EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS) {
             EBListener listener = ebListeners.remove(e);
@@ -215,6 +267,13 @@ public class EventBusToJmsBridge implements Lifecycle {
         }
     }
 
+    /**
+     * This is helper method to create event bus and start the bridge.
+     * 
+     * @param config
+     * @param entries
+     * @throws JMSException
+     */
     public static void run(Configuration config,
             Collection<EventBusToJmsEntry> entries) throws JMSException {
         EventBus eb = new EventBusImpl();
@@ -224,6 +283,9 @@ public class EventBusToJmsBridge implements Lifecycle {
         bridge.start();
     }
 
+    /**
+     * This method starts the bridge for event-bus to JMS
+     */
     @Override
     public synchronized void start() {
         if (running) {
@@ -239,6 +301,9 @@ public class EventBusToJmsBridge implements Lifecycle {
         }
     }
 
+    /**
+     * This method stops bridge for event-bus and JMS destination.
+     */
     @Override
     public synchronized void stop() {
         if (!running) {
