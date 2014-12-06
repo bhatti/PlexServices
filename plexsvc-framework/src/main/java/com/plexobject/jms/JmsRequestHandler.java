@@ -36,14 +36,14 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             .getLogger(JmsRequestHandler.class);
 
     private final ServiceRegistry serviceRegistry;
-    private final JmsClient jmsClient;
+    private final IJMSClient jmsClient;
     private final Destination destination;
     private final RequestHandler handler;
     private MessageConsumer consumer;
 
     JmsRequestHandler(final ServiceRegistry serviceRegistry,
-            JmsClient jmsClient, Destination destination, RequestHandler handler)
-            throws JMSException, NamingException {
+            IJMSClient jmsClient, Destination destination,
+            RequestHandler handler) throws JMSException, NamingException {
         this.serviceRegistry = serviceRegistry;
         this.jmsClient = jmsClient;
         this.destination = destination;
@@ -58,7 +58,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
 
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         try {
-            Map<String, Object> params = JmsClient.getParams(message);
+            Map<String, Object> params = jmsClient.getProperties(message);
             final String textPayload = txtMessage.getText();
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsClient, message.getJMSReplyTo());

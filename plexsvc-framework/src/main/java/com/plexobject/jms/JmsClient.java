@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.domain.Promise;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
-import com.plexobject.service.Lifecycle;
 import com.plexobject.util.Configuration;
 
 /**
@@ -44,8 +43,8 @@ import com.plexobject.util.Configuration;
  * @author shahzad bhatti
  *
  */
-public class JmsClient implements Lifecycle {
-    private static final Logger log = LoggerFactory.getLogger(JmsClient.class);
+public class JMSClient implements IJMSClient {
+    private static final Logger log = LoggerFactory.getLogger(JMSClient.class);
     private final Configuration config;
     private Connection connection;
     private ThreadLocal<Session> currentSession = new ThreadLocal<>();
@@ -55,7 +54,7 @@ public class JmsClient implements Lifecycle {
     private static boolean sendJmsHeaders;
     private boolean running;
 
-    public JmsClient(Configuration config) throws JMSException {
+    public JMSClient(Configuration config) {
         this.config = config;
         transactedSession = config.getBoolean("jms.trasactedSession");
         sendJmsHeaders = config.getBoolean("jms.sendJmsHeaders");
@@ -92,8 +91,6 @@ public class JmsClient implements Lifecycle {
             }
             log.info("Created JMS connection " + connection);
         } catch (RuntimeException e) {
-            throw e;
-        } catch (JMSException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -137,27 +134,23 @@ public class JmsClient implements Lifecycle {
         return running;
     }
 
-    /**
-     * This method creates producer to publish messages to JMS
+    /*
+     * (non-Javadoc)
      * 
-     * @param destName
-     * @return
-     * @throws JMSException
-     * @throws NamingException
+     * @see com.plexobject.jms.IJmsClient#createProducer(java.lang.String)
      */
+    @Override
     public MessageProducer createProducer(final String destName)
             throws JMSException, NamingException {
         return createProducer(getDestination(destName));
     }
 
-    /**
-     * This method creates producer to publish messages to JMS
+    /*
+     * (non-Javadoc)
      * 
-     * @param destination
-     * @return
-     * @throws JMSException
-     * @throws NamingException
+     * @see com.plexobject.jms.IJmsClient#createProducer(javax.jms.Destination)
      */
+    @Override
     public MessageProducer createProducer(final Destination destination)
             throws JMSException, NamingException {
         String destName = getDestName(destination).intern();
@@ -192,6 +185,13 @@ public class JmsClient implements Lifecycle {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#sendReceive(java.lang.String,
+     * java.util.Map, java.lang.String, com.plexobject.handler.Handler)
+     */
+    @Override
     public Future<Response> sendReceive(final String destName,
             final Map<String, Object> headers, final String reqPayload,
             final Handler<Response> handler) throws JMSException,
@@ -223,8 +223,7 @@ public class JmsClient implements Lifecycle {
             public void onMessage(Message message) {
                 TextMessage respMsg = (TextMessage) message;
                 try {
-                    final Map<String, Object> params = JmsClient
-                            .getParams(message);
+                    final Map<String, Object> params = getProperties(message);
                     final String respText = respMsg.getText();
                     log.info(destName + ": Received " + respText
                             + " in response to " + reqPayload + ", params "
@@ -281,12 +280,26 @@ public class JmsClient implements Lifecycle {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#send(java.lang.String, java.util.Map,
+     * java.lang.String)
+     */
+    @Override
     public void send(final String destName, final Map<String, Object> headers,
             final String payload) throws JMSException, NamingException {
         Destination destination = getDestination(destName);
         send(destination, headers, payload);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#send(javax.jms.Destination,
+     * java.util.Map, java.lang.String)
+     */
+    @Override
     public void send(final Destination destination,
             final Map<String, Object> headers, final String payload)
             throws JMSException, NamingException {
@@ -317,6 +330,12 @@ public class JmsClient implements Lifecycle {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#getDestination(java.lang.String)
+     */
+    @Override
     public Destination getDestination(String destName) throws JMSException,
             NamingException {
         String resolvedDestName = getNormalizedDestinationName(destName);
@@ -339,28 +358,52 @@ public class JmsClient implements Lifecycle {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#createTextMessage(java.lang.String)
+     */
+    @Override
     public Message createTextMessage(String payload) throws JMSException,
             NamingException {
         return currentJmsSession().createTextMessage(payload);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#createConsumer(java.lang.String)
+     */
+    @Override
     public MessageConsumer createConsumer(final String destName)
             throws JMSException, NamingException {
         return createConsumer(getDestination(destName));
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#createConsumer(javax.jms.Destination)
+     */
+    @Override
     public MessageConsumer createConsumer(final Destination destination)
             throws JMSException, NamingException {
         return currentJmsSession().createConsumer(destination);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.plexobject.jms.IJmsClient#createTemporaryQueue()
+     */
+    @Override
     public TemporaryQueue createTemporaryQueue() throws JMSException,
             NamingException {
         return currentJmsSession().createTemporaryQueue();
     }
 
     @SuppressWarnings("rawtypes")
-    public static Map<String, Object> getParams(Message message)
+    public Map<String, Object> getProperties(Message message)
             throws JMSException {
         Map<String, Object> params = new HashMap<>();
         if (sendJmsHeaders) {

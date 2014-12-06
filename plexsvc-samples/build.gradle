@@ -1,4 +1,6 @@
 sourceCompatibility = '1.7'
+apply plugin: 'war'
+apply plugin: 'jetty'
 
 apply plugin: 'application'
 mainClassName = 'com.plexobject.bugger.Main'

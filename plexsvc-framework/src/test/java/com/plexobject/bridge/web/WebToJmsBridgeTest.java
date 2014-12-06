@@ -24,7 +24,7 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
-import com.plexobject.jms.JmsClient;
+import com.plexobject.jms.IJMSClient;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
@@ -37,7 +37,7 @@ public class WebToJmsBridgeTest {
     }
 
     @Mocked
-    private JmsClient jmsClient;
+    private IJMSClient jmsClient;
     @Mocked
     private EventBus eb;
     @Mocked
@@ -50,10 +50,9 @@ public class WebToJmsBridgeTest {
     @Before
     public void setUp() throws Exception {
         Configuration config = new Configuration(new Properties());
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
-                jmsClient);
-        bridge = new WebToJmsBridge(jmsClient, new ArrayList<WebToJmsEntry>(),
-                serviceRegistry);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        bridge = new WebToJmsBridge(new ArrayList<WebToJmsEntry>(),
+                serviceRegistry, jmsClient);
     }
 
     @Test

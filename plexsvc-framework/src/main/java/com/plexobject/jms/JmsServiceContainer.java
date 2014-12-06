@@ -22,11 +22,16 @@ import com.plexobject.util.Configuration;
  *
  */
 public class JmsServiceContainer extends AbstractServiceContainer {
-    private JmsClient jmsClient;
+    private IJMSClient jmsClient;
     private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
 
     public JmsServiceContainer(final Configuration config,
-            final ServiceRegistry serviceRegistry, JmsClient jmsClient)
+            final ServiceRegistry serviceRegistry) throws Exception {
+        this(config, serviceRegistry, new JMSClient(config));
+    }
+
+    public JmsServiceContainer(final Configuration config,
+            final ServiceRegistry serviceRegistry, IJMSClient jmsClient)
             throws Exception {
         super(config, serviceRegistry);
         this.jmsClient = jmsClient;

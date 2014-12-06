@@ -20,7 +20,7 @@ import com.plexobject.encode.CodecType;
 @RunWith(JMockit.class)
 public class JmsResponseDispatcherTest {
     @Mocked
-    private JmsClient jmsClient;
+    private IJMSClient jmsClient;
     @Mocked
     private Destination replyTo;
 

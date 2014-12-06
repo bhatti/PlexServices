@@ -6,7 +6,6 @@ import org.reflections.Reflections;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.JmsClient;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistry;
@@ -33,7 +32,6 @@ public class AutoDeployer {
     public void deploy() throws Exception {
         Reflections reflections = new Reflections(pkgName);
         Configuration config = new Configuration(configFile);
-        JmsClient jmsClient = new JmsClient(config);
         String roleAuthorizerClass = config.getProperty("roleAuthorizer");
 
         RoleAuthorizer roleAuthorizer = null;
@@ -41,7 +39,7 @@ public class AutoDeployer {
             roleAuthorizer = (RoleAuthorizer) Class
                     .forName(roleAuthorizerClass).newInstance();
         }
-        serviceRegistry = new ServiceRegistry(config, roleAuthorizer, jmsClient);
+        serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
 
         Set<Class<?>> serviceClasses = reflections
                 .getTypesAnnotatedWith(ServiceConfig.class);

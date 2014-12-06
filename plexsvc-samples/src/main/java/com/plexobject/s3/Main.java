@@ -1,6 +1,5 @@
 package com.plexobject.s3;
 
-import com.plexobject.jms.JmsClient;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
@@ -14,10 +13,8 @@ public class Main {
         Configuration config = new Configuration(args[0]);
         //
         //
-        JmsClient jmsClient = new JmsClient(config);
 
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
-                jmsClient);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
         serviceRegistry.add(new S3SignService(config.getProperty("s3.key")));
         serviceRegistry.add(new StaticFileServer(config.getProperty(
                 "static.web.folder", ".")));

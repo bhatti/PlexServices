@@ -19,12 +19,14 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.jms.JmsClient;
+import com.plexobject.jms.IJMSClient;
+import com.plexobject.jms.JMSClient;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.Method;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
+import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
 /**
@@ -37,13 +39,18 @@ import com.plexobject.util.IOUtils;
 public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     private static final Logger log = LoggerFactory
             .getLogger(WebToJmsBridge.class);
-    private final JmsClient jmsClient;
+    private final IJMSClient jmsClient;
     private final ServiceRegistry serviceRegistry;
     //
     private final Map<Method, RouteResolver<WebToJmsEntry>> entriesEndpointsByMethod = new ConcurrentHashMap<>();
 
-    public WebToJmsBridge(JmsClient jmsClient,
-            Collection<WebToJmsEntry> entries, ServiceRegistry serviceRegistry) {
+    public WebToJmsBridge(Collection<WebToJmsEntry> entries,
+            ServiceRegistry serviceRegistry, Configuration config) {
+        this(entries, serviceRegistry, new JMSClient(config));
+    }
+
+    public WebToJmsBridge(Collection<WebToJmsEntry> entries,
+            ServiceRegistry serviceRegistry, IJMSClient jmsClient) {
         this.jmsClient = jmsClient;
         this.serviceRegistry = serviceRegistry;
 

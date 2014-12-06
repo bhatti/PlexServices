@@ -40,7 +40,6 @@ import com.plexobject.bugger.service.user.LoginService;
 import com.plexobject.bugger.service.user.QueryUserService;
 import com.plexobject.bugger.service.user.UpdateUserService;
 import com.plexobject.encode.CodecType;
-import com.plexobject.jms.JmsClient;
 import com.plexobject.service.Method;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
@@ -61,13 +60,12 @@ public class Main {
         this.config = new Configuration(propertyFile);
         startJmsBroker();
 
-        JmsClient jmsClient = new JmsClient(config);
         serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
-                userRepository), jmsClient);
+                userRepository));
         if (propertyFile != null) {
             Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
                     mappingFile));
-            new WebToJmsBridge(jmsClient, entries, serviceRegistry);
+            new WebToJmsBridge(entries, serviceRegistry, config);
         }
         populateTestData();
         //

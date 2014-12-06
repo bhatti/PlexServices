@@ -195,6 +195,6 @@ public class TestWebUtils {
         Properties props = new Properties();
         props.setProperty(Constants.HTTP_PORT, String.valueOf(port));
         Configuration config = new Configuration(props);
-        return HttpServerFactory.getHttpServer(config, handler);
+        return WebContainerProvider.EMBEDDED.getWebContainer(config, handler);
     }
 }

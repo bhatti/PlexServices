@@ -19,7 +19,7 @@ PlexService is designed on following design principles:
 
 - Encourage messaging based services: Though, PlexService supports both messaging based services and web services, but it prefers messaging based services and provides web bridge to expose them externally. It also encourages use of event-bus for internal communication. 
 
-- Easily deployable: PlexService framework provides embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
+- Easily deployable: PlexService framework supports both war files and embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
 
 - Development Support: Though, you may use different Java processes to deploy services in your production environment, but you can add all of services in a single Java process during development to simplify the deployment process.
 
@@ -38,7 +38,7 @@ PlexService is designed on following design principles:
 
 - PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
 
-- PlexService uses Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
+- PlexService supports both war files and Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
 
 - PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
@@ -72,6 +72,8 @@ cd plexsvc-framework
 - MIT
 
 ## Defining Services
+
+PlexService uses Netty server as embedded web server to host web services by default and you can easily build REST services as follows:
 
 ### Defining a REST service for creating a user
 ```java 
@@ -107,7 +109,10 @@ resp = requests.post('http://localhost:8181/login', data={'password': password, 
 json_resp = json.loads(resp.text)
 ```
 
-### Defining a Web service over Websockets for creating a user
+### Defining a Web service over Websockets for creating a user 
+PlexService supports both war files and embedded Netty server for hosting webservices, however websockets is only supported under Netty server, 
+which is default setting.
+
 ```java 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
@@ -445,8 +450,7 @@ Here is how you can setup bridge between HTTP/Websocket and JMS based services.
   Configuration config = new Configuration(configFile);
   Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(mappingFile));
   ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-  JmsClient jmsClient = new JmsClient(config);
-  new WebToJmsBridge(jmsClient, entries, serviceRegistry);
+  new WebToJmsBridge(entries, serviceRegistry, config);
   serviceRegistry.start();
 ```
 Note that with above configuration, you can access your services either with HTTP or Websocket
@@ -591,6 +595,74 @@ serviceRegistry.start();
 ```
 You will be able to view all of the services in JMX console at runtime.
 
+
+### Building War file
+PlexService uses embedded Netty server by default for hosting web services but you can define following configurations to deploy it inside a war file using any J2EE compatible container such as Tomcat, Jetty, JBoss, etc.
+First, add following line to the configuration 
+
+```bash 
+web.container.provider=WAR_SERVLET
+```
+
+Then define a class to add your services, e.g.
+```java 
+public class Deployer implements ServiceRegistryCallback {
+    @Override
+    public void created(ServiceRegistry serviceRegistry) {
+        PingService pingService = new PingService();
+        ReverseService reverseService = new ReverseService();
+        SimpleService simpleService = new SimpleService();
+        serviceRegistry.add(pingService);
+        serviceRegistry.add(reverseService);
+        serviceRegistry.add(simpleService);
+    }
+}
+```
+
+Then add servlet mapping to the web.xml, e.g.
+```xml
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+    <display-name>PlexService Sample Application</display-name>
+    <servlet>
+        <servlet-name>plexservice</servlet-name>
+        <servlet-class>com.plexobject.http.servlet.WebRequestHandlerServlet</servlet-class>
+        <init-param>
+            <param-name>PlexserviceCallbackClass</param-name> 
+            <param-value>com.plexobject.ping.Main</param-value> 
+        </init-param>
+        <init-param>
+            <param-name>PlexserviceConfigResourcePath</param-name> 
+            <param-value>/ping.properties</param-value> 
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>plexservice</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>  
+```
+
+Optionally, you can add class name for the security authorizer, e.g.
+```xml
+        <init-param>
+            <param-name>PlexserviceRoleAuthorizerClass</param-name> 
+            <param-value>com.plexobject.ping.MyAuthorizer</param-value> 
+        </init-param>
+```
+
+PlexService comes with examples that you can use to deploy using
+```bash
+cd plexsvc-samples
+./gradlew jettyRun
+```
+Voila
 
 ### Auto-Deploying
 In addition to specifying services manually for deployment, PlexService provides support to scan all services 

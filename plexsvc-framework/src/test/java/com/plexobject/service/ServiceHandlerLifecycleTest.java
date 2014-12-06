@@ -14,7 +14,6 @@ import org.junit.Test;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.JmsClient;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
 import com.plexobject.util.Configuration;
 
@@ -34,7 +33,6 @@ public class ServiceHandlerLifecycleTest {
     }
 
     private ServiceRegistry registry;
-    private JmsClient jmsClient;
     private BrokerService broker = new BrokerService();
 
     @Before
@@ -49,8 +47,7 @@ public class ServiceHandlerLifecycleTest {
         properties.put("jms.providerUrl", "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
 
-        jmsClient = new JmsClient(config);
-        registry = new ServiceRegistry(config, null, jmsClient);
+        registry = new ServiceRegistry(config, null);
     }
 
     @After

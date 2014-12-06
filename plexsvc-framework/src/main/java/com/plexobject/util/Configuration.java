@@ -1,11 +1,17 @@
 package com.plexobject.util;
 
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.plexobject.encode.CodecType;
+import com.plexobject.http.WebContainerProvider;
 
 /**
  * This class stores application configuration
@@ -14,6 +20,15 @@ import com.plexobject.encode.CodecType;
  *
  */
 public class Configuration {
+    private static final Logger log = LoggerFactory
+            .getLogger(Configuration.class);
+
+    private static final String WEB_CONTAINER_PROVIDER = "web.container.provider";
+    private static final String SSL = "ssl";
+    private static final String HTTP_WEBSOCKET_URI = "http.websocketUri";
+    private static final String HTTP_SERVICE_TIMEOUT_SECS = "http.serviceTimeoutSecs";
+    private static final String JSON = "JSON";
+    private static final String DEFAULT_CODEC_TYPE = "defaultCodecType";
     private final Properties properties = new Properties();
 
     public Configuration(String propertyFile) throws IOException {
@@ -30,21 +45,26 @@ public class Configuration {
         properties.putAll(props);
     }
 
+    public WebContainerProvider getWebContainerProvider() {
+        return WebContainerProvider.valueOf(getProperty(WEB_CONTAINER_PROVIDER,
+                WebContainerProvider.EMBEDDED.name()).toUpperCase());
+    }
+
     public CodecType getDefaultCodecType() {
-        return CodecType.valueOf(getProperty("defaultCodecType", "JSON")
+        return CodecType.valueOf(getProperty(DEFAULT_CODEC_TYPE, JSON)
                 .toUpperCase());
     }
 
     public int getDefaultTimeoutSecs() {
-        return getInteger("http.serviceTimeoutSecs", 10);
+        return getInteger(HTTP_SERVICE_TIMEOUT_SECS, 10);
     }
 
     public String getDefaultWebsocketUri() {
-        return getProperty("http.websocketUri", "/ws");
+        return getProperty(HTTP_WEBSOCKET_URI, "/ws");
     }
 
     public boolean isSsl() {
-        return getBoolean("ssl");
+        return getBoolean(SSL);
     }
 
     public String getProperty(final String key) {
@@ -95,6 +115,10 @@ public class Configuration {
 
     private static InputStream getInputStream(String propertyFile)
             throws IOException {
+        log.info("Loading configuration from " + propertyFile);
+        if (new File(propertyFile).exists()) {
+            return new BufferedInputStream(new FileInputStream(propertyFile));
+        }
         InputStream in = Configuration.class.getClassLoader()
                 .getResourceAsStream(propertyFile);
         if (in == null) {

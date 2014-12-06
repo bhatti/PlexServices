@@ -24,7 +24,7 @@ import com.plexobject.bus.EventBus;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
-import com.plexobject.jms.JmsClient;
+import com.plexobject.jms.IJMSClient;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 
@@ -35,7 +35,7 @@ public class EventBusToJmsBridgeTest {
     }
 
     @Mocked
-    private JmsClient jmsClient;
+    private IJMSClient jmsClient;
     @Mocked
     private EventBus eb;
     @Mocked

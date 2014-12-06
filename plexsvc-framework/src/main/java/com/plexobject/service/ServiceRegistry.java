@@ -22,10 +22,9 @@ import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.DefaultHttpRequestHandler;
-import com.plexobject.http.DefaultHttpServiceContainer;
+import com.plexobject.http.DefaultWebServiceContainer;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.http.HttpServerFactory;
-import com.plexobject.jms.JmsClient;
+import com.plexobject.http.WebContainerProvider;
 import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
@@ -47,21 +46,19 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
     private static final Logger log = LoggerFactory
             .getLogger(ServiceRegistry.class);
 
-    private final Map<Protocol, ServiceContainer> containers = new HashMap<>();
+    private final Map<Protocol, ServiceContainer> _containers = new HashMap<>();
     private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
+    private final Configuration config;
     private final RoleAuthorizer authorizer;
-    private final JmsClient jmsClient;
     private boolean running;
     private final StatsDClient statsd;
     private ServiceMetricsRegistry serviceMetricsRegistry;
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
-    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer,
-            JmsClient jmsClient) {
+    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
+        this.config = config;
         this.authorizer = authorizer;
-        this.jmsClient = jmsClient;
-        this.containers.putAll(getDefaultServiceContainers(config, authorizer));
         String statsdHost = config.getProperty("statsd.host");
         if (statsdHost != null) {
             String servicePrefix = config.getProperty("serviceConfigs", "");
@@ -103,7 +100,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
         Objects.requireNonNull(config, "service handler " + h
                 + " doesn't define ServiceConfig annotation");
         handlerConfigs.put(h, config);
-        ServiceContainer container = containers.get(config.protocol());
+        ServiceContainer container = getOrAddServiceContainer(config.protocol());
         Objects.requireNonNull(container,
                 "Unsupported container for service handler " + h);
         if (!container.exists(h)) {
@@ -151,7 +148,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
         ServiceConfigDesc config = getServiceConfig(h);
         Objects.requireNonNull(config, "config" + h
                 + " doesn't define ServiceConfig annotation");
-        ServiceContainer container = containers.get(config.protocol());
+        ServiceContainer container = getOrAddServiceContainer(config.protocol());
         if (container == null) {
             return false;
         }
@@ -166,7 +163,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
         ServiceConfigDesc config = getServiceConfig(h);
         Objects.requireNonNull(config, "config" + h
                 + " doesn't define ServiceConfig annotation");
-        ServiceContainer container = containers.get(config.protocol());
+        ServiceContainer container = getOrAddServiceContainer(config.protocol());
         if (container == null) {
             return false;
         }
@@ -194,34 +191,41 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
     @Override
     public synchronized Collection<RequestHandler> getHandlers() {
         Collection<RequestHandler> handlers = new HashSet<>();
-        for (ServiceContainer g : containers.values()) {
+        for (ServiceContainer g : _containers.values()) {
             handlers.addAll(g.getHandlers());
         }
         return handlers;
     }
 
-    private Map<Protocol, ServiceContainer> getDefaultServiceContainers(
-            Configuration config, RoleAuthorizer authorizer) {
-        final Map<Protocol, ServiceContainer> containers = new HashMap<>();
-        ServiceContainer webServiceContainer = getHttpServiceContainer(config,
-                authorizer,
-                new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>());
-        try {
-            containers.put(Protocol.HTTP, webServiceContainer);
-            containers.put(Protocol.JMS, new JmsServiceContainer(config, this,
-                    jmsClient));
-            containers.put(Protocol.WEBSOCKET, webServiceContainer);
-            return containers;
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add containers", e);
+    private synchronized ServiceContainer getOrAddServiceContainer(
+            Protocol protocol) {
+        ServiceContainer container = _containers.get(protocol);
+        if (container == null) {
+            try {
+                if (protocol == Protocol.HTTP || protocol == Protocol.WEBSOCKET) {
+                    container = getWebServiceContainer(
+                            config,
+                            authorizer,
+                            new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>());
+                    _containers.put(Protocol.HTTP, container);
+                    _containers.put(Protocol.WEBSOCKET, container);
+                } else if (protocol == Protocol.JMS) {
+                    container = new JmsServiceContainer(config, this);
+                    _containers.put(Protocol.JMS, container);
+                }
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to add containers", e);
+            }
         }
+        return container;
     }
 
     @Override
     public synchronized void start() {
-        for (ServiceContainer g : containers.values()) {
+        log.info("Starting containers...");
+        for (ServiceContainer g : _containers.values()) {
             if (g.getHandlers().size() > 0) {
                 g.start();
             }
@@ -231,7 +235,8 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
 
     @Override
     public synchronized void stop() {
-        for (ServiceContainer g : containers.values()) {
+        log.info("Stopping containers...");
+        for (ServiceContainer g : _containers.values()) {
             if (g.getHandlers().size() > 0) {
                 g.stop();
             }
@@ -322,14 +327,17 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
         }
     }
 
-    private ServiceContainer getHttpServiceContainer(
+    private ServiceContainer getWebServiceContainer(
             final Configuration config,
             final RoleAuthorizer authorizer,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
         RequestHandler executor = new DefaultHttpRequestHandler(this,
                 requestHandlerPathsByMethod);
-        Lifecycle server = HttpServerFactory.getHttpServer(config, executor);
-        return new DefaultHttpServiceContainer(config, this,
+        WebContainerProvider webContainerProvider = config
+                .getWebContainerProvider();
+        Lifecycle server = webContainerProvider.getWebContainer(config,
+                executor);
+        return new DefaultWebServiceContainer(config, this,
                 requestHandlerPathsByMethod, server);
     }
 }

@@ -10,14 +10,14 @@ import org.apache.log4j.LogManager;
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
-import com.plexobject.jms.JmsClient;
+import com.plexobject.http.servlet.ServiceRegistryCallback;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
-public class Main {
+public class Main implements ServiceRegistryCallback {
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
             System.err.println("Usage: java " + Main.class.getName()
@@ -30,9 +30,9 @@ public class Main {
         PingService pingService = new PingService();
 
         String type = args[1];
-        JmsClient jmsClient = new JmsClient(config);
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null,
-                jmsClient);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        ReverseService reverseService = new ReverseService();
+        SimpleService simpleService = new SimpleService();
 
         // ensure activemq is already running
         if ("jms".equalsIgnoreCase(type)) {
@@ -46,8 +46,8 @@ public class Main {
                     new WebToJmsEntry(CodecType.JSON, "/ping", Method.GET,
                             "queue:ping", 5), new WebToJmsEntry(CodecType.JSON,
                             "/ping", Method.MESSAGE, "queue:ping", 5));
-            new WebToJmsBridge(jmsClient, entries, serviceRegistry);
-        } else {
+            new WebToJmsBridge(entries, serviceRegistry, config);
+        } else if ("websocket".equalsIgnoreCase(type)) {
             serviceRegistry.add(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
@@ -58,8 +58,26 @@ public class Main {
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(Method.GET).setProtocol(Protocol.HTTP)
                             .setEndpoint("/ping").build());
+        } else {
+            serviceRegistry.add(pingService);
         }
+        serviceRegistry.add(reverseService);
+        serviceRegistry.add(simpleService);
         serviceRegistry.start();
         Thread.currentThread().join();
+    }
+
+    @Override
+    public void created(ServiceRegistry serviceRegistry) {
+        BasicConfigurator.configure();
+        LogManager.getRootLogger().setLevel(Level.INFO);
+
+        PingService pingService = new PingService();
+        ReverseService reverseService = new ReverseService();
+        SimpleService simpleService = new SimpleService();
+
+        serviceRegistry.add(pingService);
+        serviceRegistry.add(reverseService);
+        serviceRegistry.add(simpleService);
     }
 }

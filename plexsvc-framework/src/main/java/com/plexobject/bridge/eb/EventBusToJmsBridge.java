@@ -29,7 +29,8 @@ import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.JmsClient;
+import com.plexobject.jms.IJMSClient;
+import com.plexobject.jms.JMSClient;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
@@ -55,16 +56,16 @@ public class EventBusToJmsBridge implements Lifecycle {
      * This listener listens to the channel and forwards events to the JMS
      * queue/topics
      * 
-     * @author shahzadbhatti
+     * @author shahzad bhatti
      *
      */
     static class EBListener implements RequestHandler, Lifecycle {
-        private final JmsClient jmsClient;
+        private final IJMSClient jmsClient;
         private final EventBus eb;
         private final EventBusToJmsEntry entry;
         private long subscriptionId;
 
-        private EBListener(JmsClient jmsClient, EventBus eb,
+        private EBListener(IJMSClient jmsClient, EventBus eb,
                 EventBusToJmsEntry entry) {
             this.jmsClient = jmsClient;
             this.eb = eb;
@@ -114,12 +115,12 @@ public class EventBusToJmsBridge implements Lifecycle {
      */
     static class JmsListener implements MessageListener, ExceptionListener,
             Lifecycle {
-        private final JmsClient jmsClient;
+        private final IJMSClient jmsClient;
         private final EventBus eb;
         private final EventBusToJmsEntry entry;
         private MessageConsumer consumer;
 
-        JmsListener(JmsClient jmsClient, EventBus eb, EventBusToJmsEntry entry) {
+        JmsListener(IJMSClient jmsClient, EventBus eb, EventBusToJmsEntry entry) {
             this.jmsClient = jmsClient;
             this.eb = eb;
             this.entry = entry;
@@ -129,7 +130,7 @@ public class EventBusToJmsBridge implements Lifecycle {
         public void onMessage(Message message) {
             TextMessage txtMessage = (TextMessage) message;
             try {
-                Map<String, Object> params = JmsClient.getParams(message);
+                Map<String, Object> params = jmsClient.getProperties(message);
                 String sessionId = (String) params.get(Constants.SESSION_ID);
 
                 final String textPayload = txtMessage.getText();
@@ -193,12 +194,12 @@ public class EventBusToJmsBridge implements Lifecycle {
     }
 
     private boolean running;
-    private final JmsClient jmsClient;
+    private final IJMSClient jmsClient;
     private final EventBus eb;
     private final Map<EventBusToJmsEntry, EBListener> ebListeners = new ConcurrentHashMap<>();
     private final Map<EventBusToJmsEntry, JmsListener> jmsListeners = new ConcurrentHashMap<>();
 
-    public EventBusToJmsBridge(JmsClient jmsClient,
+    public EventBusToJmsBridge(IJMSClient jmsClient,
             Collection<EventBusToJmsEntry> entries, EventBus eb)
             throws JMSException {
         this.jmsClient = jmsClient;
@@ -277,7 +278,7 @@ public class EventBusToJmsBridge implements Lifecycle {
     public static void run(Configuration config,
             Collection<EventBusToJmsEntry> entries) throws JMSException {
         EventBus eb = new EventBusImpl();
-        JmsClient jmsClient = new JmsClient(config);
+        JMSClient jmsClient = new JMSClient(config);
         EventBusToJmsBridge bridge = new EventBusToJmsBridge(jmsClient,
                 entries, eb);
         bridge.start();

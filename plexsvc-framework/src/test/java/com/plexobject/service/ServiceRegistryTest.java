@@ -20,7 +20,6 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.JmsClient;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.util.Configuration;
@@ -101,10 +100,8 @@ public class ServiceRegistryTest {
     @Test
     public void testCreateWithoutEmptyServices() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
 
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         assertEquals(0, registry.getHandlers().size());
         assertNotNull(registry.getServiceMetricsRegistry());
     }
@@ -112,11 +109,14 @@ public class ServiceRegistryTest {
     @Test
     public void testCreateServices() throws Exception {
         properties.put("statsd.host", "localhost");
-        final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
+        properties.put("jms.contextFactory",
+                "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
+        properties.put("jms.providerUrl", "tcp://localhost:61616");
 
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        final Configuration config = new Configuration(properties);
+
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         registry.add(new WebsocketService());
         registry.add(new WebService());
         registry.add(new JmsService());
@@ -127,9 +127,7 @@ public class ServiceRegistryTest {
     @Test
     public void testAddRemoveService() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         RequestHandler h = new WebService();
         assertFalse(registry.exists(h));
         registry.add(h);
@@ -146,9 +144,7 @@ public class ServiceRegistryTest {
     @Test
     public void testUnknownRemove() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         RequestHandler h = new WebService();
         registry.remove(h);
         assertEquals(0, registry.getHandlers().size());
@@ -157,10 +153,8 @@ public class ServiceRegistryTest {
     @Test
     public void testStartStop() throws Exception {
         properties.put("statsd.host", "localhost");
-        final JmsClient jmsClient = newJmsClient();
         final Configuration config = new Configuration(properties);
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         RequestHandler h = new WebService();
         registry.add(h);
         assertFalse(registry.isRunning());
@@ -173,9 +167,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeNull() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -194,9 +186,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebsocket() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "test";
@@ -215,9 +205,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWeb() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{\"username\":\"john\"}";
@@ -237,9 +225,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithAuthExceptionAndRedirect() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -268,9 +254,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithAuthException() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -299,9 +283,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithValidationException() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -331,9 +313,7 @@ public class ServiceRegistryTest {
     @Test
     public void testInvokeWebWithException() throws Exception {
         final Configuration config = new Configuration(properties);
-        final JmsClient jmsClient = newJmsClient();
-        ServiceRegistry registry = new ServiceRegistry(config, authorizer,
-                jmsClient);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -357,15 +337,6 @@ public class ServiceRegistryTest {
         exception = new RuntimeException("unknown error");
         registry.invoke(request, h);
         assertTrue(response.toString().contains("unknown error"));
-    }
-
-    private JmsClient newJmsClient() throws Exception {
-        properties.put("jms.contextFactory",
-                "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
-        final Configuration config = new Configuration(properties);
-        return new JmsClient(config);
     }
 
     private static BrokerService startBroker() throws Exception {

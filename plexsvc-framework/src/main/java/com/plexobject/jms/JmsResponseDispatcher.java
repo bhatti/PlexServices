@@ -17,10 +17,10 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 public class JmsResponseDispatcher extends AbstractResponseDispatcher {
     private static final Logger log = LoggerFactory
             .getLogger(JmsResponseDispatcher.class);
-    private final JmsClient jmsClient;
+    private final IJMSClient jmsClient;
     private final Destination replyTo;
 
-    public JmsResponseDispatcher(JmsClient jmsClient, Destination replyTo) {
+    public JmsResponseDispatcher(IJMSClient jmsClient, Destination replyTo) {
         this.jmsClient = jmsClient;
         this.replyTo = replyTo;
     }

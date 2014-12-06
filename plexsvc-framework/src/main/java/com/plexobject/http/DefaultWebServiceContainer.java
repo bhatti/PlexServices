@@ -21,11 +21,11 @@ import com.plexobject.util.Configuration;
  * @author shahzad bhatti
  *
  */
-public class DefaultHttpServiceContainer extends AbstractServiceContainer {
+public class DefaultWebServiceContainer extends AbstractServiceContainer {
     private final Map<Method, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod;
     private final Lifecycle server;
 
-    public DefaultHttpServiceContainer(
+    public DefaultWebServiceContainer(
             final Configuration config,
             final ServiceRegistry serviceRegistry,
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod,
@@ -71,7 +71,7 @@ public class DefaultHttpServiceContainer extends AbstractServiceContainer {
             requestHandlerEndpointsByMethod.put(config.method(),
                     requestHandlerEndpoints);
         }
-
+        //
         requestHandlerEndpoints.put(endpoint, handler);
         if (handler instanceof LifecycleAware) {
             ((LifecycleAware) handler).onCreated();
@@ -108,13 +108,13 @@ public class DefaultHttpServiceContainer extends AbstractServiceContainer {
 
         if (requestHandlerEndpoints != null) {
             String endpoint = getEndpoint(handler, config);
-            return requestHandlerEndpoints.get(endpoint, new HashMap<String, Object>()) != null;
+            return requestHandlerEndpoints.get(endpoint,
+                    new HashMap<String, Object>()) != null;
         }
         return false;
     }
 
-    private String getEndpoint(com.plexobject.handler.RequestHandler handler,
-            ServiceConfigDesc config) {
+    private String getEndpoint(RequestHandler handler, ServiceConfigDesc config) {
         String endpoint = config.endpoint();
         if (endpoint == null || endpoint.length() == 0) {
             throw new IllegalArgumentException("service handler " + handler
