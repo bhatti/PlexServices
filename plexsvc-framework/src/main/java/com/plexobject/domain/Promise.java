@@ -58,7 +58,7 @@ public class Promise<T> implements Future<T> {
     @Override
     public T get() throws InterruptedException, ExecutionException {
         try {
-            return get(Long.MAX_VALUE, TimeUnit.HOURS);
+            return get(0, TimeUnit.MICROSECONDS);
         } catch (TimeoutException e) {
             throw new ExecutionException(e);
         }

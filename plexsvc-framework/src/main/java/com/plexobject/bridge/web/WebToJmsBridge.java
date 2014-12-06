@@ -20,7 +20,7 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.jms.IJMSClient;
-import com.plexobject.jms.JMSClient;
+import com.plexobject.jms.JMSClientImpl;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.Method;
@@ -46,7 +46,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
 
     public WebToJmsBridge(Collection<WebToJmsEntry> entries,
             ServiceRegistry serviceRegistry, Configuration config) {
-        this(entries, serviceRegistry, new JMSClient(config));
+        this(entries, serviceRegistry, new JMSClientImpl(config));
     }
 
     public WebToJmsBridge(Collection<WebToJmsEntry> entries,

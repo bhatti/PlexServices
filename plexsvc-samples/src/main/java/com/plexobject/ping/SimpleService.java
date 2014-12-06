@@ -27,8 +27,9 @@ public class SimpleService implements RequestHandler {
             person = new Person();
         }
         person.setId(System.currentTimeMillis());
-        person.setName("Name " + System.currentTimeMillis());
-        person.setEmail("email" + System.currentTimeMillis() + "@gmail.com");
+        person.setName(person.getName() + System.currentTimeMillis());
+        person.setEmail(person.getEmail() + System.currentTimeMillis()
+                + "@gmail.com");
         request.getResponseDispatcher().send(person);
     }
 }

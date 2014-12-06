@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.IJMSClient;
-import com.plexobject.jms.JMSClient;
+import com.plexobject.jms.JMSClientImpl;
 import com.plexobject.util.Configuration;
 
 public class JmsSender {
@@ -21,7 +21,7 @@ public class JmsSender {
     public static void send(String propertyFile, String dest,
             Map<String, Object> headers, String text) throws Exception {
         Configuration config = new Configuration(propertyFile);
-        final IJMSClient jmsClient = new JMSClient(config);
+        final IJMSClient jmsClient = new JMSClientImpl(config);
         jmsClient.start();
         jmsClient.sendReceive(dest, headers, text, new Handler<Response>() {
             @Override

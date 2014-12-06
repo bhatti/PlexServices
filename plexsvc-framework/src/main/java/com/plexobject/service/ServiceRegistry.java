@@ -267,12 +267,20 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
             }
 
             // override payload in request
-            Object payload = config.payloadClass() != Void.class ? ObjectCodecFactory
-                    .getInstance()
-                    .getObjectCodec(config.codec())
-                    .decode((String) request.getPayload(),
-                            config.payloadClass(), request.getProperties())
-                    : null;
+            Object payload = null;
+            if (config.payloadClass() != Void.class) {
+                payload = ObjectCodecFactory
+                        .getInstance()
+                        .getObjectCodec(config.codec())
+                        .decode((String) request.getPayload(),
+                                config.payloadClass(), request.getProperties());
+                if (payload == null) {
+                    request.getResponseDispatcher().setStatus(
+                            HttpResponse.SC_FORBIDDEN);
+                    request.getResponseDispatcher().send(
+                            "Expected payload not defined");
+                }
+            }
 
             // validate required fields
             requiredFieldValidator.validate(handler,

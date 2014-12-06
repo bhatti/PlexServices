@@ -58,7 +58,7 @@ public class JMSClientTest {
     @Test(expected = NullPointerException.class)
     public void testCreateWithoutContextFactory() throws Exception {
         final Configuration config = new Configuration(properties);
-        new JMSClient(config);
+        new JMSClientImpl(config);
     }
 
     @Test(expected = NullPointerException.class)
@@ -66,7 +66,7 @@ public class JMSClientTest {
         properties.put("jms.contextFactory",
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         final Configuration config = new Configuration(properties);
-        new JMSClient(config);
+        new JMSClientImpl(config);
     }
 
     @Test(expected = NullPointerException.class)
@@ -75,7 +75,7 @@ public class JMSClientTest {
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
         final Configuration config = new Configuration(properties);
-        new JMSClient(config);
+        new JMSClientImpl(config);
     }
 
     @Test(expected = RuntimeException.class)
@@ -84,14 +84,14 @@ public class JMSClientTest {
         properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
         properties.put("jms.providerUrl", "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
-        new JMSClient(config);
+        new JMSClientImpl(config);
     }
 
     @Test
     public void testCreateWithServer() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         broker.stop();
         assertFalse(client.isRunning());
     }
@@ -102,7 +102,7 @@ public class JMSClientTest {
         properties.put("jms.password", "");
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         broker.stop();
         assertFalse(client.isRunning());
     }
@@ -111,7 +111,7 @@ public class JMSClientTest {
     public void testStart() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         client.start();
         client.start();
         assertTrue(client.isRunning());
@@ -122,7 +122,7 @@ public class JMSClientTest {
     public void testStartWhenBrokerIsDown() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         broker.stop();
         client.start();
     }
@@ -131,7 +131,7 @@ public class JMSClientTest {
     public void testStop() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         client.stop();
         assertFalse(client.isRunning());
         client.start();
@@ -145,7 +145,7 @@ public class JMSClientTest {
     public void testStopWhenBrokerIsDown() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         client.start();
         broker.stop();
         client.stop();
@@ -155,7 +155,7 @@ public class JMSClientTest {
     public void testCreateProducer() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        IJMSClient client = new JMSClient(config);
+        IJMSClient client = new JMSClientImpl(config);
         MessageProducer producer = client.createProducer("topic:test");
         assertNotNull(producer);
         MessageProducer producerCopy = client.createProducer("topic:test");
@@ -169,7 +169,7 @@ public class JMSClientTest {
         properties.put("jms.test.persistent", "true");
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        IJMSClient client = new JMSClient(config);
+        IJMSClient client = new JMSClientImpl(config);
         MessageProducer producer = client.createProducer("queue:test");
         assertNotNull(producer);
         MessageProducer producerCopy = client.createProducer("queue:test");
@@ -181,7 +181,7 @@ public class JMSClientTest {
     public void testCreateTemporaryProducer() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        IJMSClient client = new JMSClient(config);
+        IJMSClient client = new JMSClientImpl(config);
         TemporaryQueue q = client.createTemporaryQueue();
         MessageProducer producer = client.createProducer(q);
         assertNotNull(producer);
@@ -192,7 +192,7 @@ public class JMSClientTest {
     public void testSend() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         JmsListener listener = new JmsListener(client);
         client.createConsumer("queue:test").setMessageListener(listener);
         client.start();
@@ -217,7 +217,7 @@ public class JMSClientTest {
     public void testSendReceive() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        JMSClient client = new JMSClient(config);
+        JMSClientImpl client = new JMSClientImpl(config);
         JmsListener listener = new JmsListener(client);
         client.createConsumer("queue:test").setMessageListener(listener);
         client.start();

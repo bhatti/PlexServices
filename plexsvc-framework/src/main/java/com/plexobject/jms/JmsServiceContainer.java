@@ -27,7 +27,7 @@ public class JmsServiceContainer extends AbstractServiceContainer {
 
     public JmsServiceContainer(final Configuration config,
             final ServiceRegistry serviceRegistry) throws Exception {
-        this(config, serviceRegistry, new JMSClient(config));
+        this(config, serviceRegistry, new JMSClientImpl(config));
     }
 
     public JmsServiceContainer(final Configuration config,

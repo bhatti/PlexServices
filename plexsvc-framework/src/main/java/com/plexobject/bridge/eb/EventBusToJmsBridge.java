@@ -30,7 +30,7 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.IJMSClient;
-import com.plexobject.jms.JMSClient;
+import com.plexobject.jms.JMSClientImpl;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
@@ -278,7 +278,7 @@ public class EventBusToJmsBridge implements Lifecycle {
     public static void run(Configuration config,
             Collection<EventBusToJmsEntry> entries) throws JMSException {
         EventBus eb = new EventBusImpl();
-        JMSClient jmsClient = new JMSClient(config);
+        JMSClientImpl jmsClient = new JMSClientImpl(config);
         EventBusToJmsBridge bridge = new EventBusToJmsBridge(jmsClient,
                 entries, eb);
         bridge.start();

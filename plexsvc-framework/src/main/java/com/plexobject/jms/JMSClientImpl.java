@@ -43,8 +43,8 @@ import com.plexobject.util.Configuration;
  * @author shahzad bhatti
  *
  */
-public class JMSClient implements IJMSClient {
-    private static final Logger log = LoggerFactory.getLogger(JMSClient.class);
+public class JMSClientImpl implements IJMSClient {
+    private static final Logger log = LoggerFactory.getLogger(JMSClientImpl.class);
     private final Configuration config;
     private Connection connection;
     private ThreadLocal<Session> currentSession = new ThreadLocal<>();
@@ -54,7 +54,7 @@ public class JMSClient implements IJMSClient {
     private static boolean sendJmsHeaders;
     private boolean running;
 
-    public JMSClient(Configuration config) {
+    public JMSClientImpl(Configuration config) {
         this.config = config;
         transactedSession = config.getBoolean("jms.trasactedSession");
         sendJmsHeaders = config.getBoolean("jms.sendJmsHeaders");
