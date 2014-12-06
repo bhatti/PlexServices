@@ -10,7 +10,6 @@ import javax.xml.bind.Unmarshaller;
 
 import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
-import com.plexobject.util.ExceptionUtils;
 import com.plexobject.validation.ValidationException;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
