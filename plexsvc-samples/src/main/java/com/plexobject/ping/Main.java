@@ -10,14 +10,14 @@ import org.apache.log4j.LogManager;
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
-import com.plexobject.http.servlet.ServiceRegistryCallback;
+import com.plexobject.http.servlet.ServiceRegistryLifecycleAware;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
-public class Main implements ServiceRegistryCallback {
+public class Main implements ServiceRegistryLifecycleAware {
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
             System.err.println("Usage: java " + Main.class.getName()
@@ -68,10 +68,7 @@ public class Main implements ServiceRegistryCallback {
     }
 
     @Override
-    public void created(ServiceRegistry serviceRegistry) {
-        BasicConfigurator.configure();
-        LogManager.getRootLogger().setLevel(Level.INFO);
-
+    public void onStarted(ServiceRegistry serviceRegistry) {
         PingService pingService = new PingService();
         ReverseService reverseService = new ReverseService();
         SimpleService simpleService = new SimpleService();
@@ -79,5 +76,9 @@ public class Main implements ServiceRegistryCallback {
         serviceRegistry.add(pingService);
         serviceRegistry.add(reverseService);
         serviceRegistry.add(simpleService);
+    }
+
+    @Override
+    public void onStopped(ServiceRegistry serviceRegistry) {
     }
 }

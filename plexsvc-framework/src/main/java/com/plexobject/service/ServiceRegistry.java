@@ -25,6 +25,7 @@ import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.DefaultWebServiceContainer;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.WebContainerProvider;
+import com.plexobject.http.servlet.ServiceRegistryLifecycleAware;
 import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
@@ -55,6 +56,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
     private ServiceMetricsRegistry serviceMetricsRegistry;
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    private ServiceRegistryLifecycleAware serviceRegistryLifecycleAware;
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
         this.config = config;
@@ -224,24 +226,28 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
 
     @Override
     public synchronized void start() {
-        log.info("Starting containers...");
         for (ServiceContainer g : _containers.values()) {
             if (g.getHandlers().size() > 0) {
                 g.start();
             }
         }
         running = true;
+        if (serviceRegistryLifecycleAware != null) {
+            serviceRegistryLifecycleAware.onStarted(this);
+        }
     }
 
     @Override
     public synchronized void stop() {
-        log.info("Stopping containers...");
         for (ServiceContainer g : _containers.values()) {
             if (g.getHandlers().size() > 0) {
                 g.stop();
             }
         }
         running = false;
+        if (serviceRegistryLifecycleAware != null) {
+            serviceRegistryLifecycleAware.onStopped(this);
+        }
     }
 
     /**
@@ -347,5 +353,10 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
                 executor);
         return new DefaultWebServiceContainer(config, this,
                 requestHandlerPathsByMethod, server);
+    }
+
+    public void setServiceRegistryLifecycleAware(
+            ServiceRegistryLifecycleAware serviceRegistryLifecycleAware) {
+        this.serviceRegistryLifecycleAware = serviceRegistryLifecycleAware;
     }
 }

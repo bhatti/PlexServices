@@ -45,12 +45,11 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
     private static final long serialVersionUID = 1L;
     private Configuration config;
     private ServiceRegistry serviceRegistry;
-    private boolean running;
     private RequestHandler defaultExecutor;
 
     public void init(ServletConfig servletConfig) throws ServletException {
         String plexserviceCallbackClass = servletConfig
-                .getInitParameter(Constants.PLEXSERVICE_CALLBACK_CLASS);
+                .getInitParameter(Constants.PLEXSERVICE_AWARE_CLASS);
         String plexserviceConfigResourcePath = servletConfig
                 .getInitParameter(Constants.PLEXSERVICE_CONFIG_RESOURCE_PATH);
         String plexserviceRoleAuthorizerClass = servletConfig
@@ -65,9 +64,10 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
                         plexserviceRoleAuthorizerClass).newInstance();
             }
             serviceRegistry = new ServiceRegistry(config, authorizer);
-            ServiceRegistryCallback serviceRegistryCallback = (ServiceRegistryCallback) Class
+            ServiceRegistryLifecycleAware serviceRegistryAware = (ServiceRegistryLifecycleAware) Class
                     .forName(plexserviceCallbackClass).newInstance();
-            serviceRegistryCallback.created(serviceRegistry);
+            serviceRegistry
+                    .setServiceRegistryLifecycleAware(serviceRegistryAware);
             serviceRegistry.start();
             log.info("**** Started service registry via war servlet ***");
         } catch (Exception e) {
@@ -102,17 +102,15 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
 
     @Override
     public synchronized void start() {
-        running = true;
     }
 
     @Override
     public synchronized void stop() {
-        running = false;
     }
 
     @Override
-    public synchronized boolean isRunning() {
-        return running;
+    public boolean isRunning() {
+        return serviceRegistry.isRunning();
     }
 
     @Override
@@ -122,9 +120,11 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
 
     private void handle(Method method, HttpServletRequest req,
             HttpServletResponse resp) throws IOException {
-        if (!running) {
+        if (!isRunning()) {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                    "Service not running");
+                    "Service not running " + this);
+            log.warn("Received requests but service registry is not running "
+                    + this);
             return;
         }
         // must consume input stream before reading parameters

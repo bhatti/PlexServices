@@ -154,7 +154,6 @@ public class Percentile<T extends Number & Comparable<T>> implements
                 }
 
                 if (allSamples.isEmpty()) {
-                    System.out.println("empty");
                     return 0d;
                 }
 

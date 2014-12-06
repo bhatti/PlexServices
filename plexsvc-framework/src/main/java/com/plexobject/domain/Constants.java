@@ -13,6 +13,6 @@ public interface Constants {
 
     public static final String PLEXSERVICE_CONFIG_RESOURCE_PATH = "PlexserviceConfigResourcePath";
 
-    public static final String PLEXSERVICE_CALLBACK_CLASS = "PlexserviceCallbackClass";
+    public static final String PLEXSERVICE_AWARE_CLASS = "PlexserviceAwareClass";
 
 }

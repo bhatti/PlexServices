@@ -114,10 +114,4 @@ public class XmlObjectCodec extends AbstractObjectCodec {
         return CodecType.XML;
     }
 
-    public static void main(String[] args) {
-        XmlObjectCodec codec = new XmlObjectCodec();
-        Exception e = ValidationException.builder()
-                .addError("code", "field", "message").build();
-        System.out.println(codec.encode(ExceptionUtils.toErrors(e)));
-    }
 }

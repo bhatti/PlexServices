@@ -12,13 +12,14 @@
         <servlet-name>plexservice</servlet-name>
         <servlet-class>com.plexobject.http.servlet.WebRequestHandlerServlet</servlet-class>
         <init-param>
-            <param-name>PlexserviceCallbackClass</param-name> 
+            <param-name>PlexserviceAwareClass</param-name> 
             <param-value>com.plexobject.ping.Main</param-value> 
         </init-param>
         <init-param>
             <param-name>PlexserviceConfigResourcePath</param-name> 
             <param-value>/ping.properties</param-value> 
         </init-param>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>

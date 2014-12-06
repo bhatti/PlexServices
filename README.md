@@ -606,15 +606,18 @@ web.container.provider=WAR_SERVLET
 
 Then define a class to add your services, e.g.
 ```java 
-public class Deployer implements ServiceRegistryCallback {
+public class Deployer implements ServiceRegistryLifecycleAware {
     @Override
-    public void created(ServiceRegistry serviceRegistry) {
+    public void onStarted(ServiceRegistry serviceRegistry) {
         PingService pingService = new PingService();
         ReverseService reverseService = new ReverseService();
         SimpleService simpleService = new SimpleService();
         serviceRegistry.add(pingService);
         serviceRegistry.add(reverseService);
         serviceRegistry.add(simpleService);
+    }
+    @Override
+    public void onStopped(ServiceRegistry serviceRegistry) {
     }
 }
 ```
@@ -632,13 +635,14 @@ Then add servlet mapping to the web.xml, e.g.
         <servlet-name>plexservice</servlet-name>
         <servlet-class>com.plexobject.http.servlet.WebRequestHandlerServlet</servlet-class>
         <init-param>
-            <param-name>PlexserviceCallbackClass</param-name> 
+            <param-name>PlexserviceAwareClass</param-name> 
             <param-value>com.plexobject.ping.Main</param-value> 
         </init-param>
         <init-param>
             <param-name>PlexserviceConfigResourcePath</param-name> 
             <param-value>/ping.properties</param-value> 
         </init-param>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
