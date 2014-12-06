@@ -10,11 +10,11 @@ import org.apache.log4j.LogManager;
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
-import com.plexobject.http.servlet.ServiceRegistryLifecycleAware;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
+import com.plexobject.service.ServiceRegistryLifecycleAware;
 import com.plexobject.util.Configuration;
 
 public class Main implements ServiceRegistryLifecycleAware {

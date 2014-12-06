@@ -25,7 +25,7 @@ import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.DefaultWebServiceContainer;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.WebContainerProvider;
-import com.plexobject.http.servlet.ServiceRegistryLifecycleAware;
+import com.plexobject.http.netty.NettyWebContainerProvider;
 import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
@@ -57,10 +57,17 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     private ServiceRegistryLifecycleAware serviceRegistryLifecycleAware;
+    private final WebContainerProvider webContainerProvider;
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
+        this(config, authorizer, new NettyWebContainerProvider());
+    }
+
+    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer,
+            WebContainerProvider webContainerProvider) {
         this.config = config;
         this.authorizer = authorizer;
+        this.webContainerProvider = webContainerProvider;
         String statsdHost = config.getProperty("statsd.host");
         if (statsdHost != null) {
             String servicePrefix = config.getProperty("serviceConfigs", "");
@@ -91,6 +98,12 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
             config = new ServiceConfigDesc(h);
         }
         return config;
+    }
+
+    public void setRequestHandlers(Collection<RequestHandler> handlers) {
+        for (RequestHandler h : handlers) {
+            add(h);
+        }
     }
 
     @Override
@@ -347,8 +360,6 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
             final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
         RequestHandler executor = new DefaultHttpRequestHandler(this,
                 requestHandlerPathsByMethod);
-        WebContainerProvider webContainerProvider = config
-                .getWebContainerProvider();
         Lifecycle server = webContainerProvider.getWebContainer(config,
                 executor);
         return new DefaultWebServiceContainer(config, this,

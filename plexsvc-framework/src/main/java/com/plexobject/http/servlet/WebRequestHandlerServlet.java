@@ -26,6 +26,7 @@ import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
+import com.plexobject.service.ServiceRegistryLifecycleAware;
 import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
@@ -36,8 +37,7 @@ import com.plexobject.util.IOUtils;
  * @author shahzad bhatti
  *
  */
-public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
-        RequestHandlerCallback {
+public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
     private static final Logger log = LoggerFactory
             .getLogger(WebRequestHandlerServlet.class);
@@ -54,8 +54,6 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
                 .getInitParameter(Constants.PLEXSERVICE_CONFIG_RESOURCE_PATH);
         String plexserviceRoleAuthorizerClass = servletConfig
                 .getInitParameter(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS);
-        WebContainerProvider.WAR_SERVLET.setLifecycle(this);
-        WebContainerProvider.WAR_SERVLET.setRequestHandlerCallback(this);
         try {
             config = new Configuration(plexserviceConfigResourcePath);
             RoleAuthorizer authorizer = null;
@@ -63,7 +61,15 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
                 authorizer = (RoleAuthorizer) Class.forName(
                         plexserviceRoleAuthorizerClass).newInstance();
             }
-            serviceRegistry = new ServiceRegistry(config, authorizer);
+            serviceRegistry = new ServiceRegistry(config, authorizer,
+                    new WebContainerProvider() {
+                        @Override
+                        public Lifecycle getWebContainer(Configuration config,
+                                RequestHandler executor) {
+                            WebRequestHandlerServlet.this.defaultExecutor = executor;
+                            return WebRequestHandlerServlet.this;
+                        }
+                    });
             ServiceRegistryLifecycleAware serviceRegistryAware = (ServiceRegistryLifecycleAware) Class
                     .forName(plexserviceCallbackClass).newInstance();
             serviceRegistry
@@ -111,11 +117,6 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle,
     @Override
     public boolean isRunning() {
         return serviceRegistry.isRunning();
-    }
-
-    @Override
-    public void created(RequestHandler h) {
-        this.defaultExecutor = h;
     }
 
     private void handle(Method method, HttpServletRequest req,

@@ -1,6 +1,5 @@
-package com.plexobject.http.servlet;
+package com.plexobject.service;
 
-import com.plexobject.service.ServiceRegistry;
 
 /**
  * This callback is used to notify when service registry is started/stopped

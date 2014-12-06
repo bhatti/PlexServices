@@ -597,14 +597,9 @@ You will be able to view all of the services in JMX console at runtime.
 
 
 ### Building War file
-PlexService uses embedded Netty server by default for hosting web services but you can define following configurations to deploy it inside a war file using any J2EE compatible container such as Tomcat, Jetty, JBoss, etc.
-First, add following line to the configuration 
+PlexService uses embedded Netty server by default for hosting web services but here is you can deploy inside a war file using any J2EE compatible container such as Tomcat, Jetty, JBoss, etc.
 
-```bash 
-web.container.provider=WAR_SERVLET
-```
-
-Then define a class to add your services, e.g.
+Define a class to add your services, e.g.
 ```java 
 public class Deployer implements ServiceRegistryLifecycleAware {
     @Override
@@ -644,12 +639,10 @@ Then add servlet mapping to the web.xml, e.g.
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>plexservice</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-
 </web-app>  
 ```
 

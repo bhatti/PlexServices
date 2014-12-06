@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.encode.CodecType;
-import com.plexobject.http.WebContainerProvider;
 
 /**
  * This class stores application configuration
@@ -23,7 +22,6 @@ public class Configuration {
     private static final Logger log = LoggerFactory
             .getLogger(Configuration.class);
 
-    private static final String WEB_CONTAINER_PROVIDER = "web.container.provider";
     private static final String SSL = "ssl";
     private static final String HTTP_WEBSOCKET_URI = "http.websocketUri";
     private static final String HTTP_SERVICE_TIMEOUT_SECS = "http.serviceTimeoutSecs";
@@ -43,11 +41,6 @@ public class Configuration {
     public Configuration(Properties props) {
         properties.putAll(System.getProperties());
         properties.putAll(props);
-    }
-
-    public WebContainerProvider getWebContainerProvider() {
-        return WebContainerProvider.valueOf(getProperty(WEB_CONTAINER_PROVIDER,
-                WebContainerProvider.EMBEDDED.name()).toUpperCase());
     }
 
     public CodecType getDefaultCodecType() {

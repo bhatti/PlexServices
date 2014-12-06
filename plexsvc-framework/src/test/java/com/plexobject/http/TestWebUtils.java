@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.http.netty.NettyWebContainerProvider;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.util.Configuration;
 
@@ -195,6 +196,6 @@ public class TestWebUtils {
         Properties props = new Properties();
         props.setProperty(Constants.HTTP_PORT, String.valueOf(port));
         Configuration config = new Configuration(props);
-        return WebContainerProvider.EMBEDDED.getWebContainer(config, handler);
+        return new NettyWebContainerProvider().getWebContainer(config, handler);
     }
 }
