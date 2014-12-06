@@ -12,3 +12,5 @@
 
 0.6 - Added validation support and auto-deploying
 
+0.7 - Added war based deployment support
+
