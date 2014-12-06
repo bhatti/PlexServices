@@ -278,7 +278,7 @@ public class EventBusToJmsBridge implements Lifecycle {
     public static void run(Configuration config,
             Collection<EventBusToJmsEntry> entries) throws JMSException {
         EventBus eb = new EventBusImpl();
-        JMSClientImpl jmsClient = new JMSClientImpl(config);
+        IJMSClient jmsClient = new JMSClientImpl(config);
         EventBusToJmsBridge bridge = new EventBusToJmsBridge(jmsClient,
                 entries, eb);
         bridge.start();
