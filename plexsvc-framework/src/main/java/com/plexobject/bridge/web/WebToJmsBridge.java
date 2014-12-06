@@ -44,16 +44,17 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     //
     private final Map<Method, RouteResolver<WebToJmsEntry>> entriesEndpointsByMethod = new ConcurrentHashMap<>();
 
-    public WebToJmsBridge(Collection<WebToJmsEntry> entries,
-            ServiceRegistry serviceRegistry, Configuration config) {
-        this(entries, serviceRegistry, new JMSClientImpl(config));
+    public WebToJmsBridge(ServiceRegistry serviceRegistry, Configuration config) {
+        this(serviceRegistry, new JMSClientImpl(config));
     }
 
-    public WebToJmsBridge(Collection<WebToJmsEntry> entries,
-            ServiceRegistry serviceRegistry, IJMSClient jmsClient) {
+    public WebToJmsBridge(ServiceRegistry serviceRegistry, IJMSClient jmsClient) {
         this.jmsClient = jmsClient;
         this.serviceRegistry = serviceRegistry;
 
+    }
+
+    public void setWebToJmsEntries(Collection<WebToJmsEntry> entries) {
         for (WebToJmsEntry e : entries) {
             add(e);
         }

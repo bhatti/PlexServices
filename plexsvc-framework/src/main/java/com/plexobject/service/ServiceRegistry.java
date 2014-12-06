@@ -15,6 +15,8 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.bridge.web.WebToJmsBridge;
+import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.domain.Redirectable;
 import com.plexobject.domain.Statusable;
 import com.plexobject.encode.CodecType;
@@ -51,6 +53,7 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
     private final Map<RequestHandler, ServiceConfigDesc> handlerConfigs = new HashMap<>();
     private final Configuration config;
     private final RoleAuthorizer authorizer;
+    private WebToJmsBridge webToJmsBridge;
     private boolean running;
     private final StatsDClient statsd;
     private ServiceMetricsRegistry serviceMetricsRegistry;
@@ -261,6 +264,24 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
         if (serviceRegistryLifecycleAware != null) {
             serviceRegistryLifecycleAware.onStopped(this);
         }
+    }
+
+    public void setWebToJmsEntries(Collection<WebToJmsEntry> entries) {
+        for (WebToJmsEntry e : entries) {
+            add(e);
+        }
+    }
+
+    /**
+     * This method adds bridge between HTTP/Websocket and JMS
+     * 
+     * @param e
+     */
+    public synchronized void add(WebToJmsEntry e) {
+        if (webToJmsBridge == null) {
+            webToJmsBridge = new WebToJmsBridge(this, config);
+        }
+        webToJmsBridge.add(e);
     }
 
     /**

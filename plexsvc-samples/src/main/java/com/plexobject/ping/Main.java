@@ -7,7 +7,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 
-import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
 import com.plexobject.service.Method;
@@ -46,7 +45,7 @@ public class Main implements ServiceRegistryLifecycleAware {
                     new WebToJmsEntry(CodecType.JSON, "/ping", Method.GET,
                             "queue:ping", 5), new WebToJmsEntry(CodecType.JSON,
                             "/ping", Method.MESSAGE, "queue:ping", 5));
-            new WebToJmsBridge(entries, serviceRegistry, config);
+            serviceRegistry.setWebToJmsEntries(entries);
         } else if ("websocket".equalsIgnoreCase(type)) {
             serviceRegistry.add(
                     pingService,

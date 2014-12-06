@@ -2,7 +2,6 @@ package com.plexobject.bridge.web;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -51,8 +50,7 @@ public class WebToJmsBridgeTest {
     public void setUp() throws Exception {
         Configuration config = new Configuration(new Properties());
         ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-        bridge = new WebToJmsBridge(new ArrayList<WebToJmsEntry>(),
-                serviceRegistry, jmsClient);
+        bridge = new WebToJmsBridge(serviceRegistry, jmsClient);
     }
 
     @Test

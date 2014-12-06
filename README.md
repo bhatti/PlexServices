@@ -450,7 +450,7 @@ Here is how you can setup bridge between HTTP/Websocket and JMS based services.
   Configuration config = new Configuration(configFile);
   Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(mappingFile));
   ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-  new WebToJmsBridge(entries, serviceRegistry, config);
+  serviceRegistry.setWebToJmsEntries(entries);
   serviceRegistry.start();
 ```
 Note that with above configuration, you can access your services either with HTTP or Websocket

@@ -65,7 +65,7 @@ public class Main {
         if (propertyFile != null) {
             Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
                     mappingFile));
-            new WebToJmsBridge(entries, serviceRegistry, config);
+            serviceRegistry.setWebToJmsEntries(entries);
         }
         populateTestData();
         //

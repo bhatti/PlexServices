@@ -27,7 +27,7 @@ import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.util.Configuration;
 
-public class JMSClientTest {
+public class JMSClientImplTest {
     private final Properties properties = new Properties();
     private List<Message> messages = new ArrayList<>();
 
