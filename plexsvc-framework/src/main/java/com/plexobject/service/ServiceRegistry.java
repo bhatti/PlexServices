@@ -109,6 +109,10 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
         }
     }
 
+    public Configuration getConfiguration() {
+        return config;
+    }
+
     @Override
     public void add(RequestHandler h) {
         add(h, new ServiceConfigDesc(h));

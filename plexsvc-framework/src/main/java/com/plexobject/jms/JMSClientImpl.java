@@ -32,6 +32,7 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.domain.Promise;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
@@ -44,7 +45,13 @@ import com.plexobject.util.Configuration;
  *
  */
 public class JMSClientImpl implements IJMSClient {
-    private static final Logger log = LoggerFactory.getLogger(JMSClientImpl.class);
+    private static final String JMS_DESTINATION = "JMSDestination";
+    private static final String JMS_REPLY_TO = "JMSReplyTo";
+    private static final String JMS_CORRELATION_ID = "JMSCorrelationID";
+    private static final String JMS_TIMESTAMP = "JMSTimestamp";
+    private static final String JMS_MESSAGE_ID = "JMSMessageID";
+    private static final Logger log = LoggerFactory
+            .getLogger(JMSClientImpl.class);
     private final Configuration config;
     private Connection connection;
     private ThreadLocal<Session> currentSession = new ThreadLocal<>();
@@ -56,20 +63,21 @@ public class JMSClientImpl implements IJMSClient {
 
     public JMSClientImpl(Configuration config) {
         this.config = config;
-        transactedSession = config.getBoolean("jms.trasactedSession");
-        sendJmsHeaders = config.getBoolean("jms.sendJmsHeaders");
+        transactedSession = config.getBoolean(Constants.JMS_TRASACTED_SESSION);
+        sendJmsHeaders = config.getBoolean(Constants.JMS_SEND_JMS_HEADERS);
         try {
             final String contextFactory = config
-                    .getProperty("jms.contextFactory");
+                    .getProperty(Constants.JMS_CONTEXT_FACTORY);
             ConnectionFactory connectionFactory = null;
 
             Objects.requireNonNull(contextFactory,
                     "jms.contextFactory property not defined");
             final String connectionFactoryLookup = config
-                    .getProperty("jms.connectionFactoryLookup");
+                    .getProperty(Constants.JMS_CONNECTION_FACTORY_LOOKUP);
             Objects.requireNonNull(connectionFactoryLookup,
                     "jms.connectionFactoryLookup property not defined");
-            final String providerUrl = config.getProperty("jms.providerUrl");
+            final String providerUrl = config
+                    .getProperty(Constants.JMS_PROVIDER_URL);
             Objects.requireNonNull(providerUrl,
                     "jms.providerUrl property not defined");
             Hashtable<String, String> env = new Hashtable<String, String>();
@@ -81,8 +89,8 @@ public class JMSClientImpl implements IJMSClient {
             Objects.requireNonNull(connectionFactory,
                     "Could not lookup ConnectionFactory with "
                             + connectionFactoryLookup);
-            String username = config.getProperty("jms.username");
-            String password = config.getProperty("jms.password");
+            String username = config.getProperty(Constants.JMS_USERNAME);
+            String password = config.getProperty(Constants.JMS_PASSWORD);
             if (username != null && password != null) {
                 connection = connectionFactory.createConnection(username,
                         password);
@@ -407,11 +415,11 @@ public class JMSClientImpl implements IJMSClient {
             throws JMSException {
         Map<String, Object> params = new HashMap<>();
         if (sendJmsHeaders) {
-            params.put("JMSMessageID", message.getJMSMessageID());
-            params.put("JMSTimestamp", message.getJMSTimestamp());
-            params.put("JMSCorrelationID", message.getJMSCorrelationID());
-            params.put("JMSReplyTo", message.getJMSReplyTo());
-            params.put("JMSDestination", message.getJMSDestination());
+            params.put(JMS_MESSAGE_ID, message.getJMSMessageID());
+            params.put(JMS_TIMESTAMP, message.getJMSTimestamp());
+            params.put(JMS_CORRELATION_ID, message.getJMSCorrelationID());
+            params.put(JMS_REPLY_TO, message.getJMSReplyTo());
+            params.put(JMS_DESTINATION, message.getJMSDestination());
         }
         Enumeration headerNames = message.getPropertyNames();
         while (headerNames.hasMoreElements()) {

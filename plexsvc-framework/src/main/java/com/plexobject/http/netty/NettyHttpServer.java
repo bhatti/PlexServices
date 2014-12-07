@@ -36,22 +36,6 @@ public class NettyHttpServer implements Lifecycle {
     private static final Logger log = LoggerFactory
             .getLogger(NettyHttpServer.class);
 
-    private static final String SSL_SELF_SIGNED = "https.selfSigned";
-    private static final String SSL_CERT_FILE = "https.certFile";
-    private static final String SSL_KEY_PASSWORD = "https.keyPassword";
-    private static final String SSL_KEY_FILE = "https.keyFile";
-    private static final int DEFAULT_HTTP_PORT = 8181;
-
-    // private static final String HTTP_THREADS_COUNT = "httpThreadsCount";
-    // private static final String HTTPS_TIMEOUT_SECS = "httpsTimeoutSecs";
-    // private static final String HTTP_TIMEOUT_SECS = "httpTimeoutSecs";
-    // private static final int DEFAULT_HTTPS_PORT = 8443;
-    // private static final String HTTPS_PORT = "httpsPort";
-    // private boolean useTcpNoDelay = true;
-    // private int soLinger = -1; // disabled by default
-    // private int receiveBufferSize = 262140; // Java default
-    // private int connectTimeoutMillis = 10000; // netty default
-
     static class NettyServerInitializer extends
             ChannelInitializer<SocketChannel> {
         private final SslContext sslCtx;
@@ -86,12 +70,10 @@ public class NettyHttpServer implements Lifecycle {
             ChannelInboundHandlerAdapter handler) {
         this.config = config;
 
-        // int httpsPort = config.getInteger(HTTPS_PORT, DEFAULT_HTTPS_PORT);
-        // int httpTimeoutSecs = config.getInteger(HTTP_TIMEOUT_SECS, 10);
-        String certPath = config.getProperty(SSL_CERT_FILE);
-        String keyFilePath = config.getProperty(SSL_KEY_FILE);
-        String keyPassword = config.getProperty(SSL_KEY_PASSWORD);
-        boolean selfSigned = config.getBoolean(SSL_SELF_SIGNED);
+        String certPath = config.getProperty(Constants.SSL_CERT_FILE);
+        String keyFilePath = config.getProperty(Constants.SSL_KEY_FILE);
+        String keyPassword = config.getProperty(Constants.SSL_KEY_PASSWORD);
+        boolean selfSigned = config.getBoolean(Constants.SSL_SELF_SIGNED);
         SslContext sslCtx = null;
         if (selfSigned) {
             try {
@@ -139,7 +121,7 @@ public class NettyHttpServer implements Lifecycle {
             return;
         }
         int httpPort = config
-                .getInteger(Constants.HTTP_PORT, DEFAULT_HTTP_PORT);
+                .getInteger(Constants.HTTP_PORT, Constants.DEFAULT_HTTP_PORT);
 
         try {
             channel = bootstrap.bind(httpPort).sync().channel();

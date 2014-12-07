@@ -21,7 +21,7 @@ import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
 
 public class GsonObjectCodec extends AbstractObjectCodec {
-    public static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     public static class GsonDateSerializer implements JsonDeserializer<Date>,
             JsonSerializer<Date>, InstanceCreator<Date> {

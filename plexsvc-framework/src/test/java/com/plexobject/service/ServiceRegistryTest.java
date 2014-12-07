@@ -16,6 +16,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
@@ -109,10 +110,10 @@ public class ServiceRegistryTest {
     @Test
     public void testCreateServices() throws Exception {
         properties.put("statsd.host", "localhost");
-        properties.put("jms.contextFactory",
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
 
         final Configuration config = new Configuration(properties);
 
@@ -345,10 +346,10 @@ public class ServiceRegistryTest {
         broker.addConnector("tcp://localhost:61616");
         broker.start();
 
-        properties.put("jms.contextFactory",
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
         return broker;
     }
 }

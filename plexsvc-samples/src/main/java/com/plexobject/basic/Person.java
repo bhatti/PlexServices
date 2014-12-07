@@ -1,4 +1,4 @@
-package com.plexobject.ping;
+package com.plexobject.basic;
 
 public class Person {
     private Long id;

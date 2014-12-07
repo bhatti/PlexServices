@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -41,10 +42,10 @@ public class ServiceHandlerLifecycleTest {
         broker.addConnector("tcp://localhost:61616");
         broker.start();
 
-        properties.put("jms.contextFactory",
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
 
         registry = new ServiceRegistry(config, null);

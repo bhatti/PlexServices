@@ -31,8 +31,9 @@ public class TransitionMappingTest {
 
     @Test
     public void testGetSetToStates() {
-        instance.setOnEvent("to");
-        assertEquals("to", instance.getToStates()[0]);
+        TransitionMapping m = new TransitionMapping("from", "event", "to");
+        m.setOnEvent("event");
+        assertEquals("to", m.getToStates()[0]);
     }
 
     @Test
@@ -41,6 +42,7 @@ public class TransitionMappingTest {
         assertTrue(m.hashCode() != 0);
     }
 
+    
     @Test
     public void testEquals() {
         TransitionMapping m1 = new TransitionMapping("from", "event", "to");

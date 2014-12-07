@@ -511,13 +511,22 @@ default), then message is sent to JMS and the web server waits for the response
 from the JMS handler. If it doesn't receive the message within timeout then an
 error is returned to the web client.
 
+### Configuring HTTP ports in configuration
+Here is how you can specify HTTP ports and default websocket path in the properties file:
+```bash 
+HttpPort=8181
+HttpWebsocketUri=/ws
+```
+In above example, we are using ActiveMQ as JMS container 
+
+
 ### Configuring JMS provider in configuration
 Here is how you can specify JMS container in properties file, which is passed
 to the runtime.
 ```bash
-jms.contextFactory=org.apache.activemq.jndi.ActiveMQInitialContextFactory
-jms.providerUrl=tcp://localhost:61616
-jms.connectionFactoryLookup=ConnectionFactory
+JMSContextFactory=org.apache.activemq.jndi.ActiveMQInitialContextFactory
+JMSCProviderUrl=tcp://localhost:61616
+JMSConnectionFactoryLookup=ConnectionFactory
 ```
 In above example, we are using ActiveMQ as JMS container 
 
@@ -654,21 +663,31 @@ Optionally, you can add class name for the security authorizer, e.g.
         </init-param>
 ```
 
+If you wish to auto-deploy all services that implement ServiceConfig then you can use com.plexobject.deploy.AutoDeployer as PlexserviceAwareClass, e.g.
+```xml
+        <init-param>
+            <param-name>PlexserviceAwareClass</param-name> 
+            <param-value>com.plexobject.deploy.AutoDeployer</param-value> 
+        </init-param>
+```
+
 PlexService comes with examples that you can use to deploy using
 ```bash
 cd plexsvc-samples
 ./gradlew jettyRun
 ```
-Voila
+
 
 ### Auto-Deploying
 In addition to specifying services manually for deployment, PlexService provides support to scan all services 
 in your application package that implement ServiceConfig annotation and deploy them, e.g.
 ```bash
-java com.plexobject.deploy.AutoDeployer com.plexobject.stock bugger.properties
+java com.plexobject.deploy.AutoDeployer bugger.properties
 ```
-You need to specify package name of your services and properties file. Your services must 
-have default constructor for this option to work.
+You need to specify package name of your services in the properties file, e.g.
+AutoDeployPackage=com.plexobject.stock
+
+Your services must have default constructor for this option to work.
 
 ### Adding Streaming Quotes Service over Websockets 
 Here is a small example of creating a streaming quote server that sends real-time
@@ -701,7 +720,7 @@ public class QuoteServer implements RequestHandler {
     }
 
     public static void main(String[] args) throws Exception {
-        new AutoDeployer("com.plexobject.stock", args[0]).deploy();
+        new AutoDeployer().deploy(args[0]);
         Thread.currentThread().join();
     }
 }

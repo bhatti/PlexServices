@@ -13,8 +13,8 @@ do
   CLASSPATH=$CLASSPATH:$j
 done
 export CLASSPATH 
-#java -Dlog4j.configuration=log4j.xml com.plexobject.ping.Main ping.properties web 
-java -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=9192 -Dlog4j.configuration=log4j.xml com.plexobject.ping.Main ping.properties web
+#java -Dlog4j.configuration=log4j.xml com.plexobject.basic.Main ping.properties web 
+java -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=9192 -Dlog4j.configuration=log4j.xml com.plexobject.basic.Main ping.properties web
   
     
 #openssl genrsa -des3 -out server.key 1024

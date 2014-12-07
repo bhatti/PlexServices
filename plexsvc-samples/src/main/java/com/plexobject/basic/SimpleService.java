@@ -1,4 +1,4 @@
-package com.plexobject.ping;
+package com.plexobject.basic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

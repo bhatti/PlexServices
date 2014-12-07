@@ -10,6 +10,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 
 /**
@@ -22,11 +23,6 @@ public class Configuration {
     private static final Logger log = LoggerFactory
             .getLogger(Configuration.class);
 
-    private static final String SSL = "ssl";
-    private static final String HTTP_WEBSOCKET_URI = "http.websocketUri";
-    private static final String HTTP_SERVICE_TIMEOUT_SECS = "http.serviceTimeoutSecs";
-    private static final String JSON = "JSON";
-    private static final String DEFAULT_CODEC_TYPE = "defaultCodecType";
     private final Properties properties = new Properties();
 
     public Configuration(String propertyFile) throws IOException {
@@ -44,20 +40,20 @@ public class Configuration {
     }
 
     public CodecType getDefaultCodecType() {
-        return CodecType.valueOf(getProperty(DEFAULT_CODEC_TYPE, JSON)
-                .toUpperCase());
+        return CodecType.valueOf(getProperty(Constants.DEFAULT_CODEC_TYPE,
+                Constants.JSON).toUpperCase());
     }
 
     public int getDefaultTimeoutSecs() {
-        return getInteger(HTTP_SERVICE_TIMEOUT_SECS, 10);
+        return getInteger(Constants.HTTP_SERVICE_TIMEOUT_SECS, 10);
     }
 
     public String getDefaultWebsocketUri() {
-        return getProperty(HTTP_WEBSOCKET_URI, "/ws");
+        return getProperty(Constants.HTTP_WEBSOCKET_URI, "/ws");
     }
 
     public boolean isSsl() {
-        return getBoolean(SSL);
+        return getBoolean(Constants.SSL);
     }
 
     public String getProperty(final String key) {

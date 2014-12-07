@@ -1,4 +1,4 @@
-package com.plexobject.ping;
+package com.plexobject.basic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,13 +10,13 @@ import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
-public class PingService implements RequestHandler {
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/reverse", method = Method.POST, codec = CodecType.JSON)
+public class ReverseService implements RequestHandler {
     private static final Logger log = LoggerFactory
-            .getLogger(PingService.class);
+            .getLogger(ReverseService.class);
 
-    public PingService() {
-        log.info("Ping Service Started");
+    public ReverseService() {
+        log.info("Reverse Service Started");
     }
 
     @Override
@@ -26,6 +26,7 @@ public class PingService implements RequestHandler {
             data = "";
         }
         log.info("Received " + data);
-        request.getResponseDispatcher().send(data);
+        request.getResponseDispatcher().send(
+                new StringBuilder(data).reverse().toString());
     }
 }

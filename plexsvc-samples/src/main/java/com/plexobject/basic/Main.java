@@ -1,4 +1,4 @@
-package com.plexobject.ping;
+package com.plexobject.basic;
 
 import java.util.Arrays;
 import java.util.Collection;

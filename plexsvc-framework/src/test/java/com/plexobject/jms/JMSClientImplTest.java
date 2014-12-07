@@ -23,6 +23,7 @@ import javax.naming.NamingException;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.Test;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.util.Configuration;
@@ -63,7 +64,7 @@ public class JMSClientImplTest {
 
     @Test(expected = NullPointerException.class)
     public void testCreateWithouFactoryLookup() throws Exception {
-        properties.put("jms.contextFactory",
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         final Configuration config = new Configuration(properties);
         new JMSClientImpl(config);
@@ -71,18 +72,18 @@ public class JMSClientImplTest {
 
     @Test(expected = NullPointerException.class)
     public void testCreateWithoutProviderUrl() throws Exception {
-        properties.put("jms.contextFactory",
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
         final Configuration config = new Configuration(properties);
         new JMSClientImpl(config);
     }
 
     @Test(expected = RuntimeException.class)
     public void testCreateWithBadFactoryLookup() throws Exception {
-        properties.put("jms.contextFactory", "xxxx");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONTEXT_FACTORY, "xxxx");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
         new JMSClientImpl(config);
     }
@@ -249,10 +250,10 @@ public class JMSClientImplTest {
         broker.addConnector("tcp://localhost:61616");
         broker.start();
 
-        properties.put("jms.contextFactory",
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
         return broker;
     }
 }

@@ -12,6 +12,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -59,11 +60,13 @@ public class AutoDeployerTest {
     @BeforeClass
     public static void setUp() throws Exception {
         broker = startBroker();
-        properties.put("httpPort", "8585");
-        properties.put("jms.contextFactory",
+        properties.put(Constants.HTTP_PORT, "8585");
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+                "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
+        properties.put(Constants.AUTO_DEPLOY_PACKAGE, "com.plexobject.deploy");
         propFile = File.createTempFile("prop", "config");
         propFile.deleteOnExit();
     }
@@ -77,9 +80,8 @@ public class AutoDeployerTest {
     public void testRunWithoutAuthorizer() throws Exception {
         properties.store(new FileWriter(propFile), "");
 
-        AutoDeployer deployer = new AutoDeployer("com.plexobject.deploy",
-                propFile.getAbsolutePath());
-        deployer.deploy();
+        AutoDeployer deployer = new AutoDeployer();
+        deployer.deploy(propFile.getAbsolutePath());
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
         assertEquals(3, handlers.size());
@@ -88,11 +90,11 @@ public class AutoDeployerTest {
 
     @Test
     public void testRunWithAuthorizer() throws Exception {
-        properties.put("roleAuthorizer", Authorizer.class.getName());
+        properties.put(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS,
+                Authorizer.class.getName());
         properties.store(new FileWriter(propFile), "");
-        AutoDeployer deployer = new AutoDeployer("com.plexobject.deploy",
-                propFile.getAbsolutePath());
-        deployer.deploy();
+        AutoDeployer deployer = new AutoDeployer();
+        deployer.deploy(propFile.getAbsolutePath());
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
         assertEquals(3, handlers.size());
@@ -104,10 +106,11 @@ public class AutoDeployerTest {
         BrokerService broker = new BrokerService();
         broker.addConnector("tcp://localhost:61616");
         broker.start();
-        properties.put("jms.contextFactory",
+        properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put("jms.connectionFactoryLookup", "ConnectionFactory");
-        properties.put("jms.providerUrl", "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+                "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
         return broker;
     }
 

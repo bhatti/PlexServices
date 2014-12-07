@@ -15,8 +15,6 @@ import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
-// @ServiceConfig(protocol = Protocol.JMS, endpoint
-// = "queue:quotes-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "symbol"), @Field(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {
@@ -55,7 +53,7 @@ public class QuoteServer implements RequestHandler {
             System.exit(1);
         }
         startJmsBroker();
-        new AutoDeployer("com.plexobject.stock", args[0]).deploy();
+        new AutoDeployer().deploy(args[0]);
         Thread.currentThread().join();
     }
 }

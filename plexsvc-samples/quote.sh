@@ -7,4 +7,4 @@ do
 done
 export CLASSPATH 
 
-java -cp $CLASSPATH com.plexobject.deploy.AutoDeployer com.plexobject.stock.QuoteServer bugger.properties
+java -cp $CLASSPATH com.plexobject.deploy.AutoDeployer quote.properties
