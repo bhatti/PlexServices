@@ -46,6 +46,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
     private Configuration config;
     private ServiceRegistry serviceRegistry;
     private RequestHandler defaultExecutor;
+    private boolean running;
 
     public void init(ServletConfig servletConfig) throws ServletException {
         String plexserviceCallbackClass = servletConfig
@@ -75,6 +76,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             serviceRegistry
                     .setServiceRegistryLifecycleAware(serviceRegistryAware);
             serviceRegistry.start();
+            running = true;
             log.info("**** Started service registry via war servlet ***");
         } catch (Exception e) {
             throw new ServletException(e);
@@ -108,15 +110,23 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
     @Override
     public synchronized void start() {
+        // not supported
     }
 
     @Override
     public synchronized void stop() {
+        // not supported
     }
 
     @Override
     public boolean isRunning() {
-        return serviceRegistry.isRunning();
+        return running;
+    }
+
+    @Override
+    public void destroy() {
+        running = false;
+        super.destroy();
     }
 
     private void handle(Method method, HttpServletRequest req,

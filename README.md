@@ -685,7 +685,9 @@ in your application package that implement ServiceConfig annotation and deploy t
 java com.plexobject.deploy.AutoDeployer bugger.properties
 ```
 You need to specify package name of your services in the properties file, e.g.
+```bash
 AutoDeployPackage=com.plexobject.stock
+```
 
 Your services must have default constructor for this option to work.
 
