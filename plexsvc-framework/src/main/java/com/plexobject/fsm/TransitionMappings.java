@@ -29,18 +29,11 @@ public class TransitionMappings {
      * @param fromState
      * @param onEvent
      * @return set of next states
-     * @throws IllegalStateException
      */
     public synchronized State[] getNextStates(State fromState, String onEvent)
             throws IllegalStateException {
         Pair<State, String> key = Pair.of(fromState, onEvent);
-        State[] nextStates = transitions.get(key);
-        if (nextStates == null || nextStates.length == 0) {
-            throw new IllegalStateException(
-                    "No next state found for from-state '" + fromState
-                            + "', on-event '" + onEvent + "'");
-        }
-        return nextStates;
+        return transitions.get(key);
     }
 
     /**

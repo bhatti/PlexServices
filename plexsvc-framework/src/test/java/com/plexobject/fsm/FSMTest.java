@@ -2,6 +2,9 @@ package com.plexobject.fsm;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -111,5 +114,29 @@ public class FSMTest {
                 .getName());
         assertEquals("SUBMITTED", instance.nextStateOnEvent("submitApp", null)
                 .getName());
+    }
+
+    @Test
+    public void addRemoveStateChangeListeners() {
+        FSM instance = new FSM(State.of("WELCOME"), mappings, null);
+        final List<State> states = new ArrayList<>();
+        final StateChangeListener l = new StateChangeListener() {
+            @Override
+            public void stateChanged(State fromState, State newState,
+                    String onEvent) {
+                states.add(fromState);
+                states.add(newState);
+            }
+        };
+        instance.addStateChangeListener(l);
+        instance.nextStateOnEvent("selectIndividual", null).getName();
+        assertEquals(2, states.size());
+        assertEquals(State.of("WELCOME"), states.get(0));
+        assertEquals(State.of("INDIVIDUAL"), states.get(1));
+        //
+        instance.removeStateChangeListener(l);
+        states.clear();
+        instance.nextStateOnEvent("saveProfile", null).getName();
+        assertEquals(0, states.size());
     }
 }

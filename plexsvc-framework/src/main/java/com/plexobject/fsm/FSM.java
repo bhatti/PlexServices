@@ -18,6 +18,8 @@ public class FSM {
     private final TransitionResolver transitionResolver;
     private State currentState;
     private List<Pair<State, String>> breadcrumbs = new ArrayList<>();
+    private List<StateChangeListener> listeners = new ArrayList<>();
+    private Object lock = new Object();
 
     public FSM(State initialState, TransitionMappings mappings,
             TransitionResolver transitionResolver) {
@@ -26,7 +28,7 @@ public class FSM {
         this.currentState = initialState;
         this.mappings = mappings;
         this.transitionResolver = transitionResolver;
-        saveAndReturnState(currentState, null);
+        setCurrentStateAndBreadcrumbs(currentState, null);
     }
 
     /**
@@ -39,20 +41,37 @@ public class FSM {
      * @return next state
      * @throws IllegalStateException
      */
-    public synchronized State nextStateOnEvent(String onEvent, Object args)
+    public State nextStateOnEvent(String onEvent, Object args)
             throws IllegalStateException {
-        State[] nextStates = mappings.getNextStates(currentState, onEvent);
-        if (nextStates.length == 1) {
-            return saveAndReturnState(nextStates[0], onEvent);
+        State oldState = null;
+        State newState = null;
+        List<StateChangeListener> copy = null;
+        //
+
+        synchronized (lock) {
+            oldState = currentState;
+            State[] nextStates = mappings.getNextStates(currentState, onEvent);
+            if (nextStates == null || nextStates.length == 0) {
+                throw new IllegalStateException(
+                        "No next state found for from-state '" + currentState
+                                + "', on-event '" + onEvent + "'");
+            } else if (nextStates.length == 1) {
+                newState = setCurrentStateAndBreadcrumbs(nextStates[0], onEvent);
+            } else if (transitionResolver != null) {
+                newState = setCurrentStateAndBreadcrumbs(transitionResolver.nextState(
+                        currentState, onEvent, nextStates, args), onEvent);
+            } else {
+                throw new IllegalStateException(
+                        "Multiple states found for current state "
+                                + currentState + " and onEvent " + onEvent
+                                + ", but resolver was not set");
+            }
+            copy = new ArrayList<>(listeners);
         }
-        if (transitionResolver != null) {
-            return saveAndReturnState(transitionResolver.nextState(
-                    currentState, onEvent, nextStates, args), onEvent);
+        for (StateChangeListener l : copy) {
+            l.stateChanged(oldState, newState, onEvent);
         }
-        throw new IllegalStateException(
-                "Multiple states found for current state " + currentState
-                        + " and onEvent " + onEvent
-                        + ", but resolver was not set");
+        return newState;
     }
 
     /**
@@ -61,15 +80,29 @@ public class FSM {
      * 
      * @return
      */
-    public synchronized List<Pair<State, String>> getBreadCrumbs() {
-        return Collections.unmodifiableList(breadcrumbs);
+    public List<Pair<State, String>> getBreadCrumbs() {
+        synchronized (lock) {
+            return Collections.unmodifiableList(breadcrumbs);
+        }
     }
 
-    private synchronized State saveAndReturnState(State state, String onEvent) {
-        this.currentState = state;
-        if (state != null) {
-            breadcrumbs.add(Pair.of(state, onEvent));
+    public void addStateChangeListener(StateChangeListener l) {
+        synchronized (lock) {
+            if (!this.listeners.contains(l)) {
+                this.listeners.add(l);
+            }
         }
-        return state;
+    }
+
+    public boolean removeStateChangeListener(StateChangeListener l) {
+        synchronized (lock) {
+            return this.listeners.remove(l);
+        }
+    }
+
+    private State setCurrentStateAndBreadcrumbs(State newState, String onEvent) {
+        this.currentState = newState;
+        breadcrumbs.add(Pair.of(newState, onEvent));
+        return newState;
     }
 }
