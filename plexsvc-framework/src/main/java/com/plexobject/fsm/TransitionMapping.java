@@ -5,6 +5,13 @@ import java.util.Objects;
 
 import com.plexobject.util.Preconditions;
 
+/**
+ * This class defines transition mapping from from-state to target-states for a
+ * specified on-event
+ * 
+ * @author shahzadbhatti
+ *
+ */
 public class TransitionMapping {
     private String fromState;
     private String onEvent;
@@ -81,7 +88,6 @@ public class TransitionMapping {
     @Override
     public String toString() {
         return "TransitionMapping [fromState=" + fromState + ", onEvent="
-                + onEvent + ", toStates=" + Arrays.toString(toStates)
-                + "]";
+                + onEvent + ", toStates=" + Arrays.toString(toStates) + "]";
     }
 }

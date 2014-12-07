@@ -45,7 +45,7 @@ public class FSM {
             throws IllegalStateException {
         State oldState = null;
         State newState = null;
-        List<StateChangeListener> copy = null;
+        List<StateChangeListener> copyListeners = null;
         //
 
         synchronized (lock) {
@@ -58,20 +58,30 @@ public class FSM {
             } else if (nextStates.length == 1) {
                 newState = setCurrentStateAndBreadcrumbs(nextStates[0], onEvent);
             } else if (transitionResolver != null) {
-                newState = setCurrentStateAndBreadcrumbs(transitionResolver.nextState(
-                        currentState, onEvent, nextStates, args), onEvent);
+                newState = setCurrentStateAndBreadcrumbs(
+                        transitionResolver.nextState(currentState, onEvent,
+                                nextStates, args), onEvent);
             } else {
                 throw new IllegalStateException(
                         "Multiple states found for current state "
                                 + currentState + " and onEvent " + onEvent
                                 + ", but resolver was not set");
             }
-            copy = new ArrayList<>(listeners);
+            if (listeners.size() > 0) {
+                copyListeners = new ArrayList<>(listeners);
+            }
         }
-        for (StateChangeListener l : copy) {
-            l.stateChanged(oldState, newState, onEvent);
+        if (copyListeners != null) {
+            notifyListeners(onEvent, oldState, newState, copyListeners);
         }
         return newState;
+    }
+
+    private void notifyListeners(String onEvent, State oldState,
+            State newState, List<StateChangeListener> copyListeners) {
+        for (StateChangeListener l : copyListeners) {
+            l.stateChanged(oldState, newState, onEvent);
+        }
     }
 
     /**
