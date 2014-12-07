@@ -46,11 +46,11 @@ public class TransitionMappings {
         for (Map.Entry<Pair<State, String>, State[]> e : transitions.entrySet()) {
             String fromState = e.getKey().first.getName();
             String onEvent = e.getKey().second;
-            String[] targetStates = new String[e.getValue().length];
+            String[] toStates = new String[e.getValue().length];
             for (int i = 0; i < e.getValue().length; i++) {
-                targetStates[i] = e.getValue()[i].getName();
+                toStates[i] = e.getValue()[i].getName();
             }
-            mappings.add(new TransitionMapping(fromState, onEvent, targetStates));
+            mappings.add(new TransitionMapping(fromState, onEvent, toStates));
         }
 
         return mappings;
@@ -63,7 +63,7 @@ public class TransitionMappings {
      */
     public void register(TransitionMapping mapping) {
         register(State.of(mapping.getFromState()), mapping.getOnEvent(),
-                toStates(mapping.getTargetStates()));
+                toStates(mapping.getToStates()));
     }
 
     /**
@@ -71,10 +71,10 @@ public class TransitionMappings {
      * 
      * @param fromState
      * @param event
-     * @param targetStates
+     * @param toStates
      */
-    public void register(String fromState, String event, String... targetStates) {
-        register(State.of(fromState), event, toStates(targetStates));
+    public void register(String fromState, String event, String... toStates) {
+        register(State.of(fromState), event, toStates(toStates));
     }
 
     /**
@@ -90,18 +90,18 @@ public class TransitionMappings {
         Objects.requireNonNull(onEvent, "onEvent is required");
         Preconditions.checkArgument(
                 states != null && states.length > 0,
-                "targetStates is required for fromState " + fromState
+                "toStates is required for fromState " + fromState
                         + ", onEvent " + onEvent + ", states "
                         + Arrays.toString(states));
         Pair<State, String> key = Pair.of(fromState, onEvent);
-        State[] oldTargetStates = transitions.get(key);
-        if (oldTargetStates != null) {
+        State[] oldToStates = transitions.get(key);
+        if (oldToStates != null) {
             throw new IllegalStateException("Duplicate transition from state "
                     + fromState + ", onEvent " + onEvent + ", toStates "
-                    + states + ", old states " + oldTargetStates);
+                    + states + ", old states " + oldToStates);
         }
-        State[] targetStates = Arrays.copyOf(states, states.length);
-        transitions.put(key, targetStates);
+        State[] toStates = Arrays.copyOf(states, states.length);
+        transitions.put(key, toStates);
     }
 
     @Override

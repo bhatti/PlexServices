@@ -8,25 +8,25 @@ import com.plexobject.util.Preconditions;
 public class TransitionMapping {
     private String fromState;
     private String onEvent;
-    private String[] targetStates;
+    private String[] toStates;
 
     public TransitionMapping() {
 
     }
 
     public TransitionMapping(String fromState, String onEvent,
-            String... targetStates) {
+            String... toStates) {
         Objects.requireNonNull(fromState, "fromState is required");
         Objects.requireNonNull(onEvent, "onEvent is required");
         Preconditions.checkArgument(
-                targetStates != null && targetStates.length > 0,
-                "targetStates is required for fromState " + fromState
+                toStates != null && toStates.length > 0,
+                "toStates is required for fromState " + fromState
                         + ", onEvent " + onEvent + ", states "
-                        + Arrays.toString(targetStates));
+                        + Arrays.toString(toStates));
         //
         this.fromState = fromState;
         this.onEvent = onEvent;
-        this.targetStates = targetStates;
+        this.toStates = toStates;
     }
 
     public String getFromState() {
@@ -45,12 +45,12 @@ public class TransitionMapping {
         this.onEvent = onEvent;
     }
 
-    public String[] getTargetStates() {
-        return targetStates;
+    public String[] getToStates() {
+        return toStates;
     }
 
-    public void setTargetStates(String[] targetStates) {
-        this.targetStates = targetStates;
+    public void setToStates(String[] toStates) {
+        this.toStates = toStates;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class TransitionMapping {
     @Override
     public String toString() {
         return "TransitionMapping [fromState=" + fromState + ", onEvent="
-                + onEvent + ", targetStates=" + Arrays.toString(targetStates)
+                + onEvent + ", toStates=" + Arrays.toString(toStates)
                 + "]";
     }
 }
