@@ -183,8 +183,14 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         };
     }
 
-    public static Collection<WebToJmsEntry> load(File file) throws IOException {
+    public static Collection<WebToJmsEntry> fromJSONFile(File file)
+            throws IOException {
         final String mappingJson = IOUtils.toString(new FileInputStream(file));
+        return fromJSON(mappingJson);
+    }
+
+    public static Collection<WebToJmsEntry> fromJSON(String mappingJson)
+            throws IOException {
         return new JsonObjectCodec().decode(mappingJson,
                 new TypeReference<List<WebToJmsEntry>>() {
                 });

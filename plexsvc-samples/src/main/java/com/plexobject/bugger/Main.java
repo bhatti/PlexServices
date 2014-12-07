@@ -63,8 +63,8 @@ public class Main {
         serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
                 userRepository));
         if (propertyFile != null) {
-            Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(
-                    mappingFile));
+            Collection<WebToJmsEntry> entries = WebToJmsBridge
+                    .fromJSONFile(new File(mappingFile));
             serviceRegistry.setWebToJmsEntries(entries);
         }
         populateTestData();
