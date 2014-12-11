@@ -32,7 +32,11 @@ public class JmsResponseDispatcher extends AbstractResponseDispatcher {
                 log.debug("Sending reply " + payload + " to " + replyTo);
             }
         } catch (Exception e) {
-            log.error("Failed to send " + payload, e);
+            if (e.toString().contains("temp-queue")) {
+                log.error("Failed to send " + payload + " because " + e);
+            } else {
+                log.error("Failed to send " + payload, e);
+            }
         }
     }
 

@@ -11,7 +11,7 @@ public class WebToJmsEntryTest {
     @Test
     public void testCreateWebToJmsEntry() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/url",
-                Method.GET, "destination", 5);
+                Method.GET, "destination", 5, false);
         assertEquals(CodecType.JSON, entry.getCodecType());
         assertEquals("/url", entry.getEndpoint());
         assertEquals(Method.GET, entry.getMethod());

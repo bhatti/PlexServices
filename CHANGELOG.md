@@ -14,3 +14,5 @@
 
 0.7 - Added war based deployment support
 
+0.8 - Added timeout support for web-to-jms bridge
+

@@ -25,6 +25,10 @@ public class PingService implements RequestHandler {
         if (data == null) {
             data = "";
         }
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+        }
         log.info("Received " + data);
         request.getResponseDispatcher().send(data);
     }

@@ -226,6 +226,7 @@ public class JMSClientImpl implements IJMSClient {
             }
         };
         final Promise<Response> promise = new Promise<>();
+
         final MessageListener listener = new MessageListener() {
             @Override
             public void onMessage(Message message) {
@@ -255,6 +256,23 @@ public class JMSClientImpl implements IJMSClient {
         consumer.setMessageListener(listener);
         reqMsg.setJMSReplyTo(replyTo);
         createProducer(destName).send(reqMsg);
+        final Handler<Promise<Response>> disposer = new Handler<Promise<Response>>() {
+            @Override
+            public void handle(Promise<Response> request) {
+                try {
+                    closeable.close();
+                } catch (Exception ex) {
+                    log.warn("Failed to close", ex);
+                }
+                try {
+                    replyTo.delete();
+                } catch (Exception ex) {
+                    log.warn("Failed to delete", ex);
+                }
+            }
+        };
+        promise.setCancelHandler(disposer);
+        promise.setTimedoutHandler(disposer);
         log.info("Sent '" + reqPayload + "' to " + destName + ", headers "
                 + headers);
         return promise;

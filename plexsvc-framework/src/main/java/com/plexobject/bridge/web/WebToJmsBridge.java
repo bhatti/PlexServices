@@ -8,11 +8,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Request;
@@ -138,10 +142,18 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                         entry.getCodecType());
                 request.getResponseDispatcher().send("");
             } else {
-                jmsClient.sendReceive(entry.getDestination(), params,
+                Future<Response> respFuture = jmsClient.sendReceive(
+                        entry.getDestination(), params,
                         (String) request.getPayload(),
                         sendbackReply(request, entry, params));
+                respFuture.get(entry.getTimeoutSecs(), TimeUnit.SECONDS);
             }
+        } catch (TimeoutException e) {
+            request.getResponseDispatcher().setCodecType(CodecType.TEXT);
+            request.getResponseDispatcher().setStatus(
+                    HttpResponse.SC_GATEWAY_TIMEOUT);
+            request.getResponseDispatcher().send("Request timedout");
+
         } catch (Exception e) {
             log.error("Failed to send request", e);
         }
@@ -179,7 +191,6 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     log.error("Could not send back websocket " + reply, e);
                 }
             }
-
         };
     }
 

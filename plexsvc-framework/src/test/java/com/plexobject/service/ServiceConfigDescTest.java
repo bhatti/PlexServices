@@ -69,12 +69,12 @@ public class ServiceConfigDescTest {
         assertFalse(desc.recordStatsdMetrics());
         assertEquals(0, desc.rolesAllowed().length);
     }
-    
+
     @Test
     public void testCreateWithWebToJmsEntry() {
-        WebToJmsEntry e = new WebToJmsEntry(CodecType.JSON, "/w", Method.GET, "queue:name", 5);
-        ServiceConfigDesc.Builder builder = ServiceConfigDesc
-                .builder(e);
+        WebToJmsEntry e = new WebToJmsEntry(CodecType.JSON, "/w", Method.GET,
+                "queue:name", 5, false);
+        ServiceConfigDesc.Builder builder = ServiceConfigDesc.builder(e);
         ServiceConfigDesc desc = builder.build();
         assertEquals(Method.GET, desc.method());
         assertEquals(Protocol.HTTP, desc.protocol());

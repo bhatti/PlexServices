@@ -43,8 +43,9 @@ public class Main implements ServiceRegistryLifecycleAware {
                             .setEndpoint("queue:ping").build());
             Collection<WebToJmsEntry> entries = Arrays.asList(
                     new WebToJmsEntry(CodecType.JSON, "/ping", Method.GET,
-                            "queue:ping", 5), new WebToJmsEntry(CodecType.JSON,
-                            "/ping", Method.MESSAGE, "queue:ping", 5));
+                            "queue:ping", 5, false), new WebToJmsEntry(
+                            CodecType.JSON, "/ping", Method.MESSAGE,
+                            "queue:ping", 5, false));
             serviceRegistry.setWebToJmsEntries(entries);
         } else if ("websocket".equalsIgnoreCase(type)) {
             serviceRegistry.add(

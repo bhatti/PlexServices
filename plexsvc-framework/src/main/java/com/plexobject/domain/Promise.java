@@ -17,9 +17,11 @@ import com.plexobject.handler.Handler;
  */
 public class Promise<T> implements Future<T> {
     private boolean cancelled;
+    private boolean timedout;
     private T value;
     private Exception exception;
     private Handler<Promise<T>> cancelHandler;
+    private Handler<Promise<T>> timedoutHandler;
 
     public Promise() {
     }
@@ -50,6 +52,10 @@ public class Promise<T> implements Future<T> {
         return cancelled;
     }
 
+    public synchronized boolean isTimedout() {
+        return timedout;
+    }
+
     @Override
     public synchronized boolean isDone() {
         return value != null;
@@ -67,8 +73,9 @@ public class Promise<T> implements Future<T> {
     @Override
     public synchronized T get(long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
+        long started = System.nanoTime();
         while (value == null && !cancelled && exception == null) {
-            if (exception == null) {
+            if (exception != null) {
                 if (exception instanceof ExecutionException) {
                     throw (ExecutionException) exception;
                 }
@@ -78,6 +85,17 @@ public class Promise<T> implements Future<T> {
                 throw new RuntimeException("Operation cancelled");
             }
             wait(unit.toMillis(timeout));
+            if (timeout > 0) {
+                long elapsed = System.nanoTime() - started;
+                if (elapsed > unit.toNanos(timeout)) {
+                    timedout = true;
+                    if (timedoutHandler != null) {
+                        timedoutHandler.handle(this);
+                    }
+                    throw new TimeoutException("Request timed out for "
+                            + unit.toSeconds(timeout));
+                }
+            }
         }
         return value;
     }
@@ -115,6 +133,15 @@ public class Promise<T> implements Future<T> {
         this.cancelHandler = cancelHandler;
     }
 
+    /**
+     * This callback is used to notify if request is times out
+     * 
+     * @param timedoutHandler
+     */
+    public void setTimedoutHandler(Handler<Promise<T>> timedoutHandler) {
+        this.timedoutHandler = timedoutHandler;
+    }
+
     private void validateIfAlreadySet() {
         if (exception != null) {
             throw new RuntimeException("Future operation is already failed!");
@@ -123,4 +150,5 @@ public class Promise<T> implements Future<T> {
             throw new RuntimeException("Future operation is already completed!");
         }
     }
+
 }

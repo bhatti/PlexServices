@@ -23,16 +23,18 @@ public class WebToJmsEntry {
     }
 
     public WebToJmsEntry(WebToJmsEntry e) {
-        this(e.codecType, e.endpoint, e.method, e.destination, e.timeoutSecs);
+        this(e.codecType, e.endpoint, e.method, e.destination, e.timeoutSecs,
+                e.asynchronous);
     }
 
     public WebToJmsEntry(CodecType codecType, String endpoint, Method method,
-            String destination, int timeoutSecs) {
+            String destination, int timeoutSecs, boolean asynchronous) {
         this.codecType = codecType;
         this.endpoint = endpoint;
         this.method = method;
         this.destination = destination;
         this.timeoutSecs = timeoutSecs;
+        this.asynchronous = asynchronous;
     }
 
     public CodecType getCodecType() {
@@ -86,10 +88,10 @@ public class WebToJmsEntry {
     @Override
     @JsonIgnore
     public String toString() {
-        return "WebToJmsEntry [codecType=" + codecType + ", endpoint=" + endpoint
-                + ", method=" + method + ", destination=" + destination
-                + ", timeoutSecs=" + timeoutSecs + ", asynchronous="
-                + asynchronous + "]";
+        return "WebToJmsEntry [codecType=" + codecType + ", endpoint="
+                + endpoint + ", method=" + method + ", destination="
+                + destination + ", timeoutSecs=" + timeoutSecs
+                + ", asynchronous=" + asynchronous + "]";
     }
 
     @JsonIgnore

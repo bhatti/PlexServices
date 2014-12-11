@@ -2,6 +2,8 @@ package com.plexobject.bugger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -16,6 +18,7 @@ import com.plexobject.jms.JMSClientImpl;
 import com.plexobject.util.Configuration;
 
 public class JmsSender {
+    private static final int TEN_SECONDS = 10;
     private static final Logger log = LoggerFactory.getLogger(JmsSender.class);
 
     public static void send(String propertyFile, String dest,
@@ -23,19 +26,21 @@ public class JmsSender {
         Configuration config = new Configuration(propertyFile);
         final IJMSClient jmsClient = new JMSClientImpl(config);
         jmsClient.start();
-        jmsClient.sendReceive(dest, headers, text, new Handler<Response>() {
-            @Override
-            public void handle(Response reply) {
-                try {
-                    String payload = reply.getPayload();
-                    log.info(payload);
-                } finally {
-                    jmsClient.stop();
-                    System.exit(0);
-                }
-            }
-        });
+        Future<Response> respFuture = jmsClient.sendReceive(dest, headers,
+                text, new Handler<Response>() {
+                    @Override
+                    public void handle(Response reply) {
+                        try {
+                            String payload = reply.getPayload();
+                            log.info(payload);
+                        } finally {
+                            jmsClient.stop();
+                            System.exit(0);
+                        }
+                    }
+                });
         log.debug("Sent to " + dest + ": " + text + ", waiting for reply ");
+        respFuture.get(TEN_SECONDS, TimeUnit.SECONDS);
         Thread.currentThread().join();
     }
 

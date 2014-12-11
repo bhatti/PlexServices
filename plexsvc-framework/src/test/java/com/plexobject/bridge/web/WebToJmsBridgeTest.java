@@ -56,7 +56,7 @@ public class WebToJmsBridgeTest {
     @Test
     public void testAdd() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "destination", 5);
+                Method.GET, "destination", 5, false);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
@@ -76,7 +76,8 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleAsynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5);
+                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5,
+                false);
         entry.setAsynchronous(true);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
@@ -104,7 +105,8 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleSynchronous() throws Exception {
         final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5);
+                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5,
+                false);
         entry.setAsynchronous(false);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
