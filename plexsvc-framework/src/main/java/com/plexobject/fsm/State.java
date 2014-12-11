@@ -2,6 +2,12 @@ package com.plexobject.fsm;
 
 import java.util.Objects;
 
+/**
+ * This class encapsulates state of the state-machine
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class State {
     private final String name;
 

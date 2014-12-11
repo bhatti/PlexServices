@@ -21,7 +21,7 @@ public class RequiredFieldValidatorTest {
     private static class WithoutAnnotations {
     }
 
-    public static class Properties {
+    public static class Properties extends WithAnnotations {
         private String username;
         private String password;
         private String email;
@@ -213,6 +213,19 @@ public class RequiredFieldValidatorTest {
 
     @Test
     public void testValidObject() {
+        Properties properties = new Properties("sbhatti", "password",
+                "bhatti@plexobject.com", 98059);
+        instance.validate(properties);
+    }
+
+    @Test
+    public void testValidObjectWithNullHandler() {
+        Properties properties = new Properties();
+        instance.validate((Object)null, properties);
+    }
+
+    @Test
+    public void testValidObjectWithAnnotations() {
         Properties properties = new Properties("sbhatti", "password",
                 "bhatti@plexobject.com", 98059);
         instance.validate(new WithAnnotations(), properties);

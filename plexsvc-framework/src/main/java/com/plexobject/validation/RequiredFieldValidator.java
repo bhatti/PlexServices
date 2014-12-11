@@ -13,6 +13,11 @@ import org.apache.commons.beanutils.BeanUtils;
  */
 public class RequiredFieldValidator implements IRequiredFieldValidator {
     @Override
+    public void validate(Object request) throws ValidationException {
+        validate(request, request);
+    }
+
+    @Override
     public void validate(Object handler, Object request)
             throws ValidationException {
         if (handler == null) {
@@ -20,6 +25,12 @@ public class RequiredFieldValidator implements IRequiredFieldValidator {
         }
         RequiredFields requiredFields = handler.getClass().getAnnotation(
                 RequiredFields.class);
+        validate(requiredFields, request);
+    }
+
+    @Override
+    public void validate(RequiredFields requiredFields, Object request)
+            throws ValidationException {
         if (requiredFields == null) {
             return;
         }
@@ -79,4 +90,5 @@ public class RequiredFieldValidator implements IRequiredFieldValidator {
             return BeanUtils.getProperty(request, name);
         }
     }
+
 }

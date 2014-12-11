@@ -525,7 +525,7 @@ Here is how you can specify JMS container in properties file, which is passed
 to the runtime.
 ```bash
 JMSContextFactory=org.apache.activemq.jndi.ActiveMQInitialContextFactory
-JMSCProviderUrl=tcp://localhost:61616
+JMSProviderUrl=tcp://localhost:61616
 JMSConnectionFactoryLookup=ConnectionFactory
 ```
 In above example, we are using ActiveMQ as JMS container 

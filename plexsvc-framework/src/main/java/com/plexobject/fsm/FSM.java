@@ -77,10 +77,14 @@ public class FSM {
         return newState;
     }
 
-    private void notifyListeners(String onEvent, State oldState,
-            State newState, List<StateChangeListener> copyListeners) {
-        for (StateChangeListener l : copyListeners) {
-            l.stateChanged(oldState, newState, onEvent);
+    /**
+     * This method returns current state
+     * 
+     * @return
+     */
+    public State getCurrentState() {
+        synchronized (lock) {
+            return currentState;
         }
     }
 
@@ -107,6 +111,13 @@ public class FSM {
     public boolean removeStateChangeListener(StateChangeListener l) {
         synchronized (lock) {
             return this.listeners.remove(l);
+        }
+    }
+
+    private void notifyListeners(String onEvent, State oldState,
+            State newState, List<StateChangeListener> copyListeners) {
+        for (StateChangeListener l : copyListeners) {
+            l.stateChanged(oldState, newState, onEvent);
         }
     }
 
