@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -29,9 +30,10 @@ import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.IJMSClient;
-import com.plexobject.jms.JMSClientImpl;
+import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JmsResponseDispatcher;
+import com.plexobject.jms.impl.DefaultJMSContainer;
+import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
@@ -60,14 +62,14 @@ public class EventBusToJmsBridge implements Lifecycle {
      *
      */
     static class EBListener implements RequestHandler, Lifecycle {
-        private final IJMSClient jmsClient;
+        private final JMSContainer jmsContainer;
         private final EventBus eb;
         private final EventBusToJmsEntry entry;
         private long subscriptionId;
 
-        private EBListener(IJMSClient jmsClient, EventBus eb,
+        private EBListener(JMSContainer jmsClient, EventBus eb,
                 EventBusToJmsEntry entry) {
-            this.jmsClient = jmsClient;
+            this.jmsContainer = jmsClient;
             this.eb = eb;
             this.entry = entry;
         }
@@ -81,7 +83,9 @@ public class EventBusToJmsBridge implements Lifecycle {
                 String payload = ObjectCodecFactory.getInstance()
                         .getObjectCodec(entry.getCodecType())
                         .encode(request.getPayload());
-                jmsClient.send(entry.getTarget(), params, payload);
+                jmsContainer.send(
+                        jmsContainer.getDestination(entry.getTarget()), params,
+                        payload);
                 log.info("Forwarding " + entry + "'s message " + payload);
 
             } catch (Exception e) {
@@ -115,13 +119,14 @@ public class EventBusToJmsBridge implements Lifecycle {
      */
     static class JmsListener implements MessageListener, ExceptionListener,
             Lifecycle {
-        private final IJMSClient jmsClient;
+        private final JMSContainer jmsContainer;
         private final EventBus eb;
         private final EventBusToJmsEntry entry;
         private MessageConsumer consumer;
 
-        JmsListener(IJMSClient jmsClient, EventBus eb, EventBusToJmsEntry entry) {
-            this.jmsClient = jmsClient;
+        JmsListener(JMSContainer jmsContainer, EventBus eb,
+                EventBusToJmsEntry entry) {
+            this.jmsContainer = jmsContainer;
             this.eb = eb;
             this.entry = entry;
         }
@@ -130,7 +135,7 @@ public class EventBusToJmsBridge implements Lifecycle {
         public void onMessage(Message message) {
             TextMessage txtMessage = (TextMessage) message;
             try {
-                Map<String, Object> params = jmsClient.getProperties(message);
+                Map<String, Object> params = JMSUtils.getProperties(message);
                 String sessionId = (String) params.get(Constants.SESSION_ID);
 
                 final String textPayload = txtMessage.getText();
@@ -140,7 +145,7 @@ public class EventBusToJmsBridge implements Lifecycle {
                         .decode(textPayload, entry.getRequestTypeClass(),
                                 params);
                 AbstractResponseDispatcher dispatcher = message.getJMSReplyTo() != null ? new JmsResponseDispatcher(
-                        jmsClient, message.getJMSReplyTo()) : null;
+                        jmsContainer, message.getJMSReplyTo()) : null;
                 if (dispatcher != null) {
                     dispatcher.setCodecType(CodecType.fromAcceptHeader(
                             (String) params.get(Constants.ACCEPT),
@@ -171,8 +176,10 @@ public class EventBusToJmsBridge implements Lifecycle {
         @Override
         public synchronized void start() {
             try {
-                this.consumer = jmsClient.createConsumer(entry.getSource());
-                consumer.setMessageListener(this);
+                Destination destination = jmsContainer.getDestination(entry
+                        .getSource());
+                this.consumer = jmsContainer.setMessageListener(destination,
+                        this);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -194,15 +201,15 @@ public class EventBusToJmsBridge implements Lifecycle {
     }
 
     private boolean running;
-    private final IJMSClient jmsClient;
+    private final JMSContainer jmsContainer;
     private final EventBus eb;
     private final Map<EventBusToJmsEntry, EBListener> ebListeners = new ConcurrentHashMap<>();
     private final Map<EventBusToJmsEntry, JmsListener> jmsListeners = new ConcurrentHashMap<>();
 
-    public EventBusToJmsBridge(IJMSClient jmsClient,
+    public EventBusToJmsBridge(JMSContainer jmsContainer,
             Collection<EventBusToJmsEntry> entries, EventBus eb)
             throws JMSException {
-        this.jmsClient = jmsClient;
+        this.jmsContainer = jmsContainer;
         this.eb = eb;
 
         for (EventBusToJmsEntry e : entries) {
@@ -239,10 +246,10 @@ public class EventBusToJmsBridge implements Lifecycle {
      */
     public synchronized void add(EventBusToJmsEntry e) {
         if (e.getType() == EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS) {
-            EBListener listener = new EBListener(jmsClient, eb, e);
+            EBListener listener = new EBListener(jmsContainer, eb, e);
             ebListeners.put(e, listener);
         } else {
-            JmsListener listener = new JmsListener(jmsClient, eb, e);
+            JmsListener listener = new JmsListener(jmsContainer, eb, e);
             jmsListeners.put(e, listener);
         }
         log.info("Adding " + e);
@@ -278,8 +285,8 @@ public class EventBusToJmsBridge implements Lifecycle {
     public static void run(Configuration config,
             Collection<EventBusToJmsEntry> entries) throws JMSException {
         EventBus eb = new EventBusImpl();
-        IJMSClient jmsClient = new JMSClientImpl(config);
-        EventBusToJmsBridge bridge = new EventBusToJmsBridge(jmsClient,
+        JMSContainer jmsContainer = new DefaultJMSContainer(config);
+        EventBusToJmsBridge bridge = new EventBusToJmsBridge(jmsContainer,
                 entries, eb);
         bridge.start();
     }
@@ -293,7 +300,7 @@ public class EventBusToJmsBridge implements Lifecycle {
             return;
         }
         running = true;
-        jmsClient.start();
+        jmsContainer.start();
         for (EBListener l : ebListeners.values()) {
             l.start();
         }
@@ -311,7 +318,7 @@ public class EventBusToJmsBridge implements Lifecycle {
             return;
         }
         running = false;
-        jmsClient.stop();
+        jmsContainer.stop();
         for (EBListener l : ebListeners.values()) {
             l.stop();
         }

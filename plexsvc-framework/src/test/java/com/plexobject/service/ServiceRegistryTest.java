@@ -109,10 +109,12 @@ public class ServiceRegistryTest {
 
     @Test
     public void testCreateServices() throws Exception {
+        properties.put(Constants.HTTP_PORT, 8282);
         properties.put("statsd.host", "localhost");
         properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+                "ConnectionFactory");
         properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
 
         final Configuration config = new Configuration(properties);
@@ -154,6 +156,8 @@ public class ServiceRegistryTest {
     @Test
     public void testStartStop() throws Exception {
         properties.put("statsd.host", "localhost");
+        properties.put(Constants.HTTP_PORT, "8282");
+
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         RequestHandler h = new WebService();
@@ -343,13 +347,14 @@ public class ServiceRegistryTest {
     private static BrokerService startBroker() throws Exception {
         Properties properties = new Properties();
         BrokerService broker = new BrokerService();
-        broker.addConnector("tcp://localhost:61616");
+        broker.addConnector("tcp://localhost:61617");
         broker.start();
 
         properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
-        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
+        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+                "ConnectionFactory");
+        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61617");
         return broker;
     }
 }

@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.jms.Destination;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -13,20 +15,21 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
-import com.plexobject.jms.IJMSClient;
-import com.plexobject.jms.JMSClientImpl;
+import com.plexobject.jms.JMSContainer;
+import com.plexobject.jms.impl.DefaultJMSContainer;
 import com.plexobject.util.Configuration;
 
 public class JmsSender {
     private static final int TEN_SECONDS = 10;
     private static final Logger log = LoggerFactory.getLogger(JmsSender.class);
 
-    public static void send(String propertyFile, String dest,
+    public static void send(String propertyFile, String destName,
             Map<String, Object> headers, String text) throws Exception {
         Configuration config = new Configuration(propertyFile);
-        final IJMSClient jmsClient = new JMSClientImpl(config);
-        jmsClient.start();
-        Future<Response> respFuture = jmsClient.sendReceive(dest, headers,
+        final JMSContainer jmsContainer = new DefaultJMSContainer(config);
+        jmsContainer.start();
+        Destination destination = jmsContainer.getDestination(destName);
+        Future<Response> respFuture = jmsContainer.sendReceive(destination, headers,
                 text, new Handler<Response>() {
                     @Override
                     public void handle(Response reply) {
@@ -34,12 +37,12 @@ public class JmsSender {
                             String payload = reply.getPayload();
                             log.info(payload);
                         } finally {
-                            jmsClient.stop();
+                            jmsContainer.stop();
                             System.exit(0);
                         }
                     }
                 });
-        log.debug("Sent to " + dest + ": " + text + ", waiting for reply ");
+        log.debug("Sent to " + destName + ": " + text + ", waiting for reply ");
         respFuture.get(TEN_SECONDS, TimeUnit.SECONDS);
         Thread.currentThread().join();
     }

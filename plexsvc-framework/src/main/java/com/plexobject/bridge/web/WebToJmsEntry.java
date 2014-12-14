@@ -17,6 +17,7 @@ public class WebToJmsEntry {
     private String destination;
     private int timeoutSecs;
     private boolean asynchronous;
+    private int concurrency;
 
     public WebToJmsEntry() {
 
@@ -24,17 +25,19 @@ public class WebToJmsEntry {
 
     public WebToJmsEntry(WebToJmsEntry e) {
         this(e.codecType, e.endpoint, e.method, e.destination, e.timeoutSecs,
-                e.asynchronous);
+                e.asynchronous, e.concurrency);
     }
 
     public WebToJmsEntry(CodecType codecType, String endpoint, Method method,
-            String destination, int timeoutSecs, boolean asynchronous) {
+            String destination, int timeoutSecs, boolean asynchronous,
+            int concurrency) {
         this.codecType = codecType;
         this.endpoint = endpoint;
         this.method = method;
         this.destination = destination;
         this.timeoutSecs = timeoutSecs;
         this.asynchronous = asynchronous;
+        this.concurrency = concurrency;
     }
 
     public CodecType getCodecType() {
@@ -85,13 +88,22 @@ public class WebToJmsEntry {
         this.asynchronous = asynchronous;
     }
 
-    @Override
+    public int getConcurrency() {
+        return concurrency;
+    }
+
+    public void setConcurrency(int concurrency) {
+        this.concurrency = concurrency;
+    }
+
     @JsonIgnore
+    @Override
     public String toString() {
         return "WebToJmsEntry [codecType=" + codecType + ", endpoint="
                 + endpoint + ", method=" + method + ", destination="
                 + destination + ", timeoutSecs=" + timeoutSecs
-                + ", asynchronous=" + asynchronous + "]";
+                + ", asynchronous=" + asynchronous + ", concurrency="
+                + concurrency + "]";
     }
 
     @JsonIgnore

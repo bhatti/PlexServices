@@ -19,6 +19,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
@@ -36,20 +37,20 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             .getLogger(JmsRequestHandler.class);
 
     private final ServiceRegistry serviceRegistry;
-    private final IJMSClient jmsClient;
+    private final JMSContainer jmsContainer;
     private final Destination destination;
     private final RequestHandler handler;
-    private MessageConsumer consumer;
+    private MessageConsumer messageConsumer;
 
     JmsRequestHandler(final ServiceRegistry serviceRegistry,
-            IJMSClient jmsClient, Destination destination,
-            RequestHandler handler) throws JMSException, NamingException {
+            JMSContainer jmsContainer, RequestHandler handler,
+            Destination destination) throws JMSException, NamingException {
         this.serviceRegistry = serviceRegistry;
-        this.jmsClient = jmsClient;
-        this.destination = destination;
+        this.jmsContainer = jmsContainer;
         this.handler = handler;
-        this.consumer = jmsClient.createConsumer(destination);
-        consumer.setMessageListener(this);
+        this.destination = destination;
+        registerListener();
+        jmsContainer.addExceptionListener(this);
     }
 
     @Override
@@ -58,10 +59,10 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
 
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         try {
-            Map<String, Object> params = jmsClient.getProperties(message);
+            Map<String, Object> params = JMSUtils.getProperties(message);
             final String textPayload = txtMessage.getText();
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
-                    jmsClient, message.getJMSReplyTo());
+                    jmsContainer, message.getJMSReplyTo());
             dispatcher.setCodecType(CodecType.fromAcceptHeader(
                     (String) params.get(Constants.ACCEPT), config.codec()));
 
@@ -85,14 +86,19 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
         log.error("Found error while listening, will resubscribe", ex);
         try {
             close();
-            this.consumer = jmsClient.createConsumer(destination);
-            consumer.setMessageListener(this);
+            registerListener();
         } catch (Exception e) {
             log.error("Failed to resubscribe", e);
         }
     }
 
-    void close() throws JMSException {
-        this.consumer.close();
+    private void registerListener() throws JMSException, NamingException {
+        this.messageConsumer = jmsContainer.setMessageListener(destination,
+                this);
     }
+
+    void close() throws JMSException {
+        this.messageConsumer.close();
+    }
+
 }

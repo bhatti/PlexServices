@@ -12,6 +12,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.jms.Destination;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +25,8 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.jms.IJMSClient;
-import com.plexobject.jms.JMSClientImpl;
+import com.plexobject.jms.JMSContainer;
+import com.plexobject.jms.impl.DefaultJMSContainer;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.Method;
@@ -43,17 +45,18 @@ import com.plexobject.util.IOUtils;
 public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     private static final Logger log = LoggerFactory
             .getLogger(WebToJmsBridge.class);
-    private final IJMSClient jmsClient;
+    private final JMSContainer jmsContainer;
     private final ServiceRegistry serviceRegistry;
     //
     private final Map<Method, RouteResolver<WebToJmsEntry>> entriesEndpointsByMethod = new ConcurrentHashMap<>();
 
     public WebToJmsBridge(ServiceRegistry serviceRegistry, Configuration config) {
-        this(serviceRegistry, new JMSClientImpl(config));
+        this(serviceRegistry, new DefaultJMSContainer(config));
     }
 
-    public WebToJmsBridge(ServiceRegistry serviceRegistry, IJMSClient jmsClient) {
-        this.jmsClient = jmsClient;
+    public WebToJmsBridge(ServiceRegistry serviceRegistry,
+            JMSContainer jmsContainer) {
+        this.jmsContainer = jmsContainer;
         this.serviceRegistry = serviceRegistry;
 
     }
@@ -135,16 +138,17 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         params.putAll(request.getProperties());
         params.putAll(request.getHeaders());
         try {
+            Destination destination = jmsContainer.getDestination(entry
+                    .getDestination());
             if (entry.isAsynchronous()) {
-                jmsClient.send(entry.getDestination(), params,
+                jmsContainer.send(destination, params,
                         (String) request.getPayload());
                 request.getResponseDispatcher().setCodecType(
                         entry.getCodecType());
                 request.getResponseDispatcher().send("");
             } else {
-                Future<Response> respFuture = jmsClient.sendReceive(
-                        entry.getDestination(), params,
-                        (String) request.getPayload(),
+                Future<Response> respFuture = jmsContainer.sendReceive(
+                        destination, params, (String) request.getPayload(),
                         sendbackReply(request, entry, params));
                 respFuture.get(entry.getTimeoutSecs(), TimeUnit.SECONDS);
             }
@@ -220,7 +224,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
      */
     @Override
     public void onStarted() {
-        jmsClient.start();
+        jmsContainer.start();
     }
 
     /**
@@ -228,7 +232,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
      */
     @Override
     public void onStopped() {
-        jmsClient.stop();
+        jmsContainer.stop();
     }
 
     @Override

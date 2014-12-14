@@ -17,17 +17,18 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 public class JmsResponseDispatcher extends AbstractResponseDispatcher {
     private static final Logger log = LoggerFactory
             .getLogger(JmsResponseDispatcher.class);
-    private final IJMSClient jmsClient;
+    private final JMSContainer messageListenerContainer;
     private final Destination replyTo;
 
-    public JmsResponseDispatcher(IJMSClient jmsClient, Destination replyTo) {
-        this.jmsClient = jmsClient;
+    public JmsResponseDispatcher(JMSContainer messageListenerContainer,
+            Destination replyTo) {
+        this.messageListenerContainer = messageListenerContainer;
         this.replyTo = replyTo;
     }
 
     protected void doSend(String payload) {
         try {
-            jmsClient.send(replyTo, properties, payload);
+            messageListenerContainer.send(replyTo, properties, payload);
             if (log.isDebugEnabled()) {
                 log.debug("Sending reply " + payload + " to " + replyTo);
             }

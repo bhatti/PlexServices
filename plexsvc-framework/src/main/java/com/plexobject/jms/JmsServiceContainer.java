@@ -10,6 +10,8 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.jms.impl.DefaultJMSContainer;
+import com.plexobject.jms.impl.DestinationResolverImpl;
 import com.plexobject.service.AbstractServiceContainer;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -22,19 +24,26 @@ import com.plexobject.util.Configuration;
  *
  */
 public class JmsServiceContainer extends AbstractServiceContainer {
-    private IJMSClient jmsClient;
+    private final JMSContainer jmsContainer;
     private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
 
     public JmsServiceContainer(final Configuration config,
             final ServiceRegistry serviceRegistry) throws Exception {
-        this(config, serviceRegistry, new JMSClientImpl(config));
+        this(config, serviceRegistry, new DestinationResolverImpl(config));
     }
 
     public JmsServiceContainer(final Configuration config,
-            final ServiceRegistry serviceRegistry, IJMSClient jmsClient)
+            final ServiceRegistry serviceRegistry,
+            final DestinationResolver destinationResolver) throws Exception {
+        this(config, serviceRegistry, new DefaultJMSContainer(config,
+                destinationResolver));
+    }
+
+    public JmsServiceContainer(final Configuration config,
+            final ServiceRegistry serviceRegistry, JMSContainer jmsContainer)
             throws Exception {
         super(config, serviceRegistry);
-        this.jmsClient = jmsClient;
+        this.jmsContainer = jmsContainer;
     }
 
     public void init() {
@@ -42,12 +51,12 @@ public class JmsServiceContainer extends AbstractServiceContainer {
 
     @Override
     protected void doStart() throws Exception {
-        jmsClient.start();
+        jmsContainer.start();
     }
 
     @Override
     protected void doStop() throws Exception {
-        jmsClient.stop();
+        jmsContainer.stop();
     }
 
     @Override
@@ -73,12 +82,16 @@ public class JmsServiceContainer extends AbstractServiceContainer {
         }
 
         try {
-            Destination dest = jmsClient.getDestination(getDestinationName(h));
-            jmsHandler = new JmsRequestHandler(serviceRegistry, jmsClient,
-                    dest, h);
+            Destination destination = jmsContainer
+                    .getDestination(getDestinationName(serviceRegistry, h));
+
+            jmsHandler = new JmsRequestHandler(serviceRegistry, jmsContainer,
+                    h, destination);
             jmsHandlersByRequestHandler.put(h, jmsHandler);
             log.info("Adding JMS service " + h.getClass().getSimpleName()
-                    + " for " + dest + ", codec " + config.codec());
+                    + " for " + h + ", codec " + config.codec());
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to add service handler " + h, e);
         }
@@ -114,8 +127,8 @@ public class JmsServiceContainer extends AbstractServiceContainer {
     // optionally add {param}, that are initialized from configuration, e.g.
     // queue:{scope}-create-project-service-queue
     // topic:{scope}-notification-topic
-    private String getDestinationName(RequestHandler h) throws JMSException,
-            NamingException {
+    private static String getDestinationName(ServiceRegistry serviceRegistry,
+            RequestHandler h) throws JMSException, NamingException {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(h);
 
         String destName = config.endpoint();

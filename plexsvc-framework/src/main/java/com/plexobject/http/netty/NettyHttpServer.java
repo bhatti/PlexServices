@@ -120,12 +120,13 @@ public class NettyHttpServer implements Lifecycle {
         if (channel != null) {
             return;
         }
-        int httpPort = config
-                .getInteger(Constants.HTTP_PORT, Constants.DEFAULT_HTTP_PORT);
+        int httpPort = config.getInteger(Constants.HTTP_PORT,
+                Constants.DEFAULT_HTTP_PORT);
 
         try {
+            System.out.println("Starting web server on " + httpPort);
+            log.info("Starting web server on " + httpPort);
             channel = bootstrap.bind(httpPort).sync().channel();
-            log.info("Started on " + httpPort);
             // ch.closeFuture().sync(); // Wait until the server socket is
             // closed
         } catch (Exception e) {

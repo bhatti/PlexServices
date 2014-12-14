@@ -17,6 +17,7 @@ public class ServiceConfigDesc implements Serializable {
     private final String endpoint;
     private final boolean recordStatsdMetrics;
     private final String[] rolesAllowed;
+    private final int concurrency;
 
     public static class Builder {
         private Method method;
@@ -27,6 +28,7 @@ public class ServiceConfigDesc implements Serializable {
         private String endpoint;
         private boolean recordStatsdMetrics;
         private String[] rolesAllowed;
+        private int concurrency;
 
         public Builder(WebToJmsEntry e) {
             if (e != null) {
@@ -38,6 +40,7 @@ public class ServiceConfigDesc implements Serializable {
                 this.version = "";
                 this.endpoint = e.getEndpoint();
                 this.recordStatsdMetrics = true;
+                this.concurrency = e.getConcurrency();
                 this.rolesAllowed = new String[0];
             }
         }
@@ -60,6 +63,7 @@ public class ServiceConfigDesc implements Serializable {
                 this.endpoint = config.endpoint();
                 this.recordStatsdMetrics = config.recordStatsdMetrics();
                 this.rolesAllowed = config.rolesAllowed();
+                this.concurrency = config.concurrency();
             }
         }
 
@@ -103,10 +107,15 @@ public class ServiceConfigDesc implements Serializable {
             return this;
         }
 
+        public Builder setConcurrency(int concurrency) {
+            this.concurrency = concurrency;
+            return this;
+        }
+
         public ServiceConfigDesc build() {
             return new ServiceConfigDesc(method, protocol, payloadClass,
                     codecType, version, endpoint, recordStatsdMetrics,
-                    rolesAllowed);
+                    rolesAllowed, concurrency);
         }
     }
 
@@ -121,12 +130,14 @@ public class ServiceConfigDesc implements Serializable {
     public ServiceConfigDesc(ServiceConfig config) {
         this(config.method(), config.protocol(), config.payloadClass(), config
                 .codec(), config.version(), config.endpoint(), config
-                .recordStatsdMetrics(), config.rolesAllowed());
+                .recordStatsdMetrics(), config.rolesAllowed(), config
+                .concurrency());
     }
 
     public ServiceConfigDesc(Method method, Protocol protocol,
             Class<?> payloadClass, CodecType codecType, String version,
-            String endpoint, boolean recordStatsdMetrics, String[] rolesAllowed) {
+            String endpoint, boolean recordStatsdMetrics,
+            String[] rolesAllowed, int concurrency) {
         this.method = method;
         this.protocol = protocol;
         this.payloadClass = payloadClass;
@@ -135,6 +146,7 @@ public class ServiceConfigDesc implements Serializable {
         this.endpoint = endpoint;
         this.recordStatsdMetrics = recordStatsdMetrics;
         this.rolesAllowed = rolesAllowed;
+        this.concurrency = concurrency;
     }
 
     public Method method() {
@@ -167,6 +179,10 @@ public class ServiceConfigDesc implements Serializable {
 
     public String[] rolesAllowed() {
         return rolesAllowed;
+    }
+
+    public int getConcurrency() {
+        return concurrency;
     }
 
     public static Builder builder(WebToJmsEntry e) {

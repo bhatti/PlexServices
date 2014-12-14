@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.jms.Destination;
 import javax.jms.MessageConsumer;
 import javax.jms.TextMessage;
 
@@ -23,7 +24,7 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
-import com.plexobject.jms.IJMSClient;
+import com.plexobject.jms.JMSContainer;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
@@ -36,7 +37,7 @@ public class WebToJmsBridgeTest {
     }
 
     @Mocked
-    private IJMSClient jmsClient;
+    private JMSContainer jmsContainer;
     @Mocked
     private EventBus eb;
     @Mocked
@@ -50,13 +51,13 @@ public class WebToJmsBridgeTest {
     public void setUp() throws Exception {
         Configuration config = new Configuration(new Properties());
         ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-        bridge = new WebToJmsBridge(serviceRegistry, jmsClient);
+        bridge = new WebToJmsBridge(serviceRegistry, jmsContainer);
     }
 
     @Test
     public void testAdd() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "destination", 5, false);
+                Method.GET, "destination", 5, false, 1);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
@@ -77,7 +78,7 @@ public class WebToJmsBridgeTest {
     public void testHandleAsynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
                 Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5,
-                false);
+                false, 1);
         entry.setAsynchronous(true);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
@@ -94,8 +95,9 @@ public class WebToJmsBridgeTest {
 
         new Expectations() {
             {
-                jmsClient.send("queue:{scope}-assign-bugreport-service-queue",
-                        (Map<String, Object>) any, anyString);
+                Destination dest = jmsContainer
+                        .getDestination("queue:{scope}-assign-bugreport-service-queue");
+                jmsContainer.send(dest, (Map<String, Object>) any, anyString);
             }
         };
         bridge.handle(request);
@@ -106,7 +108,7 @@ public class WebToJmsBridgeTest {
     public void testHandleSynchronous() throws Exception {
         final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
                 Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5,
-                false);
+                false, 1);
         entry.setAsynchronous(false);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
@@ -123,8 +125,9 @@ public class WebToJmsBridgeTest {
 
         new Expectations() {
             {
-                jmsClient.sendReceive(entry.getDestination(),
-                        (Map<String, Object>) any,
+                Destination dest = jmsContainer.getDestination(entry
+                        .getDestination());
+                jmsContainer.sendReceive(dest, (Map<String, Object>) any,
                         (String) request.getPayload(), (Handler<Response>) any);
             }
         };

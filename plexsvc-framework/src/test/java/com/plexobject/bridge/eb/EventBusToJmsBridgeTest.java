@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jms.Destination;
 import javax.jms.MessageConsumer;
 import javax.jms.TextMessage;
 
@@ -24,7 +25,7 @@ import com.plexobject.bus.EventBus;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
-import com.plexobject.jms.IJMSClient;
+import com.plexobject.jms.JMSContainer;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 
@@ -35,7 +36,7 @@ public class EventBusToJmsBridgeTest {
     }
 
     @Mocked
-    private IJMSClient jmsClient;
+    private JMSContainer jmsContainer;
     @Mocked
     private EventBus eb;
     @Mocked
@@ -46,7 +47,7 @@ public class EventBusToJmsBridgeTest {
 
     @Before
     public void setUp() throws Exception {
-        bridge = new EventBusToJmsBridge(jmsClient,
+        bridge = new EventBusToJmsBridge(jmsContainer,
                 new ArrayList<EventBusToJmsEntry>(), eb);
     }
 
@@ -85,12 +86,12 @@ public class EventBusToJmsBridgeTest {
         final JmsListener listener = bridge.getJmsListener(entry);
         new Expectations() {
             {
-                jmsClient.start();
-                jmsClient
-                        .createConsumer("queue:{scope}-query-user-service-queue");
+                jmsContainer.start();
+                Destination destination = jmsContainer
+                        .getDestination("queue:{scope}-query-user-service-queue");
+                jmsContainer.setMessageListener(destination, listener);
                 returns(consumer);
-                consumer.setMessageListener(listener);
-                jmsClient.stop();
+                jmsContainer.stop();
                 consumer.close();
             }
         };
@@ -108,6 +109,7 @@ public class EventBusToJmsBridgeTest {
         JmsListener listener = bridge.getJmsListener(entry);
         new Expectations() {
             {
+                message.getPropertyNames();
                 message.getText();
                 returns("{}");
                 message.getJMSReplyTo();
@@ -129,8 +131,9 @@ public class EventBusToJmsBridgeTest {
         EBListener listener = bridge.getEBListener(entry);
         new Expectations() {
             {
-                jmsClient.send("queue:{scope}-assign-bugreport-service-queue",
-                        (Map<String, Object>) any, anyString);
+                Destination dest = jmsContainer
+                        .getDestination("queue:{scope}-assign-bugreport-service-queue");
+                jmsContainer.send(dest, (Map<String, Object>) any, anyString);
             }
         };
         Map<String, Object> properties = new HashMap<>();
