@@ -60,7 +60,7 @@ public class DefaultJMSContainerTest {
     @Test(expected = NullPointerException.class)
     public void testCreateWithoutContextFactory() throws Exception {
         final Configuration config = new Configuration(properties);
-        new DefaultJMSContainer(config);
+        JMSUtils.getJMSContainer(config);
     }
 
     @Test(expected = NullPointerException.class)
@@ -68,7 +68,7 @@ public class DefaultJMSContainerTest {
         properties.put(Constants.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         final Configuration config = new Configuration(properties);
-        new DefaultJMSContainer(config);
+        JMSUtils.getJMSContainer(config);
     }
 
     @Test(expected = NullPointerException.class)
@@ -78,7 +78,7 @@ public class DefaultJMSContainerTest {
         properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
         final Configuration config = new Configuration(properties);
-        new DefaultJMSContainer(config);
+        JMSUtils.getJMSContainer(config);
     }
 
     @Test(expected = RuntimeException.class)
@@ -88,14 +88,14 @@ public class DefaultJMSContainerTest {
                 "ConnectionFactory");
         properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
-        new DefaultJMSContainer(config);
+        JMSUtils.getJMSContainer(config);
     }
 
     @Test
     public void testCreateWithServer() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        DefaultJMSContainer client = new DefaultJMSContainer(config);
+        JMSContainer client = JMSUtils.getJMSContainer(config);
         broker.stop();
         assertFalse(client.isRunning());
     }
@@ -106,7 +106,7 @@ public class DefaultJMSContainerTest {
         properties.put("jms.password", "");
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        DefaultJMSContainer client = new DefaultJMSContainer(config);
+        JMSContainer client = JMSUtils.getJMSContainer(config);
         broker.stop();
         assertFalse(client.isRunning());
     }
@@ -115,7 +115,7 @@ public class DefaultJMSContainerTest {
     public void testStart() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        DefaultJMSContainer client = new DefaultJMSContainer(config);
+        JMSContainer client = JMSUtils.getJMSContainer(config);
         client.start();
         client.start();
         assertTrue(client.isRunning());
@@ -126,7 +126,7 @@ public class DefaultJMSContainerTest {
     public void testStartWhenBrokerIsDown() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        DefaultJMSContainer client = new DefaultJMSContainer(config);
+        JMSContainer client = JMSUtils.getJMSContainer(config);
         broker.stop();
         client.start();
     }
@@ -135,7 +135,7 @@ public class DefaultJMSContainerTest {
     public void testStop() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        DefaultJMSContainer client = new DefaultJMSContainer(config);
+        JMSContainer client = JMSUtils.getJMSContainer(config);
         client.stop();
         assertFalse(client.isRunning());
         client.start();
@@ -149,7 +149,7 @@ public class DefaultJMSContainerTest {
     public void testStopWhenBrokerIsDown() throws Exception {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
-        DefaultJMSContainer client = new DefaultJMSContainer(config);
+        JMSContainer client = JMSUtils.getJMSContainer(config);
         client.start();
         broker.stop();
         client.stop();

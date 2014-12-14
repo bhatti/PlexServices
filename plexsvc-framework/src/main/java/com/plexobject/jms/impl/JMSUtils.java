@@ -13,6 +13,11 @@ import javax.jms.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Constants;
+import com.plexobject.jms.JMSContainer;
+import com.plexobject.jms.JMSContainerFactory;
+import com.plexobject.util.Configuration;
+
 public class JMSUtils {
     private static final Logger log = LoggerFactory.getLogger(JMSUtils.class);
     private static final String JMS_DESTINATION = "JMSDestination";
@@ -59,6 +64,24 @@ public class JMSUtils {
             return t.getTopicName();
         } else {
             return null;
+        }
+    }
+
+    public static JMSContainer getJMSContainer(Configuration config) {
+        String factoryClassName = config
+                .getProperty(Constants.PLEXSERVICE_JMS_CONTAINER_FACTORY_CLASS);
+        if (factoryClassName == null) {
+            return new DefaultJMSContainerFactory().create(config);
+        }
+        try {
+            Class<?> factoryClass = Class.forName(factoryClassName);
+            JMSContainerFactory factory = (JMSContainerFactory) factoryClass
+                    .getDeclaredConstructor(Configuration.class).newInstance(
+                            config);
+            return factory.create(config);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create JMSContainerFactory",
+                    e);
         }
     }
 

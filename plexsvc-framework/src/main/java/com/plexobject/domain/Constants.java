@@ -9,6 +9,7 @@ public interface Constants {
     public static final String HTTP_PORT = "HttpPort";
     public static final String HTTPS_PORT = "HttpsPort";
     public static final String ACCEPT = "Accept";
+    public static final String PLEXSERVICE_JMS_CONTAINER_FACTORY_CLASS = "PlexserviceJMSContainerFactory";
     public static final String PLEXSERVICE_ROLE_AUTHORIZER_CLASS = "PlexserviceRoleAuthorizerClass";
     public static final String PLEXSERVICE_CONFIG_RESOURCE_PATH = "PlexserviceConfigResourcePath";
     public static final String PLEXSERVICE_AWARE_CLASS = "PlexserviceAwareClass";

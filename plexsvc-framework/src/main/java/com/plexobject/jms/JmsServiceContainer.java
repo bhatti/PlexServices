@@ -10,8 +10,7 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.impl.DefaultJMSContainer;
-import com.plexobject.jms.impl.DestinationResolverImpl;
+import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.AbstractServiceContainer;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -29,21 +28,8 @@ public class JmsServiceContainer extends AbstractServiceContainer {
 
     public JmsServiceContainer(final Configuration config,
             final ServiceRegistry serviceRegistry) throws Exception {
-        this(config, serviceRegistry, new DestinationResolverImpl(config));
-    }
-
-    public JmsServiceContainer(final Configuration config,
-            final ServiceRegistry serviceRegistry,
-            final DestinationResolver destinationResolver) throws Exception {
-        this(config, serviceRegistry, new DefaultJMSContainer(config,
-                destinationResolver));
-    }
-
-    public JmsServiceContainer(final Configuration config,
-            final ServiceRegistry serviceRegistry, JMSContainer jmsContainer)
-            throws Exception {
         super(config, serviceRegistry);
-        this.jmsContainer = jmsContainer;
+        this.jmsContainer = JMSUtils.getJMSContainer(config);
     }
 
     public void init() {

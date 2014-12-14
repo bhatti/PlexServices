@@ -26,7 +26,7 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.jms.JMSContainer;
-import com.plexobject.jms.impl.DefaultJMSContainer;
+import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.Method;
@@ -51,7 +51,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     private final Map<Method, RouteResolver<WebToJmsEntry>> entriesEndpointsByMethod = new ConcurrentHashMap<>();
 
     public WebToJmsBridge(ServiceRegistry serviceRegistry, Configuration config) {
-        this(serviceRegistry, new DefaultJMSContainer(config));
+        this(serviceRegistry, JMSUtils.getJMSContainer(config));
     }
 
     public WebToJmsBridge(ServiceRegistry serviceRegistry,
