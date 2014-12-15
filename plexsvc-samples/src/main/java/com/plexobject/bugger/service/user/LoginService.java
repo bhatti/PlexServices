@@ -14,7 +14,7 @@ import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 //@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/login", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, endpoint = "queue:{scope}-login-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://{scope}-login-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username"),
         @Field(name = "password") })
 public class LoginService extends AbstractUserService implements RequestHandler {

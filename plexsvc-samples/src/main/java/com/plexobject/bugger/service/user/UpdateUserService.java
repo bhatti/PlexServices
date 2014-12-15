@@ -12,7 +12,7 @@ import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "/users/{id}", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue:{scope}-update-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-update-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "id") })
 public class UpdateUserService extends AbstractUserService implements
         RequestHandler {

@@ -12,11 +12,11 @@ public class EventBusToJmsEntryTest {
     public void testCreateEventBusToJmsEntryJmsToEB() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.JMS_TO_EB_CHANNEL,
-                "queue:{scope}-query-user-service-queue", "query-user-channel",
-                TestUser.class.getName());
+                "queue://{scope}-query-user-service-queue", "query-user-channel",
+                TestUser.class.getName(), 1, 0);
         assertEquals(CodecType.JSON, entry.getCodecType());
         assertEquals(EventBusToJmsEntry.Type.JMS_TO_EB_CHANNEL, entry.getType());
-        assertEquals("queue:{scope}-query-user-service-queue",
+        assertEquals("queue://{scope}-query-user-service-queue",
                 entry.getSource());
         assertEquals("query-user-channel", entry.getTarget());
         assertEquals(TestUser.class.getName(), entry.getRequestType());
@@ -27,12 +27,12 @@ public class EventBusToJmsEntryTest {
     public void testCreateEventBusToJmsEntryEbToJms() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS, "create-user",
-                "queue:{scope}-assign-bugreport-service-queue",
-                TestUser.class.getName());
+                "queue://{scope}-assign-bugreport-service-queue",
+                TestUser.class.getName(), 1, 0);
         assertEquals(CodecType.JSON, entry.getCodecType());
         assertEquals(EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS, entry.getType());
         assertEquals("create-user", entry.getSource());
-        assertEquals("queue:{scope}-assign-bugreport-service-queue",
+        assertEquals("queue://{scope}-assign-bugreport-service-queue",
                 entry.getTarget());
         assertEquals(TestUser.class.getName(), entry.getRequestType());
         assertEquals(TestUser.class, entry.getRequestTypeClass());
@@ -48,8 +48,8 @@ public class EventBusToJmsEntryTest {
     @Test
     public void testGetSetTarget() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry();
-        entry.setTarget("queue:{scope}-assign-bugreport-service-queue");
-        assertEquals("queue:{scope}-assign-bugreport-service-queue",
+        entry.setTarget("queue://{scope}-assign-bugreport-service-queue");
+        assertEquals("queue://{scope}-assign-bugreport-service-queue",
                 entry.getTarget());
     }
 

@@ -73,7 +73,7 @@ public class ServiceConfigDescTest {
     @Test
     public void testCreateWithWebToJmsEntry() {
         WebToJmsEntry e = new WebToJmsEntry(CodecType.JSON, "/w", Method.GET,
-                "queue:name", 5, false, 1);
+                "queue://name", 5, false, 1);
         ServiceConfigDesc.Builder builder = ServiceConfigDesc.builder(e);
         ServiceConfigDesc desc = builder.build();
         assertEquals(Method.GET, desc.method());

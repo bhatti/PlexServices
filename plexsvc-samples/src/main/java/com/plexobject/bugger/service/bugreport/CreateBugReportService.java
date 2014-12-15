@@ -13,7 +13,7 @@ import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugId"),
         @Field(name = "projectId") })
 public class CreateBugReportService extends AbstractBugReportService implements

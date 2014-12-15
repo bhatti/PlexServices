@@ -3,12 +3,12 @@ package com.plexobject.bridge.eb;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.jms.Destination;
-import javax.jms.MessageConsumer;
 import javax.jms.TextMessage;
 
 import mockit.Expectations;
@@ -26,6 +26,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.jms.JMSContainer;
+import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 
@@ -40,7 +41,7 @@ public class EventBusToJmsBridgeTest {
     @Mocked
     private EventBus eb;
     @Mocked
-    private MessageConsumer consumer;
+    private Closeable consumer;
     @Mocked
     private TextMessage message;
     private EventBusToJmsBridge bridge;
@@ -55,8 +56,8 @@ public class EventBusToJmsBridgeTest {
     public void testAddRemoveJmsToEB() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.JMS_TO_EB_CHANNEL,
-                "queue:{scope}-query-user-service-queue", "query-user-channel",
-                TestUser.class.getName());
+                "queue://{scope}-query-user-service-queue",
+                "query-user-channel", TestUser.class.getName(), 1, 0);
         bridge.add(entry);
 
         assertNotNull(bridge.getJmsListener(entry));
@@ -68,8 +69,8 @@ public class EventBusToJmsBridgeTest {
     public void testAddRemoveEBToJms() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS, "create-user",
-                "queue:{scope}-assign-bugreport-service-queue",
-                TestUser.class.getName());
+                "queue://{scope}-assign-bugreport-service-queue",
+                TestUser.class.getName(), 1, 0);
         bridge.add(entry);
         assertNotNull(bridge.getEBListener(entry));
         bridge.remove(entry);
@@ -80,16 +81,17 @@ public class EventBusToJmsBridgeTest {
     public void testStartStopJmsToEB() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.JMS_TO_EB_CHANNEL,
-                "queue:{scope}-query-user-service-queue", "query-user-channel",
-                TestUser.class.getName());
+                "queue://{scope}-query-user-service-queue",
+                "query-user-channel", TestUser.class.getName(), 1, 0);
         bridge.add(entry);
         final JmsListener listener = bridge.getJmsListener(entry);
         new Expectations() {
             {
                 jmsContainer.start();
                 Destination destination = jmsContainer
-                        .getDestination("queue:{scope}-query-user-service-queue");
-                jmsContainer.setMessageListener(destination, listener);
+                        .getDestination("queue://{scope}-query-user-service-queue");
+                jmsContainer.setMessageListener(destination, listener,
+                        (MessageListenerConfig) any);
                 returns(consumer);
                 jmsContainer.stop();
                 consumer.close();
@@ -103,8 +105,8 @@ public class EventBusToJmsBridgeTest {
     public void testOnMessageJmsToEB() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.JMS_TO_EB_CHANNEL,
-                "queue:{scope}-query-user-service-queue", "query-user-channel",
-                TestUser.class.getName());
+                "queue://{scope}-query-user-service-queue",
+                "query-user-channel", TestUser.class.getName(), 1, 0);
         bridge.add(entry);
         JmsListener listener = bridge.getJmsListener(entry);
         new Expectations() {
@@ -125,14 +127,14 @@ public class EventBusToJmsBridgeTest {
     public void testHandleEBToJms() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS, "create-user",
-                "queue:{scope}-assign-bugreport-service-queue",
-                TestUser.class.getName());
+                "queue://{scope}-assign-bugreport-service-queue",
+                TestUser.class.getName(), 1, 0);
         bridge.add(entry);
         EBListener listener = bridge.getEBListener(entry);
         new Expectations() {
             {
                 Destination dest = jmsContainer
-                        .getDestination("queue:{scope}-assign-bugreport-service-queue");
+                        .getDestination("queue://{scope}-assign-bugreport-service-queue");
                 jmsContainer.send(dest, (Map<String, Object>) any, anyString);
             }
         };
@@ -153,8 +155,8 @@ public class EventBusToJmsBridgeTest {
     public void testStartStopEBToJms() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
                 EventBusToJmsEntry.Type.EB_CHANNEL_TO_JMS, "create-user",
-                "queue:{scope}-assign-bugreport-service-queue",
-                TestUser.class.getName());
+                "queue://{scope}-assign-bugreport-service-queue",
+                TestUser.class.getName(), 1, 0);
         bridge.add(entry);
         final EBListener listener = bridge.getEBListener(entry);
         new Expectations() {

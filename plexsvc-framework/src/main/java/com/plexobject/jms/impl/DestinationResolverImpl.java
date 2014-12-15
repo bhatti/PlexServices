@@ -13,6 +13,8 @@ import com.plexobject.jms.DestinationResolver;
 import com.plexobject.util.Configuration;
 
 public class DestinationResolverImpl implements DestinationResolver {
+    private final String QUEUE_PREFIX = "queue://";
+    private final String TOPIC_PREFIX = "topic://";
     private final Map<String, Destination> destinations = new ConcurrentHashMap<>();
     private final Configuration config;
 
@@ -21,21 +23,26 @@ public class DestinationResolverImpl implements DestinationResolver {
     }
 
     @Override
-    public Destination resolveDestinationName(Session session, String destName,
-            boolean pubSubDomain) throws JMSException {
-        String resolvedDestName = getNormalizedDestinationName(destName);
+    public Destination resolveDestinationName(Session session,
+            String rawDestName, boolean pubsub) throws JMSException {
+        String resolvedDestName = getNormalizedDestinationName(rawDestName);
         synchronized (resolvedDestName.intern()) {
             Destination destination = destinations.get(resolvedDestName);
             if (destination == null) {
-                if (resolvedDestName.startsWith("queue:")) {
-                    destination = session.createQueue(resolvedDestName
-                            .substring(6));
-                } else if (resolvedDestName.startsWith("topic:")) {
-                    destination = session.createTopic(resolvedDestName
-                            .substring(6));
+                String destName = resolvedDestName;
+                if (resolvedDestName.startsWith(QUEUE_PREFIX)) {
+                    destName = resolvedDestName
+                            .substring(QUEUE_PREFIX.length());
+                    pubsub = false;
+                } else if (resolvedDestName.startsWith(TOPIC_PREFIX)) {
+                    destName = resolvedDestName
+                            .substring(TOPIC_PREFIX.length());
+                    pubsub = true;
+                }
+                if (pubsub) {
+                    destination = session.createTopic(destName);
                 } else {
-                    throw new IllegalArgumentException("unknown type for "
-                            + resolvedDestName);
+                    destination = session.createQueue(destName);
                 }
                 destinations.put(resolvedDestName, destination);
             }

@@ -27,11 +27,8 @@ public interface Constants {
 
     public static final String JMS_PASSWORD = "JMSPassword";
     public static final String JMS_USERNAME = "JMSUsername";
-    public static final String JMS_SEND_JMS_HEADERS = "JMSSendJmsHeaders";
-    public static final String JMS_PROVIDER_URL = "JMSProviderUrl";
-    public static final String JMS_CONTEXT_FACTORY = "JMSContextFactory";
     public static final String JMS_TRASACTED_SESSION = "JMSTrasactedSession";
-    public static final String JMS_CONNECTION_FACTORY_LOOKUP = "JMSConnectionFactoryLookup";
+    public static final String JMS_SEND_JMS_HEADERS = "JMSSendJmsHeaders";
 
     public static final int DEFAULT_HTTP_PORT = 8181;
 }

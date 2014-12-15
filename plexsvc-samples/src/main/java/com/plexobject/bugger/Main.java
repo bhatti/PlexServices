@@ -154,45 +154,45 @@ public class Main {
     static Collection<WebToJmsEntry> getJmsToJmsEntries() {
         return Arrays.asList(new WebToJmsEntry(DEFAULT_CODEC,
                 "/projects/{projectId}/bugreports/{id}/assign", Method.POST,
-                "queue:{scope}-assign-bugreport-service-queue",
+                "queue://{scope}-assign-bugreport-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/projects/{projectId}/bugreports", Method.GET,
-                "queue:{scope}-query-project-bugreport-service-queue",
+                "queue://{scope}-query-project-bugreport-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/users", Method.GET,
-                "queue:{scope}-query-user-service-queue", DEFAULT_TIMEOUT_SECS,
+                "queue://{scope}-query-user-service-queue", DEFAULT_TIMEOUT_SECS,
                 false, 1), new WebToJmsEntry(DEFAULT_CODEC, "/projects",
-                Method.GET, "queue:{scope}-query-projects-service",
+                Method.GET, "queue://{scope}-query-projects-service",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/bugreports", Method.GET,
-                "queue:{scope}-bugreports-service-queue", DEFAULT_TIMEOUT_SECS,
+                "queue://{scope}-bugreports-service-queue", DEFAULT_TIMEOUT_SECS,
                 false, 1), new WebToJmsEntry(DEFAULT_CODEC,
                 "/projects/{id}/membership/add", Method.POST,
-                "queue:{scope}-add-project-member-service-queue",
+                "queue://{scope}-add-project-member-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/projects/{id}/membership/remove", Method.POST,
-                "queue:{scope}-remove-project-member-service-queue",
+                "queue://{scope}-remove-project-member-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/projects/{projectId}/bugreports", Method.POST,
-                "queue:{scope}-create-bugreport-service-queue",
+                "queue://{scope}-create-bugreport-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/users", Method.POST,
-                "queue:{scope}-create-user-service-queue",
+                "queue://{scope}-create-user-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/projects", Method.POST,
-                "queue:{scope}-create-projects-service-queue",
+                "queue://{scope}-create-projects-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/users/{id}", Method.POST,
-                "queue:{scope}-update-user-service-queue",
+                "queue://{scope}-update-user-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/users/{id}/delete", Method.POST,
-                "queue:{scope}-delete-user-service-queue",
+                "queue://{scope}-delete-user-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/projects/{id}", Method.POST,
-                "queue:{scope}-update-project-service-queue",
+                "queue://{scope}-update-project-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/projects/{projectId}/bugreports/{id}",
-                Method.POST, "queue:{scope}-update-bugreport-service-queue",
+                Method.POST, "queue://{scope}-update-bugreport-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1));
     }
 

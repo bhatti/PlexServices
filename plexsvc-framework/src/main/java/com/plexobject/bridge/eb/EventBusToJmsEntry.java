@@ -18,6 +18,8 @@ public class EventBusToJmsEntry {
     private String source;
     private String target;
     private String requestType;
+    private int concurrency;
+    private int timeoutSecs;
     private transient Class<?> requestTypeClass;
 
     public EventBusToJmsEntry() {
@@ -25,12 +27,14 @@ public class EventBusToJmsEntry {
     }
 
     public EventBusToJmsEntry(CodecType codecType, Type type, String source,
-            String target, String requestType) {
+            String target, String requestType, int concurrency, int timeoutSecs) {
         this.codecType = codecType;
         this.type = type;
         this.source = source;
         this.target = target;
         this.requestType = requestType;
+        this.concurrency = concurrency;
+        this.timeoutSecs = timeoutSecs;
     }
 
     public CodecType getCodecType() {
@@ -69,6 +73,14 @@ public class EventBusToJmsEntry {
         return requestType;
     }
 
+    public int getConcurrency() {
+        return concurrency;
+    }
+
+    public void setConcurrency(int concurrency) {
+        this.concurrency = concurrency;
+    }
+
     public Class<?> getRequestTypeClass() {
         if (requestTypeClass == null) {
             try {
@@ -82,6 +94,14 @@ public class EventBusToJmsEntry {
 
     public void setRequestType(String requestType) {
         this.requestType = requestType;
+    }
+
+    public int getTimeoutSecs() {
+        return timeoutSecs;
+    }
+
+    public void setTimeoutSecs(int timeoutSecs) {
+        this.timeoutSecs = timeoutSecs;
     }
 
     @Override

@@ -14,7 +14,7 @@ import com.plexobject.validation.RequiredFields;
 import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/assign", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue:{scope}-assign-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-assign-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "projectId"),
         @Field(name = "bugReportId"),
         @Field(name = "assignedTo") })

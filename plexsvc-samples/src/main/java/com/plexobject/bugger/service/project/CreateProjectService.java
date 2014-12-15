@@ -13,7 +13,7 @@ import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "/projects", method = Method.POST, contentType = "application/json")
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "queue:{scope}-create-projects-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "queue://{scope}-create-projects-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "projectId") })
 public class CreateProjectService extends AbstractProjectService implements
         RequestHandler {

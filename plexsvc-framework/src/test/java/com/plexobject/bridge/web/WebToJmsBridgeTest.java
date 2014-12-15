@@ -77,7 +77,7 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleAsynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5,
+                Method.GET, "queue://{scope}-assign-bugreport-service-queue", 5,
                 false, 1);
         entry.setAsynchronous(true);
         bridge.add(entry);
@@ -96,7 +96,7 @@ public class WebToJmsBridgeTest {
         new Expectations() {
             {
                 Destination dest = jmsContainer
-                        .getDestination("queue:{scope}-assign-bugreport-service-queue");
+                        .getDestination("queue://{scope}-assign-bugreport-service-queue");
                 jmsContainer.send(dest, (Map<String, Object>) any, anyString);
             }
         };
@@ -107,7 +107,7 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleSynchronous() throws Exception {
         final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue:{scope}-assign-bugreport-service-queue", 5,
+                Method.GET, "queue://{scope}-assign-bugreport-service-queue", 5,
                 false, 1);
         entry.setAsynchronous(false);
         bridge.add(entry);

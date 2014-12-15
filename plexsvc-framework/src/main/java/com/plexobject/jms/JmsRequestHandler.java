@@ -1,13 +1,15 @@
 package com.plexobject.jms;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Map;
 
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.NamingException;
 
@@ -40,7 +42,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
     private final JMSContainer jmsContainer;
     private final Destination destination;
     private final RequestHandler handler;
-    private MessageConsumer messageConsumer;
+    private Closeable consumer;
 
     JmsRequestHandler(final ServiceRegistry serviceRegistry,
             JMSContainer jmsContainer, RequestHandler handler,
@@ -56,7 +58,6 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
     @Override
     public void onMessage(Message message) {
         TextMessage txtMessage = (TextMessage) message;
-
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         try {
             Map<String, Object> params = JMSUtils.getProperties(message);
@@ -71,8 +72,9 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                     .setPayload(textPayload).setResponseDispatcher(dispatcher)
                     .build();
 
-            log.info("Received " + textPayload + " for " + config.endpoint()
-                    + " " + handler.getClass().getSimpleName() + ", headers "
+            log.info("### Received " + textPayload + " for "
+                    + config.endpoint() + " "
+                    + handler.getClass().getSimpleName() + ", headers "
                     + params);
 
             serviceRegistry.invoke(req, handler);
@@ -93,12 +95,18 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
     }
 
     private void registerListener() throws JMSException, NamingException {
-        this.messageConsumer = jmsContainer.setMessageListener(destination,
-                this);
+        ServiceConfigDesc desc = serviceRegistry.getServiceConfig(handler);
+        MessageListenerConfig MessageListenerConfig = new MessageListenerConfig(
+                desc.concurrency(), true, Session.AUTO_ACKNOWLEDGE, 0);
+        consumer = jmsContainer.setMessageListener(destination, this,
+                MessageListenerConfig);
     }
 
     void close() throws JMSException {
-        this.messageConsumer.close();
+        try {
+            consumer.close();
+        } catch (IOException e) {
+        }
     }
 
 }

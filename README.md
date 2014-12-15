@@ -158,7 +158,7 @@ ws.onerror = function(err) {
 ### Defining a JMS service for creating a user
 ```java 
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
-      rolesAllowed = "Administrator", endpoint = "queue:{scope}-create-user-service-queue", 
+      rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
@@ -211,7 +211,7 @@ classes into JSON when delivering messages over HTTP.
 ### Defining a Websocket based service to create bug-report 
 ```java 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
-      rolesAllowed = "Employee", endpoint = "queue:{scope}-create-bugreport-service-queue", 
+      rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", 
       method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugNumber"),
         @Field(name = "projectId"), @Field(name = "priority")
@@ -289,7 +289,7 @@ public QueryUserService(UserRepository userRepository) {
 ### Defining a JMS service for querying users
 ```java 
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
-      rolesAllowed = "Administrator", endpoint = "queue:{scope}-query-user-service-queue", 
+      rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", 
       method = Method.MESSAGE, 
       codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements RequestHandler {
@@ -343,7 +343,7 @@ And then at runtime, override configuration, e.g.
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(Method.MESSAGE)
-                            .setEndpoint("queue:ping")
+                            .setEndpoint("queue://ping")
                             .setProtocol(Protocol.JMS)
                             .build());
     serviceRegistry.add(
@@ -461,45 +461,45 @@ Note that with above configuration, you can access your services either with HTT
 ```javascript 
   [
   {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports/{id}/assign","method":"POST",
-    "destination":"queue:{scope}-assign-bugreport-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-assign-bugreport-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports","method":"GET",
-    "destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/users","method":"GET",
-    "destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-query-user-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects","method":"GET",
-    "destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
+    "destination":"queue://{scope}-query-projects-service","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/bugreports","method":"GET",
-    "destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-bugreports-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects/{id}/membership/add","method":"POST",
-    "destination":"queue:{scope}-add-project-member-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-add-project-member-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects/{id}/membership/remove","method":"POST",
-    "destination":"queue:{scope}-remove-project-member-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-remove-project-member-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports","method":"POST",
-    "destination":"queue:{scope}-create-bugreport-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-create-bugreport-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/users","method":"POST",
-    "destination":"queue:{scope}-create-user-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-create-user-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects","method":"POST",
-    "destination":"queue:{scope}-create-projects-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-create-projects-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/users/{id}","method":"POST",
-    "destination":"queue:{scope}-update-user-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-update-user-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/users/{id}/delete","method":"POST",
-    "destination":"queue:{scope}-delete-user-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-delete-user-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects/{id}","method":"POST",
-    "destination":"queue:{scope}-update-project-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-update-project-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/projects/{projectId}/bugreports/{id}","method":"POST",
-    "destination":"queue:{scope}-update-bugreport-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-update-bugreport-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/login","method":"POST",
-    "destination":"queue:{scope}-login-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-login-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"/logs","method":"POST",
-    "destination":"queue:{scope}-log-service-queue","asynchronous":true},
+    "destination":"queue://{scope}-log-service-queue","asynchronous":true},
   {"codecType":"JSON","endpoint":"query-project-bugreport-ws","method":"MESSAGE",
-    "destination":"queue:{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-query-project-bugreport-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"query-user-ws","method":"MESSAGE",
-    "destination":"queue:{scope}-query-user-service-queue","timeoutSecs":30},
+    "destination":"queue://{scope}-query-user-service-queue","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"projects-ws","method":"MESSAGE",
-    "destination":"queue:{scope}-query-projects-service","timeoutSecs":30},
+    "destination":"queue://{scope}-query-projects-service","timeoutSecs":30},
   {"codecType":"JSON","endpoint":"bugreports-ws","method":"MESSAGE",
-    "destination":"queue:{scope}-bugreports-service-queue","timeoutSecs":30}]
+    "destination":"queue://{scope}-bugreports-service-queue","timeoutSecs":30}]
 ```
 Note that Method types of GET/POST will use HTTP based bridge and method type
 of MESSAGE will use Websocket based bridge.
@@ -563,10 +563,10 @@ EventBusToJmsBridge.run(config, entries);
 
 Here is a sample json file that describes mapping:
 ```javascript
-[{"codecType":"JSON","type":"JMS_TO_EB_CHANNEL", "source":"queue:{scope}-query-user-service-queue",
+[{"codecType":"JSON","type":"JMS_TO_EB_CHANNEL", "source":"queue://{scope}-query-user-service-queue",
 "target":"query-user-channel", "requestType":"com.plexobject.bugger.model.User"}, 
 {"codecType":"JSON","type":"EB_CHANNEL_TO_JMS", "source":"create-user",
-"target":"queue:{scope}-assign-bugreport-service-queue","requestType":
+"target":"queue://{scope}-assign-bugreport-service-queue","requestType":
 "com.plexobject.bugger.model.User"}]
 ```
 

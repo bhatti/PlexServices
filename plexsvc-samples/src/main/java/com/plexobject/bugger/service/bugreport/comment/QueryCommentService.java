@@ -17,7 +17,7 @@ import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "/comments", method = Method.GET, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue:{scope}-query-comments-service-queue", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-query-comments-service-queue", method = Method.GET, codec = CodecType.JSON)
 public class QueryCommentService extends AbstractBugReportService implements
         RequestHandler {
     public QueryCommentService(BugReportRepository bugReportRepository,

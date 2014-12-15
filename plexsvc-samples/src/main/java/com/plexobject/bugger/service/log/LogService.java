@@ -13,7 +13,7 @@ import com.plexobject.service.ServiceConfig;
 // @ServiceConfig(protocol = Protocol.HTTP, 
 // endpoint = "/logs", method = Method.POST,
 // contentType = "application/json")
-@ServiceConfig(protocol = Protocol.JMS, endpoint = "queue:{scope}-log-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://{scope}-log-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class LogService implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LogService.class);
 

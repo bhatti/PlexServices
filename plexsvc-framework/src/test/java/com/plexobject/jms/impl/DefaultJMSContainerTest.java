@@ -23,7 +23,6 @@ import javax.naming.NamingException;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.Test;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
@@ -65,7 +64,7 @@ public class DefaultJMSContainerTest {
 
     @Test(expected = NullPointerException.class)
     public void testCreateWithouFactoryLookup() throws Exception {
-        properties.put(Constants.JMS_CONTEXT_FACTORY,
+        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         final Configuration config = new Configuration(properties);
         JMSUtils.getJMSContainer(config);
@@ -73,9 +72,9 @@ public class DefaultJMSContainerTest {
 
     @Test(expected = NullPointerException.class)
     public void testCreateWithoutProviderUrl() throws Exception {
-        properties.put(Constants.JMS_CONTEXT_FACTORY,
+        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
         final Configuration config = new Configuration(properties);
         JMSUtils.getJMSContainer(config);
@@ -83,10 +82,10 @@ public class DefaultJMSContainerTest {
 
     @Test(expected = RuntimeException.class)
     public void testCreateWithBadFactoryLookup() throws Exception {
-        properties.put(Constants.JMS_CONTEXT_FACTORY, "xxxx");
-        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+        properties.put(JMSUtils.JMS_CONTEXT_FACTORY, "xxxx");
+        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
-        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
+        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
         JMSUtils.getJMSContainer(config);
     }
@@ -160,9 +159,9 @@ public class DefaultJMSContainerTest {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
-        MessageProducer producer = client.createProducer("topic:test");
+        MessageProducer producer = client.createProducer("topic://test");
         assertNotNull(producer);
-        MessageProducer producerCopy = client.createProducer("topic:test");
+        MessageProducer producerCopy = client.createProducer("topic://test");
         assertTrue(producer == producerCopy); // should be same reference
         broker.stop();
     }
@@ -174,9 +173,9 @@ public class DefaultJMSContainerTest {
         BrokerService broker = startBroker();
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
-        MessageProducer producer = client.createProducer("queue:test");
+        MessageProducer producer = client.createProducer("queue://test");
         assertNotNull(producer);
-        MessageProducer producerCopy = client.createProducer("queue:test");
+        MessageProducer producerCopy = client.createProducer("queue://test");
         assertTrue(producer == producerCopy); // should be same reference
         broker.stop();
     }
@@ -198,7 +197,7 @@ public class DefaultJMSContainerTest {
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
         JmsListener listener = new JmsListener(client);
-        client.createConsumer("queue:test").setMessageListener(listener);
+        client.createConsumer("queue://test").setMessageListener(listener);
         client.start();
         Map<String, Object> headers = new HashMap<>();
         headers.put("key1", "value1");
@@ -210,7 +209,7 @@ public class DefaultJMSContainerTest {
         headers.put("key7", true);
         headers.put("key8", (byte) 8);
         headers.put("key9", new Date());
-        client.send(client.getDestination("queue:test"), headers, "payload");
+        client.send(client.getDestination("queue://test"), headers, "payload");
         Thread.sleep(1000);
         broker.stop();
         assertEquals(1, messages.size());
@@ -223,7 +222,7 @@ public class DefaultJMSContainerTest {
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
         JmsListener listener = new JmsListener(client);
-        client.createConsumer("queue:test").setMessageListener(listener);
+        client.createConsumer("queue://test").setMessageListener(listener);
         client.start();
         Map<String, Object> headers = new HashMap<>();
         headers.put("key1", "value1");
@@ -236,7 +235,7 @@ public class DefaultJMSContainerTest {
         headers.put("key8", (byte) 8);
         headers.put("key9", new Date());
         final StringBuilder payload = new StringBuilder();
-        client.sendReceive(client.getDestination("queue:test"), headers,
+        client.sendReceive(client.getDestination("queue://test"), headers,
                 "ping", new Handler<Response>() {
                     @Override
                     public void handle(Response request) {
@@ -253,11 +252,11 @@ public class DefaultJMSContainerTest {
         broker.addConnector("tcp://localhost:61616");
         broker.start();
 
-        properties.put(Constants.JMS_CONTEXT_FACTORY,
+        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
-        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
+        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
         return broker;
     }
 }

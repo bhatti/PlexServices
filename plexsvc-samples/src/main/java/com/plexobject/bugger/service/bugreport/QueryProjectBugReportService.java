@@ -14,7 +14,7 @@ import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", method = Method.GET)
-@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue:{scope}-query-project-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-query-project-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class QueryProjectBugReportService extends AbstractBugReportService
         implements RequestHandler {
     public QueryProjectBugReportService(

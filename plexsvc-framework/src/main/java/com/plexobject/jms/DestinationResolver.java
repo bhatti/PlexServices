@@ -11,6 +11,16 @@ import javax.jms.Session;
  *
  */
 public interface DestinationResolver {
+    /**
+     * This method resolves destination name
+     * 
+     * @param session
+     * @param destinationName
+     * @param pubsub
+     *            - is-topic
+     * @return
+     * @throws JMSException
+     */
     Destination resolveDestinationName(Session session, String destinationName,
-            boolean pubSubDomain) throws JMSException;
+            boolean pubsub) throws JMSException;
 }

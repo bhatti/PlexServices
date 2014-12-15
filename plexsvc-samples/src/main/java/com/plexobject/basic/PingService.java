@@ -25,7 +25,6 @@ public class PingService implements RequestHandler {
         if (data == null) {
             data = "";
         }
-        log.info("************ Received " + data);
         request.getResponseDispatcher().send(data);
     }
 }

@@ -12,7 +12,7 @@ import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/notify", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue:{scope}-notify-service", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-notify-service", method = Method.MESSAGE, codec = CodecType.JSON)
 public class NotificationService implements RequestHandler {
     private static final Logger log = LoggerFactory
             .getLogger(NotificationService.class);

@@ -1,5 +1,6 @@
 package com.plexobject.bridge.eb;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,8 +14,8 @@ import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JmsResponseDispatcher;
-import com.plexobject.jms.impl.DefaultJMSContainer;
+import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
@@ -44,8 +45,8 @@ import com.plexobject.util.IOUtils;
  * This class adds bridge between event-bus and JMS bridge so that you can use
  * event-bus and when you publish events on event-bus, they are published.
  * Similarly, you can subscribe to channels on event-bus, which can be connected
- * to JMS queues/topics so that when events are receied from those destinations,
- * they are forwarded to the channel that you are listening to.
+ * to JMS queues/topics so that when events are received from those
+ * destinations, they are forwarded to the channel that you are listening to.
  * 
  * @author shahzad bhatti
  *
@@ -122,7 +123,7 @@ public class EventBusToJmsBridge implements Lifecycle {
         private final JMSContainer jmsContainer;
         private final EventBus eb;
         private final EventBusToJmsEntry entry;
-        private MessageConsumer consumer;
+        private Closeable consumer;
 
         JmsListener(JMSContainer jmsContainer, EventBus eb,
                 EventBusToJmsEntry entry) {
@@ -178,8 +179,11 @@ public class EventBusToJmsBridge implements Lifecycle {
             try {
                 Destination destination = jmsContainer.getDestination(entry
                         .getSource());
+                MessageListenerConfig messageListenerConfig = new MessageListenerConfig(
+                        entry.getConcurrency(), true, Session.AUTO_ACKNOWLEDGE,
+                        0);
                 this.consumer = jmsContainer.setMessageListener(destination,
-                        this);
+                        this, messageListenerConfig);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -188,7 +192,9 @@ public class EventBusToJmsBridge implements Lifecycle {
         @Override
         public synchronized void stop() {
             try {
-                this.consumer.close();
+                if (consumer != null) {
+                    consumer.close();
+                }
             } catch (Exception e) {
             }
             this.consumer = null;

@@ -1,25 +1,45 @@
 package com.plexobject.jms.impl;
 
+import java.io.Closeable;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Future;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TemporaryQueue;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Constants;
+import com.plexobject.domain.Promise;
+import com.plexobject.handler.Handler;
+import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSContainerFactory;
+import com.plexobject.jms.MessageListenerConfig;
+import com.plexobject.jms.MessageListenerContainer;
 import com.plexobject.util.Configuration;
 
 public class JMSUtils {
     private static final Logger log = LoggerFactory.getLogger(JMSUtils.class);
+    public static final String JMS_CONNECTION_FACTORY_LOOKUP = "JMSConnectionFactoryLookup";
+    public static final String JMS_PROVIDER_URL = "JMSProviderUrl";
+    public static final String JMS_CONTEXT_FACTORY = "JMSContextFactory";
     private static final String JMS_DESTINATION = "JMSDestination";
     private static final String JMS_REPLY_TO = "JMSReplyTo";
     private static final String JMS_CORRELATION_ID = "JMSCorrelationID";
@@ -27,8 +47,8 @@ public class JMSUtils {
     private static final String JMS_MESSAGE_ID = "JMSMessageID";
     private static boolean sendJmsHeaders;
 
-    static void setHeaders(final Map<String, Object> headers, Message reqMsg)
-            throws JMSException {
+    public static void setHeaders(final Map<String, Object> headers,
+            Message reqMsg) throws JMSException {
         for (Map.Entry<String, Object> e : headers.entrySet()) {
             String name = e.getKey();
             Object value = e.getValue();
@@ -67,6 +87,30 @@ public class JMSUtils {
         }
     }
 
+    public static ConnectionFactory getConnectionFactory(Configuration config)
+            throws NamingException {
+        final String contextFactory = config.getProperty(JMS_CONTEXT_FACTORY);
+        Objects.requireNonNull(contextFactory,
+                "jms.contextFactory property not defined");
+        final String connectionFactoryLookup = config
+                .getProperty(JMS_CONNECTION_FACTORY_LOOKUP);
+        Objects.requireNonNull(connectionFactoryLookup,
+                "jms.connectionFactoryLookup property not defined");
+        final String providerUrl = config.getProperty(JMS_PROVIDER_URL);
+        Objects.requireNonNull(providerUrl,
+                "jms.providerUrl property not defined");
+        Hashtable<String, String> env = new Hashtable<String, String>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, contextFactory);
+        env.put(Context.PROVIDER_URL, providerUrl);
+        InitialContext namingCtx = new InitialContext(env);
+        ConnectionFactory connectionFactory = (ConnectionFactory) namingCtx
+                .lookup(connectionFactoryLookup);
+        Objects.requireNonNull(connectionFactory,
+                "Could not lookup ConnectionFactory with "
+                        + connectionFactoryLookup);
+        return connectionFactory;
+    }
+
     public static JMSContainer getJMSContainer(Configuration config) {
         String factoryClassName = config
                 .getProperty(Constants.PLEXSERVICE_JMS_CONTAINER_FACTORY_CLASS);
@@ -76,8 +120,7 @@ public class JMSUtils {
         try {
             Class<?> factoryClass = Class.forName(factoryClassName);
             JMSContainerFactory factory = (JMSContainerFactory) factoryClass
-                    .getDeclaredConstructor(Configuration.class).newInstance(
-                            config);
+                    .newInstance();
             return factory.create(config);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create JMSContainerFactory",
@@ -102,6 +145,74 @@ public class JMSUtils {
             params.put(name, message.getObjectProperty(name));
         }
         return params;
+    }
+
+    public static Future<Response> configureReplier(final Session session,
+            final Message reqMsg, final Handler<Response> reqHandler,
+            final MessageListenerContainer listenerContainer)
+            throws JMSException, NamingException {
+        final TemporaryQueue replyTo = session.createTemporaryQueue();
+        reqMsg.setJMSReplyTo(replyTo);
+        //
+        final Promise<Response> promise = new Promise<>();
+        final Closeable[] consumerCloseable = new Closeable[1];
+        final Closeable closeable = new Closeable() {
+            @Override
+            public void close() {
+                try {
+                    consumerCloseable[0].close();
+                } catch (Exception e) {
+                    log.warn("Failed to close", e);
+                }
+                try {
+                    replyTo.delete();
+                } catch (Exception e) {
+                    log.warn("Failed to delete temp queue", e);
+                }
+            }
+        };
+        final MessageListener listener = new MessageListener() {
+            @Override
+            public void onMessage(Message message) {
+                TextMessage respMsg = (TextMessage) message;
+                try {
+                    final Map<String, Object> params = JMSUtils
+                            .getProperties(message);
+                    final String respText = respMsg.getText();
+                    final Response response = new Response(params, params,
+                            respText);
+                    reqHandler.handle(response);
+                    promise.setValue(response);
+                } catch (Exception e) {
+                    log.error("Failed to forward message " + message, e);
+                    promise.setError(e);
+                } finally {
+                    try {
+                        Thread.sleep(100);
+                        closeable.close();
+                    } catch (Exception ex) {
+                        log.warn("Failed to close", ex);
+                    }
+                }
+            }
+        };
+        consumerCloseable[0] = listenerContainer.setMessageListener(replyTo,
+                listener, new MessageListenerConfig(1, true,
+                        Session.AUTO_ACKNOWLEDGE, 0));
+
+        final Handler<Promise<Response>> disposer = new Handler<Promise<Response>>() {
+            @Override
+            public void handle(Promise<Response> request) {
+                try {
+                    closeable.close();
+                } catch (Exception ex) {
+                    log.warn("Failed to close", ex);
+                }
+            }
+        };
+        promise.setCancelHandler(disposer);
+        promise.setTimedoutHandler(disposer);
+        return promise;
     }
 
 }

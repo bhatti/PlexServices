@@ -156,7 +156,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             request.getResponseDispatcher().setCodecType(CodecType.TEXT);
             request.getResponseDispatcher().setStatus(
                     HttpResponse.SC_GATEWAY_TIMEOUT);
-            request.getResponseDispatcher().send("Request timedout");
+            request.getResponseDispatcher().send(
+                    "Request timedout " + entry.getTimeoutSecs() + " secs");
 
         } catch (Exception e) {
             log.error("Failed to send request", e);

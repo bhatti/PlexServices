@@ -21,6 +21,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.util.Configuration;
@@ -78,7 +79,7 @@ public class ServiceRegistryTest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue:test", method = Method.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://test", method = Method.MESSAGE, codec = CodecType.JSON)
     public class JmsService implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -111,11 +112,11 @@ public class ServiceRegistryTest {
     public void testCreateServices() throws Exception {
         properties.put(Constants.HTTP_PORT, 8282);
         properties.put("statsd.host", "localhost");
-        properties.put(Constants.JMS_CONTEXT_FACTORY,
+        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
-        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61616");
+        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
 
         final Configuration config = new Configuration(properties);
 
@@ -350,11 +351,11 @@ public class ServiceRegistryTest {
         broker.addConnector("tcp://localhost:61617");
         broker.start();
 
-        properties.put(Constants.JMS_CONTEXT_FACTORY,
+        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(Constants.JMS_CONNECTION_FACTORY_LOOKUP,
+        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
-        properties.put(Constants.JMS_PROVIDER_URL, "tcp://localhost:61617");
+        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61617");
         return broker;
     }
 }

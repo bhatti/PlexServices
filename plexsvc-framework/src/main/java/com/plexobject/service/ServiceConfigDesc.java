@@ -181,7 +181,7 @@ public class ServiceConfigDesc implements Serializable {
         return rolesAllowed;
     }
 
-    public int getConcurrency() {
+    public int concurrency() {
         return concurrency;
     }
 
