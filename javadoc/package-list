@@ -15,6 +15,7 @@ com.plexobject.http
 com.plexobject.http.netty
 com.plexobject.http.servlet
 com.plexobject.jms
+com.plexobject.jms.impl
 com.plexobject.metrics
 com.plexobject.predicate
 com.plexobject.route
