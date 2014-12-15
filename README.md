@@ -517,19 +517,38 @@ Here is how you can specify HTTP ports and default websocket path in the propert
 HttpPort=8181
 HttpWebsocketUri=/ws
 ```
-In above example, we are using ActiveMQ as JMS container 
+In above example, we are using ActiveMQ as JMS server
 
 
 ### Configuring JMS provider in configuration
-Here is how you can specify JMS container in properties file, which is passed
+Here is how you can specify JMS server in properties file, which is passed
 to the runtime.
 ```bash
 JMSContextFactory=org.apache.activemq.jndi.ActiveMQInitialContextFactory
 JMSProviderUrl=tcp://localhost:61616
 JMSConnectionFactoryLookup=ConnectionFactory
 ```
-In above example, we are using ActiveMQ as JMS container 
+In above example, we are using ActiveMQ as JMS server
 
+
+### Configuring JMS container in configuration
+PlexService comes with simple JMS container but you can replace it with Spring or other JMS frameworks by defining configuration, e.g.:
+```bash
+PlexserviceJMSContainerFactory=com.plexobject.bugger.jms.SpringJMSContainerFactory
+```
+
+In above example, we are defining factory to use spring container. You can then define factory as:
+```java 
+public class SpringJMSContainerFactory implements JMSContainerFactory {
+    @Override
+    public JMSContainer create(Configuration config) {
+        return new SpringJMSContainer(config);
+    }
+}
+```
+The samples folder include an example of SpringJMSContainer that you can use.
+PlexService didn't include it in the framework to remove dependency on specific
+version of Spring with PlexService.
 
 
 ### EventBus for intra-process communication
