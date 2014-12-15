@@ -27,6 +27,7 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import com.plexobject.handler.Function;
 import com.plexobject.handler.Handler;
@@ -45,6 +46,7 @@ public class SpringJMSContainer implements JMSContainer {
     private final DestinationResolverImpl destinationResolver;
     private final List<MessageListenerContainer> listenerContainers = new ArrayList<>();
     private final JmsTemplate defaultJmsTemplate;
+    private PlatformTransactionManager transactionManager;
     private boolean running;
 
     public SpringJMSContainer(final Configuration config)
@@ -186,6 +188,7 @@ public class SpringJMSContainer implements JMSContainer {
         if (destination instanceof TemporaryQueue) {
             messageListenerContainer.setCacheLevelName("CACHE_SESSION");
         } else {
+            messageListenerContainer.setCacheLevelName("CACHE_CONSUMER");
             synchronized (this) {
                 listenerContainers.add(messageListenerContainer);
             }
@@ -210,11 +213,17 @@ public class SpringJMSContainer implements JMSContainer {
         // TODO
     }
 
+    // This can only be set in Spring xml files
+    public void setTransactionManager(
+            PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
     private DefaultMessageListenerContainer newMessageListenerContainer() {
         DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
-        // you can set jta transaction manager only in spring xml beans
-        // messageListenerContainer
-        // .setTransactionManager(new JtaTransactionManager());
+        if (transactionManager != null) {
+            messageListenerContainer.setTransactionManager(transactionManager);
+        }
         messageListenerContainer.setConnectionFactory(connectionFactory);
         messageListenerContainer.setAutoStartup(true);
         messageListenerContainer
