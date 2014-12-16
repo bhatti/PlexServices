@@ -10,7 +10,7 @@ import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON, concurrency = 10)
 public class PingService implements RequestHandler {
     private static final Logger log = LoggerFactory
             .getLogger(PingService.class);

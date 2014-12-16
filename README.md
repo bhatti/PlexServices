@@ -160,6 +160,7 @@ ws.onerror = function(err) {
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", 
       method = Method.MESSAGE, 
+      concurrency = 10,
       codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements RequestHandler {
@@ -177,6 +178,7 @@ public class CreateUserService extends AbstractUserService implements RequestHan
 ```
 
 The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexService will serialize POJO classes into JSON when delivering messages over JMS.
+Note: concurrency parameter specifies number of concurrent consumers that would listen for the incoming messages.
 
 
 ### Defining a REST service with parameterized URLs
