@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -39,14 +42,18 @@ import com.plexobject.util.Configuration;
  * @author shahzad bhatti
  *
  */
-public class DefaultJMSContainer implements JMSContainer, ExceptionListener {
+public class DefaultJMSContainer implements JMSContainer, ExceptionListener,
+        MessageReceiverThread.Callback {
     private static final Logger log = LoggerFactory
             .getLogger(DefaultJMSContainer.class);
     private final Configuration config;
     private Connection connection;
     private final ThreadLocal<Session> currentSession = new ThreadLocal<>();
-    private final ThreadLocal<Map<String, MessageProducer>> currentProducers = new ThreadLocal<>();
     private final List<ExceptionListener> exceptionListeners = new ArrayList<>();
+    private final ThreadLocal<Map<String, MessageProducer>> currentProducers = new ThreadLocal<>();
+    private final List<MessageReceiverThread> receivers = new ArrayList<>();
+    private final ExecutorService executorService = Executors
+            .newCachedThreadPool();
     private boolean transactedSession;
     private final DestinationResolver destinationResolver;
     private boolean running;
@@ -71,7 +78,7 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener {
             } else {
                 connection = connectionFactory.createConnection();
             }
-            log.info("Created JMS connection " + connection);
+            connection.setExceptionListener(this);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -89,7 +96,17 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener {
         }
         try {
             connection.start();
+            log.info("Starting ...");
+            synchronized (receivers) {
+                for (MessageReceiverThread t : receivers) {
+                    if (!t.isRunning()) {
+                        t.start();
+                        executorService.submit(t);
+                    }
+                }
+            }
             running = true;
+            notifyAll();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -104,10 +121,34 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener {
             return;
         }
         try {
+            log.info("Stopping ...");
+
+            synchronized (receivers) {
+                for (MessageReceiverThread t : receivers) {
+                    t.stop();
+                }
+            }
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
             connection.stop();
             running = false;
+            notifyAll();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public synchronized void waitUntilReady() {
+        while (!running) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
         }
     }
 
@@ -120,30 +161,46 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener {
     public Closeable setMessageListener(Destination destination,
             MessageListener l, MessageListenerConfig messageListenerConfig)
             throws JMSException, NamingException {
-        final MessageConsumer consumer = createConsumer(destination);
-        consumer.setMessageListener(l);
-        return new Closeable() {
-            @Override
-            public void close() throws IOException {
-                try {
-                    consumer.close();
-                } catch (Exception e) {
-                    log.error("Failed to close consumer for " + destination);
+        if (destination instanceof TemporaryQueue) {
+            final MessageConsumer consumer = createConsumer(destination);
+            consumer.setMessageListener(l);
+            return new Closeable() {
+                @Override
+                public void close() throws IOException {
+                    try {
+                        consumer.close();
+                    } catch (Exception e) {
+                        log.error("Failed to close consumer for " + destination);
+                    }
+                }
+            };
+        } else {
+            final List<MessageReceiverThread> threads = new ArrayList<>();
+            synchronized (receivers) {
+                for (int i = 0; i < messageListenerConfig.getConcurrency(); i++) {
+                    final MessageReceiverThread t = new MessageReceiverThread(
+                            destination + "-" + (i + 1), destination, l, null,
+                            this, messageListenerConfig.getReceiveTimeout(),
+                            this);
+                    threads.add(t);
+                    executorService.submit(t);
                 }
             }
-        };
-    }
-
-    @Override
-    public synchronized void addExceptionListener(ExceptionListener l) {
-        if (!exceptionListeners.contains(l)) {
-            exceptionListeners.add(l);
+            // MessageReceiverThread will be added in callback
+            return new Closeable() {
+                @Override
+                public void close() throws IOException {
+                    for (MessageReceiverThread t : threads) {
+                        try {
+                            t.stop();
+                        } catch (Exception e) {
+                            log.error("Failed to close message-receiver thread for "
+                                    + destination);
+                        }
+                    }
+                }
+            };
         }
-    }
-
-    @Override
-    public synchronized void onException(JMSException exception) {
-        // TODO handle exceptions
     }
 
     public MessageProducer createProducer(final String destName)
@@ -211,6 +268,7 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener {
     public void send(final Destination destination,
             final Map<String, Object> headers, final String payload)
             throws JMSException, NamingException {
+        // log.info("*** Sending " + payload + " to " + destination);
         Message m = createTextMessage(payload);
         JMSUtils.setHeaders(headers, m);
 
@@ -258,5 +316,41 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener {
                     Session.AUTO_ACKNOWLEDGE));
         }
         return currentSession.get();
+    }
+
+    @Override
+    public void onStarted(MessageReceiverThread t) {
+        synchronized (receivers) {
+            receivers.add(t);
+        }
+    }
+
+    @Override
+    public void onStopped(MessageReceiverThread t) {
+        synchronized (receivers) {
+            receivers.remove(t);
+        }
+    }
+
+    @Override
+    public void onException(JMSException e) {
+        log.error("******JMS Error\n\n\n", e);
+        final List<ExceptionListener> copyExceptionListeners = new ArrayList<>();
+
+        synchronized (exceptionListeners) {
+            copyExceptionListeners.addAll(exceptionListeners);
+        }
+        for (ExceptionListener l : copyExceptionListeners) {
+            l.onException(e);
+        }
+    }
+
+    @Override
+    public void addExceptionListener(ExceptionListener l) {
+        synchronized (exceptionListeners) {
+            if (!exceptionListeners.contains(l)) {
+                exceptionListeners.add(l);
+            }
+        }
     }
 }

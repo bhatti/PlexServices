@@ -38,13 +38,15 @@ import com.plexobject.jms.impl.DestinationResolverImpl;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.util.Configuration;
 
-public class SpringJMSContainer implements JMSContainer {
+public class SpringJMSContainer implements JMSContainer, ExceptionListener {
     private static final Logger log = LoggerFactory
             .getLogger(SpringJMSContainer.class);
 
     private final ConnectionFactory connectionFactory;
     private final DestinationResolverImpl destinationResolver;
     private final List<MessageListenerContainer> listenerContainers = new ArrayList<>();
+    private final List<ExceptionListener> exceptionListeners = new ArrayList<>();
+
     private final JmsTemplate defaultJmsTemplate;
     private PlatformTransactionManager transactionManager;
     private boolean running;
@@ -192,6 +194,7 @@ public class SpringJMSContainer implements JMSContainer {
             synchronized (this) {
                 listenerContainers.add(messageListenerContainer);
             }
+            messageListenerContainer.setExceptionListener(this);
         }
         messageListenerContainer.afterPropertiesSet();
         messageListenerContainer.start();
@@ -209,8 +212,25 @@ public class SpringJMSContainer implements JMSContainer {
     }
 
     @Override
+    public void onException(JMSException e) {
+        log.error("******JMS Error\n\n\n", e);
+        final List<ExceptionListener> copyExceptionListeners = new ArrayList<>();
+
+        synchronized (exceptionListeners) {
+            copyExceptionListeners.addAll(exceptionListeners);
+        }
+        for (ExceptionListener l : copyExceptionListeners) {
+            l.onException(e);
+        }
+    }
+
+    @Override
     public void addExceptionListener(ExceptionListener l) {
-        // TODO
+        synchronized (exceptionListeners) {
+            if (!exceptionListeners.contains(l)) {
+                exceptionListeners.add(l);
+            }
+        }
     }
 
     // This can only be set in Spring xml files

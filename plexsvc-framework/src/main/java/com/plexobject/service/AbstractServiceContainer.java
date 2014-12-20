@@ -32,6 +32,7 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
     @Override
     public final synchronized void start() {
         try {
+            log.info("Starting...");
             if (!running) {
                 doStart();
                 for (RequestHandler h : getHandlers()) {
@@ -40,7 +41,6 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
                     }
                 }
             }
-            log.info("Started");
             running = true;
         } catch (RuntimeException e) {
             throw e;
@@ -52,6 +52,7 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
     @Override
     public final synchronized void stop() {
         try {
+            log.info("Stopping...");
             if (running) {
                 doStop();
             }
@@ -61,7 +62,6 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
                 }
             }
             running = false;
-            log.info("Stopped");
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
