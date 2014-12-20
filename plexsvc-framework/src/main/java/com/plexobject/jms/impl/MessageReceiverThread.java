@@ -38,7 +38,7 @@ public class MessageReceiverThread implements Runnable {
     private final long timeout;
     private volatile boolean stop;
     private volatile boolean running;
-    private Thread thread;
+    private volatile Thread thread;
 
     public MessageReceiverThread(String name, Destination destination,
             MessageListener messageListener,
@@ -81,14 +81,9 @@ public class MessageReceiverThread implements Runnable {
 
     @Override
     public void run() {
-        Thread.currentThread().setName(name);
-        jmsContainer.waitUntilReady();
-        running = true;
         MessageConsumer consumer = null;
         try {
-            thread = Thread.currentThread();
-            consumer = jmsContainer.createConsumer(destination);
-            callback.onStarted(this);
+            consumer = beforeRun();
             while (!stop) {
                 try {
                     Message msg = timeout > 0 ? consumer.receive(timeout)
@@ -114,16 +109,31 @@ public class MessageReceiverThread implements Runnable {
                 exceptionListener.onException(new JMSException(e.toString()));
             }
         } finally {
-            log.info("Stopping...");
-            running = false;
-            try {
-                if (consumer != null) {
-                    consumer.close();
-                }
-            } catch (Exception e) {
-                log.error("Failed to close consumer for " + destination);
-            }
-            callback.onStopped(this);
+            afterRun(consumer);
         }
     }
+
+    private MessageConsumer beforeRun() throws JMSException, NamingException {
+        thread = Thread.currentThread();
+        Thread.currentThread().setName(name);
+        jmsContainer.waitUntilReady();
+        MessageConsumer consumer = jmsContainer.createConsumer(destination);
+        callback.onStarted(this);
+        running = true;
+        return consumer;
+    }
+
+    private void afterRun(MessageConsumer consumer) {
+        running = false;
+        thread = null;
+        try {
+            if (consumer != null) {
+                consumer.close();
+            }
+        } catch (Exception e) {
+            log.error("Failed to close consumer for " + destination);
+        }
+        callback.onStopped(this);
+    }
+
 }
