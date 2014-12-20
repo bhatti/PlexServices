@@ -29,7 +29,7 @@ public class MessageReceiverThread implements Runnable {
         void onStopped(MessageReceiverThread t);
     }
 
-    private final String name;
+    private final String threadName;
     private final Destination destination;
     private final MessageListener messageListener;
     private ExceptionListener exceptionListener;
@@ -38,19 +38,19 @@ public class MessageReceiverThread implements Runnable {
     private final long timeout;
     private volatile boolean stop;
     private volatile boolean running;
-    private volatile Thread thread;
+    private volatile Thread runnerThread;
 
-    public MessageReceiverThread(String name, Destination destination,
+    public MessageReceiverThread(String threadName, Destination destination,
             MessageListener messageListener,
             ExceptionListener exceptionListener, Callback callback,
             long timeout, DefaultJMSContainer jmsContainer) {
-        Objects.requireNonNull(name, "name is not specified");
+        Objects.requireNonNull(threadName, "threadName is not specified");
         Objects.requireNonNull(destination, "destination is not specified");
         Objects.requireNonNull(messageListener,
                 "messageListener is not specified");
         Objects.requireNonNull(jmsContainer, "jmsContainer is not specified");
         Objects.requireNonNull(callback, "callback is not specified");
-        this.name = name;
+        this.threadName = threadName;
         this.destination = destination;
         this.messageListener = messageListener;
         this.exceptionListener = exceptionListener;
@@ -70,8 +70,8 @@ public class MessageReceiverThread implements Runnable {
 
     public void stop() {
         stop = true;
-        if (thread != null) {
-            thread.interrupt();
+        if (runnerThread != null) {
+            runnerThread.interrupt();
         }
     }
 
@@ -114,8 +114,8 @@ public class MessageReceiverThread implements Runnable {
     }
 
     private MessageConsumer beforeRun() throws JMSException, NamingException {
-        thread = Thread.currentThread();
-        Thread.currentThread().setName(name);
+        runnerThread = Thread.currentThread();
+        Thread.currentThread().setName(threadName);
         jmsContainer.waitUntilReady();
         MessageConsumer consumer = jmsContainer.createConsumer(destination);
         callback.onStarted(this);
@@ -125,7 +125,7 @@ public class MessageReceiverThread implements Runnable {
 
     private void afterRun(MessageConsumer consumer) {
         running = false;
-        thread = null;
+        runnerThread = null;
         try {
             if (consumer != null) {
                 consumer.close();

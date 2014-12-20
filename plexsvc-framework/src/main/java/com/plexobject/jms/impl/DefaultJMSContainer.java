@@ -15,7 +15,6 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
-import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -25,14 +24,10 @@ import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 import javax.naming.NamingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.DestinationResolver;
-import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.util.Configuration;
 
@@ -42,21 +37,14 @@ import com.plexobject.util.Configuration;
  * @author shahzad bhatti
  *
  */
-public class DefaultJMSContainer implements JMSContainer, ExceptionListener,
+public class DefaultJMSContainer extends BaseJMSContainer implements
         MessageReceiverThread.Callback {
-    private static final Logger log = LoggerFactory
-            .getLogger(DefaultJMSContainer.class);
-    private final Configuration config;
     private Connection connection;
     private final ThreadLocal<Session> currentSession = new ThreadLocal<>();
-    private final List<ExceptionListener> exceptionListeners = new ArrayList<>();
     private final ThreadLocal<Map<String, MessageProducer>> currentProducers = new ThreadLocal<>();
     private final List<MessageReceiverThread> receivers = new ArrayList<>();
     private final ExecutorService executorService = Executors
             .newCachedThreadPool();
-    private boolean transactedSession;
-    private final DestinationResolver destinationResolver;
-    private boolean running;
 
     public DefaultJMSContainer(Configuration config) {
         this(config, new DestinationResolverImpl(config));
@@ -64,9 +52,7 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener,
 
     public DefaultJMSContainer(Configuration config,
             DestinationResolver destinationResolver) {
-        this.config = config;
-        this.destinationResolver = destinationResolver;
-        transactedSession = config.getBoolean(Constants.JMS_TRASACTED_SESSION);
+        super(config, destinationResolver);
         try {
             ConnectionFactory connectionFactory = JMSUtils
                     .getConnectionFactory(config);
@@ -150,11 +136,6 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener,
                 Thread.interrupted();
             }
         }
-    }
-
-    @Override
-    public synchronized boolean isRunning() {
-        return running;
     }
 
     @Override
@@ -329,28 +310,6 @@ public class DefaultJMSContainer implements JMSContainer, ExceptionListener,
     public void onStopped(MessageReceiverThread t) {
         synchronized (receivers) {
             receivers.remove(t);
-        }
-    }
-
-    @Override
-    public void onException(JMSException e) {
-        log.error("******JMS Error\n\n\n", e);
-        final List<ExceptionListener> copyExceptionListeners = new ArrayList<>();
-
-        synchronized (exceptionListeners) {
-            copyExceptionListeners.addAll(exceptionListeners);
-        }
-        for (ExceptionListener l : copyExceptionListeners) {
-            l.onException(e);
-        }
-    }
-
-    @Override
-    public void addExceptionListener(ExceptionListener l) {
-        synchronized (exceptionListeners) {
-            if (!exceptionListeners.contains(l)) {
-                exceptionListeners.add(l);
-            }
         }
     }
 }

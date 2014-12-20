@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -18,8 +17,6 @@ import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 import javax.naming.NamingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.SessionCallback;
@@ -32,33 +29,30 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.plexobject.handler.Function;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
-import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.MessageListenerConfig;
-import com.plexobject.jms.impl.DestinationResolverImpl;
+import com.plexobject.jms.impl.BaseJMSContainer;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.util.Configuration;
 
-public class SpringJMSContainer implements JMSContainer, ExceptionListener {
-    private static final Logger log = LoggerFactory
-            .getLogger(SpringJMSContainer.class);
-
+/**
+ * This class implements JMS container using Spring framework
+ * 
+ * @author shahzad bhatti
+ *
+ */
+public class SpringJMSContainer extends BaseJMSContainer {
     private final ConnectionFactory connectionFactory;
-    private final DestinationResolverImpl destinationResolver;
     private final List<MessageListenerContainer> listenerContainers = new ArrayList<>();
-    private final List<ExceptionListener> exceptionListeners = new ArrayList<>();
-
     private final JmsTemplate defaultJmsTemplate;
     private PlatformTransactionManager transactionManager;
-    private boolean running;
 
     public SpringJMSContainer(final Configuration config)
             throws NamingException {
+        super(config);
         this.connectionFactory = new CachingConnectionFactory(
                 JMSUtils.getConnectionFactory(config));
         ((CachingConnectionFactory) this.connectionFactory)
                 .setSessionCacheSize(20);
-
-        this.destinationResolver = new DestinationResolverImpl(config);
         this.defaultJmsTemplate = new JmsTemplate(connectionFactory);
     }
 
@@ -75,11 +69,6 @@ public class SpringJMSContainer implements JMSContainer, ExceptionListener {
         for (MessageListenerContainer c : listenerContainers) {
             c.stop();
         }
-    }
-
-    @Override
-    public synchronized boolean isRunning() {
-        return running;
     }
 
     @Override
@@ -137,34 +126,6 @@ public class SpringJMSContainer implements JMSContainer, ExceptionListener {
         doSend(destination, headers, payload, null);
     }
 
-    private Future<Response> doSend(final Destination destination,
-            final Map<String, Object> headers, final String reqPayload,
-            final Function<Message, Future<Response>> beforeSend)
-            throws JMSException {
-        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
-        jmsTemplate.setDefaultDestination(destination);
-        return jmsTemplate.execute(new SessionCallback<Future<Response>>() {
-            public Future<Response> doInJms(Session session)
-                    throws JMSException {
-                MessageProducer producer = session.createProducer(destination);
-                try {
-                    Message reqMsg = session.createTextMessage(reqPayload);
-                    JMSUtils.setHeaders(headers, reqMsg);
-                    Future<Response> promise = null;
-                    if (beforeSend != null) {
-                        promise = beforeSend.invoke(reqMsg);
-                    }
-                    producer.send(reqMsg);
-                    return promise;
-                } catch (Exception e) {
-                    throw new ListenerExecutionFailedException(
-                            "Exchange processing failed", e);
-                }
-
-            }
-        });
-    }
-
     @Override
     public Closeable setMessageListener(final Destination destination,
             final MessageListener l,
@@ -211,28 +172,6 @@ public class SpringJMSContainer implements JMSContainer, ExceptionListener {
         };
     }
 
-    @Override
-    public void onException(JMSException e) {
-        log.error("******JMS Error\n\n\n", e);
-        final List<ExceptionListener> copyExceptionListeners = new ArrayList<>();
-
-        synchronized (exceptionListeners) {
-            copyExceptionListeners.addAll(exceptionListeners);
-        }
-        for (ExceptionListener l : copyExceptionListeners) {
-            l.onException(e);
-        }
-    }
-
-    @Override
-    public void addExceptionListener(ExceptionListener l) {
-        synchronized (exceptionListeners) {
-            if (!exceptionListeners.contains(l)) {
-                exceptionListeners.add(l);
-            }
-        }
-    }
-
     // This can only be set in Spring xml files
     public void setTransactionManager(
             PlatformTransactionManager transactionManager) {
@@ -259,4 +198,31 @@ public class SpringJMSContainer implements JMSContainer, ExceptionListener {
         return messageListenerContainer;
     }
 
+    private Future<Response> doSend(final Destination destination,
+            final Map<String, Object> headers, final String reqPayload,
+            final Function<Message, Future<Response>> beforeSend)
+            throws JMSException {
+        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+        jmsTemplate.setDefaultDestination(destination);
+        return jmsTemplate.execute(new SessionCallback<Future<Response>>() {
+            public Future<Response> doInJms(Session session)
+                    throws JMSException {
+                MessageProducer producer = session.createProducer(destination);
+                try {
+                    Message reqMsg = session.createTextMessage(reqPayload);
+                    JMSUtils.setHeaders(headers, reqMsg);
+                    Future<Response> promise = null;
+                    if (beforeSend != null) {
+                        promise = beforeSend.invoke(reqMsg);
+                    }
+                    producer.send(reqMsg);
+                    return promise;
+                } catch (Exception e) {
+                    throw new ListenerExecutionFailedException(
+                            "Exchange processing failed", e);
+                }
+
+            }
+        });
+    }
 }
