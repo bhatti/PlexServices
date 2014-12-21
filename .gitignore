@@ -14,4 +14,7 @@ bin/
 .gradle/
 .classpath
 .settings 
-plexsvc-samples/s3.properties
+plexsvc-samples/s3.properties 
+plexsvc-framework/activemq-data/
+plexsvc-framework/build/
+plexsvc-samples/.settings/
