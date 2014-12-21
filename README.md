@@ -9,15 +9,15 @@ PlexService is designed on following design principles:
 
 - Not MVC framework - PlexService is only meant for services and it's not general purpose MVC framework.
 
-- Not Invented Here: PlexService leverages other 3rd party frameworks and libraries such as Log4j, Netty, JaxB, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
+- Not Invented Here: PlexService leverages other 3rd party frameworks and libraries such as Netty, XStream, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
 
 - Minimize Dependencies: Despite NIH, PlexService minimizes the dependencies of 3rd party libraries. 
 
 - Technology independent services: PlexService provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexService provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
 
-- Easily Configurable: PlexService uses simple annotations for describing services but allows them to override the properties at run-time.
+- Easily Configurable: PlexService uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.
 
-- Encourage messaging based services: Though, PlexService supports both messaging based services and web services, but it prefers messaging based services and provides web bridge to expose them externally. It also encourages use of event-bus for internal communication. 
+- Reactive messaging based services: Though, PlexService supports both messaging based services and web services. You can use messaging based services to build reactive services and then use web bridge to expose them externally. It also provides event-bus for internal communication and to build loosely coupled components.
 
 - Easily deployable: PlexService framework supports both war files and embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
 
