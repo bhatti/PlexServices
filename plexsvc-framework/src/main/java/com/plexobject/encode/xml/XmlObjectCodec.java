@@ -1,15 +1,14 @@
 package com.plexobject.encode.xml;
 
-import java.io.StringReader;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-
 import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
+import com.plexobject.encode.EncodingException;
+import com.plexobject.handler.Request;
+import com.plexobject.handler.Response;
 import com.plexobject.validation.ValidationException;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
@@ -33,6 +32,7 @@ public class XmlObjectCodec extends AbstractObjectCodec {
         public boolean canConvert(Class clazz) {
             return AbstractMap.class.isAssignableFrom(clazz);
         }
+
         @SuppressWarnings("rawtypes")
         public void marshal(Object value, HierarchicalStreamWriter writer,
                 MarshallingContext context) {
@@ -53,7 +53,7 @@ public class XmlObjectCodec extends AbstractObjectCodec {
 
             while (reader.hasMoreChildren()) {
                 reader.moveDown();
-                String key = reader.getNodeName(); 
+                String key = reader.getNodeName();
                 String value = reader.getValue();
                 map.put(key, value);
 
@@ -66,7 +66,12 @@ public class XmlObjectCodec extends AbstractObjectCodec {
 
     public XmlObjectCodec() {
         xstream.alias("error", ValidationException.Error.class);
+        xstream.processAnnotations(new Class[] { Request.class, Response.class });
         xstream.registerConverter(new MapEntryConverter());
+    }
+
+    public void processAnnotations(Class<?>... klasses) {
+        xstream.processAnnotations(klasses);
     }
 
     @Override
@@ -74,36 +79,35 @@ public class XmlObjectCodec extends AbstractObjectCodec {
         if (obj == null) {
             return null;
         }
+        if (obj instanceof String) {
+            return (String) obj;
+        } else if (obj instanceof CharSequence) {
+            return obj.toString();
+        }
         try {
             return xstream.toXML(obj);
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to encode " + obj, e);
+            throw new EncodingException("Failed to encode " + obj, e);
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T decode(String text, Class<?> type, Map<String, Object> params) {
+        if (type == null) {
+            return null;
+        }
         try {
-
-            JAXBContext jaxbContext = JAXBContext.newInstance(type);
-
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            StringReader in = new StringReader(text);
             if (text != null && text.length() > 0) {
-                T obj = (T) jaxbUnmarshaller.unmarshal(in);
+                T obj = (T) xstream.fromXML(text);
                 populateProperties(params, obj);
                 return obj;
             } else {
                 return propertyDecode(params, type);
             }
 
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to decode " + text, e);
+            throw new EncodingException("Failed to decode " + text, e);
         }
 
     }

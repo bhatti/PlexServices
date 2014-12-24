@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
+import com.plexobject.encode.EncodingException;
 
 public class TextObjectCodec extends AbstractObjectCodec {
     @Override
@@ -34,13 +35,12 @@ public class TextObjectCodec extends AbstractObjectCodec {
                     populateProperties(params, obj);
                     return obj;
                 }
-                throw new RuntimeException(
-                        "Failed to find string constructor for " + type
-                                + " with " + text);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to instantiate " + type
+                throw new EncodingException("Failed to instantiate " + type
                         + " with " + text, e);
             }
+            throw new EncodingException("Failed to find string constructor for " + type
+                                + " with " + text);
         } else {
             return propertyDecode(params, type);
         }

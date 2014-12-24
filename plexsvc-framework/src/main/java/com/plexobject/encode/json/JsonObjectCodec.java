@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
+import com.plexobject.encode.EncodingException;
 
 /**
  * This class implements codec for JSON
@@ -45,7 +46,7 @@ public class JsonObjectCodec extends AbstractObjectCodec {
         try {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to convert " + obj, e);
+            throw new EncodingException("Failed to convert " + obj, e);
         }
     }
 
@@ -64,7 +65,7 @@ public class JsonObjectCodec extends AbstractObjectCodec {
         try {
             return mapper.readValue(text, type);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to decode " + text, e);
+            throw new EncodingException("Failed to decode " + text, e);
         }
     }
 
@@ -84,7 +85,7 @@ public class JsonObjectCodec extends AbstractObjectCodec {
                     getClass().getClassLoader());
             return (T) mapper.readValue(text, type);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to decode " + text.length()
+            throw new EncodingException("Failed to decode " + text.length()
                     + ", '" + text + "'", e);
         } finally {
             Thread.currentThread().setContextClassLoader(savedCL);

@@ -22,10 +22,8 @@ public abstract class AbstractObjectCodec implements ObjectCodec {
             T object = (T) type.newInstance();
             populateProperties(params, object);
             return object;
-        } catch (RuntimeException ex) {
-            throw ex;
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to decode " + params, ex);
+            throw new EncodingException("Failed to decode " + params, ex);
         }
     }
 

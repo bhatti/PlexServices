@@ -11,7 +11,24 @@ import java.util.Map;
 public interface ObjectCodec {
     CodecType getType();
 
-    <T> String encode(T obj);
+    /**
+     * This method serializes given object into string using underlying encoder
+     * 
+     * @param obj
+     * @return
+     * @throws EncodingException
+     */
+    <T> String encode(T obj) throws EncodingException;
 
-    <T> T decode(String text, Class<?> type, Map<String, Object> params);
+    /**
+     * This method deserializes string into an object using underlying encoder
+     * 
+     * @param text
+     * @param type
+     * @param params
+     * @return
+     * @throws EncodingException
+     */
+    <T> T decode(String text, Class<?> type, Map<String, Object> params)
+            throws EncodingException;
 }

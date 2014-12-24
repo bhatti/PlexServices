@@ -1,8 +1,15 @@
 package com.plexobject.encode;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
+@XStreamAlias("Obj")
 public class Employee {
+    @XStreamAlias("ID")
+    @XStreamAsAttribute
     Long id;
+    @XStreamAlias("Name")
+    @XStreamAsAttribute
     String name;
 
     public Employee() {
