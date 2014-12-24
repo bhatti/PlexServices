@@ -21,6 +21,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
@@ -91,7 +92,7 @@ public class ServiceRegistryTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        broker = startBroker();
+        broker = JMSTestUtils.startBroker(new Properties());
     }
 
     @AfterClass
@@ -345,17 +346,4 @@ public class ServiceRegistryTest {
         assertTrue(response.toString().contains("unknown error"));
     }
 
-    private static BrokerService startBroker() throws Exception {
-        Properties properties = new Properties();
-        BrokerService broker = new BrokerService();
-        broker.addConnector("tcp://localhost:61617");
-        broker.start();
-
-        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
-                "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
-                "ConnectionFactory");
-        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61617");
-        return broker;
-    }
 }

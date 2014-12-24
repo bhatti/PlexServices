@@ -16,6 +16,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
@@ -60,7 +61,7 @@ public class AutoDeployerTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        broker = startBroker();
+        broker = JMSTestUtils.startBroker(properties);
         properties.put(Constants.HTTP_PORT, "8585");
         properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
@@ -100,19 +101,6 @@ public class AutoDeployerTest {
                 .getHandlers();
         assertEquals(3, handlers.size());
         deployer.serviceRegistry.stop();
-    }
-
-    private static BrokerService startBroker() throws Exception {
-        Properties properties = new Properties();
-        BrokerService broker = new BrokerService();
-        broker.addConnector("tcp://localhost:61616");
-        broker.start();
-        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
-                "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
-                "ConnectionFactory");
-        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
-        return broker;
     }
 
 }

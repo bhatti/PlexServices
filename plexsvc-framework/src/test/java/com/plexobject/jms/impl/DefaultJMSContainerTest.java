@@ -26,6 +26,7 @@ import org.junit.Test;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
+import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.util.Configuration;
 
 public class DefaultJMSContainerTest {
@@ -92,7 +93,7 @@ public class DefaultJMSContainerTest {
 
     @Test
     public void testCreateWithServer() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         JMSContainer client = JMSUtils.getJMSContainer(config);
         broker.stop();
@@ -103,7 +104,7 @@ public class DefaultJMSContainerTest {
     public void testCreateWithServerWithUsername() throws Exception {
         properties.put("jms.username", "");
         properties.put("jms.password", "");
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         JMSContainer client = JMSUtils.getJMSContainer(config);
         broker.stop();
@@ -112,7 +113,7 @@ public class DefaultJMSContainerTest {
 
     @Test
     public void testStart() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         JMSContainer client = JMSUtils.getJMSContainer(config);
         client.start();
@@ -123,7 +124,7 @@ public class DefaultJMSContainerTest {
 
     @Test(expected = RuntimeException.class)
     public void testStartWhenBrokerIsDown() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         JMSContainer client = JMSUtils.getJMSContainer(config);
         broker.stop();
@@ -132,7 +133,7 @@ public class DefaultJMSContainerTest {
 
     @Test
     public void testStop() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         JMSContainer client = JMSUtils.getJMSContainer(config);
         client.stop();
@@ -146,7 +147,7 @@ public class DefaultJMSContainerTest {
 
     @Test(expected = RuntimeException.class)
     public void testStopWhenBrokerIsDown() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         JMSContainer client = JMSUtils.getJMSContainer(config);
         client.start();
@@ -156,7 +157,7 @@ public class DefaultJMSContainerTest {
 
     @Test
     public void testCreateProducer() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
         MessageProducer producer = client.createProducer("topic://test");
@@ -170,7 +171,7 @@ public class DefaultJMSContainerTest {
     public void testCreatePersistentProducer() throws Exception {
         properties.put("jms.test.ttl", "1");
         properties.put("jms.test.persistent", "true");
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
         MessageProducer producer = client.createProducer("queue://test");
@@ -182,7 +183,7 @@ public class DefaultJMSContainerTest {
 
     @Test
     public void testCreateTemporaryProducer() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
         TemporaryQueue q = client.createTemporaryQueue();
@@ -193,7 +194,7 @@ public class DefaultJMSContainerTest {
 
     @Test
     public void testSend() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
         JmsListener listener = new JmsListener(client);
@@ -218,7 +219,7 @@ public class DefaultJMSContainerTest {
 
     @Test
     public void testSendReceive() throws Exception {
-        BrokerService broker = startBroker();
+        BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         DefaultJMSContainer client = new DefaultJMSContainer(config);
         JmsListener listener = new JmsListener(client);
@@ -247,16 +248,4 @@ public class DefaultJMSContainerTest {
         assertEquals("ping", payload.toString());
     }
 
-    private BrokerService startBroker() throws Exception {
-        BrokerService broker = new BrokerService();
-        broker.addConnector("tcp://localhost:61616");
-        broker.start();
-
-        properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
-                "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
-                "ConnectionFactory");
-        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
-        return broker;
-    }
 }

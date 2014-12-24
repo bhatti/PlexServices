@@ -7,6 +7,7 @@ then
 ./gradlew compileJava dist
 else
 ./gradlew jettyRun
+exit
 fi;
 CLASSPATH=build/classes/main
 for j in build/dist/lib/*jar 

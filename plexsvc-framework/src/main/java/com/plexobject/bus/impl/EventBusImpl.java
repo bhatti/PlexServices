@@ -128,7 +128,7 @@ public class EventBusImpl implements EventBus {
                                 if (haf.filter == null
                                         || haf.filter.accept(request)) {
                                     haf.handler.handle(request);
-                                }
+                                }                                
                             } catch (Exception ex) {
                                 log.error("Failed to publish " + request, ex);
                             }

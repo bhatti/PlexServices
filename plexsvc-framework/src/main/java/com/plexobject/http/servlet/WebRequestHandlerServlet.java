@@ -46,7 +46,6 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
     private Configuration config;
     private ServiceRegistry serviceRegistry;
     private RequestHandler defaultExecutor;
-    private boolean running;
 
     public void init(ServletConfig servletConfig) throws ServletException {
         String plexserviceCallbackClass = servletConfig
@@ -76,7 +75,6 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             serviceRegistry
                     .setServiceRegistryLifecycleAware(serviceRegistryAware);
             serviceRegistry.start();
-            running = true;
             log.info("**** Started service registry via war servlet ***");
         } catch (Exception e) {
             throw new ServletException(e);
@@ -90,7 +88,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
     protected void doHead(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        doGet(req, resp);
+        handle(Method.HEAD, req, resp);
     }
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -120,12 +118,11 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
     @Override
     public boolean isRunning() {
-        return running;
+        return serviceRegistry.isRunning();
     }
 
     @Override
     public void destroy() {
-        running = false;
         super.destroy();
     }
 
@@ -133,7 +130,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             HttpServletResponse resp) throws IOException {
         if (!isRunning()) {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                    "Service not running " + this);
+                    "Service not running");
             log.warn("Received requests but service registry is not running "
                     + this);
             return;
@@ -147,7 +144,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         if (n != -1) {
             uri = uri.substring(0, n);
         }
-
+        //
         AbstractResponseDispatcher dispatcher = new ServletResponseDispatcher(
                 new Handledable() {
                     @Override
@@ -159,6 +156,13 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                 .setHeaders(headers).setPayload(payload)
                 .setResponseDispatcher(dispatcher).build();
         log.info("HTTP Received URI '" + uri + "', request " + handlerReq);
+        if (defaultExecutor == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    "Service is not found");
+            log.warn("Received requests but request handler is not found for "
+                    + handlerReq);
+            return;
+        }
         defaultExecutor.handle(handlerReq);
 
     }

@@ -238,7 +238,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
 
     @Override
     public boolean equals(Object obj) {
-        return false;
+        return this == obj;
     }
 
 }

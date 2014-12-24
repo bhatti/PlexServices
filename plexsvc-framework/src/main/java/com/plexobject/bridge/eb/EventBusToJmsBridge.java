@@ -286,15 +286,17 @@ public class EventBusToJmsBridge implements Lifecycle {
      * 
      * @param config
      * @param entries
+     * @return bridge
      * @throws JMSException
      */
-    public static void run(Configuration config,
+    public static EventBusToJmsBridge run(Configuration config,
             Collection<EventBusToJmsEntry> entries) throws JMSException {
         EventBus eb = new EventBusImpl();
         JMSContainer jmsContainer = JMSUtils.getJMSContainer(config);
         EventBusToJmsBridge bridge = new EventBusToJmsBridge(jmsContainer,
                 entries, eb);
         bridge.start();
+        return bridge;
     }
 
     /**

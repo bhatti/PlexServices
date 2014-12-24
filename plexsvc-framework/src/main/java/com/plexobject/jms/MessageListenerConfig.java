@@ -1,10 +1,16 @@
 package com.plexobject.jms;
 
+import javax.jms.Session;
+
 public class MessageListenerConfig {
     private final int concurrency;
     private final boolean sessionTransacted;
     private final int sessionAcknowledgeMode;
     private final int receiveTimeout;
+
+    public MessageListenerConfig() {
+        this(1, true, Session.AUTO_ACKNOWLEDGE, 0);
+    }
 
     public MessageListenerConfig(int concurrency, boolean sessionTransacted,
             int sessionAcknowledgeMode, int receiveTimeout) {
