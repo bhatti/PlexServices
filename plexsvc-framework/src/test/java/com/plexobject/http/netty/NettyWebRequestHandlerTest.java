@@ -1,24 +1,17 @@
 package com.plexobject.http.netty;
 
-import static io.netty.handler.codec.http.HttpHeaders.Names.COOKIE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.Cookie;
-import io.netty.handler.codec.http.CookieDecoder;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
 
 import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import mockit.Expectations;
 import mockit.Mocked;
@@ -148,36 +141,4 @@ public class NettyWebRequestHandlerTest {
         assertEquals("value", headers.get("name"));
     }
 
-    public static Map<String, Object> getHeaders(HttpRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        String cookieString = request.headers().get(COOKIE);
-        if (cookieString != null) {
-            Set<Cookie> cookies = CookieDecoder.decode(cookieString);
-            if (!cookies.isEmpty()) {
-                // Reset the cookies if necessary.
-                for (Cookie cookie : cookies) {
-                    result.put(cookie.getName(), cookie.getValue());
-                    // response.headers().add(SET_COOKIE,
-                    // ServerCookieEncoder.encode(cookie));
-                }
-            }
-        }
-        for (String name : request.headers().names()) {
-            String value = request.headers().get(name);
-            result.put(name, value);
-        }
-        return result;
-    }
-
-    public static String toString(HttpRequest request) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Method:" + request.getMethod());
-        sb.append(", Path:" + request.getUri());
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-        for (Map.Entry<String, List<String>> e : decoder.parameters()
-                .entrySet()) {
-            sb.append(", " + e.getKey() + " -> " + e.getValue());
-        }
-        return sb.toString();
-    }
 }

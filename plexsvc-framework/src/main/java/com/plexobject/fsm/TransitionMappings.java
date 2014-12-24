@@ -106,7 +106,15 @@ public class TransitionMappings {
 
     @Override
     public String toString() {
-        return "TransitionMappings [transitions=" + transitions + "]";
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Pair<State, String>, State[]> e : transitions.entrySet()) {
+            sb.append(e.getKey() + " ->");
+            for (State state : e.getValue()) {
+                sb.append(" " + state);
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
     private static State[] toStates(Collection<String> strStates) {

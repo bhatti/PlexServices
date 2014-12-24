@@ -17,7 +17,7 @@ public class FSM {
     private final TransitionMappings mappings;
     private final TransitionResolver transitionResolver;
     private State currentState;
-    private List<Pair<State, String>> breadcrumbs = new ArrayList<>();
+    private List<Pair<State, String>> history = new ArrayList<>();
     private List<StateChangeListener> listeners = new ArrayList<>();
     private Object lock = new Object();
 
@@ -94,9 +94,9 @@ public class FSM {
      * 
      * @return
      */
-    public List<Pair<State, String>> getBreadCrumbs() {
+    public List<Pair<State, String>> getHistory() {
         synchronized (lock) {
-            return Collections.unmodifiableList(breadcrumbs);
+            return Collections.unmodifiableList(history);
         }
     }
 
@@ -123,7 +123,7 @@ public class FSM {
 
     private State setCurrentStateAndBreadcrumbs(State newState, String onEvent) {
         this.currentState = newState;
-        breadcrumbs.add(Pair.of(newState, onEvent));
+        history.add(Pair.of(newState, onEvent));
         return newState;
     }
 }

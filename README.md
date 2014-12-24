@@ -38,6 +38,8 @@ PlexService is designed on following design principles:
 
 - PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
 
+- PlexService provides support for using finite state machines in building services.
+
 - PlexService supports both war files and Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
 
 - PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
@@ -589,6 +591,37 @@ Here is a sample json file that describes mapping:
 {"codecType":"JSON","type":"EB_CHANNEL_TO_JMS", "source":"create-user",
 "target":"queue://{scope}-assign-bugreport-service-queue","requestType":
 "com.plexobject.bugger.model.User"}]
+```
+
+
+### Finite State Machine
+PlexService provides helper classes to implement finite state machine. For example, here is how you can implement FSM for Android application lifecycle:
+
+![Android Lifecycle](http://upload.wikimedia.org/wikipedia/en/f/f6/Android_application_life_cycle.png)
+
+```java 
+final TransitionMappings mappings = new TransitionMappings();
+mappings.register(new TransitionMapping("Init", "onCreate", "Created"));
+mappings.register(new TransitionMapping("Created", "onStart", "Started"));
+mappings.register(new TransitionMapping("Started", "onResume", "Resumed"));
+mappings.register(new TransitionMapping("Resumed", "onPause", "Paused"));
+mappings.register(new TransitionMapping("Paused", "onResume", "Resumed"));
+mappings.register(new TransitionMapping("Paused", "onStop", "Stopped"));
+mappings.register(new TransitionMapping("Stopped", "onRestart", "Started"));
+mappings.register(new TransitionMapping("Stopped", "onDestroy", "Destroyed"));
+FSM instance = new FSM(State.of("Init"), mappings, null);
+assertEquals("Created", instance.nextStateOnEvent("onCreate", null) .getName());
+assertEquals("Started", instance.nextStateOnEvent("onStart", null) .getName());
+assertEquals("Resumed", instance.nextStateOnEvent("onResume", null) .getName());
+assertEquals("Paused", instance.nextStateOnEvent("onPause", null) .getName());
+assertEquals("Resumed", instance.nextStateOnEvent("onResume", null) .getName());
+assertEquals("Paused", instance.nextStateOnEvent("onPause", null) .getName());
+assertEquals("Stopped", instance.nextStateOnEvent("onStop", null) .getName());
+assertEquals("Started", instance.nextStateOnEvent("onRestart", null) .getName());
+assertEquals("Resumed", instance.nextStateOnEvent("onResume", null) .getName());
+assertEquals("Paused", instance.nextStateOnEvent("onPause", null) .getName());
+assertEquals("Stopped", instance.nextStateOnEvent("onStop", null) .getName());
+assertEquals("Destroyed", instance.nextStateOnEvent("onDestroy", null) .getName());
 ```
 
 
