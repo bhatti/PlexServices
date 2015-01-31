@@ -139,8 +139,8 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
     }
 
     @Override
-    public Closeable setMessageListener(Destination destination,
-            MessageListener l, MessageListenerConfig messageListenerConfig)
+    public Closeable setMessageListener(final Destination destination,
+            final MessageListener l, final MessageListenerConfig messageListenerConfig)
             throws JMSException, NamingException {
         if (destination instanceof TemporaryQueue) {
             final MessageConsumer consumer = createConsumer(destination);

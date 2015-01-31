@@ -119,6 +119,7 @@ public class RequestTest {
         assertEquals("v1", request.getStringProperty("p1"));
         request.setProperty("p2", 2);
         assertEquals("2", request.getStringProperty("p2"));
+        assertEquals(new Integer(2), request.getIntegerProperty("p2"));
         assertEquals(new Long(2), request.getLongProperty("p2"));
         assertEquals(properties, request.getProperties());
         assertNull(request.getStringProperty("p3"));

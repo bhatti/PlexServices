@@ -72,10 +72,12 @@ public class Main implements ServiceRegistryLifecycleAware {
         PingService pingService = new PingService();
         ReverseService reverseService = new ReverseService();
         SimpleService simpleService = new SimpleService();
+        ArrayService arrayService = new ArrayService();
 
         serviceRegistry.add(pingService);
         serviceRegistry.add(reverseService);
         serviceRegistry.add(simpleService);
+        serviceRegistry.add(arrayService);
     }
 
     @Override

@@ -2,5 +2,6 @@
 #./gradlew distZip 
 ./gradlew jettyRun
 ./gradlew compileJava dist
-#./gradlew run -Pargs="bugger.properties http_jms_services_mapping.json"
+#./gradlew run -Pargs="bugger.properties http_jms_services_mapping.json" 
+#curl -H "Accept: application/json" http://localhost:8080/plexsvc-samples/array
 ./gradlew bugger -Pargs="bugger.properties http_jms_services_mapping.json"

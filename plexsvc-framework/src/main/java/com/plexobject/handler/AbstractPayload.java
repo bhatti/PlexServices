@@ -47,6 +47,19 @@ public abstract class AbstractPayload {
         return (V) properties.get(name);
     }
 
+    public Integer getIntegerProperty(String name) {
+        Object value = properties.get(name);
+        if (value instanceof Integer) {
+            return (Integer) value;
+        } else if (value instanceof String) {
+            return Integer.valueOf((String) value);
+        } else if (value != null) {
+            return Integer.valueOf(value.toString());
+        } else {
+            return null;
+        }
+    }
+
     public Long getLongProperty(String name) {
         Object value = properties.get(name);
         if (value instanceof Long) {

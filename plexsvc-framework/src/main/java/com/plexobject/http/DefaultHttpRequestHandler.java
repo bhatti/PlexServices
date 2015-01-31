@@ -68,7 +68,7 @@ public class DefaultHttpRequestHandler implements RequestHandler {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         request.getResponseDispatcher().setCodecType(
                 CodecType.fromAcceptHeader(
-                        (String) request.getProperty(Constants.ACCEPT),
+                        (String) request.getHeader(Constants.ACCEPT),
                         config.codec()));
         // dispatcher.setContentType(config.codec()
         // .getContentType());

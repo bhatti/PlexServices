@@ -43,9 +43,10 @@ public class AbstractResponseDispatcherTest {
     @Test
     public void testSendError() throws Exception {
         dispatcher.send(new AuthException("session", "test"));
-        assertEquals(
-                "{\"errorType\":\"AuthException\",\"sessionId\":\"session\",\"message\":\"test\",\"status\":401}",
-                payload);
+        assertTrue(payload.contains("\"errorType\":\"AuthException\""));
+        assertTrue(payload.contains("\"sessionId\":\"session\""));
+        assertTrue(payload.contains("\"errorType\":\"AuthException\""));
+        assertTrue(payload.contains("\"status\":401"));
     }
 
     @Test
