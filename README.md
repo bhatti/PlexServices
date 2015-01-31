@@ -119,6 +119,7 @@ will return response in JSON format
 or
 curl -H "Accept: application/xml" http://localhost:8080/plexsvc-samples/array
 will return response in XML format
+```
 
 
 ### Defining a Web service over Websockets for creating a user 
