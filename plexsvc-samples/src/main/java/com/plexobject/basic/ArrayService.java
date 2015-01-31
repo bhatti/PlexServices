@@ -1,5 +1,11 @@
 package com.plexobject.basic;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,8 +15,6 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
-
-import java.util.*;
 
 
 @ServiceConfig(protocol = Protocol.HTTP, endpoint = "/array", method = Method.GET, codec = CodecType.JSON)

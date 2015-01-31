@@ -111,6 +111,16 @@ resp = requests.post('http://localhost:8181/login', data={'password': password, 
 json_resp = json.loads(resp.text)
 ```
 
+### Accepting client specific encoding
+The service clients can optionally send Accept header to request response in XML, JSON or any other supported encoding scheme. By default, service returns response in same encoding as codec's type. For example,
+```bash 
+curl -H "Accept: application/json" http://localhost:8080/plexsvc-samples/array 
+will return response in JSON format
+or
+curl -H "Accept: application/xml" http://localhost:8080/plexsvc-samples/array
+will return response in XML format
+
+
 ### Defining a Web service over Websockets for creating a user 
 PlexService supports both war files and embedded Netty server for hosting webservices, however websockets is only supported under Netty server, 
 which is default setting.
