@@ -68,7 +68,7 @@ public class AutoDeployerTest {
         properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
         properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
-        properties.put(Constants.AUTO_DEPLOY_PACKAGE, "com.plexobject.deploy");
+        properties.put(Constants.AUTO_DEPLOY_PACKAGES, "com.plexobject.deploy");
         propFile = File.createTempFile("prop", "config");
         propFile.deleteOnExit();
     }

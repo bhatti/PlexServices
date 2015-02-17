@@ -1,6 +1,9 @@
 package com.plexobject.stock;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +50,14 @@ public class QuoteServer implements RequestHandler {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
+        if (args.length == 0) {
             System.err.println("Usage: java " + QuoteServer.class.getName()
                     + " properties-file");
             System.exit(1);
         }
+        BasicConfigurator.configure();
+        LogManager.getRootLogger().setLevel(Level.INFO);
+
         startJmsBroker();
         new AutoDeployer().deploy(args[0]);
         Thread.currentThread().join();

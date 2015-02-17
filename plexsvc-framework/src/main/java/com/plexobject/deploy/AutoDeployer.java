@@ -17,7 +17,7 @@ import com.plexobject.util.Configuration;
 
 /**
  * This is a helper class that searches service classes that define
- * ServiceConfig annoations and automatically deploys them.
+ * ServiceConfig annotations and automatically deploys them.
  * 
  * @author shahzad bhatti
  *
@@ -32,39 +32,50 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
     public AutoDeployer() {
     }
 
-    public void deploy(String configFile) throws Exception {
-        Configuration config = new Configuration(configFile);
-        String roleAuthorizerClass = config
-                .getProperty(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS);
+    public void deploy(String configFile) {
+        try {
+            Configuration config = new Configuration(configFile);
+            String roleAuthorizerClass = config
+                    .getProperty(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS);
 
-        RoleAuthorizer roleAuthorizer = null;
-        if (roleAuthorizerClass != null) {
-            roleAuthorizer = (RoleAuthorizer) Class
-                    .forName(roleAuthorizerClass).newInstance();
+            RoleAuthorizer roleAuthorizer = null;
+            if (roleAuthorizerClass != null) {
+                roleAuthorizer = (RoleAuthorizer) Class.forName(
+                        roleAuthorizerClass).newInstance();
+            }
+            serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
+            onStarted(serviceRegistry);
+            serviceRegistry.start();
+        } catch (Exception e) {
+            log.error("Failed to deploy", e);
         }
-        serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
-        serviceRegistry.start();
-        onStarted(serviceRegistry);
     }
 
     @Override
     public void onStarted(ServiceRegistry serviceRegistry) {
-        String pkgName = serviceRegistry.getConfiguration().getProperty(
-                Constants.AUTO_DEPLOY_PACKAGE);
-        Reflections reflections = new Reflections(pkgName);
+        String[] pkgNames = serviceRegistry.getConfiguration()
+                .getProperty(Constants.AUTO_DEPLOY_PACKAGES).split("[\\s;:,]");
+        for (String pkgName : pkgNames) {
+            pkgName = pkgName.trim();
+            if (pkgName.length() == 0) {
+                continue;
+            }
+            log.info("Parsing " + pkgName + " for auto-deployment...");
+            Reflections reflections = new Reflections(pkgName);
+            Set<Class<?>> serviceClasses = reflections
+                    .getTypesAnnotatedWith(ServiceConfig.class);
 
-        Set<Class<?>> serviceClasses = reflections
-                .getTypesAnnotatedWith(ServiceConfig.class);
-
-        for (Class<?> serviceClass : serviceClasses) {
-            try {
-                RequestHandler handler = (RequestHandler) serviceClass
-                        .newInstance();
-                serviceRegistry.add(handler);
-            } catch (Exception e) {
-                log.error(
-                        "Failed to add request handler for "
-                                + serviceClass.getName(), e);
+            for (Class<?> serviceClass : serviceClasses) {
+                try {
+                    RequestHandler handler = (RequestHandler) serviceClass
+                            .newInstance();
+                    log.info("Registering " + serviceClass.getName()
+                            + " for auto-deployment...");
+                    serviceRegistry.add(handler);
+                } catch (Exception e) {
+                    log.error("Failed to add request handler for "
+                            + serviceClass.getName(), e);
+                }
             }
         }
     }
@@ -75,7 +86,7 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
+        if (args.length == 0) {
             System.err
                     .println("Usage: java com.plexobject.deploy.AutoDeployer configuration-file");
             System.err

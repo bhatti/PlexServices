@@ -124,7 +124,7 @@ public class NettyHttpServer implements Lifecycle {
                 Constants.DEFAULT_HTTP_PORT);
 
         try {
-            log.info("Starting web server on " + httpPort);
+            log.info("##### Starting web server on " + httpPort);
             channel = bootstrap.bind(httpPort).sync().channel();
             // ch.closeFuture().sync(); // Wait until the server socket is
             // closed

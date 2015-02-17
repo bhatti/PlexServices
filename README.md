@@ -752,7 +752,7 @@ java com.plexobject.deploy.AutoDeployer bugger.properties
 ```
 You need to specify package name of your services in the properties file, e.g.
 ```bash
-AutoDeployPackage=com.plexobject.stock
+AutoDeployPackages=com.plexobject.stock
 ```
 
 Your services must have default constructor for this option to work.

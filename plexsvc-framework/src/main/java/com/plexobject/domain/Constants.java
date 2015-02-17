@@ -13,7 +13,7 @@ public interface Constants {
     public static final String PLEXSERVICE_ROLE_AUTHORIZER_CLASS = "PlexserviceRoleAuthorizerClass";
     public static final String PLEXSERVICE_CONFIG_RESOURCE_PATH = "PlexserviceConfigResourcePath";
     public static final String PLEXSERVICE_AWARE_CLASS = "PlexserviceAwareClass";
-    public static final String AUTO_DEPLOY_PACKAGE = "AutoDeployPackage";
+    public static final String AUTO_DEPLOY_PACKAGES = "AutoDeployPackages";
     public static final String SSL = "ssl";
     public static final String HTTP_WEBSOCKET_URI = "HttpWebsocketUri";
     public static final String HTTP_SERVICE_TIMEOUT_SECS = "HttpServiceTimeoutSecs";
