@@ -755,7 +755,7 @@ You need to specify package name of your services in the properties file, e.g.
 AutoDeployPackages=com.plexobject.stock
 ```
 
-Your services must have default constructor for this option to work.
+Your services must have default constructor for this option to work. You can specify multiple packages separated by comma if needed.
 
 ### Adding Streaming Quotes Service over Websockets 
 Here is a small example of creating a streaming quote server that sends real-time
