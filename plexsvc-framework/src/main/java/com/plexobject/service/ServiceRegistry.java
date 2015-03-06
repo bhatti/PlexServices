@@ -246,17 +246,18 @@ public class ServiceRegistry implements ServiceContainer, ServiceRegistryMBean {
 
     @Override
     public synchronized void start() {
-        log.info("starting containers " + _containers.size());
+        if (serviceRegistryLifecycleAware != null) {
+            log.info("invoking onStarted for " + serviceRegistryLifecycleAware + " ...");
+            serviceRegistryLifecycleAware.onStarted(this);
+        }
+        //
+        log.info("starting containers size " + _containers.size());
         for (ServiceContainer g : _containers.values()) {
             if (g.getHandlers().size() > 0) {
                 g.start();
             }
         }
         running = true;
-        if (serviceRegistryLifecycleAware != null) {
-            log.info("invoking onStarted...");
-            serviceRegistryLifecycleAware.onStarted(this);
-        }
     }
 
     @Override
