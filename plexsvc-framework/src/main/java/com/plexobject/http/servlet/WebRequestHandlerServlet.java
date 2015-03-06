@@ -140,6 +140,9 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         Map<String, Object> headers = getHeaders(req);
         Map<String, Object> params = getParams(req);
         String uri = req.getPathInfo();
+        if (uri == null) {
+            uri = req.getServletPath();
+        }
         int n = uri.indexOf("?");
         if (n != -1) {
             uri = uri.substring(0, n);
