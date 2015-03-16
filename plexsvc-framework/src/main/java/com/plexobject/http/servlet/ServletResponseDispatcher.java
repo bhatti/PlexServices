@@ -58,6 +58,7 @@ public class ServletResponseDispatcher extends HttpResponseDispatcher {
                 if (location != null || errorMessage != null) {
                     return;
                 }
+
                 resp.getOutputStream().write(contents.getBytes());
                 resp.getOutputStream().flush();
             }

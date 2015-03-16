@@ -104,7 +104,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
             return true;
         if (obj == null)
             return false;
-        if (obj instanceof AbstractResponseDispatcher == false) {
+        if (obj.getClass() != getClass()) {
             return false;
         }
         AbstractResponseDispatcher other = (AbstractResponseDispatcher) obj;
