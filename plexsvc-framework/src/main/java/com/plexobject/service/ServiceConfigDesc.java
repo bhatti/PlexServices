@@ -1,20 +1,15 @@
 package com.plexobject.service;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.RequestHandler;
 
-public class ServiceConfigDesc implements Serializable {
+public class ServiceConfigDesc extends ServiceTypeDesc {
     private static final long serialVersionUID = 1L;
-    private final Method method;
-    private final Protocol protocol;
     private final Class<?> payloadClass;
     private final CodecType codecType;
-    private final String version;
-    private final String endpoint;
     private final boolean recordStatsdMetrics;
     private final String[] rolesAllowed;
     private final int concurrency;
@@ -113,7 +108,7 @@ public class ServiceConfigDesc implements Serializable {
         }
 
         public ServiceConfigDesc build() {
-            return new ServiceConfigDesc(method, protocol, payloadClass,
+            return new ServiceConfigDesc(protocol, method, payloadClass,
                     codecType, version, endpoint, recordStatsdMetrics,
                     rolesAllowed, concurrency);
         }
@@ -128,33 +123,22 @@ public class ServiceConfigDesc implements Serializable {
     }
 
     public ServiceConfigDesc(ServiceConfig config) {
-        this(config.method(), config.protocol(), config.payloadClass(), config
+        this(config.protocol(), config.method(), config.payloadClass(), config
                 .codec(), config.version(), config.endpoint(), config
                 .recordStatsdMetrics(), config.rolesAllowed(), config
                 .concurrency());
     }
 
-    public ServiceConfigDesc(Method method, Protocol protocol,
+    public ServiceConfigDesc(Protocol protocol, Method method,
             Class<?> payloadClass, CodecType codecType, String version,
             String endpoint, boolean recordStatsdMetrics,
             String[] rolesAllowed, int concurrency) {
-        this.method = method;
-        this.protocol = protocol;
+        super(protocol, method, version, endpoint);
         this.payloadClass = payloadClass;
         this.codecType = codecType;
-        this.version = version;
-        this.endpoint = endpoint;
         this.recordStatsdMetrics = recordStatsdMetrics;
         this.rolesAllowed = rolesAllowed;
         this.concurrency = concurrency;
-    }
-
-    public Method method() {
-        return method;
-    }
-
-    public Protocol protocol() {
-        return protocol;
     }
 
     public Class<?> payloadClass() {
@@ -163,14 +147,6 @@ public class ServiceConfigDesc implements Serializable {
 
     public CodecType codec() {
         return codecType;
-    }
-
-    public String version() {
-        return version;
-    }
-
-    public String endpoint() {
-        return endpoint;
     }
 
     public boolean recordStatsdMetrics() {
@@ -195,10 +171,11 @@ public class ServiceConfigDesc implements Serializable {
 
     @Override
     public String toString() {
-        return "ServiceConfigDesc [method=" + method + ", protocol=" + protocol
-                + ", payloadClass=" + payloadClass + ", codecType=" + codecType
-                + ", version=" + version + ", endpoint=" + endpoint
-                + ", recordStatsdMetrics=" + recordStatsdMetrics
-                + ", rolesALlowed=" + Arrays.toString(rolesAllowed) + "]";
+        return "ServiceConfigDesc [method=" + method() + ", protocol="
+                + protocol() + ", payloadClass=" + payloadClass
+                + ", codecType=" + codecType + ", version=" + version()
+                + ", endpoint=" + endpoint() + ", recordStatsdMetrics="
+                + recordStatsdMetrics + ", rolesALlowed="
+                + Arrays.toString(rolesAllowed) + "]";
     }
 }

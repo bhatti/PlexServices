@@ -11,9 +11,9 @@ import javax.naming.NamingException;
 
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.AbstractServiceContainer;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
+import com.plexobject.service.impl.AbstractServiceContainer;
 import com.plexobject.util.Configuration;
 
 /**
