@@ -30,6 +30,8 @@ PlexService is designed on following design principles:
 
 - PlexService framework allows annotations for validating request parameters or attributes of request object.
 
+- PlexService framework allows request interceptors to define cross cutting logic that is common to all handlers.
+
 - PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
 
 - PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to expose them through HTTP or websocket interfaces.
@@ -458,6 +460,25 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
       }
 }
 ```
+
+
+### Adding interceptors for handling incoming requests 
+You can add interceptors (similar to filters in java servlets), that can modify
+incoming requests or execute cross cutting logic, e.g.
+
+```java  
+serviceRegistry.add(new ServiceTypeDesc(Protocol.HTTP, Method.GET,
+        null, "/.*"), new RequestInterceptor() {
+    @Override
+    public Request intercept(Request request) {
+        // my business logic 
+        // ...
+        return request;
+    }
+});
+```
+The first parameter is ServiceTypeDesc that defines matching pattern for request type. For example, above code will match all incoming HTTP requests that use GET requests. If you need to match all type of requests, you can just specify null as Method. The last argument of ServiceTypeDesc is endpoint or path of request, which can be regex or exact path.
+
 
 
 ### Creating Http or Websocket bridge for JMS services

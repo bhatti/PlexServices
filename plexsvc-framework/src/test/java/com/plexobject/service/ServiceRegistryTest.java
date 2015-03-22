@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -105,12 +108,27 @@ public class ServiceRegistryTest {
         final Configuration config = new Configuration(properties);
 
         ServiceRegistry registry = new ServiceRegistry(config, authorizer);
+        assertEquals(config, registry.getConfiguration());
+
         assertEquals(0, registry.getHandlers().size());
         assertNotNull(registry.getServiceMetricsRegistry());
     }
 
     @Test
     public void testCreateServices() throws Exception {
+        final Configuration config = initProperties();
+
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
+        registry.add(new WebsocketService());
+        registry.add(new WebService());
+        registry.add(new JmsService());
+        assertEquals(3, registry.getHandlers().size());
+        assertNotNull(registry.getServiceMetricsRegistry());
+        assertEquals(3, registry.getServiceConfigurations().size());
+        assertTrue(registry.dumpServiceConfigurations().contains("HTTP:GET"));
+    }
+
+    private Configuration initProperties() {
         properties.put(Constants.HTTP_PORT, 8282);
         properties.put("statsd.host", "localhost");
         properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
@@ -120,13 +138,50 @@ public class ServiceRegistryTest {
         properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
 
         final Configuration config = new Configuration(properties);
+        return config;
+    }
+
+    @Test
+    public void testSetRequestHandlers() throws Exception {
+        final Configuration config = initProperties();
 
         ServiceRegistry registry = new ServiceRegistry(config, authorizer);
-        registry.add(new WebsocketService());
-        registry.add(new WebService());
-        registry.add(new JmsService());
+        registry.setRequestHandlers(Arrays.asList(new WebsocketService(),
+                new WebService(), new JmsService()));
         assertEquals(3, registry.getHandlers().size());
         assertNotNull(registry.getServiceMetricsRegistry());
+    }
+
+    @Test
+    public void testAddRemoveInterceptor() throws Exception {
+        final Configuration config = new Configuration(properties);
+        RequestInterceptor interceptor1 = new RequestInterceptor() {
+            @Override
+            public Request intercept(Request request) {
+                return request;
+            }
+        };
+        RequestInterceptor interceptor2 = new RequestInterceptor() {
+            @Override
+            public Request intercept(Request request) {
+                return request;
+            }
+        };
+
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
+        RequestHandler h = new WebService();
+        registry.add(h);
+        registry.add(
+                new ServiceTypeDesc(Protocol.HTTP, Method.GET, null, "/.*"),
+                interceptor1);
+        registry.add(new ServiceTypeDesc(), interceptor2);
+
+        Map<ServiceTypeDesc, Collection<RequestInterceptor>> interceptors = registry
+                .getInterceptors();
+        assertEquals(2, interceptors.size());
+        registry.remove(new ServiceTypeDesc(), interceptor2);
+        interceptors = registry.getInterceptors();
+        assertEquals(1, interceptors.size());
     }
 
     @Test
@@ -147,6 +202,20 @@ public class ServiceRegistryTest {
     }
 
     @Test
+    public void testAddWebToJmsEntries() throws Exception {
+        final Configuration config = initProperties();
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
+        Collection<WebToJmsEntry> entries = Arrays.asList(new WebToJmsEntry(
+                CodecType.JSON, "/w", Method.GET, "queue://w", 5, false, 1),
+                new WebToJmsEntry(CodecType.JSON, "/ws", Method.GET,
+                        "queue://w", 5, false, 1));
+        RequestHandler h = new WebService();
+        registry.add(h);
+        registry.setWebToJmsEntries(entries);
+        assertEquals(2, registry.getHandlers().size());
+    }
+
+    @Test
     public void testUnknownRemove() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config, authorizer);
@@ -162,6 +231,33 @@ public class ServiceRegistryTest {
 
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config, authorizer);
+        RequestHandler h = new WebService();
+        registry.add(h);
+        assertFalse(registry.isRunning());
+        registry.start();
+        assertTrue(registry.isRunning());
+        registry.stop();
+        assertFalse(registry.isRunning());
+    }
+
+    @Test
+    public void testStartStopWithServiceRegistryLifecycleAware()
+            throws Exception {
+        properties.put("statsd.host", "localhost");
+        properties.put(Constants.HTTP_PORT, "8282");
+
+        final Configuration config = new Configuration(properties);
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
+        registry.setServiceRegistryLifecycleAware(new ServiceRegistryLifecycleAware() {
+            @Override
+            public void onStarted(ServiceRegistry serviceRegistry) {
+            }
+
+            @Override
+            public void onStopped(ServiceRegistry serviceRegistry) {
+            }
+        });
+
         RequestHandler h = new WebService();
         registry.add(h);
         assertFalse(registry.isRunning());

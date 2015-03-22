@@ -20,6 +20,12 @@ import com.plexobject.service.ServiceContainer;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.Configuration;
 
+/**
+ * This is a helper class to manage service containers used by service-registry
+ * 
+ * @author shahzad bhatti
+ *
+ */
 public class ServiceRegistryContainers {
     private final ServiceRegistry serviceRegistry;
     private final WebContainerProvider webContainerProvider;
@@ -38,6 +44,11 @@ public class ServiceRegistryContainers {
         this.serviceRegistry = serviceRegistry;
     }
 
+    /**
+     * This method returns all request handlers
+     * 
+     * @return
+     */
     public Collection<RequestHandler> getHandlers() {
         Collection<RequestHandler> handlers = new HashSet<>();
         for (ServiceContainer g : _containers.values()) {
@@ -46,6 +57,9 @@ public class ServiceRegistryContainers {
         return handlers;
     }
 
+    /**
+     * This method starts all containers
+     */
     public synchronized void start() {
         for (ServiceContainer g : _containers.values()) {
             if (g.getHandlers().size() > 0) {
@@ -54,6 +68,9 @@ public class ServiceRegistryContainers {
         }
     }
 
+    /**
+     * This method stops all containers
+     */
     public synchronized void stop() {
         for (ServiceContainer g : _containers.values()) {
             if (g.getHandlers().size() > 0) {
@@ -62,6 +79,12 @@ public class ServiceRegistryContainers {
         }
     }
 
+    /**
+     * This method finds or adds container for given protocol
+     * 
+     * @param protocol
+     * @return
+     */
     public synchronized ServiceContainer getOrAddServiceContainer(
             Protocol protocol) {
         ServiceContainer container = _containers.get(protocol);

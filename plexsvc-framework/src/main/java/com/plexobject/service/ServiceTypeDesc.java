@@ -1,8 +1,15 @@
 package com.plexobject.service;
 
 import java.io.Serializable;
+import java.util.regex.PatternSyntaxException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServiceTypeDesc implements Serializable {
+    private static final Logger log = LoggerFactory
+            .getLogger(ServiceTypeDesc.class);
+
     private static final long serialVersionUID = 1L;
     private final Protocol protocol;
     private final Method method;
@@ -15,6 +22,10 @@ public class ServiceTypeDesc implements Serializable {
         this.method = method;
         this.version = version;
         this.endpoint = endpoint;
+    }
+
+    public ServiceTypeDesc() {
+        this(null, null, null, null);
     }
 
     public Protocol protocol() {
@@ -33,21 +44,25 @@ public class ServiceTypeDesc implements Serializable {
         return endpoint;
     }
 
+    /**
+     * This method checks if other type is same as self or if endpoint of other
+     * type is regex then it matches the regex to current endpoint
+     * 
+     * @param other
+     * @return
+     */
     public boolean matches(ServiceTypeDesc other) {
-        if (protocol != other.protocol) {
+        if (other.protocol != null && protocol != other.protocol) {
             return false;
         }
-        if (method != other.method) {
-            return false;
-        }
-        if (method != other.method) {
+        if (other.method != null && method != other.method) {
             return false;
         }
         if (version == null) {
             if (other.version != null) {
                 return false;
             }
-        } else if (!version.equals(other.version)) {
+        } else if (other.version != null && !version.equals(other.version)) {
             return false;
         }
         if (endpoint == null) {
@@ -55,9 +70,15 @@ public class ServiceTypeDesc implements Serializable {
                 return false;
             }
         } else {
-            if (!endpoint.equals(other.endpoint)) {
-                if (!endpoint.matches(other.endpoint)) {
-                    return false;
+            if (other.endpoint != null && !other.endpoint.equals("*")
+                    && !other.endpoint.equals("/*")
+                    && !endpoint.equals(other.endpoint)) {
+                try {
+                    if (!endpoint.matches(other.endpoint)) {
+                        return false;
+                    }
+                } catch (PatternSyntaxException e) {
+                    log.warn("Illegal endpoint regex " + other.endpoint);
                 }
             }
         }

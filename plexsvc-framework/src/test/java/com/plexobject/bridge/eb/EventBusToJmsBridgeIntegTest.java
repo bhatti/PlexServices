@@ -227,7 +227,7 @@ public class EventBusToJmsBridgeIntegTest {
                 new Handler<Response>() {
                     @Override
                     public void handle(Response resp) {
-                        reply.append(resp.getPayload());
+                        reply.append((String) resp.getPayload());
                         latch.countDown();
                     }
                 });

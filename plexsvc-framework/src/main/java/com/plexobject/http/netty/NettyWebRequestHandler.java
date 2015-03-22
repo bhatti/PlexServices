@@ -176,17 +176,6 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             params.put(e.getKey(), e.getValue().get(0));
         }
 
-        // if (request.getMethod() == HttpMethod.POST) {
-        // ChannelBuffer content = request.getDecoderResult();
-        // if (content.readable()) {
-        // String param = content.toString(WaarpStringUtils.UTF8);
-        // QueryStringDecoder queryStringDecoder2 = new QueryStringDecoder(
-        // "/?" + param);
-        // params = queryStringDecoder2.getParameters();
-        // } else {
-        // params = null;
-        // }
-        // }
         // params.put(Constants.HOST, request.getRemoteHost());
         return params;
 

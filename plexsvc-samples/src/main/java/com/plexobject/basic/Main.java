@@ -9,11 +9,14 @@ import org.apache.log4j.LogManager;
 
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.encode.CodecType;
+import com.plexobject.handler.Request;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestInterceptor;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
+import com.plexobject.service.ServiceTypeDesc;
 import com.plexobject.util.Configuration;
 
 public class Main implements ServiceRegistryLifecycleAware {
@@ -63,8 +66,27 @@ public class Main implements ServiceRegistryLifecycleAware {
         }
         serviceRegistry.add(reverseService);
         serviceRegistry.add(simpleService);
+        addInterceptors(serviceRegistry);
         serviceRegistry.start();
         Thread.currentThread().join();
+    }
+
+    private static void addInterceptors(ServiceRegistry serviceRegistry) {
+        serviceRegistry.add(new ServiceTypeDesc(Protocol.HTTP, Method.GET,
+                null, "/.*"), new RequestInterceptor() {
+            @Override
+            public Request intercept(Request request) {
+                System.out.println(">>>>>>>>>Interceptor 1 " + request);
+                return request;
+            }
+        });
+        serviceRegistry.add(new ServiceTypeDesc(), new RequestInterceptor() {
+            @Override
+            public Request intercept(Request request) {
+                System.out.println(">>>>>>>>>>Interceptor 2 " + request);
+                return request;
+            }
+        });
     }
 
     @Override
@@ -78,6 +100,7 @@ public class Main implements ServiceRegistryLifecycleAware {
         serviceRegistry.add(reverseService);
         serviceRegistry.add(simpleService);
         serviceRegistry.add(arrayService);
+        addInterceptors(serviceRegistry);
     }
 
     @Override

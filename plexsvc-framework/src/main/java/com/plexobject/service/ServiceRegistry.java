@@ -3,6 +3,7 @@ package com.plexobject.service;
 import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -259,6 +260,11 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     public synchronized void remove(ServiceTypeDesc type,
             RequestInterceptor interceptor) {
         serviceRegistryHandlers.remove(type, interceptor);
+    }
+
+    @Override
+    public Map<ServiceTypeDesc, Collection<RequestInterceptor>> getInterceptors() {
+        return serviceRegistryHandlers.getInterceptors();
     }
 
     /**
