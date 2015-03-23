@@ -1,5 +1,6 @@
 package com.plexobject.domain;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -74,15 +75,17 @@ public class Promise<T> implements Future<T> {
     public synchronized T get(long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
         long started = System.nanoTime();
-        while (value == null && !cancelled && exception == null) {
+        while (value == null) {
             if (exception != null) {
                 if (exception instanceof ExecutionException) {
                     throw (ExecutionException) exception;
+                } else if (exception instanceof RuntimeException) {
+                    throw (RuntimeException) exception;
                 }
                 throw new ExecutionException(exception);
             }
             if (cancelled) {
-                throw new RuntimeException("Operation cancelled");
+                throw new CancellationException("Operation cancelled");
             }
             wait(unit.toMillis(timeout));
             if (timeout > 0) {
@@ -93,7 +96,7 @@ public class Promise<T> implements Future<T> {
                         timedoutHandler.handle(this);
                     }
                     throw new TimeoutException("Request timed out for "
-                            + unit.toSeconds(timeout));
+                            + unit.toMillis(timeout) + " milli-seconds");
                 }
             }
         }
@@ -144,10 +147,12 @@ public class Promise<T> implements Future<T> {
 
     private void validateIfAlreadySet() {
         if (exception != null) {
-            throw new RuntimeException("Future operation is already failed!");
+            throw new IllegalStateException(
+                    "Future operation is already failed!");
         }
         if (value != null) {
-            throw new RuntimeException("Future operation is already completed!");
+            throw new IllegalStateException(
+                    "Future operation is already completed!");
         }
     }
 

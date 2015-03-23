@@ -87,8 +87,8 @@ public class ServiceMetricsTest {
         for (int i = 0; i < 100; i++) {
             metrics.addResponseTime(1);
         }
-        Thread.sleep(10);
-        assertTrue(metrics.getTotalThroughput() > 10000);
+        Thread.sleep(50);
+        assertTrue(metrics.getTotalThroughput() > 1000);
     }
 
     @Test
