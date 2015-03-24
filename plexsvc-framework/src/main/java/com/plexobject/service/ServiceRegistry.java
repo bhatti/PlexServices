@@ -75,7 +75,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         serviceMetricsRegistry = new ServiceMetricsRegistry(this, statsd);
         try {
             mbs.registerMBean(this, new ObjectName(
-                    "PlexService:name=ServiceRegistry"));
+                    "PlexServices:name=ServiceRegistry"));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
             log.error("Could not register mbean for service-registry", e);

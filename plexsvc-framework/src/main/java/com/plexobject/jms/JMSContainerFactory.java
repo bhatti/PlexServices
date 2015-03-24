@@ -3,7 +3,7 @@ package com.plexobject.jms;
 import com.plexobject.domain.Configuration;
 
 /**
- * This factory is used to create JMS container. PlexService comes with default
+ * This factory is used to create JMS container. PlexServices comes with default
  * implementation but you can implement Spring or Apache Camel if required
  * 
  * @author shahzad bhatti

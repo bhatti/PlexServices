@@ -5,11 +5,11 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     version="2.4">
 
-    <display-name>PlexService Sample Application</display-name>
-    <description> This is a PlexService Sample </description>
+    <display-name>PlexServices Sample Application</display-name>
+    <description> This is a PlexServices Sample </description>
 
     <servlet>
-        <servlet-name>plexservice</servlet-name>
+        <servlet-name>plexservices</servlet-name>
         <servlet-class>com.plexobject.http.servlet.WebRequestHandlerServlet</servlet-class>
         <init-param>
             <param-name>PlexserviceAwareClass</param-name> 
@@ -23,7 +23,7 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>plexservice</servlet-name>
+        <servlet-name>plexservices</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 

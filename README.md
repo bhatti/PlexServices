@@ -1,52 +1,52 @@
-#PlexService - Light-weight Micro-Service Framework for building high performance and secured applications 
+#PlexServices - Light-weight Micro-Service Framework for building high performance and secured applications 
 
 ##Overview
 
-PlexService is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. 
+PlexServices is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. 
 
 ## Design Principles 
-PlexService is designed on following design principles:
+PlexServices is designed on following design principles:
 
-- Not MVC framework - PlexService is only meant for services and it's not general purpose MVC framework.
+- Not MVC framework - PlexServices is only meant for services and it's not general purpose MVC framework.
 
-- Not Invented Here: PlexService leverages other 3rd party frameworks and libraries such as Netty, XStream, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
+- Not Invented Here: PlexServices leverages other 3rd party frameworks and libraries such as Netty, XStream, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
 
-- Minimize Dependencies: Despite NIH, PlexService minimizes the dependencies of 3rd party libraries. 
+- Minimize Dependencies: Despite NIH, PlexServices minimizes the dependencies of 3rd party libraries. 
 
-- Technology independent services: PlexService provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexService provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
+- Technology independent services: PlexServices provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexServices provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
 
-- Easily Configurable: PlexService uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.
+- Easily Configurable: PlexServices uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.
 
-- Reactive messaging based services: Though, PlexService supports both messaging based services and web services. You can use messaging based services to build reactive services and then use web bridge to expose them externally. It also provides event-bus for internal communication and to build loosely coupled components.
+- Reactive messaging based services: Though, PlexServices supports both messaging based services and web services. You can use messaging based services to build reactive services and then use web bridge to expose them externally. It also provides event-bus for internal communication and to build loosely coupled components.
 
-- Easily deployable: PlexService framework supports both war files and embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
+- Easily deployable: PlexServices framework supports both war files and embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
 
 - Development Support: Though, you may use different Java processes to deploy services in your production environment, but you can add all of services in a single Java process during development to simplify the deployment process.
 
-- Operational Support: PlexService provides monitoring, statistics and logging support for ease of operational support.
+- Operational Support: PlexServices provides monitoring, statistics and logging support for ease of operational support.
 
 ## Major Features
-- PlexService framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
+- PlexServices framework provides support for converting POJO objects into JSON for service consumption. The developers define service configuration via Java annoations, which allow them to define protocols, encoding scheme, end-points, roles, etc. You can also override the configurations at runtime if needed.
 
-- PlexService framework allows annotations for validating request parameters or attributes of request object.
+- PlexServices framework allows annotations for validating request parameters or attributes of request object.
 
-- PlexService framework allows request interceptors to define cross cutting logic that is common to all handlers.
+- PlexServices framework allows request interceptors to define cross cutting logic that is common to all handlers.
 
-- PlexService supports role-based security, which are enforced before accessing underlying services. PlexService provides simple interfaces for providing security rules for access to the services.
+- PlexServices supports role-based security, which are enforced before accessing underlying services. PlexServices provides simple interfaces for providing security rules for access to the services.
 
-- PlexService also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to expose them through HTTP or websocket interfaces.
+- PlexServices also provides bridge for forwarding web requests to JMS based services for accessing services over http or websockets. For example, you may use JMS for all internal services and then create a bridge to expose them through HTTP or websocket interfaces.
 
-- For intra-process communication, PlexService provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.
+- For intra-process communication, PlexServices provides event-bus, which uses same interfaces as other services. In order to decouple your services from any external protocols, you may deploy all services to event-bus and then create event-bus to JMS bridge for external communication.
 
-- PlexService keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
+- PlexServices keeps key metrics such as latency, invocations, errors, etc., which are exposed via JMX interface. It also supports integration with StatsD, which can be enabled via configuration.
 
-- PlexService provides support for using finite state machines in building services.
+- PlexServices provides support for using finite state machines in building services.
 
-- PlexService supports both war files and Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
+- PlexServices supports both war files and Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
 
-- PlexService also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
+- PlexServices also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
-- PlexService allows you to specify the services you want to deploy or allows support to automatically 
+- PlexServices allows you to specify the services you want to deploy or allows support to automatically 
 deplooy all services that implement ServiceConfig annotation.
 
 
@@ -56,7 +56,7 @@ deplooy all services that implement ServiceConfig annotation.
 - Checkout code using 
 
 ```
-git clone git@github.com:bhatti/PlexService.git
+git clone git@github.com:bhatti/PlexServices.git
 ```
 
 - Compile and build jar file using
@@ -77,7 +77,7 @@ cd plexsvc-framework
 
 ## Defining Services
 
-PlexService uses Netty server as embedded web server to host web services by default and you can easily build REST services as follows:
+PlexServices uses Netty server as embedded web server to host web services by default and you can easily build REST services as follows:
 
 ### Defining a REST service for creating a user
 ```java 
@@ -126,7 +126,7 @@ will return response in XML format
 
 
 ### Defining a Web service over Websockets for creating a user 
-PlexService supports both war files and embedded Netty server for hosting webservices, however websockets is only supported under Netty server, 
+PlexServices supports both war files and embedded Netty server for hosting webservices, however websockets is only supported under Netty server, 
 which is default setting.
 
 ```java 
@@ -193,7 +193,7 @@ public class CreateUserService extends AbstractUserService implements RequestHan
 }
 ```
 
-The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexService will serialize POJO classes into JSON when delivering messages over JMS.
+The developer can use variables in end-point of queues, which are populated from configurations. For example, you may create scope variable to create different queues by developer-username or environment. PlexServices will serialize POJO classes into JSON when delivering messages over JMS.
 Note: concurrency parameter specifies number of concurrent consumers that would listen for the incoming messages.
 
 
@@ -223,7 +223,7 @@ public class CreateBugReportService extends AbstractBugReportService implements 
 
 The http end-point or URL can also store variables, but unlike end-points for
 queues/topics, they are populated using http parameters. For example, projectId
-parameter would be populated from URL in above example. PlexService will serialize POJO 
+parameter would be populated from URL in above example. PlexServices will serialize POJO 
 classes into JSON when delivering messages over HTTP.
 
 ### Defining a Websocket based service to create bug-report 
@@ -252,7 +252,7 @@ public class CreateBugReportService extends AbstractBugReportService implements
 ```
 
 For websocket based services, the parameters are passed explicitly by consumer. 
-PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.
+PlexServices automatically passes any json parameters sent as part of request, which are consumed by the service.
 
 
 ### Consuming Websocket based service for creating bug-report 
@@ -278,7 +278,7 @@ ws.onerror = function(err) {
 ```
 
 For websocket based services, the parameters are passed explicitly by consumer. 
-PlexService automatically passes any json parameters sent as part of request, which are consumed by the service.
+PlexServices automatically passes any json parameters sent as part of request, which are consumed by the service.
 
 ### Defining a REST service for querying users
 ```java 
@@ -330,7 +330,7 @@ public class QueryUserService extends AbstractUserService implements RequestHand
 
 
 ### Input Validation
-PlexService provides flexible annotations for validating input parameters or attributes of incoming rquest, e.g.
+PlexServices provides flexible annotations for validating input parameters or attributes of incoming rquest, e.g.
 ```java 
 @RequiredFields({
         @Field(name = "username", minLength = 6, maxLength = 12),
@@ -381,7 +381,7 @@ And then at runtime, override configuration, e.g.
 Alternatively, you can also deploy a service via JMS protocol and then use web-to-jms bridge to expose the service via HTTP/Websocket protocols.
 
 ### Creating a static file server
-Though, PlexService framework is meant for REST or messaging based services,
+Though, PlexServices framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:
 
 ```java 
@@ -569,7 +569,7 @@ In above example, we are using ActiveMQ as JMS server
 
 
 ### Configuring JMS container in configuration
-PlexService comes with simple JMS container but you can replace it with Spring or other JMS frameworks by defining configuration, e.g.:
+PlexServices comes with simple JMS container but you can replace it with Spring or other JMS frameworks by defining configuration, e.g.:
 ```bash
 PlexserviceJMSContainerFactory=com.plexobject.bugger.jms.SpringJMSContainerFactory
 ```
@@ -584,8 +584,8 @@ public class SpringJMSContainerFactory implements JMSContainerFactory {
 }
 ```
 The samples folder include an example of SpringJMSContainer that you can use.
-PlexService didn't include it in the framework to remove dependency on specific
-version of Spring with PlexService.
+PlexServices didn't include it in the framework to remove dependency on specific
+version of Spring with PlexServices.
 
 
 ### EventBus for intra-process communication
@@ -609,7 +609,7 @@ You can optionally pass predicate parameter with subscribe so that you only rece
 
 
 ### Connecting EventBus to JMS for external communication
-Similar to web-to-jms bridge, PlexService provides event-bus-to-jms bridge, which allows you convert messages from JMS queue/topic into request objects and receive them via event-bus. Likewise, you can setup outgoing bridge to send messages that are published to event bus be forwarded to JMS queues/topics. The bridge also performs encoding similar to JMS or web services, e.g.
+Similar to web-to-jms bridge, PlexServices provides event-bus-to-jms bridge, which allows you convert messages from JMS queue/topic into request objects and receive them via event-bus. Likewise, you can setup outgoing bridge to send messages that are published to event bus be forwarded to JMS queues/topics. The bridge also performs encoding similar to JMS or web services, e.g.
 ```java  
 Configuration config = new Configuration(args[0]);
 Collection<EventBusToJmsEntry> entries = EventBusToJmsBridge.load(new File(args[1]));
@@ -628,7 +628,7 @@ Here is a sample json file that describes mapping:
 
 
 ### Finite State Machine
-PlexService provides helper classes to implement finite state machine. For example, here is how you can implement FSM for Android application lifecycle:
+PlexServices provides helper classes to implement finite state machine. For example, here is how you can implement FSM for Android application lifecycle:
 
 ![Android Lifecycle](http://upload.wikimedia.org/wikipedia/en/f/f6/Android_application_life_cycle.png)
 
@@ -659,14 +659,14 @@ assertEquals("Destroyed", instance.nextStateOnEvent("onDestroy", null) .getName(
 
 
 ### JMX Monitoring
-PlexService provides monitoring and management through JMX. For example, you
+PlexServices provides monitoring and management through JMX. For example, you
 can start/stop services or view statistics, e.g. 
-![JMX Support](http://bhatti.github.io/PlexService/jmx.png)
+![JMX Support](http://bhatti.github.io/PlexServices/jmx.png)
 
 
 
 ### Registering services and starting service container 
-PlexService allows you to specify the services that you want to deploy in
+PlexServices allows you to specify the services that you want to deploy in
 a container and start the container using service-registry, e.g.
 ```java 
 Configuration config = new Configuration(args[0]);
@@ -693,7 +693,7 @@ You will be able to view all of the services in JMX console at runtime.
 
 
 ### Building War file
-PlexService uses embedded Netty server by default for hosting web services but here is you can deploy inside a war file using any J2EE compatible container such as Tomcat, Jetty, JBoss, etc.
+PlexServices uses embedded Netty server by default for hosting web services but here is you can deploy inside a war file using any J2EE compatible container such as Tomcat, Jetty, JBoss, etc.
 
 Define a class to add your services, e.g.
 ```java 
@@ -721,7 +721,7 @@ Then add servlet mapping to the web.xml, e.g.
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     version="2.4">
-    <display-name>PlexService Sample Application</display-name>
+    <display-name>PlexServices Sample Application</display-name>
     <servlet>
         <servlet-name>plexservice</servlet-name>
         <servlet-class>com.plexobject.http.servlet.WebRequestHandlerServlet</servlet-class>
@@ -758,7 +758,7 @@ If you wish to auto-deploy all services that implement ServiceConfig then you ca
         </init-param>
 ```
 
-PlexService comes with examples that you can use to deploy using
+PlexServices comes with examples that you can use to deploy using
 ```bash
 cd plexsvc-samples
 ./gradlew jettyRun
@@ -766,7 +766,7 @@ cd plexsvc-samples
 
 
 ### Auto-Deploying
-In addition to specifying services manually for deployment, PlexService provides support to scan all services 
+In addition to specifying services manually for deployment, PlexServices provides support to scan all services 
 in your application package that implement ServiceConfig annotation and deploy them, e.g.
 ```bash
 java com.plexobject.deploy.AutoDeployer bugger.properties
@@ -961,7 +961,7 @@ Here is the html form that displays quotes:
 ```
 
 ## API Doc
-[Java Doc](http://bhatti.github.io/PlexService/javadoc/)
+[Java Doc](http://bhatti.github.io/PlexServices/javadoc/)
 
 
 ## Sample Applications

@@ -1,4 +1,4 @@
-#PlexService - Change Log
+#PlexServices - Change Log
 
 0.1 - Initial version with basic support of HTTP and JMS services 
 
