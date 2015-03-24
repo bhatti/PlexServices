@@ -21,5 +21,6 @@ com.plexobject.predicate
 com.plexobject.route
 com.plexobject.security
 com.plexobject.service
+com.plexobject.service.impl
 com.plexobject.util
 com.plexobject.validation
