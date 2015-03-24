@@ -1,4 +1,4 @@
-package com.plexobject.util;
+package com.plexobject.domain;
 
 /**
  * This class validates arguments

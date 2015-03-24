@@ -3,7 +3,7 @@ package com.plexobject.metrics;
 import java.io.Serializable;
 import java.util.Random;
 
-import com.plexobject.util.Preconditions;
+import com.plexobject.domain.Preconditions;
 
 /**
  * This class selects random selection

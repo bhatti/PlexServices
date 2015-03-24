@@ -23,11 +23,11 @@ import javax.naming.NamingException;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.Test;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSTestUtils;
-import com.plexobject.util.Configuration;
 
 public class DefaultJMSContainerTest {
     private final Properties properties = new Properties();

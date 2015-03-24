@@ -1,8 +1,8 @@
 package com.plexobject.jms.impl;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSContainerFactory;
-import com.plexobject.util.Configuration;
 
 public class DefaultJMSContainerFactory implements JMSContainerFactory {
     @Override

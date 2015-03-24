@@ -9,10 +9,10 @@ import javax.jms.JMSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.jms.DestinationResolver;
 import com.plexobject.jms.JMSContainer;
-import com.plexobject.util.Configuration;
 
 public abstract class BaseJMSContainer implements JMSContainer,
         ExceptionListener {

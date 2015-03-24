@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.Handler;
@@ -32,7 +33,6 @@ import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.Method;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
 /**

@@ -9,12 +9,12 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.impl.AbstractServiceContainer;
-import com.plexobject.util.Configuration;
 
 /**
  * This class provides service container for JMS based handlers

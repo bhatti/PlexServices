@@ -11,12 +11,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
-import com.plexobject.util.Configuration;
 
 public class ServiceHandlerLifecycleTest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")

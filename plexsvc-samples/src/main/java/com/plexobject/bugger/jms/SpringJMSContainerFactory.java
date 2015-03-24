@@ -2,9 +2,9 @@ package com.plexobject.bugger.jms;
 
 import javax.naming.NamingException;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSContainerFactory;
-import com.plexobject.util.Configuration;
 
 public class SpringJMSContainerFactory implements JMSContainerFactory {
     @Override

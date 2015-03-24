@@ -22,9 +22,9 @@ import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.util.Configuration;
 
 /**
  * This class implements web server using netty

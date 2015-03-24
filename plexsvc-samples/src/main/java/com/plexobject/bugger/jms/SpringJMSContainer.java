@@ -26,13 +26,13 @@ import org.springframework.jms.listener.adapter.ListenerExecutionFailedException
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.Function;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.BaseJMSContainer;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.util.Configuration;
 
 /**
  * This class implements JMS container using Spring framework

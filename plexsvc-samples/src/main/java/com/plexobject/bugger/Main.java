@@ -39,10 +39,10 @@ import com.plexobject.bugger.service.user.DeleteUserService;
 import com.plexobject.bugger.service.user.LoginService;
 import com.plexobject.bugger.service.user.QueryUserService;
 import com.plexobject.bugger.service.user.UpdateUserService;
+import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.service.Method;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);

@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.plexobject.domain.Pair;
-import com.plexobject.util.Preconditions;
+import com.plexobject.domain.Preconditions;
 
 /**
  * This class stores transition mappings

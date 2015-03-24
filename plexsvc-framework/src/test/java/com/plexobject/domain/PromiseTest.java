@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
-import org.junit.internal.runners.statements.Fail;
 
 import com.plexobject.handler.Handler;
 

@@ -13,11 +13,11 @@ import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.impl.DefaultJMSContainer;
-import com.plexobject.util.Configuration;
 
 public class JmsSender {
     private static final int TEN_SECONDS = 10;

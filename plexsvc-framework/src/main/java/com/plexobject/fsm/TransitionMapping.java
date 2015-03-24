@@ -3,7 +3,7 @@ package com.plexobject.fsm;
 import java.util.Arrays;
 import java.util.Objects;
 
-import com.plexobject.util.Preconditions;
+import com.plexobject.domain.Preconditions;
 
 /**
  * This class defines transition mapping from from-state to target-states for a

@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.plexobject.bus.EventBus;
+import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Handler;
@@ -28,7 +29,6 @@ import com.plexobject.jms.JMSContainer;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 
 @RunWith(JMockit.class)
 public class WebToJmsBridgeTest {

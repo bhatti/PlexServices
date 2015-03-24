@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.WebContainerProvider;
@@ -25,7 +26,6 @@ import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.impl.ServiceInvocationHelper;
 import com.plexobject.service.impl.ServiceRegistryContainers;
 import com.plexobject.service.impl.ServiceRegistryHandlers;
-import com.plexobject.util.Configuration;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 

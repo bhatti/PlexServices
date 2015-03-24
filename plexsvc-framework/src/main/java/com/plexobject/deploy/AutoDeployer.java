@@ -7,13 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
-import com.plexobject.util.Configuration;
 
 /**
  * This is a helper class that searches service classes that define

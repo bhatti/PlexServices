@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.DefaultWebServiceContainer;
@@ -18,7 +19,6 @@ import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceContainer;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 
 /**
  * This is a helper class to manage service containers used by service-registry

@@ -1,6 +1,6 @@
 package com.plexobject.jms;
 
-import com.plexobject.util.Configuration;
+import com.plexobject.domain.Configuration;
 
 /**
  * This factory is used to create JMS container. PlexService comes with default

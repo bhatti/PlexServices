@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.plexobject.util.Preconditions;
+import com.plexobject.domain.Preconditions;
 
 /**
  * This class creates percentile based on sampling of input data

@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -40,7 +41,6 @@ import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 
 public class WebToJmsBridgeIntegTest {
     public static class TestUser {

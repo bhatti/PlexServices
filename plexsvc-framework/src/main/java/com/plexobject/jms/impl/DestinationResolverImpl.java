@@ -9,8 +9,8 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.jms.DestinationResolver;
-import com.plexobject.util.Configuration;
 
 public class DestinationResolverImpl implements DestinationResolver {
     private final String QUEUE_PREFIX = "queue://";

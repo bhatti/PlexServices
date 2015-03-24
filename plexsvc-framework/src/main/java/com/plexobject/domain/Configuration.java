@@ -1,4 +1,4 @@
-package com.plexobject.util;
+package com.plexobject.domain;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -10,7 +10,6 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 
 /**

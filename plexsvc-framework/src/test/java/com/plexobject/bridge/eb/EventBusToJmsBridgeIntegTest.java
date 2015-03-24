@@ -32,6 +32,7 @@ import org.junit.Test;
 import com.plexobject.bridge.eb.EventBusToJmsBridge.JmsListener;
 import com.plexobject.bus.EventBus;
 import com.plexobject.bus.impl.EventBusImpl;
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
@@ -46,7 +47,6 @@ import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
-import com.plexobject.util.Configuration;
 
 public class EventBusToJmsBridgeIntegTest {
     public static class TestUser {

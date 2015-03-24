@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
@@ -27,7 +28,6 @@ import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
-import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
 /**

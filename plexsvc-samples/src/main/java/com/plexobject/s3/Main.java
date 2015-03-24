@@ -1,7 +1,7 @@
 package com.plexobject.s3;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 
 public class Main {
     public static void main(String[] args) throws Exception {

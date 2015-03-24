@@ -3,11 +3,11 @@ package com.plexobject.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.ServiceContainer;
 import com.plexobject.service.ServiceRegistry;
-import com.plexobject.util.Configuration;
 
 /**
  * This is abstract class that provides helper methods for ServiceContainer

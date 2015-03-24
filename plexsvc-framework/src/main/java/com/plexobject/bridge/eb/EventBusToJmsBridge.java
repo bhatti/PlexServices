@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.bus.EventBus;
 import com.plexobject.bus.impl.EventBusImpl;
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
@@ -38,7 +39,6 @@ import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
-import com.plexobject.util.Configuration;
 import com.plexobject.util.IOUtils;
 
 /**

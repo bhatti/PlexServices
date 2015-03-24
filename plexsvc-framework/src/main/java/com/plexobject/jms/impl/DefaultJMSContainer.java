@@ -24,12 +24,12 @@ import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 import javax.naming.NamingException;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.DestinationResolver;
 import com.plexobject.jms.MessageListenerConfig;
-import com.plexobject.util.Configuration;
 
 /**
  * This class provides helper methods for communication with JMS

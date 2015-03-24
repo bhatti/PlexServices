@@ -38,11 +38,11 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.netty.NettyWebContainerProvider;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.util.Configuration;
 
 public class TestWebUtils {
     private static class WebSocketClientHandler extends

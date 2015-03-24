@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.plexobject.bridge.web.WebToJmsEntry;
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -28,7 +29,6 @@ import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.util.Configuration;
 import com.plexobject.validation.ValidationException;
 
 public class ServiceRegistryTest {

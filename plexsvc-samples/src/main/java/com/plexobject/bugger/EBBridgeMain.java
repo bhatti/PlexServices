@@ -11,7 +11,7 @@ import org.apache.log4j.LogManager;
 import com.plexobject.bridge.eb.EventBusToJmsBridge;
 import com.plexobject.bridge.eb.EventBusToJmsEntry;
 import com.plexobject.bridge.web.WebToJmsBridge;
-import com.plexobject.util.Configuration;
+import com.plexobject.domain.Configuration;
 
 public class EBBridgeMain {
     static void startJmsBroker() throws Exception {

@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.domain.Promise;
 import com.plexobject.handler.Handler;
@@ -33,7 +34,6 @@ import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSContainerFactory;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.MessageListenerContainer;
-import com.plexobject.util.Configuration;
 
 public class JMSUtils {
     private static final Logger log = LoggerFactory.getLogger(JMSUtils.class);

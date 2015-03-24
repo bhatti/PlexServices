@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.Lifecycle;
@@ -13,7 +14,6 @@ import com.plexobject.service.Method;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.impl.AbstractServiceContainer;
-import com.plexobject.util.Configuration;
 
 /**
  * This is default implementation of HTTP based service container

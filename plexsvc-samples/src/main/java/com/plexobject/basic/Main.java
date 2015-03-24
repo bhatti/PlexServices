@@ -8,6 +8,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 
 import com.plexobject.bridge.web.WebToJmsEntry;
+import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.service.Method;
@@ -17,7 +18,6 @@ import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
 import com.plexobject.service.ServiceTypeDesc;
-import com.plexobject.util.Configuration;
 
 public class Main implements ServiceRegistryLifecycleAware {
     public static void main(String[] args) throws Exception {
