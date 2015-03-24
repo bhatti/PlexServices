@@ -66,8 +66,15 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-0.9-SNAPSHOT.jar) manually in your application.
 
+
+##Dependencies
+- Netty 4.0
+- Google GSON 2.3
+- Fast JSON  2.4
+- XStream 1.4
+- JMS API 1.1
 
 ##Version
 - 0.9
