@@ -27,7 +27,7 @@ public class ServiceMetrics implements ServiceMetricsMBean {
     private static final ThreadLocal<DateFormat> DATE_FMT = new ThreadLocal<DateFormat>() {
         @Override
         public DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         }
     };
 
@@ -174,17 +174,18 @@ public class ServiceMetrics implements ServiceMetricsMBean {
     }
 
     public String getSummary() {
-        return "Summary for " + name + "\n\tStarted: "
-                + formatDate(getStartTime()) + "\n\tLast Success Time: "
+        return "{\"name\":\""
+                + name
+                + "\", \"startedAt\":\""
+                + formatDate(getStartTime())
+                + "\", \"lastRequestAt\":\""
                 + formatDate(getLastSuccessRequestTime())
-                + "\n\tSuccess Invocations: " + getSuccessInvocations()
-                + "\n\tLast Error Time: "
-                + formatDate(getLastErrorRequestTime()) + "\n\tErrors: "
-                + getErrorInvocations() + "\n\tRunning Mean: "
-                + format(getRunningMean()) + "\n\tMin: " + getMin()
-                + "\n\tMax: " + getMax() + "\n\tStd Dev: "
-                + format(getStandardDeviation()) + "\tPercentile: "
-                + getPercentileValue();
+                + "\", \"lastErrorAt\":\" + formatDate(getLastErrorRequestTime()) + "
+                + "\", \"successCount\":" + getSuccessInvocations()
+                + ", \"errorsCount\":" + getErrorInvocations()
+                + ", \"meanLatency\":" + format(getRunningMean())
+                + ", \"min\": " + getMin() + ", \"maxLatency\":" + getMax()
+                + ", \"percentile\":" + getPercentileValue() + "}";
     }
 
     @SuppressWarnings("deprecation")

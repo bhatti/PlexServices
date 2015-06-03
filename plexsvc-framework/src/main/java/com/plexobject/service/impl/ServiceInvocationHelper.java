@@ -52,9 +52,7 @@ public class ServiceInvocationHelper {
             if (log.isDebugEnabled()) {
                 log.debug("Received request for handler "
                         + handler.getClass().getSimpleName() + ", protocol "
-                        + config.protocol() + ", payload "
-                        + request.getPayload() + ", params "
-                        + request.getProperties());
+                        + config.protocol() + ", request " + request);
             }
 
             // override payload in request

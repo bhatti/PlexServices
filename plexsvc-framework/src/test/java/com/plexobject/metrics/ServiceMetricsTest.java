@@ -42,7 +42,7 @@ public class ServiceMetricsTest {
         for (int i = 1; i < 10000; i++) {
             metrics.addResponseTime(i % 10);
         }
-        assertTrue(metrics.getSummary().contains("Percentile"));
+        assertTrue(metrics.getSummary().contains("percentile"));
     }
 
     @Test

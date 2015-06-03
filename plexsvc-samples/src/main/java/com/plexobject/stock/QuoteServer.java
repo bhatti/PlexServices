@@ -17,7 +17,7 @@ import com.plexobject.service.ServiceConfig;
 import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", payloadClass = QuoteRequest.class, method = Method.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "symbol"), @Field(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {
@@ -30,14 +30,14 @@ public class QuoteServer implements RequestHandler {
 
     @Override
     public void handle(Request request) {
-        String symbol = request.getProperty("symbol");
-        String actionVal = request.getProperty("action");
+        QuoteRequest quoteRequest = request.getPayload();
         log.info("Received " + request);
-        Action action = Action.valueOf(actionVal.toUpperCase());
-        if (action == Action.SUBSCRIBE) {
-            quoteStreamer.add(symbol, request.getResponseDispatcher());
+        if (quoteRequest.getAction() == Action.SUBSCRIBE) {
+            quoteStreamer.add(quoteRequest.getSymbol(),
+                    request.getResponseDispatcher());
         } else {
-            quoteStreamer.remove(symbol, request.getResponseDispatcher());
+            quoteStreamer.remove(quoteRequest.getSymbol(),
+                    request.getResponseDispatcher());
         }
     }
 

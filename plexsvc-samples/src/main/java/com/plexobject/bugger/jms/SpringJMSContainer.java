@@ -94,31 +94,6 @@ public class SpringJMSContainer extends BaseJMSContainer {
         return doSend(destination, headers, reqPayload, buildReceiver(handler));
     }
 
-    private Function<Message, Future<Response>> buildReceiver(
-            final Handler<Response> handler) {
-        return new Function<Message, Future<Response>>() {
-            @Override
-            public Future<Response> invoke(final Message reqMsg) {
-                final JmsTemplate replyJmsTemplate = new JmsTemplate(
-                        connectionFactory);
-                return replyJmsTemplate.execute(
-                        new SessionCallback<Future<Response>>() {
-                            public Future<Response> doInJms(
-                                    final Session session) throws JMSException {
-                                try {
-                                    return JMSUtils.configureReplier(session,
-                                            reqMsg, handler,
-                                            SpringJMSContainer.this);
-                                } catch (NamingException e) {
-                                    throw new JMSException(
-                                            "Failed to lookup destination " + e);
-                                }
-                            }
-                        }, true);
-            }
-        };
-    }
-
     @Override
     public void send(final Destination destination,
             final Map<String, Object> headers, final String payload)
@@ -224,5 +199,30 @@ public class SpringJMSContainer extends BaseJMSContainer {
 
             }
         });
+    }
+
+    private Function<Message, Future<Response>> buildReceiver(
+            final Handler<Response> handler) {
+        return new Function<Message, Future<Response>>() {
+            @Override
+            public Future<Response> invoke(final Message reqMsg) {
+                final JmsTemplate replyJmsTemplate = new JmsTemplate(
+                        connectionFactory);
+                return replyJmsTemplate.execute(
+                        new SessionCallback<Future<Response>>() {
+                            public Future<Response> doInJms(
+                                    final Session session) throws JMSException {
+                                try {
+                                    return JMSUtils.configureReplier(session,
+                                            reqMsg, handler,
+                                            SpringJMSContainer.this);
+                                } catch (NamingException e) {
+                                    throw new JMSException(
+                                            "Failed to lookup destination " + e);
+                                }
+                            }
+                        }, true);
+            }
+        };
     }
 }

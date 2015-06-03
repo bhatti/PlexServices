@@ -87,6 +87,6 @@ public class ServiceHandlerLifecycleTest {
         ServiceHandlerLifecycle handlerLifecycle = new ServiceHandlerLifecycle(
                 registry, handler);
         handlerLifecycle.start();
-        assertTrue(handlerLifecycle.getSummary().contains("Summary"));
+        assertTrue(handlerLifecycle.getSummary().contains("percentile"));
     }
 }

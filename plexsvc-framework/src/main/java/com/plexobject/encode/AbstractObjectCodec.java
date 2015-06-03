@@ -2,7 +2,8 @@ package com.plexobject.encode;
 
 import java.util.Map;
 
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,19 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractObjectCodec implements ObjectCodec {
     protected final Logger log = LoggerFactory.getLogger(getClass());
+    private static final BeanUtilsBean beanUtilsBean = new BeanUtilsBean(
+            new ConvertUtilsBean() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public Object convert(String value,
+                        @SuppressWarnings("rawtypes") Class clazz) {
+                    if (clazz.isEnum()) {
+                        return Enum.valueOf(clazz, value.toUpperCase());
+                    } else {
+                        return super.convert(value, clazz);
+                    }
+                }
+            });
 
     @SuppressWarnings("unchecked")
     protected <T> T propertyDecode(Map<String, Object> params, Class<?> type) {
@@ -32,11 +46,10 @@ public abstract class AbstractObjectCodec implements ObjectCodec {
             for (Map.Entry<String, Object> e : params.entrySet()) {
                 try {
                     String name = toCamelCase(e.getKey());
-                    BeanUtils.setProperty(object, name, e.getValue());
+                    beanUtilsBean.setProperty(object, name, e.getValue());
                 } catch (Exception ex) {
-                    log.warn(
-                            "Failed to set " + e.getKey() + "=>" + e.getValue(),
-                            ex);
+                    log.warn("Failed to set \"" + e.getKey()
+                            + "\" with value \"" + e.getValue() + "\"", ex);
                 }
             }
         }
