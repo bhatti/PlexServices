@@ -86,6 +86,6 @@ public class NettyWebsocketResponseDispatcher extends
 
     @Override
     public String toString() {
-        return "WebsocketResponse " + channel;
+        return "NettyWebsocketResponseDispatcher " + channel;
     }
 }
