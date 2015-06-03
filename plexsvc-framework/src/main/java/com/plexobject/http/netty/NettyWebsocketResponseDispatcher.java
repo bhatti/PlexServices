@@ -36,9 +36,16 @@ public class NettyWebsocketResponseDispatcher extends
                     new HashMap<String, Object>(), payload);
             String responseText = ObjectCodecFactory.getInstance()
                     .getObjectCodec(codecType).encode(response);
-            // log.info("Sending " + responseText + " to " + channel);
-            channel.write(new TextWebSocketFrame(responseText));
-            channel.flush();
+            // if (log.isDebugEnabled()) {
+            // log.debug("Sending " + responseText + " to " + channel);
+            // }
+            if (channel.isOpen()) {
+                channel.write(new TextWebSocketFrame(responseText));
+                channel.flush();
+            } else {
+                throw new IllegalStateException(
+                        "channel is closed, cannot send " + responseText);
+            }
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

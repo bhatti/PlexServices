@@ -70,7 +70,7 @@ public class QuoteStreamer extends TimerTask {
                     try {
                         d.send(q);
                         log.info(n + "/" + dispatchers.size() + ": Sending "
-                                + q + " to " + d);
+                                + q + " to " + d.getClass().getName());
                         n++;
                     } catch (Exception ex) {
                         log.error(
