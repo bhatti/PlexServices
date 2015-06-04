@@ -7,7 +7,7 @@ public interface ServiceHandlerLifecycleMBean {
 
     boolean isRunning();
 
-    int ping();
+    String ping();
 
     String getSummary();
 }

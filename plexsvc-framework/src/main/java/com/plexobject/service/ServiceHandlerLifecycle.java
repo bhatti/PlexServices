@@ -28,11 +28,11 @@ public class ServiceHandlerLifecycle implements ServiceHandlerLifecycleMBean {
     }
 
     @Override
-    public int ping() {
+    public String ping() {
         if (handler instanceof Pingable) {
             return ((Pingable) handler).ping();
         }
-        return -1;
+        return getSummary();
     }
 
     @Override

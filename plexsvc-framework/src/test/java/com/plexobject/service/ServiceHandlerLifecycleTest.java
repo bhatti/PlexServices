@@ -28,8 +28,8 @@ public class ServiceHandlerLifecycleTest {
 
     public class PingableWebService extends WebService implements Pingable {
         @Override
-        public int ping() {
-            return 200;
+        public String ping() {
+            return "success";
         }
     }
 
@@ -78,7 +78,7 @@ public class ServiceHandlerLifecycleTest {
         ServiceHandlerLifecycle handlerLifecycle = new ServiceHandlerLifecycle(
                 registry, handler);
         handlerLifecycle.start();
-        assertEquals(200, handlerLifecycle.ping());
+        assertEquals("success", handlerLifecycle.ping());
     }
 
     @Test
