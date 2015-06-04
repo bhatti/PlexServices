@@ -56,7 +56,7 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public synchronized void add(RequestHandler handler) {
+    public synchronized void add(final RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
 
         String endpoint = getEndpoint(handler, config);
@@ -64,13 +64,8 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
             throw new IllegalStateException(
                     "RequestHandler is already registered for " + endpoint);
         }
-        RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
-                .get(config.method());
-        if (requestHandlerEndpoints == null) {
-            requestHandlerEndpoints = new RouteResolver<RequestHandler>();
-            requestHandlerEndpointsByMethod.put(config.method(),
-                    requestHandlerEndpoints);
-        }
+        RouteResolver<RequestHandler> requestHandlerEndpoints = getRouteResolver(config
+                .method());
         //
         requestHandlerEndpoints.put(endpoint, handler);
         if (handler instanceof LifecycleAware) {
@@ -80,6 +75,17 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
                 + handler.getClass().getSimpleName() + " for "
                 + config.protocol() + ":" + config.method() + " : "
                 + config.endpoint() + ", codec " + config.codec());
+    }
+
+    private RouteResolver<RequestHandler> getRouteResolver(Method method) {
+        RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
+                .get(method);
+        if (requestHandlerEndpoints == null) {
+            requestHandlerEndpoints = new RouteResolver<RequestHandler>();
+            requestHandlerEndpointsByMethod
+                    .put(method, requestHandlerEndpoints);
+        }
+        return requestHandlerEndpoints;
     }
 
     @Override

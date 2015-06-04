@@ -72,14 +72,14 @@ public class ServiceMetricsTest {
                 metrics.addResponseTime(8);
             }
         }
-        Map<Double, Sampleable> percentiles = metrics.getPercentile()
+        Map<Integer, Sampleable> percentiles = metrics.getPercentile()
                 .getPercentiles();
         String value = metrics.getPercentileValue();
         assertTrue(value.contains("99"));
-        assertEquals(12.0, percentiles.get(99.0).sample(), EPSILON);
-        assertEquals(12.0, percentiles.get(90.0).sample(), EPSILON);
-        assertEquals(12.0, percentiles.get(80.0).sample(), EPSILON);
-        assertEquals(10.0, percentiles.get(50.0).sample(), EPSILON);
+        assertEquals(12.0, percentiles.get(99).sample(), EPSILON);
+        assertEquals(12.0, percentiles.get(90).sample(), EPSILON);
+        assertEquals(12.0, percentiles.get(80).sample(), EPSILON);
+        assertEquals(10.0, percentiles.get(50).sample(), EPSILON);
     }
 
     @Test

@@ -122,9 +122,9 @@ public class ServiceRegistryTest {
         registry.add(new WebsocketService());
         registry.add(new WebService());
         registry.add(new JmsService());
-        assertEquals(3, registry.getHandlers().size());
+        assertEquals(3*2, registry.getHandlers().size()); // double because of ping handlers
         assertNotNull(registry.getServiceMetricsRegistry());
-        assertEquals(3, registry.getServiceConfigurations().size());
+        assertEquals(3*2, registry.getServiceConfigurations().size()); // double because of ping handlers
         assertTrue(registry.dumpServiceConfigurations().contains("HTTP:GET"));
     }
 
@@ -148,7 +148,7 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         registry.setRequestHandlers(Arrays.asList(new WebsocketService(),
                 new WebService(), new JmsService()));
-        assertEquals(3, registry.getHandlers().size());
+        assertEquals(3*2, registry.getHandlers().size()); // double due to ping handlers
         assertNotNull(registry.getServiceMetricsRegistry());
     }
 
@@ -193,7 +193,7 @@ public class ServiceRegistryTest {
         registry.add(h);
         assertTrue(registry.exists(h));
         registry.add(h);
-        assertEquals(1, registry.getHandlers().size());
+        assertEquals(1*2, registry.getHandlers().size()); // double because of ping handlers
         registry.remove(h);
         assertEquals(0, registry.getHandlers().size());
         registry.remove(h);
@@ -212,7 +212,7 @@ public class ServiceRegistryTest {
         RequestHandler h = new WebService();
         registry.add(h);
         registry.setWebToJmsEntries(entries);
-        assertEquals(2, registry.getHandlers().size());
+        assertEquals(4, registry.getHandlers().size()); // double because of ping handlers
     }
 
     @Test

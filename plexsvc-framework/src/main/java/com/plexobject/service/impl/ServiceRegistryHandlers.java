@@ -48,8 +48,16 @@ public class ServiceRegistryHandlers {
     public void add(RequestHandler h, ServiceConfigDesc config) {
         Objects.requireNonNull(config, "service handler " + h
                 + " doesn't define ServiceConfig annotation");
-        serviceConfigsByHandler.put(h, config);
+        setServiceConfig(h, config);
         addInterceptors(h);
+    }
+
+    public void setServiceConfig(RequestHandler h, ServiceConfigDesc config) {
+        serviceConfigsByHandler.put(h, config);
+    }
+
+    public void removeServiceConfig(RequestHandler h) {
+        serviceConfigsByHandler.remove(h);
     }
 
     /**

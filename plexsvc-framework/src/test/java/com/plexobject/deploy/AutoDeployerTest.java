@@ -86,7 +86,7 @@ public class AutoDeployerTest {
         deployer.deploy(propFile.getAbsolutePath());
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
-        assertEquals(3, handlers.size());
+        assertEquals(6, handlers.size()); // double because of ping handlers
         deployer.serviceRegistry.stop();
     }
 
@@ -99,7 +99,7 @@ public class AutoDeployerTest {
         deployer.deploy(propFile.getAbsolutePath());
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
-        assertEquals(3, handlers.size());
+        assertEquals(6, handlers.size());// double because of ping handlers
         deployer.serviceRegistry.stop();
     }
 

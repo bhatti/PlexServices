@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.domain.Configuration;
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.WebContainerProvider;
@@ -50,6 +52,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     private final ServiceInvocationHelper serviceInvocationHelper;
     private final ServiceRegistryHandlers serviceRegistryHandlers;
     private final ServiceRegistryContainers serviceRegistryContainers;
+    private final Map<String, RequestHandler> pingHandlers = new ConcurrentHashMap<>();
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
         this(config, authorizer, new NettyWebContainerProvider());
@@ -91,6 +94,14 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         return serviceRegistryHandlers.getServiceConfig(h);
     }
 
+    private void setServiceConfig(RequestHandler h, ServiceConfigDesc config) {
+        serviceRegistryHandlers.setServiceConfig(h, config);
+    }
+
+    private void removeServiceConfig(RequestHandler h) {
+        serviceRegistryHandlers.removeServiceConfig(h);
+    }
+
     public void setRequestHandlers(Collection<RequestHandler> handlers) {
         for (RequestHandler h : handlers) {
             add(h);
@@ -118,6 +129,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
             registerMetricsJMX(h);
             registerServiceHandlerLifecycle(h);
             container.add(h);
+            addPingHandler(h, config, container);
         }
     }
 
@@ -166,6 +178,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         }
         serviceRegistryHandlers.removeInterceptors(h);
         if (container.remove(h)) {
+            removePingHandler(h, config, container);
             return true;
         }
         return false;
@@ -281,4 +294,38 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         serviceInvocationHelper.invoke(request, handler, interceptors);
     }
 
+    private void addPingHandler(final RequestHandler h,
+            final ServiceConfigDesc config, final ServiceContainer container) {
+        String pingEndpoint = config.endpoint() + ".ping";
+
+        ServiceConfigDesc pingConfig = ServiceConfigDesc
+                .builder(config)
+                .setCodecType(CodecType.TEXT)
+                .setMethod(
+                        config.protocol() == Protocol.HTTP ? Method.GET
+                                : config.method()).setEndpoint(pingEndpoint)
+                .setPayloadClass(Void.class).setRecordStatsdMetrics(false)
+                .setRolesAllowed(new String[0]).build();
+        final RequestHandler pingHandler = new RequestHandler() {
+            @Override
+            public void handle(Request request) {
+                request.getResponseDispatcher().send(
+                        getServiceMetricsRegistry().getServiceMetrics(h)
+                                .getSummary());
+            }
+        };
+        pingHandlers.put(pingEndpoint, pingHandler);
+        setServiceConfig(pingHandler, pingConfig);
+        container.add(pingHandler);
+    }
+
+    private void removePingHandler(final RequestHandler handler,
+            final ServiceConfigDesc config, final ServiceContainer container) {
+        String pingEndpoint = config.endpoint() + ".ping";
+        final RequestHandler pingHandler = pingHandlers.get(pingEndpoint);
+        if (pingHandler != null) {
+            container.remove(pingHandler);
+            removeServiceConfig(pingHandler);
+        }
+    }
 }

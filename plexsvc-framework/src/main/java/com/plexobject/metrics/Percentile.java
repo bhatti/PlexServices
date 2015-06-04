@@ -25,7 +25,7 @@ public class Percentile<T extends Number & Comparable<T>> implements
 
     private final Sampler sampler;
 
-    private final Map<Double, Sampleable> statsByPercentile;
+    private final Map<Integer, Sampleable> statsByPercentile;
     private final LinkedList<T> samples = new LinkedList<>();
 
     private final LinkedBlockingDeque<ArrayList<T>> sampleQueue;
@@ -39,7 +39,7 @@ public class Percentile<T extends Number & Comparable<T>> implements
      * @param percentiles
      *            The percentiles to track.
      */
-    public Percentile(float samplePercent, double... percentiles) {
+    public Percentile(float samplePercent, int... percentiles) {
         this(new Sampler(samplePercent), percentiles);
     }
 
@@ -51,7 +51,7 @@ public class Percentile<T extends Number & Comparable<T>> implements
      * @param percentiles
      *            The percentiles to track.
      */
-    public Percentile(Sampler sampler, double... percentiles) {
+    public Percentile(Sampler sampler, int... percentiles) {
         this(1, sampler, percentiles);
     }
 
@@ -72,8 +72,7 @@ public class Percentile<T extends Number & Comparable<T>> implements
      * @param percentiles
      *            The percentiles to track.
      */
-    public Percentile(int numSampleWindows, Sampler sampler,
-            double... percentiles) {
+    public Percentile(int numSampleWindows, Sampler sampler, int... percentiles) {
         Preconditions.checkArgument(numSampleWindows >= 1,
                 "Must have one or more sample windows.");
         Preconditions.checkNotNull(percentiles, "null percentiles");
@@ -98,18 +97,22 @@ public class Percentile<T extends Number & Comparable<T>> implements
      * 
      * @return A map from tracked percentile
      */
-    public Map<Double, Sampleable> getPercentiles() {
+    public Map<Integer, Sampleable> getPercentiles() {
         return new HashMap<>(statsByPercentile);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("{");
 
-        for (Map.Entry<Double, Sampleable> perE : getPercentiles().entrySet()) {
-            sb.append(", P" + perE.getKey() + ": "
+        for (Map.Entry<Integer, Sampleable> perE : getPercentiles().entrySet()) {
+            if (sb.length() > 1) {
+                sb.append(",");
+            }
+            sb.append("\"P" + perE.getKey() + "\": "
                     + ServiceMetrics.format(perE.getValue().sample()));
         }
+        sb.append("}");
         return sb.toString();
     }
 

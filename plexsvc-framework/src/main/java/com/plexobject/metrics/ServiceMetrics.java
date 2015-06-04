@@ -33,8 +33,7 @@ public class ServiceMetrics implements ServiceMetricsMBean {
 
     private static final int SECONDS = 60;
     private static final float DEFAULT_SAMPLE_PERCENT = 10;
-    private static final double[] DEFAULT_PERCENTILES = { 10, 25, 50, 80, 90,
-            99 };
+    private static final int[] DEFAULT_PERCENTILES = { 10, 25, 50, 80, 90, 99 };
 
     private final long started = System.currentTimeMillis();
     private final AtomicLong successInvocations = new AtomicLong();
@@ -174,13 +173,13 @@ public class ServiceMetrics implements ServiceMetricsMBean {
     }
 
     public String getSummary() {
-        return "{\"name\":\""
-                + name
-                + "\", \"startedAt\":\""
-                + formatDate(getStartTime())
-                + "\", \"lastRequestAt\":\""
-                + formatDate(getLastSuccessRequestTime())
-                + "\", \"lastErrorAt\":\" + formatDate(getLastErrorRequestTime()) + "
+        String lastErrorAt = getLastErrorRequestTime() > 0 ? "\", \"lastErrorAt\":\""
+                + formatDate(getLastErrorRequestTime())
+                : "";
+
+        return "{\"name\":\"" + name + "\", \"startedAt\":\""
+                + formatDate(getStartTime()) + "\", \"lastRequestAt\":\""
+                + formatDate(getLastSuccessRequestTime()) + lastErrorAt
                 + "\", \"successCount\":" + getSuccessInvocations()
                 + ", \"errorsCount\":" + getErrorInvocations()
                 + ", \"meanLatency\":" + format(getRunningMean())

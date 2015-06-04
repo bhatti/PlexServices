@@ -63,13 +63,13 @@ public class ServiceHandlerLifecycleTest {
                 registry, handler);
         assertEquals(0, registry.getHandlers().size());
         handlerLifecycle.start();
-        assertEquals("handlers " + registry.getHandlers(), 1, registry
-                .getHandlers().size());
+        assertEquals("handlers " + registry.getHandlers(), 2, registry
+                .getHandlers().size()); // double for ping handler
         assertTrue(handlerLifecycle.isRunning());
         handlerLifecycle.stop();
         assertEquals(0, registry.getHandlers().size());
         assertFalse(registry.isRunning());
-        assertEquals(-1, handlerLifecycle.ping());
+        assertTrue(handlerLifecycle.ping().contains("WebService"));
     }
 
     @Test

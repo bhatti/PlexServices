@@ -62,6 +62,20 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
             }
         }
 
+        public Builder(ServiceConfigDesc config) {
+            if (config != null) {
+                this.method = config.method();
+                this.protocol = config.protocol();
+                this.payloadClass = config.payloadClass();
+                this.codecType = config.codec();
+                this.version = config.version();
+                this.endpoint = config.endpoint();
+                this.recordStatsdMetrics = config.recordStatsdMetrics();
+                this.rolesAllowed = config.rolesAllowed();
+                this.concurrency = config.concurrency();
+            }
+        }
+
         public Builder setMethod(Method method) {
             this.method = method;
             return this;
@@ -167,6 +181,10 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
 
     public static Builder builder(RequestHandler handler) {
         return new Builder(handler);
+    }
+
+    public static Builder builder(ServiceConfigDesc config) {
+        return new Builder(config);
     }
 
     @Override
