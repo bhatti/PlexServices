@@ -86,6 +86,19 @@ public class AutoDeployerTest {
         deployer.deploy(propFile.getAbsolutePath());
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
+        assertEquals(3, handlers.size());
+        deployer.serviceRegistry.stop();
+    }
+
+    @Test
+    public void testRunWithoutAuthorizerAndPing() throws Exception {
+        properties.setProperty("enablePingHandlers", "true");
+        properties.store(new FileWriter(propFile), "");
+
+        AutoDeployer deployer = new AutoDeployer();
+        deployer.deploy(propFile.getAbsolutePath());
+        Collection<RequestHandler> handlers = deployer.serviceRegistry
+                .getHandlers();
         assertEquals(6, handlers.size()); // double because of ping handlers
         deployer.serviceRegistry.stop();
     }
@@ -99,7 +112,7 @@ public class AutoDeployerTest {
         deployer.deploy(propFile.getAbsolutePath());
         Collection<RequestHandler> handlers = deployer.serviceRegistry
                 .getHandlers();
-        assertEquals(6, handlers.size());// double because of ping handlers
+        assertEquals(3, handlers.size());
         deployer.serviceRegistry.stop();
     }
 

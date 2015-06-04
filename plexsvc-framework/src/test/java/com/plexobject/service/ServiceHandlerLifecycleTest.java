@@ -44,7 +44,8 @@ public class ServiceHandlerLifecycleTest {
 
         properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP, "ConnectionFactory");
+        properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
+                "ConnectionFactory");
         properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
 
@@ -63,8 +64,8 @@ public class ServiceHandlerLifecycleTest {
                 registry, handler);
         assertEquals(0, registry.getHandlers().size());
         handlerLifecycle.start();
-        assertEquals("handlers " + registry.getHandlers(), 2, registry
-                .getHandlers().size()); // double for ping handler
+        assertEquals("handlers " + registry.getHandlers(), 1, registry
+                .getHandlers().size());
         assertTrue(handlerLifecycle.isRunning());
         handlerLifecycle.stop();
         assertEquals(0, registry.getHandlers().size());

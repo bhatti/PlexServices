@@ -53,6 +53,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     private final ServiceRegistryHandlers serviceRegistryHandlers;
     private final ServiceRegistryContainers serviceRegistryContainers;
     private final Map<String, RequestHandler> pingHandlers = new ConcurrentHashMap<>();
+    private final boolean enablePingHandlers;
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
         this(config, authorizer, new NettyWebContainerProvider());
@@ -66,6 +67,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         this.serviceRegistryHandlers = new ServiceRegistryHandlers();
         this.serviceRegistryContainers = new ServiceRegistryContainers(config,
                 authorizer, webContainerProvider, this);
+        this.enablePingHandlers = config.getBoolean("enablePingHandlers");
         String statsdHost = config.getProperty("statsd.host");
         if (statsdHost != null) {
             String servicePrefix = config.getProperty("serviceConfigs", "");
@@ -129,7 +131,9 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
             registerMetricsJMX(h);
             registerServiceHandlerLifecycle(h);
             container.add(h);
-            addPingHandler(h, config, container);
+            if (enablePingHandlers) {
+                addPingHandler(h, config, container);
+            }
         }
     }
 
@@ -178,7 +182,9 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         }
         serviceRegistryHandlers.removeInterceptors(h);
         if (container.remove(h)) {
-            removePingHandler(h, config, container);
+            if (enablePingHandlers) {
+                removePingHandler(h, config, container);
+            }
             return true;
         }
         return false;

@@ -122,9 +122,9 @@ public class ServiceRegistryTest {
         registry.add(new WebsocketService());
         registry.add(new WebService());
         registry.add(new JmsService());
-        assertEquals(3*2, registry.getHandlers().size()); // double because of ping handlers
+        assertEquals(3, registry.getHandlers().size());
         assertNotNull(registry.getServiceMetricsRegistry());
-        assertEquals(3*2, registry.getServiceConfigurations().size()); // double because of ping handlers
+        assertEquals(3, registry.getServiceConfigurations().size());
         assertTrue(registry.dumpServiceConfigurations().contains("HTTP:GET"));
     }
 
@@ -148,7 +148,7 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config, authorizer);
         registry.setRequestHandlers(Arrays.asList(new WebsocketService(),
                 new WebService(), new JmsService()));
-        assertEquals(3*2, registry.getHandlers().size()); // double due to ping handlers
+        assertEquals(3, registry.getHandlers().size());
         assertNotNull(registry.getServiceMetricsRegistry());
     }
 
@@ -193,12 +193,28 @@ public class ServiceRegistryTest {
         registry.add(h);
         assertTrue(registry.exists(h));
         registry.add(h);
-        assertEquals(1*2, registry.getHandlers().size()); // double because of ping handlers
+        assertEquals(1, registry.getHandlers().size());
         registry.remove(h);
         assertEquals(0, registry.getHandlers().size());
         registry.remove(h);
         assertEquals(0, registry.getHandlers().size());
         assertFalse(registry.exists(h));
+    }
+
+    @Test
+    public void testAddWebToJmsEntriesWithPings() throws Exception {
+        properties.setProperty("enablePingHandlers", "true");
+        final Configuration config = initProperties();
+        ServiceRegistry registry = new ServiceRegistry(config, authorizer);
+        Collection<WebToJmsEntry> entries = Arrays.asList(new WebToJmsEntry(
+                CodecType.JSON, "/w", Method.GET, "queue://w", 5, false, 1),
+                new WebToJmsEntry(CodecType.JSON, "/ws", Method.GET,
+                        "queue://w", 5, false, 1));
+        RequestHandler h = new WebService();
+        registry.add(h);
+        registry.setWebToJmsEntries(entries);
+        assertEquals(4, registry.getHandlers().size()); // double because of
+                                                        // ping handlers
     }
 
     @Test
@@ -212,7 +228,7 @@ public class ServiceRegistryTest {
         RequestHandler h = new WebService();
         registry.add(h);
         registry.setWebToJmsEntries(entries);
-        assertEquals(4, registry.getHandlers().size()); // double because of ping handlers
+        assertEquals(2, registry.getHandlers().size());
     }
 
     @Test

@@ -75,7 +75,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             serviceRegistry
                     .setServiceRegistryLifecycleAware(serviceRegistryAware);
             serviceRegistry.start();
-            log.info("**** Started service registry via war servlet ***");
+            log.info("**** Started service registry via war servlet ***" + this);
         } catch (Exception e) {
             throw new ServletException(e);
         }

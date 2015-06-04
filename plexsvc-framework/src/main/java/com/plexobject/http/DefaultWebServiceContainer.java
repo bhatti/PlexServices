@@ -132,6 +132,7 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
     @Override
     public String toString() {
         return "DefaultHttpServiceContainer [requestHandlerEndpointsByMethod="
-                + requestHandlerEndpointsByMethod + ", server=" + server + "]";
+                + requestHandlerEndpointsByMethod + ", server=" + server + "]"
+                + System.identityHashCode(this);
     }
 }
