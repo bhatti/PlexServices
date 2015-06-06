@@ -1,22 +1,30 @@
 package com.plexobject.javaws;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.ws.rs.Path;
 
 import com.plexobject.bugger.model.Project;
 import com.plexobject.predicate.Predicate;
 
 @WebService
+@Path("/projects")
 public class ProjectServiceImpl implements ProjectService {
+    @Override
     public Project create(Project project) {
         Project saved = SharedRepository.projectRepository.save(project);
         return saved;
-    }       
-    @WebMethod(exclude=true)
-    public Project addMember(String projectId, String assignedTo, boolean projectLead) {
-        Project project = SharedRepository.projectRepository.load(Long.valueOf(projectId));
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public Project addMember(String projectId, String assignedTo,
+            boolean projectLead) {
+        Project project = SharedRepository.projectRepository.load(Long
+                .valueOf(projectId));
         if (projectLead) {
             project.setProjectLead(assignedTo);
         } else {
@@ -25,9 +33,12 @@ public class ProjectServiceImpl implements ProjectService {
         return project;
     }
 
-    @WebMethod(exclude=true)
-    public Project removeMember(String projectId, String assignedTo, boolean projectLead) {
-        Project project = SharedRepository.projectRepository.load(Long.valueOf(projectId));
+    @Override
+    @WebMethod(exclude = true)
+    public Project removeMember(String projectId, String assignedTo,
+            boolean projectLead) {
+        Project project = SharedRepository.projectRepository.load(Long
+                .valueOf(projectId));
         if (projectLead) {
             project.setProjectLead(null);
         } else {
@@ -36,6 +47,7 @@ public class ProjectServiceImpl implements ProjectService {
         return project;
     }
 
+    @Override
     public List<Project> query() {
         return SharedRepository.projectRepository
                 .getAll(new Predicate<Project>() {
@@ -45,5 +57,10 @@ public class ProjectServiceImpl implements ProjectService {
                         return true;
                     }
                 });
+    }
+
+    @Override
+    public int verifyProjects(Collection<Project> projects) {
+        return 0;
     }
 }

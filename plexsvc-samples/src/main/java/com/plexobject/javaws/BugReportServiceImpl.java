@@ -1,22 +1,51 @@
 package com.plexobject.javaws;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import javax.jws.WebMethod;
+import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.ws.rs.Path;
 
 import com.plexobject.bugger.model.BugReport;
 import com.plexobject.predicate.Predicate;
 
 @WebService
+@Path("/bugReports")
 public class BugReportServiceImpl implements BugReportService {
-    public BugReport create(BugReport report) {
+    @Override
+    public BugReport create(@WebParam(name = "bugReport") BugReport report) {
         report.validate();
         BugReport saved = SharedRepository.bugReportRepository.save(report);
         return saved;
     }
 
+    @Override
+    public BugReport get(final Long id) {
+        List<BugReport> reports = SharedRepository.bugReportRepository
+                .getAll(new Predicate<BugReport>() {
+                    @Override
+                    public boolean accept(final BugReport report) {
+                        return report.getId().equals(id);
+                    }
+                });
+        return reports.size() > 0 ? reports.get(0) : null;
+    }
+
+    @Override
+    public List<BugReport> getAll(final Collection<Long> ids) {
+        return SharedRepository.bugReportRepository
+                .getAll(new Predicate<BugReport>() {
+                    @Override
+                    public boolean accept(final BugReport report) {
+                        return ids.contains(report.getId());
+                    }
+                });
+    }
+
+    @Override
     public List<BugReport> query(Map<String, Object> params) {
         final Long projectId = params.containsKey("projectId") ? (Long) params
                 .get("projectId") : null;
@@ -63,4 +92,5 @@ public class BugReportServiceImpl implements BugReportService {
         SharedRepository.bugReportRepository.save(report);
         return report;
     }
+
 }

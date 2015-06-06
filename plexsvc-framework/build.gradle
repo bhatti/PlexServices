@@ -14,6 +14,7 @@ dependencies {
     compile 'javax.jms:jms-api:1.1-rev-1'
     compile 'com.timgroup:java-statsd-client:3.0.2'
     compile 'org.reflections:reflections:0.9.9'
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
     providedCompile "javax.servlet:servlet-api:2.5"
     testCompile 'junit:junit:4.11'
     testCompile 'com.googlecode.jmockit:jmockit:1.7'
