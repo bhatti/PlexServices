@@ -8,6 +8,7 @@ public interface HttpResponse {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String STATUS = "status";
     public static final String LOCATION = "location";
+    public static final String ERROR_MESSAGE = "errorMessage";
 
     /**
      * Status code (100) indicating the client can continue.

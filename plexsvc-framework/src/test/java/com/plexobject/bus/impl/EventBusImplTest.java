@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.plexobject.bus.EventBus;
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -45,7 +46,8 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         Request req = new Request(Protocol.HTTP, Method.GET, "/w", properties,
-                headers, "payload", new AbstractResponseDispatcher() {
+                headers, "payload", CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 
@@ -62,7 +64,8 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         Request req = new Request(Protocol.HTTP, Method.GET, "/w", properties,
-                headers, "payload", new AbstractResponseDispatcher() {
+                headers, "payload", CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 
@@ -83,8 +86,9 @@ public class EventBusImplTest {
         bus.unsubscribe(id);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request req = new Request(Protocol.HTTP, Method.GET, "/w", properties, headers,
-                "payload", new AbstractResponseDispatcher() {
+        Request req = new Request(Protocol.HTTP, Method.GET, "/w", properties,
+                headers, "payload", CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 

@@ -93,4 +93,9 @@ public class BugReportServiceImpl implements BugReportService {
         return report;
     }
 
+    @Override
+    public int count(List<BugReport> reports) {
+        return reports.size();
+    }
+
 }

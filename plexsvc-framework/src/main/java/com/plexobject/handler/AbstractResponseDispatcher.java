@@ -42,6 +42,9 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         return this;
     }
 
+    /**
+     * This method serializes response in text and sends back to client
+     */
     public void send(Object payload) {
         String sessionId = (String) properties.get(Constants.SESSION_ID);
         if (sessionId != null) {
@@ -50,7 +53,8 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         String replyText = null;
         if (payload instanceof Exception) {
             log.warn("Error received " + payload, payload);
-            Map<String, Object> resp = ExceptionUtils.toErrors((Exception) payload);
+            Map<String, Object> resp = ExceptionUtils
+                    .toErrors((Exception) payload);
             replyText = ObjectCodecFactory.getInstance()
                     .getObjectCodec(codecType).encode(resp);
             for (String name : HEADER_PROPERTIES) {

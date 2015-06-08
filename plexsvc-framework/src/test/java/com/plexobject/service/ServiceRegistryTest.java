@@ -68,7 +68,6 @@ public class ServiceRegistryTest {
     //
     @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
     public class WebsocketService implements RequestHandler {
-
         @Override
         public void handle(Request request) {
             requests.add(request);
@@ -292,7 +291,8 @@ public class ServiceRegistryTest {
         String payload = "{}";
 
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 
@@ -311,7 +311,8 @@ public class ServiceRegistryTest {
         String payload = "test";
 
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
                     }
@@ -330,7 +331,8 @@ public class ServiceRegistryTest {
         String payload = "{\"username\":\"john\"}";
 
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
                     }
@@ -350,7 +352,8 @@ public class ServiceRegistryTest {
         String payload = "{}";
         final StringBuilder response = new StringBuilder();
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     {
                         setCodecType(CodecType.TEXT);
                     }
@@ -379,7 +382,8 @@ public class ServiceRegistryTest {
         String payload = "{}";
         final StringBuilder response = new StringBuilder();
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     {
                         setCodecType(CodecType.TEXT);
                     }
@@ -408,7 +412,8 @@ public class ServiceRegistryTest {
         String payload = "{}";
         final StringBuilder response = new StringBuilder();
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     {
                         setCodecType(CodecType.TEXT);
                     }
@@ -423,7 +428,7 @@ public class ServiceRegistryTest {
                     }
                 });
         RequestHandler h = new WebService();
-        valException = ValidationException.builder()
+        valException = (ValidationException) ValidationException.builder()
                 .addError("code", "field", "msg").build();
         registry.invoke(request, h);
         assertTrue(response.toString().contains("ValidationException"));
@@ -438,7 +443,8 @@ public class ServiceRegistryTest {
         String payload = "{}";
         final StringBuilder response = new StringBuilder();
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     {
                         setCodecType(CodecType.TEXT);
                     }

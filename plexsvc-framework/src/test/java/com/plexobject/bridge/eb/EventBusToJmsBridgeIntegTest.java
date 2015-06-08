@@ -176,7 +176,8 @@ public class EventBusToJmsBridgeIntegTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "message";
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 

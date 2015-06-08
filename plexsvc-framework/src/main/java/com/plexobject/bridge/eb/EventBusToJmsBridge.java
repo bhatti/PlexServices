@@ -147,14 +147,16 @@ public class EventBusToJmsBridge implements Lifecycle {
                                 params);
                 AbstractResponseDispatcher dispatcher = message.getJMSReplyTo() != null ? new JmsResponseDispatcher(
                         jmsContainer, message.getJMSReplyTo()) : null;
+                CodecType codecType = CodecType.fromAcceptHeader(
+                        (String) params.get(Constants.ACCEPT),
+                        entry.getCodecType());
                 if (dispatcher != null) {
-                    dispatcher.setCodecType(CodecType.fromAcceptHeader(
-                            (String) params.get(Constants.ACCEPT),
-                            entry.getCodecType()));
+                    dispatcher.setCodecType(codecType);
                 }
                 Request req = Request.builder().setProtocol(Protocol.JMS)
                         .setMethod(Method.MESSAGE).setProperties(params)
-                        .setPayload(payload).setSessionId(sessionId)
+                        .setCodecType(codecType).setPayload(payload)
+                        .setSessionId(sessionId)
                         .setResponseDispatcher(dispatcher).build();
                 log.info("Forwarding " + entry + "'s message " + req);
                 eb.publish(entry.getTarget(), req);

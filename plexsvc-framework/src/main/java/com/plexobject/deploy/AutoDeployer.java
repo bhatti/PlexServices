@@ -1,8 +1,7 @@
 package com.plexobject.deploy;
 
-import java.util.Set;
+import java.util.Collection;
 
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +13,7 @@ import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
+import com.plexobject.util.ReflectUtils;
 
 /**
  * This is a helper class that searches service classes that define
@@ -55,27 +55,20 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
     public void onStarted(ServiceRegistry serviceRegistry) {
         String[] pkgNames = serviceRegistry.getConfiguration()
                 .getProperty(Constants.AUTO_DEPLOY_PACKAGES).split("[\\s;:,]");
-        for (String pkgName : pkgNames) {
-            pkgName = pkgName.trim();
-            if (pkgName.length() == 0) {
-                continue;
-            }
-            log.info("Parsing " + pkgName + " for auto-deployment...");
-            Reflections reflections = new Reflections(pkgName);
-            Set<Class<?>> serviceClasses = reflections
-                    .getTypesAnnotatedWith(ServiceConfig.class);
+        Collection<Class<?>> serviceClasses = ReflectUtils.getAnnotatedClasses(
+                ServiceConfig.class, pkgNames);
 
-            for (Class<?> serviceClass : serviceClasses) {
-                try {
-                    RequestHandler handler = (RequestHandler) serviceClass
-                            .newInstance();
-                    log.info("Registering " + serviceClass.getName()
-                            + " for auto-deployment...");
-                    serviceRegistry.add(handler);
-                } catch (Exception e) {
-                    log.error("Failed to add request handler for "
-                            + serviceClass.getName(), e);
-                }
+        for (Class<?> serviceClass : serviceClasses) {
+            try {
+                RequestHandler handler = (RequestHandler) serviceClass
+                        .newInstance();
+                log.info("Registering " + serviceClass.getName()
+                        + " for auto-deployment...");
+                serviceRegistry.add(handler);
+            } catch (Exception e) {
+                log.error(
+                        "Failed to add request handler for "
+                                + serviceClass.getName(), e);
             }
         }
     }

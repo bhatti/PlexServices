@@ -38,12 +38,9 @@ public class Main implements ServiceRegistryLifecycleAware {
 
         // ensure activemq is already running
         if ("jms".equalsIgnoreCase(type)) {
-            serviceRegistry.add(
-                    pingService,
-                    ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
-                            .setProtocol(Protocol.JMS)
-                            .setEndpoint("queue://ping").build());
+            serviceRegistry.add(ServiceConfigDesc.builder(pingService)
+                    .setMethod(Method.MESSAGE).setProtocol(Protocol.JMS)
+                    .setEndpoint("queue://ping").build(), pingService);
             Collection<WebToJmsEntry> entries = Arrays.asList(
                     new WebToJmsEntry(CodecType.JSON, "/ping", Method.GET,
                             "queue://ping", 5, false, 1), new WebToJmsEntry(
@@ -51,16 +48,12 @@ public class Main implements ServiceRegistryLifecycleAware {
                             "queue://ping", 5, false, 1));
             serviceRegistry.setWebToJmsEntries(entries);
         } else if ("websocket".equalsIgnoreCase(type)) {
-            serviceRegistry.add(
-                    pingService,
-                    ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
-                            .setProtocol(Protocol.WEBSOCKET)
-                            .setEndpoint("/ping").build());
-            serviceRegistry.add(pingService,
-                    ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.GET).setProtocol(Protocol.HTTP)
-                            .setEndpoint("/ping").build());
+            serviceRegistry.add(ServiceConfigDesc.builder(pingService)
+                    .setMethod(Method.MESSAGE).setProtocol(Protocol.WEBSOCKET)
+                    .setEndpoint("/ping").build(), pingService);
+            serviceRegistry.add(ServiceConfigDesc.builder(pingService)
+                    .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                    .setEndpoint("/ping").build(), pingService);
         } else {
             serviceRegistry.add(pingService);
         }

@@ -93,7 +93,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for http
-        serviceRegistry.add(this, ServiceConfigDesc.builder(e).build());
+        serviceRegistry.add(ServiceConfigDesc.builder(e).build(), this);
         log.info("Adding Web->JMS mapping for " + e.getShortString());
     }
 
@@ -111,7 +111,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for webscoket
-        serviceRegistry.add(this, ServiceConfigDesc.builder(e).build());
+        serviceRegistry.add(ServiceConfigDesc.builder(e).build(), this);
         log.info("Adding Websocket->JMS mapping for " + e.getShortString());
     }
 

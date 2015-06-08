@@ -116,10 +116,10 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
 
     @Override
     public void add(RequestHandler h) {
-        add(h, new ServiceConfigDesc(h));
+        add(new ServiceConfigDesc(h), h);
     }
 
-    public synchronized void add(RequestHandler h, ServiceConfigDesc config) {
+    public synchronized void add(ServiceConfigDesc config, RequestHandler h) {
         Objects.requireNonNull(config, "service handler " + h
                 + " doesn't define ServiceConfig annotation");
         ServiceContainer container = serviceRegistryContainers

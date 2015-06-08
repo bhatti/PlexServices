@@ -6,6 +6,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Constants;
+import com.plexobject.encode.CodecType;
+import com.plexobject.encode.ObjectCodec;
+import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 
@@ -23,6 +26,7 @@ public class Request extends AbstractPayload {
         private Map<String, Object> headers = new HashMap<>();
         private Method method;
         private String endpoint;
+        private CodecType codecType;
 
         private AbstractResponseDispatcher responseDispatcher;
 
@@ -33,6 +37,11 @@ public class Request extends AbstractPayload {
 
         public Builder setMethod(Method method) {
             this.method = method;
+            return this;
+        }
+
+        public Builder setCodecType(CodecType codecType) {
+            this.codecType = codecType;
             return this;
         }
 
@@ -71,7 +80,7 @@ public class Request extends AbstractPayload {
 
         public Request build() {
             return new Request(protocol, method, endpoint, properties, headers,
-                    payload, responseDispatcher);
+                    payload, codecType, responseDispatcher);
         }
     }
 
@@ -79,6 +88,7 @@ public class Request extends AbstractPayload {
     private Protocol protocol;
     private Method method;
     private String endpoint;
+    private CodecType codecType;
 
     Request() {
     }
@@ -86,11 +96,13 @@ public class Request extends AbstractPayload {
     public Request(Protocol protocol, Method method, String endpoint,
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
+            final CodecType codecType,
             final AbstractResponseDispatcher responseBuilder) {
         super(properties, headers, payload);
         this.protocol = protocol;
         this.method = method;
         this.endpoint = endpoint;
+        this.codecType = codecType;
         this.responseBuilder = responseBuilder;
     }
 
@@ -113,6 +125,14 @@ public class Request extends AbstractPayload {
         }
 
         return sessionId;
+    }
+
+    public CodecType getCodecType() {
+        return codecType;
+    }
+
+    public ObjectCodec getCodec() {
+        return ObjectCodecFactory.getInstance().getObjectCodec(codecType);
     }
 
     @SuppressWarnings("unchecked")
@@ -149,4 +169,5 @@ public class Request extends AbstractPayload {
     public static Builder builder() {
         return new Builder();
     }
+
 }

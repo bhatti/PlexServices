@@ -13,8 +13,8 @@ public class NettyWebContainerProvider implements WebContainerProvider {
     public Lifecycle getWebContainer(Configuration config,
             RequestHandler executor) {
         SimpleChannelInboundHandler<Object> webHandler = new NettyWebRequestHandler(
-                executor, config.getDefaultWebsocketUri(),
-                config.isSsl(), config.getDefaultCodecType());
+                executor, config.getDefaultWebsocketUri(), config.isSsl(),
+                config.getDefaultCodecType());
         return new NettyHttpServer(config, webHandler);
     }
 

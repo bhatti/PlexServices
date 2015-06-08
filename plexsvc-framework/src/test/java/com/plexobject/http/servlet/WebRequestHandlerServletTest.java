@@ -113,7 +113,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(Method.HEAD).build();
-        serviceRegistry.add(handler, desc);
+        serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         StubHttpServletResponse response = new StubHttpServletResponse();
@@ -127,7 +127,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(Method.POST).build();
-        serviceRegistry.add(handler, desc);
+        serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         request.parameters.put("p1", "v1");
@@ -144,7 +144,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(Method.PUT).build();
-        serviceRegistry.add(handler, desc);
+        serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         request.parameters.put("p1", "v1");
@@ -159,7 +159,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(Method.DELETE).build();
-        serviceRegistry.add(handler, desc);
+        serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         request.parameters.put("p1", "v1");

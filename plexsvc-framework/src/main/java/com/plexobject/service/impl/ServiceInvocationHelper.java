@@ -1,5 +1,6 @@
 package com.plexobject.service.impl;
 
+import java.io.FileNotFoundException;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -104,8 +105,10 @@ public class ServiceInvocationHelper {
                         request.getResponseDispatcher().setLocation(
                                 ((Redirectable) e).getLocation());
                     }
-                }
-                if (e instanceof Statusable) {
+                } else if (e instanceof FileNotFoundException) {
+                    request.getResponseDispatcher().setStatus(
+                            HttpResponse.SC_NOT_FOUND);
+                } else if (e instanceof Statusable) {
                     request.getResponseDispatcher().setStatus(
                             ((Statusable) e).getStatus());
                 } else {

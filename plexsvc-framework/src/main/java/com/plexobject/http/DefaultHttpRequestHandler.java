@@ -46,7 +46,9 @@ public class DefaultHttpRequestHandler implements RequestHandler {
             request.getResponseDispatcher().send(
                     "Unknown request received payload " + request);
 
-            log.error("** Unknown request received payload "
+            log.error("** Unknown request '"
+                    + request.getEndpoint()
+                    + ", received payload "
                     + request
                     + ", available requestHandlerPaths "
                     + (requestHandlerPaths != null ? requestHandlerPaths

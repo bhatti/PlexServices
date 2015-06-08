@@ -64,7 +64,8 @@ public class WebToJmsBridgeTest {
         String payload = "{}";
 
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 
@@ -77,8 +78,8 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleAsynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue://{scope}-assign-bugreport-service-queue", 5,
-                false, 1);
+                Method.GET, "queue://{scope}-assign-bugreport-service-queue",
+                5, false, 1);
         entry.setAsynchronous(true);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
@@ -86,7 +87,8 @@ public class WebToJmsBridgeTest {
         String payload = "{}";
 
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 
@@ -107,8 +109,8 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleSynchronous() throws Exception {
         final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue://{scope}-assign-bugreport-service-queue", 5,
-                false, 1);
+                Method.GET, "queue://{scope}-assign-bugreport-service-queue",
+                5, false, 1);
         entry.setAsynchronous(false);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
@@ -116,7 +118,8 @@ public class WebToJmsBridgeTest {
         String payload = "{}";
 
         final Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, new AbstractResponseDispatcher() {
+                properties, headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
 

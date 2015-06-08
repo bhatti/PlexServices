@@ -10,8 +10,10 @@ import com.plexobject.bugger.model.BugReport;
 
 @WebService
 public interface BugReportService {
+    int count(List<BugReport> reports);
+
     BugReport get(Long id);
-    
+
     BugReport create(BugReport report);
 
     List<BugReport> getAll(Collection<Long> ids);

@@ -29,6 +29,7 @@ public interface Constants {
     public static final String JMS_USERNAME = "JMSUsername";
     public static final String JMS_TRASACTED_SESSION = "JMSTrasactedSession";
     public static final String JMS_SEND_JMS_HEADERS = "JMSSendJmsHeaders";
+    public static final String JAVAWS_NAMESPACE = "javawsNamespace";
 
     public static final int DEFAULT_HTTP_PORT = 8181;
 }

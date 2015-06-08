@@ -64,11 +64,13 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             final String textPayload = txtMessage.getText();
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsContainer, message.getJMSReplyTo());
-            dispatcher.setCodecType(CodecType.fromAcceptHeader(
-                    (String) params.get(Constants.ACCEPT), config.codec()));
+            CodecType codecType = CodecType.fromAcceptHeader(
+                    (String) params.get(Constants.ACCEPT), config.codec());
+            dispatcher.setCodecType(codecType);
 
             Request req = Request.builder().setProtocol(Protocol.JMS)
                     .setMethod(Method.MESSAGE).setProperties(params)
+                    .setCodecType(codecType)
                     .setPayload(textPayload).setResponseDispatcher(dispatcher)
                     .build();
 

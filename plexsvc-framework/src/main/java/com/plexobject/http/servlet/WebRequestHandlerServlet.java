@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -46,6 +47,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
     private Configuration config;
     private ServiceRegistry serviceRegistry;
     private RequestHandler defaultExecutor;
+    private CodecType codecType;
 
     public void init(ServletConfig servletConfig) throws ServletException {
         String plexserviceCallbackClass = servletConfig
@@ -67,6 +69,8 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                         public Lifecycle getWebContainer(Configuration config,
                                 RequestHandler executor) {
                             WebRequestHandlerServlet.this.defaultExecutor = executor;
+                            WebRequestHandlerServlet.this.codecType = serviceRegistry
+                                    .getServiceConfig(defaultExecutor).codec();
                             return WebRequestHandlerServlet.this;
                         }
                     });
@@ -137,6 +141,13 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         }
         // must consume input stream before reading parameters
         String payload = IOUtils.toString(req.getInputStream());
+        if (defaultExecutor == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    "Service is not found");
+            log.warn("Received requests but request handler is not found for "
+                    + payload);
+            return;
+        }
         Map<String, Object> headers = getHeaders(req);
         Map<String, Object> params = getParams(req);
         String uri = req.getPathInfo();
@@ -154,20 +165,16 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                     public void setHandled(boolean h) {
                     }
                 }, req, resp);
+        CodecType reqCodecType = CodecType.fromAcceptHeader(
+                (String) params.get(Constants.ACCEPT), codecType);
+        dispatcher.setCodecType(reqCodecType);
+        //
         Request handlerReq = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(method).setEndpoint(uri).setProperties(params)
-                .setHeaders(headers).setPayload(payload)
-                .setResponseDispatcher(dispatcher).build();
+                .setCodecType(reqCodecType).setHeaders(headers)
+                .setPayload(payload).setResponseDispatcher(dispatcher).build();
         log.info("HTTP Received URI '" + uri + "', request " + handlerReq);
-        if (defaultExecutor == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-                    "Service is not found");
-            log.warn("Received requests but request handler is not found for "
-                    + handlerReq);
-            return;
-        }
         defaultExecutor.handle(handlerReq);
-
     }
 
     private static Map<String, Object> getParams(HttpServletRequest request) {

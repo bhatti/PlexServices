@@ -250,7 +250,8 @@ public class WebToJmsBridgeIntegTest {
         Map<String, Object> headers = new HashMap<>();
         headers.put("head1", "val1");
         Request request = new Request(Protocol.HTTP, method, path, properties,
-                headers, payload, new AbstractResponseDispatcher() {
+                headers, payload, CodecType.JSON,
+                new AbstractResponseDispatcher() {
                     @Override
                     public void addSessionId(String value) {
                     }

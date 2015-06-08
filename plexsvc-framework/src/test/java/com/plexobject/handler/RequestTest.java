@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.plexobject.domain.Constants;
+import com.plexobject.encode.CodecType;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 
@@ -20,10 +21,10 @@ public class RequestTest {
         Request request = new Request();
         assertNull(request.getProtocol());
         assertNull(request.getMethod());
-        assertNull( request.getEndpoint());
+        assertNull(request.getEndpoint());
         assertNull(request.getResponseDispatcher());
         assertNull(request.getSessionId());
-        assertNull( request.getPayload());
+        assertNull(request.getPayload());
     }
 
     @Test
@@ -38,7 +39,7 @@ public class RequestTest {
         };
         String payload = "{}";
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, dispatcher);
+                properties, headers, payload, CodecType.JSON, dispatcher);
         assertEquals(Protocol.HTTP, request.getProtocol());
         assertEquals(Method.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
@@ -77,7 +78,6 @@ public class RequestTest {
         assertEquals("id", request.getSessionId());
         assertEquals("{}", request.getPayload());
     }
-    
 
     @Test
     public void testHandleUnknown() throws Exception {
@@ -86,7 +86,7 @@ public class RequestTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, null);
+                properties, headers, payload, CodecType.JSON, null);
         request.handleUnknown(null, null);
         request.handleUnknown(Constants.PAYLOAD, "payload");
         assertEquals("payload", request.getPayload());
@@ -103,16 +103,17 @@ public class RequestTest {
         request.handleUnknown("key", properties);
         assertEquals("v1", request.getProperty("p1"));
     }
+
     @Test
     public void testGetSetProperties() throws Exception {
         Map<String, Object> properties = new HashMap<>();
         properties.put("p1", "v1");
         Map<String, Object> headers = new HashMap<>();
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, null, null);
+                properties, headers, null, CodecType.JSON, null);
         request.setPayload("pay");
         assertEquals("pay", request.getPayload());
-        
+
         assertTrue(request.hasProperty("p1"));
         assertFalse(request.hasProperty("p2"));
         assertTrue(request.getPropertyNames().contains("p1"));
@@ -137,6 +138,7 @@ public class RequestTest {
         assertFalse(request.getBooleanProperty("p5", false));
 
     }
+
     @Test
     public void testGetSetHeaders() throws Exception {
         Map<String, Object> properties = new HashMap<>();
@@ -145,7 +147,7 @@ public class RequestTest {
         headers.put("head1", "val1");
         headers.put("head2", 2);
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, null, null);
+                properties, headers, null, CodecType.JSON, null);
         assertTrue(request.getHeaderNames().contains("head1"));
         assertEquals("val1", request.getHeader("head1"));
         assertEquals("2", request.getHeader("head2"));
