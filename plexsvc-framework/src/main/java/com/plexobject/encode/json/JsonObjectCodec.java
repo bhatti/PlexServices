@@ -42,7 +42,7 @@ public class JsonObjectCodec extends AbstractObjectCodec {
         } else if (obj instanceof CharSequence) {
             return obj.toString();
         }
-
+        System.out.println(">>>> " + obj.getClass().getName() + ":" + obj);
         try {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {

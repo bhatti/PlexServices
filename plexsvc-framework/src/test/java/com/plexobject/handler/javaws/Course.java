@@ -3,6 +3,9 @@ package com.plexobject.handler.javaws;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Course {
     private String id;
     private String name;

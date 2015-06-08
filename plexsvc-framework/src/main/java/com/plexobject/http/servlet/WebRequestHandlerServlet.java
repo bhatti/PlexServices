@@ -69,8 +69,8 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                         public Lifecycle getWebContainer(Configuration config,
                                 RequestHandler executor) {
                             WebRequestHandlerServlet.this.defaultExecutor = executor;
-                            WebRequestHandlerServlet.this.codecType = serviceRegistry
-                                    .getServiceConfig(defaultExecutor).codec();
+                            WebRequestHandlerServlet.this.codecType = config
+                                    .getDefaultCodecType(); // serviceRegistry.getServiceConfig(defaultExecutor).codec();
                             return WebRequestHandlerServlet.this;
                         }
                     });

@@ -68,6 +68,11 @@ public class XmlObjectCodec extends AbstractObjectCodec {
         xstream.alias("error", ValidationException.Error.class);
         xstream.processAnnotations(new Class[] { Request.class, Response.class });
         xstream.registerConverter(new MapEntryConverter());
+        xstream.alias("items", Map.class);
+        // NamedMapConverter namedMapConverter = new NamedMapConverter(
+        // xstream.getMapper(), "attr", "description", String.class,
+        // "value", String.class);
+        // xstream.registerConverter(namedMapConverter);
     }
 
     public void processAnnotations(Class<?>... klasses) {

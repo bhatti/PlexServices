@@ -209,12 +209,15 @@ public class TestWebUtils {
         return getResponse(con);
     }
 
-    public static String post(String target, String contents)
+    public static String post(String target, String contents, String... headers)
             throws IOException {
         URL url = new URL(target);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
+        for (int i = 0; i < headers.length - 1; i += 2) {
+            con.setRequestProperty(headers[i], headers[i + 1]);
+        }
 
         con.setDoOutput(true);
         OutputStream out = con.getOutputStream();

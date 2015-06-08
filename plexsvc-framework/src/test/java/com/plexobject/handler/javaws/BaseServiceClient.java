@@ -4,6 +4,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.http.TestWebUtils;
@@ -15,6 +17,7 @@ public class BaseServiceClient {
 
     // private static final ObjectCodec CODEC = new XmlObjectCodec();
 
+    @XmlRootElement
     public static class RequestBuilder {
         final Map<String, Object> request = new HashMap<>();
 
@@ -37,7 +40,7 @@ public class BaseServiceClient {
             Class<?> responseType, Type pType) throws Exception {
         // System.out.println("SENDING " + request);
         String resp = TestWebUtils.post("http://localhost:" + DEFAULT_PORT
-                + path, request.encode());
+                + path, request.encode(), "Accept", "application/json");
         // System.out.println("RECEIVED " + resp);
         int colon = resp.indexOf("\":");
         colon = resp.indexOf("\":", colon + 1);

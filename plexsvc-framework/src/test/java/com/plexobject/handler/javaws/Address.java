@@ -1,5 +1,8 @@
 package com.plexobject.handler.javaws;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Address {
     private String street;
     private String city;

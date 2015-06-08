@@ -122,7 +122,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         return false;
     }
 
-    private static Class<?> getWebServiceInterface(Class<?> serviceClass) {
+    static Class<?> getWebServiceInterface(Class<?> serviceClass) {
         Class<?>[] interfaces = serviceClass.getInterfaces();
         for (Class<?> iface : interfaces) {
             WebService webService = iface.getAnnotation(WebService.class);

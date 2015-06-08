@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
@@ -88,7 +89,7 @@ public class Request extends AbstractPayload {
     private Protocol protocol;
     private Method method;
     private String endpoint;
-    private CodecType codecType;
+    private transient CodecType codecType;
 
     Request() {
     }
@@ -131,8 +132,10 @@ public class Request extends AbstractPayload {
         return codecType;
     }
 
+    @JsonIgnoreProperties
     public ObjectCodec getCodec() {
-        return ObjectCodecFactory.getInstance().getObjectCodec(codecType);
+        return codecType != null ? ObjectCodecFactory.getInstance()
+                .getObjectCodec(codecType) : null;
     }
 
     @SuppressWarnings("unchecked")
