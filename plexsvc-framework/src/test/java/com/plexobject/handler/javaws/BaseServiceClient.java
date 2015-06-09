@@ -38,10 +38,10 @@ public class BaseServiceClient {
     @SuppressWarnings("unchecked")
     protected <T> T post(String path, RequestBuilder request,
             Class<?> responseType, Type pType) throws Exception {
-        // System.out.println("SENDING " + request);
+        System.out.println("SENDING " + request);
         String resp = TestWebUtils.post("http://localhost:" + DEFAULT_PORT
                 + path, request.encode(), "Accept", "application/json");
-        // System.out.println("RECEIVED " + resp);
+        System.out.println("RECEIVED " + resp);
         int colon = resp.indexOf("\":");
         colon = resp.indexOf("\":", colon + 1);
         String payload = resp.substring(colon + 2, resp.length() - 2);

@@ -5,7 +5,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Pair;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfigDesc;
@@ -21,10 +20,9 @@ public class ServiceRegistryJavawsSupport {
     private static final Logger logger = LoggerFactory
             .getLogger(ServiceRegistryJavawsSupport.class);
 
-    public static void addHandlers(Configuration config,
-            ServiceRegistry serviceRegistry, Map<String, Object> services) {
+    public static void addHandlers(ServiceRegistry serviceRegistry, Map<String, Object> services) {
         final RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
-                config);
+                serviceRegistry.getConfiguration());
         for (Map.Entry<String, Object> e : services.entrySet()) {
             Class<?> webService = RequestHandlerAdapterJavaws
                     .getWebServiceInterface(e.getValue().getClass());
