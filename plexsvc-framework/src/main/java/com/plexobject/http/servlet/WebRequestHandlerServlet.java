@@ -50,6 +50,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
     private CodecType codecType;
 
     public void init(ServletConfig servletConfig) throws ServletException {
+        super.init(servletConfig);
         String plexserviceCallbackClass = servletConfig
                 .getInitParameter(Constants.PLEXSERVICE_AWARE_CLASS);
         String plexserviceConfigResourcePath = servletConfig
