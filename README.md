@@ -636,7 +636,7 @@ Here is a sample json file that describes mapping:
 ```
 
 ### JavaWS support
-PlexServices allows you to import existing JavaWS and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
+PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
 ```java 
 import javax.jws.WebService;
 
@@ -647,6 +647,7 @@ public interface StudentService {
     Student get(Long id);
 }
 ```
+
 You can convert the implementing service into RequestHandler as follows:
 
 ```java 
