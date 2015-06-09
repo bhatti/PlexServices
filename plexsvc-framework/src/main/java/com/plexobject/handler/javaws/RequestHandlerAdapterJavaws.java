@@ -70,8 +70,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         if (webService == null) {
             throw new IllegalArgumentException(service + " is not web service");
         }
-        JavawsDelegateHandler handler = new JavawsDelegateHandler(service,
-                config);
+        RequestHandler handler = new JavawsDelegateHandler(service, config);
         if (serviceConfig == null) {
             String endpoint = getEndpoint(serviceClass, webService);
             serviceConfig = new ServiceConfigDesc(Protocol.HTTP,
@@ -83,7 +82,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         int countExported = 0;
         for (final Method m : serviceClass.getMethods()) {
             if (isExported(webService, m)) {
-                handler.addMethod(m);
+                ((JavawsDelegateHandler) handler).addMethod(m);
                 countExported++;
             }
         }
@@ -108,7 +107,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
 
     private static boolean isExported(Class<?> webService, Method m) {
         try {
-            if (m.getParameterCount() <= 1
+            if (m.getParameterTypes().length <= 1
                     && webService.getMethod(m.getName(), m.getParameterTypes()) != null) {
                 WebMethod webMethod = m.getAnnotation(WebMethod.class);
                 if (webMethod == null || !webMethod.exclude()) {

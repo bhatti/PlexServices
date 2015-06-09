@@ -1,7 +1,5 @@
 package com.plexobject.jms.impl;
 
-import java.util.Objects;
-
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
@@ -12,6 +10,8 @@ import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.plexobject.domain.Preconditions;
 
 /**
  * This class listens for incoming JMS messages in a separate thread
@@ -44,12 +44,12 @@ public class MessageReceiverThread implements Runnable {
             MessageListener messageListener,
             ExceptionListener exceptionListener, Callback callback,
             long timeout, DefaultJMSContainer jmsContainer) {
-        Objects.requireNonNull(threadName, "threadName is not specified");
-        Objects.requireNonNull(destination, "destination is not specified");
-        Objects.requireNonNull(messageListener,
+        Preconditions.checkEmpty(threadName, "threadName is not specified");
+        Preconditions.requireNotNull(destination, "destination is not specified");
+        Preconditions.requireNotNull(messageListener,
                 "messageListener is not specified");
-        Objects.requireNonNull(jmsContainer, "jmsContainer is not specified");
-        Objects.requireNonNull(callback, "callback is not specified");
+        Preconditions.requireNotNull(jmsContainer, "jmsContainer is not specified");
+        Preconditions.requireNotNull(callback, "callback is not specified");
         this.threadName = threadName;
         this.destination = destination;
         this.messageListener = messageListener;

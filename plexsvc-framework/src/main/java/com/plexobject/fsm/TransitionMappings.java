@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.plexobject.domain.Pair;
@@ -86,8 +85,8 @@ public class TransitionMappings {
      */
     public synchronized void register(State fromState, String onEvent,
             State[] states) {
-        Objects.requireNonNull(fromState, "fromState is required");
-        Objects.requireNonNull(onEvent, "onEvent is required");
+        Preconditions.requireNotNull(fromState, "fromState is required");
+        Preconditions.checkEmpty(onEvent, "onEvent is required");
         Preconditions.checkArgument(
                 states != null && states.length > 0,
                 "toStates is required for fromState " + fromState

@@ -1,7 +1,7 @@
 package com.plexobject.util;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,19 +29,20 @@ public class ReflectUtils {
         return serviceClasses;
     }
 
-    @SuppressWarnings("unchecked")
-    public static Object[] decode(String payload, Parameter[] params,
-            ObjectCodec codec) throws Exception {
-        Pair<Class<?>, Type>[] pairs = new Pair[params.length];
-        for (int i = 0; i < params.length; i++) {
-            pairs[i] = Pair.of(params[i].getType(),
-                    params[i].getParameterizedType());
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Object[] decode(String payload, Method m, ObjectCodec codec)
+            throws Exception {
+        Pair<Class, Type>[] pairs = new Pair[m.getParameterTypes().length];
+        for (int i = 0; i < m.getParameterTypes().length; i++) {
+            pairs[i] = Pair.of((Class) m.getParameterTypes()[i],
+                    m.getGenericParameterTypes()[i]);
         }
         return decode(payload, pairs, codec);
     }
 
-    public static Object[] decode(String payload,
-            Pair<Class<?>, Type>[] params, ObjectCodec codec) throws Exception {
+    @SuppressWarnings("rawtypes")
+    public static Object[] decode(String payload, Pair<Class, Type>[] params,
+            ObjectCodec codec) throws Exception {
         Object[] args = new Object[params.length];
         for (int i = 0; i < params.length; i++) {
             Class<?> klass = params[i].first;

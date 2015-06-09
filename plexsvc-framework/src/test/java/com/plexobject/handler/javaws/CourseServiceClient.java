@@ -52,14 +52,18 @@ public class CourseServiceClient extends BaseServiceClient implements
     public List<Course> enroll(List<Student> students) {
         RequestBuilder request = new RequestBuilder("enroll", students);
         try {
-            Method m = CourseService.class.getMethod("count", List.class);
-            Class<?> klass = m.getParameters()[0].getClass();
-            Type pKlass = m.getParameters()[0].getParameterizedType();
-
-            return post(COURSE_SERVICE, request, klass, pKlass);
+            return postWithListReturnType(request);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private List<Course> postWithListReturnType(RequestBuilder request)
+            throws NoSuchMethodException, Exception {
+        Method m = CourseService.class.getMethod("count", List.class);
+        Class<?> klass = m.getParameterTypes()[0].getClass();
+        Type pKlass = m.getGenericParameterTypes()[0];
+        return post(COURSE_SERVICE, request, klass, pKlass);
     }
 
     @WebMethod(exclude = true)
@@ -68,11 +72,7 @@ public class CourseServiceClient extends BaseServiceClient implements
         RequestBuilder request = new RequestBuilder("getCoursesForStudentId",
                 studentId);
         try {
-            Method m = CourseService.class.getMethod("count", List.class);
-            Class<?> klass = m.getParameters()[0].getClass();
-            Type pKlass = m.getParameters()[0].getParameterizedType();
-
-            return post(COURSE_SERVICE, request, klass, pKlass);
+            return postWithListReturnType(request);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -83,11 +83,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public List<Course> query(Map<String, Object> criteria) {
         RequestBuilder request = new RequestBuilder("query", criteria);
         try {
-            Method m = CourseService.class.getMethod("count", List.class);
-            Class<?> klass = m.getParameters()[0].getClass();
-            Type pKlass = m.getParameters()[0].getParameterizedType();
-
-            return post(COURSE_SERVICE, request, klass, pKlass);
+            return postWithListReturnType(request);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

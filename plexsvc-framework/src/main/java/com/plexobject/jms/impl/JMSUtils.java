@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Future;
 
 import javax.jms.ConnectionFactory;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
+import com.plexobject.domain.Preconditions;
 import com.plexobject.domain.Promise;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
@@ -90,14 +90,14 @@ public class JMSUtils {
     public static ConnectionFactory getConnectionFactory(Configuration config)
             throws NamingException {
         final String contextFactory = config.getProperty(JMS_CONTEXT_FACTORY);
-        Objects.requireNonNull(contextFactory,
+        Preconditions.requireNotNull(contextFactory,
                 "jms.contextFactory property not defined");
         final String connectionFactoryLookup = config
                 .getProperty(JMS_CONNECTION_FACTORY_LOOKUP);
-        Objects.requireNonNull(connectionFactoryLookup,
+        Preconditions.requireNotNull(connectionFactoryLookup,
                 "jms.connectionFactoryLookup property not defined");
         final String providerUrl = config.getProperty(JMS_PROVIDER_URL);
-        Objects.requireNonNull(providerUrl,
+        Preconditions.requireNotNull(providerUrl,
                 "jms.providerUrl property not defined");
         Hashtable<String, String> env = new Hashtable<String, String>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, contextFactory);
@@ -105,7 +105,7 @@ public class JMSUtils {
         InitialContext namingCtx = new InitialContext(env);
         ConnectionFactory connectionFactory = (ConnectionFactory) namingCtx
                 .lookup(connectionFactoryLookup);
-        Objects.requireNonNull(connectionFactory,
+        Preconditions.requireNotNull(connectionFactory,
                 "Could not lookup ConnectionFactory with "
                         + connectionFactoryLookup);
         return connectionFactory;

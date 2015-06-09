@@ -3,9 +3,9 @@ package com.plexobject.fsm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import com.plexobject.domain.Pair;
+import com.plexobject.domain.Preconditions;
 
 /**
  * This class implements simple Finite-State-Machine
@@ -23,8 +23,9 @@ public class FSM {
 
     public FSM(State initialState, TransitionMappings mappings,
             TransitionResolver transitionResolver) {
-        Objects.requireNonNull(initialState, "initialState is required");
-        Objects.requireNonNull(mappings, "transitionMappings is required");
+        Preconditions.requireNotNull(initialState, "initialState is required");
+        Preconditions
+                .requireNotNull(mappings, "transitionMappings is required");
         this.currentState = initialState;
         this.mappings = mappings;
         this.transitionResolver = transitionResolver;

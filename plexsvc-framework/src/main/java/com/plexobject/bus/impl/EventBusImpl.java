@@ -1,7 +1,6 @@
 package com.plexobject.bus.impl;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.plexobject.bus.EventBus;
+import com.plexobject.domain.Preconditions;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
@@ -78,8 +78,8 @@ public class EventBusImpl implements EventBus {
     @Override
     public long subscribe(String channel, RequestHandler handler,
             Predicate<Request> filter) {
-        Objects.requireNonNull(channel, "channel is not specified");
-        Objects.requireNonNull(handler, "handler is not specified");
+        Preconditions.checkEmpty(channel, "channel is not specified");
+        Preconditions.requireNotNull(handler, "handler is not specified");
         synchronized (channel.intern()) {
             long id = nextSubscriberId.incrementAndGet();
             HandlerAndFilter haf = new HandlerAndFilter(id, handler, filter);
@@ -114,8 +114,8 @@ public class EventBusImpl implements EventBus {
 
     @Override
     public void publish(final String channel, final Request request) {
-        Objects.requireNonNull(channel, "channel is not specified");
-        Objects.requireNonNull(request, "request is not specified");
+        Preconditions.checkEmpty(channel, "channel is not specified");
+        Preconditions.requireNotNull(request, "request is not specified");
         synchronized (channel.intern()) {
             final Map<Long, HandlerAndFilter> handlers = handlersAndFiltersByChannel
                     .get(channel);
@@ -128,7 +128,7 @@ public class EventBusImpl implements EventBus {
                                 if (haf.filter == null
                                         || haf.filter.accept(request)) {
                                     haf.handler.handle(request);
-                                }                                
+                                }
                             } catch (Exception ex) {
                                 log.error("Failed to publish " + request, ex);
                             }

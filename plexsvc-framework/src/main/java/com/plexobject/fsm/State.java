@@ -1,6 +1,6 @@
 package com.plexobject.fsm;
 
-import java.util.Objects;
+import com.plexobject.domain.Preconditions;
 
 /**
  * This class encapsulates state of the state-machine
@@ -12,7 +12,7 @@ public class State {
     private final String name;
 
     public State(String name) {
-        Objects.requireNonNull(name);
+        Preconditions.checkEmpty(name, "state is empty");
         this.name = name;
     }
 

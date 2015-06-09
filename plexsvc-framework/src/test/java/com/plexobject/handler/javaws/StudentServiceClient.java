@@ -54,8 +54,8 @@ public class StudentServiceClient extends BaseServiceClient implements
 
         try {
             Method m = StudentService.class.getMethod("count", List.class);
-            Class<?> klass = m.getParameters()[0].getClass();
-            Type pKlass = m.getParameters()[0].getParameterizedType();
+            Class<?> klass = m.getParameterTypes()[0];
+            Type pKlass = m.getGenericParameterTypes()[0];
             return post(STUDENT_SERVICE, request, klass, pKlass);
         } catch (Exception e) {
             throw new RuntimeException(e);

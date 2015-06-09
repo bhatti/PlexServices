@@ -1,7 +1,6 @@
 package com.plexobject.fsm;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import com.plexobject.domain.Preconditions;
 
@@ -23,8 +22,8 @@ public class TransitionMapping {
 
     public TransitionMapping(String fromState, String onEvent,
             String... toStates) {
-        Objects.requireNonNull(fromState, "fromState is required");
-        Objects.requireNonNull(onEvent, "onEvent is required");
+        Preconditions.checkEmpty(fromState, "fromState is required");
+        Preconditions.checkEmpty(onEvent, "onEvent is required");
         Preconditions.checkArgument(
                 toStates != null && toStates.length > 0,
                 "toStates is required for fromState " + fromState

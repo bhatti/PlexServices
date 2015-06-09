@@ -4,7 +4,6 @@ import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -17,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.domain.Configuration;
+import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -120,11 +120,11 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     }
 
     public synchronized void add(ServiceConfigDesc config, RequestHandler h) {
-        Objects.requireNonNull(config, "service handler " + h
+        Preconditions.requireNotNull(config, "service handler " + h
                 + " doesn't define ServiceConfig annotation");
         ServiceContainer container = serviceRegistryContainers
                 .getOrAddServiceContainer(config.protocol());
-        Objects.requireNonNull(container,
+        Preconditions.requireNotNull(container,
                 "Unsupported container for service handler " + h);
         serviceRegistryHandlers.add(h, config);
         if (!container.exists(h)) {
@@ -173,7 +173,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     @Override
     public synchronized boolean remove(RequestHandler h) {
         ServiceConfigDesc config = getServiceConfig(h);
-        Objects.requireNonNull(config, "config" + h
+        Preconditions.requireNotNull(config, "config" + h
                 + " doesn't define ServiceConfig annotation");
         ServiceContainer container = serviceRegistryContainers
                 .getOrAddServiceContainer(config.protocol());
@@ -193,7 +193,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     @Override
     public boolean exists(RequestHandler h) {
         ServiceConfigDesc config = getServiceConfig(h);
-        Objects.requireNonNull(config, "config" + h
+        Preconditions.requireNotNull(config, "config" + h
                 + " doesn't define ServiceConfig annotation");
         ServiceContainer container = serviceRegistryContainers
                 .getOrAddServiceContainer(config.protocol());

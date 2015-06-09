@@ -57,13 +57,13 @@ public class DefaultJMSContainerTest {
         }
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateWithoutContextFactory() throws Exception {
         final Configuration config = new Configuration(properties);
         JMSUtils.getJMSContainer(config);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateWithouFactoryLookup() throws Exception {
         properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
@@ -71,7 +71,7 @@ public class DefaultJMSContainerTest {
         JMSUtils.getJMSContainer(config);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateWithoutProviderUrl() throws Exception {
         properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");

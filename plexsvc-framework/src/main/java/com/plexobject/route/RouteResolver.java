@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.plexobject.domain.Preconditions;
 
 /**
  * PlexServices allows http url with parameters. This class provides lookup
@@ -130,8 +131,8 @@ public class RouteResolver<T> {
     private Node<T> root = new Node<T>(null, "/", 0);
 
     public void put(String path, T object) {
-        Objects.requireNonNull(path, "null path");
-        Objects.requireNonNull(object, "null object");
+        Preconditions.checkEmpty(path, "null path");
+        Preconditions.requireNotNull(object, "null object");
         path = path.trim();
         servicesByPath.put(path, object);
         String[] fragments = path.split("/");
@@ -169,7 +170,7 @@ public class RouteResolver<T> {
     }
 
     private Node<T> getNode(String path, Map<String, Object> parameters) {
-        Objects.requireNonNull(path, "null path");
+        Preconditions.checkEmpty(path, "null path");
 
         String[] fragments = path.split("/");
         if (fragments.length == 0) {

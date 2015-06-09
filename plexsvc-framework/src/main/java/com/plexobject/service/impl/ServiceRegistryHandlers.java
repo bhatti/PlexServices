@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.plexobject.domain.Preconditions;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.RequestInterceptor;
 import com.plexobject.service.ServiceConfigDesc;
@@ -46,7 +46,7 @@ public class ServiceRegistryHandlers {
      * @param config
      */
     public void add(RequestHandler h, ServiceConfigDesc config) {
-        Objects.requireNonNull(config, "service handler " + h
+        Preconditions.requireNotNull(config, "service handler " + h
                 + " doesn't define ServiceConfig annotation");
         setServiceConfig(h, config);
         addInterceptors(h);

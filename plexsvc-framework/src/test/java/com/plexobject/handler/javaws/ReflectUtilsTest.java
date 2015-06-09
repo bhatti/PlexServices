@@ -122,8 +122,8 @@ public class ReflectUtilsTest {
         String json1 = CODEC.encode(courses1);
         Method m = TestService.class
                 .getMethod("printCourses", Collection.class);
-        Class<?> klass = m.getParameters()[0].getType();
-        Type pKlass = m.getParameters()[0].getParameterizedType();
+        Class<?> klass = m.getParameterTypes()[0];
+        Type pKlass = m.getGenericParameterTypes()[0];
         Collection<Course> courses2 = (Collection<Course>) ReflectUtils.decode(
                 json1, klass, pKlass, CODEC);
         String json2 = CODEC.encode(courses2);
@@ -137,7 +137,7 @@ public class ReflectUtilsTest {
         Student s = buildStudent();
         Method m = TestService.class.getMethod("printStudent", Student.class);
         String payload = CODEC.encode(s);
-        Object[] args = ReflectUtils.decode(payload, m.getParameters(), CODEC);
+        Object[] args = ReflectUtils.decode(payload, m, CODEC);
         List<Object> result = (List<Object>) m.invoke(service, args);
         assertEquals(s, result.get(0));
     }
@@ -149,7 +149,7 @@ public class ReflectUtilsTest {
         Method m = TestService.class
                 .getMethod("printCourses", Collection.class);
         String payload = CODEC.encode(c);
-        Object[] args = ReflectUtils.decode(payload, m.getParameters(), CODEC);
+        Object[] args = ReflectUtils.decode(payload, m, CODEC);
         List<Object> result = (List<Object>) m.invoke(service, args);
         assertEquals(c, result);
     }
@@ -160,7 +160,7 @@ public class ReflectUtilsTest {
         Map<String, Student> students = buildStudentsMap();
         Method m = TestService.class.getMethod("printStudents", Map.class);
         String payload = CODEC.encode(students);
-        Object[] args = ReflectUtils.decode(payload, m.getParameters(), CODEC);
+        Object[] args = ReflectUtils.decode(payload, m, CODEC);
         Collection<Object> result = (Collection<Object>) m
                 .invoke(service, args);
         assertEquals(students.size(), result.size());
@@ -185,8 +185,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getCourse", String.class);
         String payload = "100";
         Course c1 = new Course(payload, "Ruby");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(payload, arg);
         Course c2 = (Course) m.invoke(service, new Object[] { arg });
         assertEquals(c1, c2);
@@ -197,8 +197,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getStudent", Long.class);
         String payload = "100";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(Long.valueOf(payload), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);
@@ -209,8 +209,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getStudentShort", Short.TYPE);
         String payload = "100";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(Short.valueOf(payload), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);
@@ -221,8 +221,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getStudentInt", Integer.TYPE);
         String payload = "100";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(Integer.valueOf(payload), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);
@@ -237,8 +237,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getStudentLong", Long.TYPE);
         String payload = "100";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(Long.valueOf(payload), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);
@@ -249,8 +249,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getStudentByte", Byte.TYPE);
         String payload = "100";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(Byte.valueOf(payload), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);
@@ -266,8 +266,8 @@ public class ReflectUtilsTest {
                 .getMethod("getStudentChar", Character.TYPE);
         String payload = "1";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(new Character(payload.charAt(0)), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);
@@ -278,8 +278,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getStudentFloat", Float.TYPE);
         String payload = "100.0";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(Float.valueOf(payload), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);
@@ -290,8 +290,8 @@ public class ReflectUtilsTest {
         Method m = TestService.class.getMethod("getStudentDouble", Double.TYPE);
         String payload = "100.0";
         Student s1 = new Student(payload, "Jack");
-        Object arg = ReflectUtils.decode(payload,
-                m.getParameters()[0].getType(), null, CODEC);
+        Object arg = ReflectUtils.decode(payload, m.getParameterTypes()[0],
+                null, CODEC);
         assertEquals(Double.valueOf(payload), arg);
         Student s2 = (Student) m.invoke(service, new Object[] { arg });
         assertEquals(s1, s2);

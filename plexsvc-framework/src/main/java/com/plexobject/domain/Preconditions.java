@@ -25,6 +25,12 @@ public class Preconditions {
         }
     }
 
+    public static void requireNotNull(Object obj, String message) {
+        if (obj == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     public static <T> T checkNotNull(T obj, String message) {
         if (obj == null) {
             throw new IllegalArgumentException(message);

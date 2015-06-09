@@ -39,7 +39,7 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     @Override
     public void handle(Request request) {
-        Pair<String, String> methodAndPayload = getMethodNameAndPayload(request
+        Pair<String, String> methodAndPayload = getMethodNameAndPayload((String) request
                 .getPayload());
 
         Method method = methods.get(methodAndPayload.first);
@@ -48,15 +48,15 @@ public class JavawsDelegateHandler implements RequestHandler {
                     + methodAndPayload.first + ", request "
                     + request.getPayload(), HttpResponse.SC_NOT_FOUND);
         }
-        WebParam webParam = method.getParameters().length > 0 ? method
-                .getParameters()[0].getAnnotation(WebParam.class) : null;
+        WebParam webParam = method.getParameterTypes().length > 0 ? method
+                .getParameterTypes()[0].getAnnotation(WebParam.class) : null;
         String responseItemTag = webParam == null ? "item" : webParam.name();
         //
         String responseTag = responseNamespace + methodAndPayload.first
                 + RESPONSE_SUFFIX;
         try {
             Object[] args = ReflectUtils.decode(methodAndPayload.second,
-                    method.getParameters(), request.getCodec());
+                    method, request.getCodec());
             Map<String, Object> response = new HashMap<>();
             Object result = method.invoke(delegate, args);
             if (result != null) {
