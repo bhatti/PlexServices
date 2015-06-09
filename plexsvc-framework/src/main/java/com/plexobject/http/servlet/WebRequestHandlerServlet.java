@@ -74,6 +74,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                             return WebRequestHandlerServlet.this;
                         }
                     });
+            serviceRegistry.setServletContext(getServletContext());
             ServiceRegistryLifecycleAware serviceRegistryAware = (ServiceRegistryLifecycleAware) Class
                     .forName(plexserviceCallbackClass).newInstance();
             serviceRegistry

@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     private final ServiceRegistryContainers serviceRegistryContainers;
     private final Map<String, RequestHandler> pingHandlers = new ConcurrentHashMap<>();
     private final boolean enablePingHandlers;
+    private ServletContext servletContext;
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
         this(config, authorizer, new NettyWebContainerProvider());
@@ -306,6 +308,14 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         serviceInvocationHelper.invoke(request, handler, interceptors);
     }
 
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
+
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
+
     private void addPingHandler(final RequestHandler h,
             final ServiceConfigDesc config, final ServiceContainer container) {
         String pingEndpoint = config.endpoint() + ".ping";
@@ -340,4 +350,5 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
             removeServiceConfig(pingHandler);
         }
     }
+
 }
