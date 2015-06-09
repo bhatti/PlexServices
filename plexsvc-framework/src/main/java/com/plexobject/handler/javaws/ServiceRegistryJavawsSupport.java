@@ -1,6 +1,6 @@
 package com.plexobject.handler.javaws;
 
-import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,26 +21,26 @@ public class ServiceRegistryJavawsSupport {
     private static final Logger logger = LoggerFactory
             .getLogger(ServiceRegistryJavawsSupport.class);
 
-    public ServiceRegistryJavawsSupport(ServiceRegistry serviceRegistry,
-            List<Object> serviceBeans, Configuration config) {
+    public static void addHandlers(Configuration config,
+            ServiceRegistry serviceRegistry, Map<String, Object> services) {
         final RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
                 config);
-        for (Object service : serviceBeans) {
+        for (Map.Entry<String, Object> e : services.entrySet()) {
             Class<?> webService = RequestHandlerAdapterJavaws
-                    .getWebServiceInterface(service.getClass());
+                    .getWebServiceInterface(e.getValue().getClass());
             if (webService == null) {
                 continue;
             }
 
             try {
                 Pair<ServiceConfigDesc, RequestHandler> configAndHandler = requestHandlerAdapterJavaws
-                        .create(service, (ServiceConfigDesc) null);
+                        .create(e.getValue(), e.getKey());
                 serviceRegistry.add(configAndHandler.first,
                         configAndHandler.second);
-            } catch (Exception e) {
-                logger.error("Could not add " + service, e);
+            } catch (Exception ex) {
+                logger.error(
+                        "Could not add " + e.getKey() + "=>" + e.getValue(), ex);
             }
         }
-        serviceRegistry.start();
     }
 }
