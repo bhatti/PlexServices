@@ -6,8 +6,8 @@ import java.util.Map;
 
 import javax.jws.WebParam;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
@@ -19,7 +19,7 @@ import com.plexobject.http.ServiceInvocationException;
 import com.plexobject.util.ReflectUtils;
 
 public class JavawsDelegateHandler implements RequestHandler {
-    private static final Logger logger = LoggerFactory
+    private static final Logger logger = Logger
             .getLogger(JavawsDelegateHandler.class);
     private static final String RESPONSE_SUFFIX = "Response";
 

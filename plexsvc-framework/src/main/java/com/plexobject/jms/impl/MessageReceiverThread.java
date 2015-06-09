@@ -8,8 +8,8 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.naming.NamingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Preconditions;
 
@@ -20,7 +20,7 @@ import com.plexobject.domain.Preconditions;
  *
  */
 public class MessageReceiverThread implements Runnable {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(MessageReceiverThread.class);
 
     interface Callback {

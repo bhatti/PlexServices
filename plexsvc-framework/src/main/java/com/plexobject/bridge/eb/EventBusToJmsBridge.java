@@ -18,8 +18,8 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.bus.EventBus;
@@ -52,8 +52,7 @@ import com.plexobject.util.IOUtils;
  *
  */
 public class EventBusToJmsBridge implements Lifecycle {
-    private static final Logger log = LoggerFactory
-            .getLogger(EventBusToJmsBridge.class);
+    private static final Logger log = Logger.getLogger(EventBusToJmsBridge.class);
 
     /**
      * This listener listens to the channel and forwards events to the JMS

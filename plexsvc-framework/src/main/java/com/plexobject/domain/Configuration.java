@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.encode.CodecType;
 
@@ -19,7 +19,7 @@ import com.plexobject.encode.CodecType;
  *
  */
 public class Configuration {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(Configuration.class);
 
     private final Properties properties = new Properties();

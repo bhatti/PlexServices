@@ -37,8 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
@@ -69,7 +69,7 @@ import com.plexobject.service.Protocol;
  */
 @Sharable
 public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(NettyWebRequestHandler.class);
     private final RequestHandler handler;
     private final CodecType codecType;

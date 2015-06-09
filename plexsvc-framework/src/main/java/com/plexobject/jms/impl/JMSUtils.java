@@ -21,8 +21,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
@@ -36,7 +36,7 @@ import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.MessageListenerContainer;
 
 public class JMSUtils {
-    private static final Logger log = LoggerFactory.getLogger(JMSUtils.class);
+    private static final Logger log = Logger.getLogger(JMSUtils.class);
     public static final String JMS_CONNECTION_FACTORY_LOOKUP = "JMSConnectionFactoryLookup";
     public static final String JMS_PROVIDER_URL = "JMSProviderUrl";
     public static final String JMS_CONTEXT_FACTORY = "JMSContextFactory";

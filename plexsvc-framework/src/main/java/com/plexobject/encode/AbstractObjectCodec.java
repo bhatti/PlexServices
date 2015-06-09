@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 /**
  * This is base class for encoding implementation classes that provides helper
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class AbstractObjectCodec implements ObjectCodec {
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    protected final Logger log = Logger.getLogger(getClass());
     private static final BeanUtilsBean beanUtilsBean = new BeanUtilsBean(
             new ConvertUtilsBean() {
                 @SuppressWarnings("unchecked")

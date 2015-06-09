@@ -14,8 +14,8 @@ import java.util.concurrent.TimeoutException;
 
 import javax.jms.Destination;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.domain.Configuration;
@@ -43,8 +43,7 @@ import com.plexobject.util.IOUtils;
  *
  */
 public class WebToJmsBridge implements RequestHandler, LifecycleAware {
-    private static final Logger log = LoggerFactory
-            .getLogger(WebToJmsBridge.class);
+    private static final Logger log = Logger.getLogger(WebToJmsBridge.class);
     private final JMSContainer jmsContainer;
     private final ServiceRegistry serviceRegistry;
     //

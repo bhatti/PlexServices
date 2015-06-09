@@ -10,8 +10,8 @@ import javax.jms.Destination;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.handler.Handler;
@@ -21,7 +21,7 @@ import com.plexobject.jms.impl.DefaultJMSContainer;
 
 public class JmsSender {
     private static final int TEN_SECONDS = 10;
-    private static final Logger log = LoggerFactory.getLogger(JmsSender.class);
+    private static final Logger log = Logger.getLogger(JmsSender.class);
 
     public static void send(String propertyFile, String destName,
             Map<String, Object> headers, String text) throws Exception {

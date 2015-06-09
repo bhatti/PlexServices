@@ -8,8 +8,8 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
@@ -45,7 +45,7 @@ import com.plexobject.service.Method;
 import com.plexobject.service.ServiceRegistry;
 
 public class Main {
-    private static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final Logger log = Logger.getLogger(Main.class);
     private static final int DEFAULT_TIMEOUT_SECS = 5;
     private static final CodecType DEFAULT_CODEC = CodecType.JSON;
 

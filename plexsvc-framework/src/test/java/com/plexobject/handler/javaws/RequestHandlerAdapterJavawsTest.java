@@ -16,8 +16,8 @@ import org.apache.log4j.LogManager;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
@@ -27,7 +27,7 @@ import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
 public class RequestHandlerAdapterJavawsTest {
-    private static final Logger logger = LoggerFactory
+    private static final Logger logger = Logger
             .getLogger(RequestHandlerAdapterJavawsTest.class);
 
     private static ServiceRegistry serviceRegistry;

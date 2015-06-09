@@ -6,8 +6,8 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.ObjectCodecFactory;
@@ -16,7 +16,7 @@ import com.plexobject.handler.Response;
 
 public class NettyWebsocketResponseDispatcher extends
         AbstractResponseDispatcher {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(NettyWebsocketResponseDispatcher.class);
     private final Channel channel;
     private final Map<String, Object> properties = new HashMap<>();

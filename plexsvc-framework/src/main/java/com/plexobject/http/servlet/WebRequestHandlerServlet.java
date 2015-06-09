@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
@@ -40,7 +40,7 @@ import com.plexobject.util.IOUtils;
  */
 public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(WebRequestHandlerServlet.class);
 
     private static final long serialVersionUID = 1L;

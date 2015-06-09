@@ -3,8 +3,7 @@ package com.plexobject.handler;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
@@ -13,7 +12,7 @@ import com.plexobject.http.HttpResponse;
 import com.plexobject.util.ExceptionUtils;
 
 public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(AbstractResponseDispatcher.class);
 
     protected static final String[] HEADER_PROPERTIES = new String[] {
@@ -52,7 +51,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         }
         String replyText = null;
         if (payload instanceof Exception) {
-            log.warn("Error received " + payload, payload);
+            log.warn("Error received " + payload);
             Map<String, Object> resp = ExceptionUtils
                     .toErrors((Exception) payload);
             replyText = ObjectCodecFactory.getInstance()

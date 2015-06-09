@@ -11,8 +11,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.servlet.ServletContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
@@ -39,7 +39,7 @@ import com.plexobject.service.impl.ServiceRegistryHandlers;
  */
 public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         ServiceRegistryMBean {
-    private static final Logger logger = LoggerFactory
+    private static final Logger logger = Logger
             .getLogger(ServiceRegistry.class);
 
     private final Configuration config;

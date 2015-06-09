@@ -13,8 +13,8 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.NamingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
@@ -35,7 +35,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 class JmsRequestHandler implements MessageListener, ExceptionListener {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(JmsRequestHandler.class);
 
     private final ServiceRegistry serviceRegistry;

@@ -2,8 +2,8 @@ package com.plexobject.http;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
@@ -21,7 +21,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 public class DefaultHttpRequestHandler implements RequestHandler {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(DefaultHttpRequestHandler.class);
     private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
     private final ServiceRegistry serviceRegistry;

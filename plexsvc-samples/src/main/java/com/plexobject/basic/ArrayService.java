@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
@@ -19,7 +19,7 @@ import com.plexobject.service.ServiceConfig;
 
 @ServiceConfig(protocol = Protocol.HTTP, endpoint = "/array", method = Method.GET, codec = CodecType.JSON)
 public class ArrayService implements RequestHandler {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(ReverseService.class);
 
     public ArrayService() {

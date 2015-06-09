@@ -2,8 +2,8 @@ package com.plexobject.handler.javaws;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Pair;
 import com.plexobject.handler.RequestHandler;
@@ -17,7 +17,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 public class ServiceRegistryJavawsSupport {
-    private static final Logger logger = LoggerFactory
+    private static final Logger logger = Logger
             .getLogger(ServiceRegistryJavawsSupport.class);
 
     public static void addHandlers(ServiceRegistry serviceRegistry, Map<String, Object> services) {

@@ -4,8 +4,8 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.deploy.AutoDeployer;
 import com.plexobject.encode.CodecType;
@@ -24,7 +24,7 @@ public class QuoteServer implements RequestHandler {
         SUBSCRIBE, UNSUBSCRIBE
     }
 
-    static final Logger log = LoggerFactory.getLogger(QuoteServer.class);
+    static final Logger log = Logger.getLogger(QuoteServer.class);
 
     private QuoteStreamer quoteStreamer = new QuoteStreamer();
 

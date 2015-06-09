@@ -1,13 +1,13 @@
 package com.plexobject.bugger.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.service.LifecycleAware;
 
 public class AbstractService implements LifecycleAware {
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    protected final Logger log = Logger.getLogger(getClass());
 
     protected final UserRepository userRepository;
 

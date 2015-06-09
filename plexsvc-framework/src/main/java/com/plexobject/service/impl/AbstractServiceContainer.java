@@ -1,7 +1,7 @@
 package com.plexobject.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
@@ -17,7 +17,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 public abstract class AbstractServiceContainer implements ServiceContainer {
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    protected final Logger log = Logger.getLogger(getClass());
     protected final ServiceRegistry serviceRegistry;
     protected final Configuration config;
     protected boolean running;

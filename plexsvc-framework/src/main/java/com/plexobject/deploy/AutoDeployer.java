@@ -2,8 +2,8 @@ package com.plexobject.deploy;
 
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.google.common.annotations.VisibleForTesting;
 import com.plexobject.domain.Configuration;
@@ -23,7 +23,7 @@ import com.plexobject.util.ReflectUtils;
  *
  */
 public class AutoDeployer implements ServiceRegistryLifecycleAware {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(AutoDeployer.class);
 
     @VisibleForTesting

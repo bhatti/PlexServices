@@ -1,7 +1,7 @@
 package com.plexobject.bugger.service.log;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
@@ -15,7 +15,7 @@ import com.plexobject.service.ServiceConfig;
 // contentType = "application/json")
 @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://{scope}-log-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
 public class LogService implements RequestHandler {
-    private static final Logger log = LoggerFactory.getLogger(LogService.class);
+    private static final Logger log = Logger.getLogger(LogService.class);
 
     @Override
     public void handle(Request request) {

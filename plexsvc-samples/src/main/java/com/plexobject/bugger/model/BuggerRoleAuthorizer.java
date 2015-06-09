@@ -1,7 +1,7 @@
 package com.plexobject.bugger.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.handler.Request;
@@ -9,7 +9,7 @@ import com.plexobject.security.AuthException;
 import com.plexobject.security.RoleAuthorizer;
 
 public class BuggerRoleAuthorizer implements RoleAuthorizer {
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = Logger.getLogger(getClass());
 
     private final UserRepository userRepository;
 

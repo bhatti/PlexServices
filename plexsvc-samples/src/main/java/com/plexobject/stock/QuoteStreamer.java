@@ -8,13 +8,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.handler.ResponseDispatcher;
 
 public class QuoteStreamer extends TimerTask {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(QuoteStreamer.class);
 
     private int delay = 1000;

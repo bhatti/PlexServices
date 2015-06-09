@@ -1,7 +1,7 @@
 package com.plexobject.bugger.service.notification;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.bugger.model.BugReport;
 import com.plexobject.encode.CodecType;
@@ -14,7 +14,7 @@ import com.plexobject.service.ServiceConfig;
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/notify", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-notify-service", method = Method.MESSAGE, codec = CodecType.JSON)
 public class NotificationService implements RequestHandler {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(NotificationService.class);
 
     public void sendNotification(BugReport report) {

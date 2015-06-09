@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 /**
  * This class provides helper methods for exceptions s *
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ExceptionUtils {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(ExceptionUtils.class);
     private static final String ERROR_TYPE = "errorType";
 

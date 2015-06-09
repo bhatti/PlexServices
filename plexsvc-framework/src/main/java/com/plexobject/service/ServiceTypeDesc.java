@@ -3,11 +3,11 @@ package com.plexobject.service;
 import java.io.Serializable;
 import java.util.regex.PatternSyntaxException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 public class ServiceTypeDesc implements Serializable {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(ServiceTypeDesc.class);
 
     private static final long serialVersionUID = 1L;

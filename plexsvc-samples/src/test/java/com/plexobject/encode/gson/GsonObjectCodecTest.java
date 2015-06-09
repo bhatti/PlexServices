@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.bridge.eb.EventBusToJmsEntry;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.Employee;
+import com.plexobject.encode.gson.GsonObjectCodec;
 import com.plexobject.encode.json.JsonObjectCodec;
 
 public class GsonObjectCodecTest {

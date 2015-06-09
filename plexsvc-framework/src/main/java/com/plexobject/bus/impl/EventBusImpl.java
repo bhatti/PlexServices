@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.bus.EventBus;
 import com.plexobject.domain.Preconditions;
@@ -22,7 +22,7 @@ import com.plexobject.predicate.Predicate;
  * 
  */
 public class EventBusImpl implements EventBus {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(EventBusImpl.class);
     private static final int DEFAULT_MAX_DISPATCH_THREADS = 4;
 

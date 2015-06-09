@@ -3,8 +3,8 @@ package com.plexobject.service.impl;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 import com.plexobject.domain.Redirectable;
 import com.plexobject.domain.Statusable;
@@ -22,7 +22,7 @@ import com.plexobject.validation.IRequiredFieldValidator;
 import com.plexobject.validation.RequiredFieldValidator;
 
 public class ServiceInvocationHelper {
-    private static final Logger log = LoggerFactory
+    private static final Logger log = Logger
             .getLogger(ServiceInvocationHelper.class);
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private final ServiceRegistry serviceRegistry;

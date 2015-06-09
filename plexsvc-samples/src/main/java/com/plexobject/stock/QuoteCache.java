@@ -7,11 +7,11 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 public class QuoteCache {
-    private static final Logger log = LoggerFactory.getLogger(QuoteCache.class);
+    private static final Logger log = Logger.getLogger(QuoteCache.class);
 
     private Map<String, Quote> cache = new ConcurrentHashMap<>();
 
