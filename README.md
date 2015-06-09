@@ -46,7 +46,7 @@ PlexServices is designed on following design principles:
 
 - PlexServices also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
-- PlexServices allows you to import existing JavaWS services.
+- PlexServices allows you to import existing JavaWS based services.
 
 - PlexServices allows you to specify the services you want to deploy or allows support to automatically 
 deplooy all services that implement ServiceConfig annotation.
