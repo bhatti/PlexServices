@@ -34,7 +34,7 @@ public class ServiceRegistryJavawsSupport {
 
             try {
                 Pair<ServiceConfigDesc, RequestHandler> configAndHandler = requestHandlerAdapterJavaws
-                        .create(service, null);
+                        .create(service, (ServiceConfigDesc) null);
                 serviceRegistry.add(configAndHandler.first,
                         configAndHandler.second);
             } catch (Exception e) {

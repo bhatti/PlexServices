@@ -17,4 +17,5 @@ public interface RequestHandlerAdapter {
     Pair<ServiceConfigDesc, RequestHandler> create(Object service,
             ServiceConfigDesc desc);
 
+    Pair<ServiceConfigDesc, RequestHandler> create(Object service, String path);
 }

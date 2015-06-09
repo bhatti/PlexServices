@@ -38,7 +38,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
                 }
                 try {
                     Pair<ServiceConfigDesc, RequestHandler> handlerAndConfig = create(
-                            serviceClass, null);
+                            serviceClass, (ServiceConfigDesc) null);
                     handlers.put(handlerAndConfig.first,
                             handlerAndConfig.second);
                 } catch (IllegalArgumentException e) {
@@ -60,6 +60,16 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Pair<ServiceConfigDesc, RequestHandler> create(Object service,
+            String endpoint) {
+        ServiceConfigDesc serviceConfig = endpoint != null ? new ServiceConfigDesc(
+                Protocol.HTTP, com.plexobject.service.Method.POST, Void.class,
+                config.getDefaultCodecType(), DEFAULT_VERSION, endpoint, true,
+                new String[0], 1) : null;
+        return create(service, serviceConfig);
     }
 
     @Override
