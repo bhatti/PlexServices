@@ -4,7 +4,6 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.7'
     compile 'org.owasp.encoder:encoder:1.1.1'
     compile 'io.netty:netty-all:4.0.23.Final'
-    compile 'com.google.code.gson:gson:2.3'
     compile 'com.fasterxml.jackson.core:jackson-core:2.4.1.1'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.4.1.3'
@@ -12,7 +11,7 @@ dependencies {
     compile 'com.thoughtworks.xstream:xstream:1.4.7'
     compile 'javax.jms:jms:1.1'
     compile 'javax.jms:jms-api:1.1-rev-1'
-    compile 'com.timgroup:java-statsd-client:3.0.2'
+    //compile 'com.timgroup:java-statsd-client:3.0.2'
     compile 'org.reflections:reflections:0.9.9'
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
     providedCompile "javax.servlet:servlet-api:2.5"

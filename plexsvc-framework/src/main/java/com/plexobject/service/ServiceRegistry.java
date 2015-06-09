@@ -24,12 +24,11 @@ import com.plexobject.http.WebContainerProvider;
 import com.plexobject.http.netty.NettyWebContainerProvider;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
+import com.plexobject.metrics.StatsCollector;
 import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.impl.ServiceInvocationHelper;
 import com.plexobject.service.impl.ServiceRegistryContainers;
 import com.plexobject.service.impl.ServiceRegistryHandlers;
-import com.timgroup.statsd.NonBlockingStatsDClient;
-import com.timgroup.statsd.StatsDClient;
 
 /**
  * This class defines registry for service handlers
@@ -39,13 +38,13 @@ import com.timgroup.statsd.StatsDClient;
  */
 public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         ServiceRegistryMBean {
-    private static final Logger log = LoggerFactory
+    private static final Logger logger = LoggerFactory
             .getLogger(ServiceRegistry.class);
 
     private final Configuration config;
     private WebToJmsBridge webToJmsBridge;
     private boolean running;
-    private final StatsDClient statsd;
+    private StatsCollector statsd;
     private ServiceMetricsRegistry serviceMetricsRegistry;
     private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     private ServiceRegistryLifecycleAware serviceRegistryLifecycleAware;
@@ -68,12 +67,19 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         this.serviceRegistryContainers = new ServiceRegistryContainers(config,
                 authorizer, webContainerProvider, this);
         this.enablePingHandlers = config.getBoolean("enablePingHandlers");
-        String statsdHost = config.getProperty("statsd.host");
-        if (statsdHost != null) {
-            String servicePrefix = config.getProperty("serviceConfigs", "");
-            this.statsd = new NonBlockingStatsDClient(config.getProperty(
-                    "statsd.prefix", servicePrefix), statsdHost,
-                    config.getInteger("statsd.port", 8125));
+        String statsCollectorClassName = config
+                .getProperty("statsCollectorClassName");
+        if (statsCollectorClassName != null) {
+            try {
+                this.statsd = (StatsCollector) Class.forName(
+                        statsCollectorClassName).newInstance();
+            } catch (Exception e) {
+                logger.error("Could not create stats collector", e);
+            }
+            // String servicePrefix = config.getProperty("serviceConfigs", "");
+            // this.statsd = new NonBlockingStatsDClient(config.getProperty(
+            // "statsd.prefix", servicePrefix), statsdHost,
+            // config.getInteger("statsd.port", 8125));
         } else {
             this.statsd = null;
         }
@@ -83,7 +89,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
                     "PlexServices:name=ServiceRegistry"));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
-            log.error("Could not register mbean for service-registry", e);
+            logger.error("Could not register mbean for service-registry", e);
         }
     }
 
@@ -149,7 +155,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
                     new ObjectName(objName));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
-            log.error("Could not register mbean " + objName, e);
+            logger.error("Could not register mbean " + objName, e);
         }
     }
 
@@ -166,7 +172,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
             mbs.registerMBean(metrics, new ObjectName(objName));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
-            log.error("Could not register mbean " + objName, e);
+            logger.error("Could not register mbean " + objName, e);
         }
     }
 
@@ -229,8 +235,8 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     @Override
     public synchronized void start() {
         if (serviceRegistryLifecycleAware != null) {
-            log.info("invoking onStarted for " + serviceRegistryLifecycleAware
-                    + " ...");
+            logger.info("invoking onStarted for "
+                    + serviceRegistryLifecycleAware + " ...");
             serviceRegistryLifecycleAware.onStarted(this);
         }
         serviceRegistryContainers.start();

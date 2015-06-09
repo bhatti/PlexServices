@@ -8,8 +8,6 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.timgroup.statsd.StatsDClient;
-
 /**
  * This class stores timing information for service metrics
  * 
@@ -52,9 +50,9 @@ public class ServiceMetrics implements ServiceMetricsMBean {
     private long minValue = Long.MAX_VALUE;
     private long maxValue = Long.MIN_VALUE;
     private long lastValue;
-    private final StatsDClient statsd;
+    private final StatsCollector statsd;
 
-    public ServiceMetrics(StatsDClient statsd, String name) {
+    public ServiceMetrics(StatsCollector statsd, String name) {
         this.statsd = statsd;
         this.name = name;
         for (int i = 0; i < SECONDS; i++) {

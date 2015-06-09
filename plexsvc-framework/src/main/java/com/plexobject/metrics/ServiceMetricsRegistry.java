@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
-import com.timgroup.statsd.StatsDClient;
 
 /**
  * This class maintains service metrics. It also exposes them as JMX MBeans so
@@ -19,10 +18,10 @@ import com.timgroup.statsd.StatsDClient;
 public class ServiceMetricsRegistry {
     private final Map<String, ServiceMetrics> stats = new ConcurrentHashMap<>();
     private final ServiceRegistry serviceRegistry;
-    private final StatsDClient statsd;
+    private final StatsCollector statsd;
 
     public ServiceMetricsRegistry(final ServiceRegistry serviceRegistry,
-            final StatsDClient statsd) {
+            final StatsCollector statsd) {
         this.serviceRegistry = serviceRegistry;
         this.statsd = statsd;
     }
