@@ -89,7 +89,7 @@ public class Request extends AbstractPayload {
     private Protocol protocol;
     private Method method;
     private String endpoint;
-    private transient CodecType codecType;
+    private CodecType codecType;
 
     Request() {
     }

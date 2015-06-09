@@ -46,6 +46,8 @@ PlexServices is designed on following design principles:
 
 - PlexServices also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
+- PlexServices allows you to import existing JavaWS 
+
 - PlexServices allows you to specify the services you want to deploy or allows support to automatically 
 deplooy all services that implement ServiceConfig annotation.
 
@@ -633,6 +635,35 @@ Here is a sample json file that describes mapping:
 "com.plexobject.bugger.model.User"}]
 ```
 
+### JavaWS support
+PlexServices allows you to import existing JavaWS and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
+```java 
+import javax.jws.WebService;
+
+@WebService
+public interface StudentService {
+    Student save(Student student);
+    List<Student> query(Map<String, Object> criteria);
+    Student get(Long id);
+}
+```
+You can convert the implementing service into RequestHandler as follows:
+
+```java 
+Configuration config = ...
+RoleAuthorizer roleAuthorizer = ...
+serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
+RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(config);
+Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
+                .createFromPackages("com.plexobject.handler.javaws");
+for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers.entrySet()) {
+  serviceRegistry.add(e.getKey(), e.getValue());
+}
+serviceRegistry.start();
+```
+Above code looks for classes that implement WebService and createFromPackages
+returns RequestHandlers. If you have an existing service object then you can
+use create method instead.
 
 ### Finite State Machine
 PlexServices provides helper classes to implement finite state machine. For example, here is how you can implement FSM for Android application lifecycle:
