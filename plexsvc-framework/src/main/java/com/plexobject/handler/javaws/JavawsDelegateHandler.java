@@ -8,7 +8,6 @@ import javax.jws.WebParam;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.domain.Pair;
@@ -68,13 +67,14 @@ public class JavawsDelegateHandler implements RequestHandler {
             }
             request.getResponseDispatcher().send(response);
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Failed to invoke " + method + ", for request "
                     + request, e);
             request.getResponseDispatcher().send(e);
         }
     }
 
+    // hard coding to handle JSON messages
+    // TODO handle XML messages
     private static Pair<String, String> getMethodNameAndPayload(String text) {
         if (text == null || text.length() == 0 || text.charAt(0) != '{') {
             throw new IllegalArgumentException("Unsupported request " + text);
