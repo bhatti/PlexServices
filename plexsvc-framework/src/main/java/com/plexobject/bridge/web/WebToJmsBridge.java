@@ -118,7 +118,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
      * It then listen for the response if the mapping entry is not asynchronous.
      */
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         final WebToJmsEntry entry = getMappingEntry(request);
 
         if (entry == null) {
@@ -159,7 +159,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
     }
 
-    WebToJmsEntry getMappingEntry(Request request) {
+    WebToJmsEntry getMappingEntry(Request<Object> request) {
         RouteResolver<WebToJmsEntry> entryEndpoints = entriesEndpointsByMethod
                 .get(request.getMethod());
         final WebToJmsEntry entry = entryEndpoints != null ? entryEndpoints
@@ -167,7 +167,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         return entry;
     }
 
-    Handler<Response> sendbackReply(final Request request,
+    Handler<Response> sendbackReply(final Request<Object> request,
             final WebToJmsEntry entry, final Map<String, Object> params) {
         return new com.plexobject.handler.Handler<Response>() {
             @Override

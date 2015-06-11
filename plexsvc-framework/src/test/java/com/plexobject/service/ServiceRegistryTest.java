@@ -47,7 +47,7 @@ public class ServiceRegistryTest {
 
     private RoleAuthorizer authorizer = new RoleAuthorizer() {
         @Override
-        public void authorize(Request request, String[] roles)
+        public void authorize(Request<Object> request, String[] roles)
                 throws AuthException {
             if (authException != null) {
                 throw authException;
@@ -64,13 +64,13 @@ public class ServiceRegistryTest {
     private ValidationException valException;
     private RuntimeException exception;
     private final Properties properties = new Properties();
-    private List<Request> requests = new ArrayList<>();
+    private List<Request<Object>> requests = new ArrayList<>();
 
     //
     @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
     public class WebsocketService implements RequestHandler {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             requests.add(request);
         }
     }
@@ -78,7 +78,7 @@ public class ServiceRegistryTest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             requests.add(request);
             request.getResponse().setPayload(request.getPayload());
         }
@@ -87,7 +87,7 @@ public class ServiceRegistryTest {
     @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://test", method = Method.MESSAGE, codec = CodecType.JSON)
     public class JmsService implements RequestHandler {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             requests.add(request);
         }
     }
@@ -156,15 +156,15 @@ public class ServiceRegistryTest {
     @Test
     public void testAddRemoveInterceptor() throws Exception {
         final Configuration config = new Configuration(properties);
-        Interceptor<Request> interceptor1 = new Interceptor<Request>() {
+        Interceptor<Request<Object>> interceptor1 = new Interceptor<Request<Object>>() {
             @Override
-            public Request intercept(Request request) {
+            public Request<Object> intercept(Request<Object> request) {
                 return request;
             }
         };
-        Interceptor<Request> interceptor2 = new Interceptor<Request>() {
+        Interceptor<Request<Object>> interceptor2 = new Interceptor<Request<Object>>() {
             @Override
-            public Request intercept(Request request) {
+            public Request<Object> intercept(Request<Object> request) {
                 return request;
             }
         };
@@ -287,20 +287,16 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
+
         registry.invoke(request, null);
         assertEquals(payload, request.getPayload());
     }
@@ -313,18 +309,13 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "test";
 
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         RequestHandler h = new WebsocketService();
@@ -339,11 +330,15 @@ public class ServiceRegistryTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{\"username\":\"john\"}";
-        Request request = InterceptorAwareRequestBuilder.buildRequest(
-                Protocol.HTTP, Method.GET, "/w", properties, headers, payload,
-                CodecType.JSON, TestUser.class,
-                new AbstractResponseDispatcher() {
-                }, null);
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         RequestHandler h = new WebService();
         registry.invoke(request, h);
         TestUser user1 = request.getPayload();
@@ -359,31 +354,24 @@ public class ServiceRegistryTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        final StringBuilder response = new StringBuilder();
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "") {
-                            @Override
-                            public void setPayload(Object payload) {
-                                super.setPayload(payload);
-                                response.append(payload);
-                            }
-                        })
+        final StringBuilder out = new StringBuilder();
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
+                    @Override
+                    protected void doSend(Response r, String text) {
+                        out.append(text);
+                    }
                 }).build();
         RequestHandler h = new WebService();
         authException = new AuthException("sessionId", "location", "bad auth");
         registry.invoke(request, h);
-        assertTrue(response.toString().contains("AuthException"));
+        assertTrue(out.toString().contains("AuthException"));
     }
 
     @Test
@@ -393,31 +381,25 @@ public class ServiceRegistryTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        final StringBuilder response = new StringBuilder();
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "") {
-                            @Override
-                            public void setPayload(Object payload) {
-                                super.setPayload(payload);
-                                response.append(payload);
-                            }
-                        })
+        final StringBuilder out = new StringBuilder();
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
+                    @Override
+                    protected void doSend(Response r, String text) {
+                        out.append(text);
+                    }
                 }).build();
+
         RequestHandler h = new WebService();
         authException = new AuthException("sessionId", "bad auth");
         registry.invoke(request, h);
-        assertTrue(response.toString().contains("AuthException"));
+        assertTrue("Out: " + out, out.toString().contains("AuthException"));
     }
 
     @Test
@@ -427,32 +409,25 @@ public class ServiceRegistryTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        final StringBuilder response = new StringBuilder();
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "") {
-                            @Override
-                            public void setPayload(Object payload) {
-                                super.setPayload(payload);
-                                response.append(payload);
-                            }
-                        })
+        final StringBuilder out = new StringBuilder();
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
+                    @Override
+                    protected void doSend(Response r, String text) {
+                        out.append(text);
+                    }
                 }).build();
         RequestHandler h = new WebService();
         valException = (ValidationException) ValidationException.builder()
                 .addError("code", "field", "msg").build();
         registry.invoke(request, h);
-        assertTrue(response.toString().contains("ValidationException"));
+        assertTrue(out.toString().contains("ValidationException"));
     }
 
     @Test
@@ -462,31 +437,24 @@ public class ServiceRegistryTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        final StringBuilder response = new StringBuilder();
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "") {
-                            @Override
-                            public void setPayload(Object payload) {
-                                super.setPayload(payload);
-                                response.append(payload);
-                            }
-                        })
+        final StringBuilder out = new StringBuilder();
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
+                    @Override
+                    protected void doSend(Response r, String text) {
+                        out.append(text);
+                    }
                 }).build();
         RequestHandler h = new WebService();
         exception = new RuntimeException("unknown error");
         registry.invoke(request, h);
-        assertTrue(response.toString().contains("unknown error"));
+        assertTrue(out.toString().contains("unknown error"));
     }
 
 }

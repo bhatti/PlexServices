@@ -2,6 +2,7 @@ package com.plexobject.jms;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.jms.Destination;
@@ -15,11 +16,12 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
@@ -63,10 +65,14 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsContainer, message.getJMSReplyTo());
 
-            Request req = InterceptorAwareRequestBuilder.buildRequest(
-                    Protocol.JMS, Method.MESSAGE, config.endpoint(), params,
-                    params, textPayload, config.codec(), Void.class,
-                    dispatcher, null);
+            Response response = new Response(new HashMap<String, Object>(),
+                    new HashMap<String, Object>(), "", config.codec());
+            Request<String> request = Request.stringBuilder()
+                    .setProtocol(Protocol.JMS).setMethod(Method.MESSAGE)
+                    .setProperties(params).setEndpoint(config.endpoint())
+                    .setCodecType(config.codec()).setPayload(textPayload)
+                    .setResponse(response).setResponseDispatcher(dispatcher)
+                    .build();
 
             log.info("### Received " + textPayload + " for "
                     + config.endpoint() + " "
@@ -74,7 +80,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                     + params);
 
             // service registry will invoke handler and send back reply
-            serviceRegistry.invoke(req, handler);
+            serviceRegistry.invoke(request, handler);
         } catch (JMSException e) {
             log.error("Failed to handle request", e);
         }

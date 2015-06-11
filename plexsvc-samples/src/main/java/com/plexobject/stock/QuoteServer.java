@@ -28,7 +28,7 @@ public class QuoteServer implements RequestHandler {
     private QuoteStreamer quoteStreamer = new QuoteStreamer();
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         try {
             QuoteRequest quoteRequest = request.getPayload();
             log.info("Received " + request);

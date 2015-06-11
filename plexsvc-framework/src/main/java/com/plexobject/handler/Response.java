@@ -19,8 +19,10 @@ public class Response extends AbstractPayload {
     private int status = HttpResponse.SC_OK;
 
     public Response(final Map<String, Object> properties,
-            final Map<String, Object> headers, final Object payload) {
+            final Map<String, Object> headers, final Object payload,
+            CodecType codecType) {
         super(properties, headers, payload);
+        this.codecType = codecType;
     }
 
     public Response setStatus(int status) {

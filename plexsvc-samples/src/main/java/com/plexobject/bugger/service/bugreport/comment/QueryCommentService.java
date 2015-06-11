@@ -26,7 +26,7 @@ public class QueryCommentService extends AbstractBugReportService implements
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         final Collection<Comment> comments = new ArrayList<>();
         Collection<BugReport> reports = bugReportRepository
                 .getAll(new Predicate<BugReport>() {

@@ -4,13 +4,11 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.Method;
-import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
 /**
@@ -33,7 +31,7 @@ public class DefaultHttpRequestHandler implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         RouteResolver<RequestHandler> requestHandlerPaths = requestHandlerPathsByMethod
                 .get(request.getMethod());
         RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
@@ -53,15 +51,6 @@ public class DefaultHttpRequestHandler implements RequestHandler {
                             : requestHandlerPathsByMethod));
             return;
         }
-        ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
-        // TODO probably unnecessary to set codec type
-        request.getResponse().setCodecType(
-                CodecType.fromAcceptHeader(
-                        (String) request.getHeader(Constants.ACCEPT),
-                        config.codec()));
-        // dispatcher.setContentType(config.codec()
-        // .getContentType());
-
         serviceRegistry.invoke(request, handler);
     }
 }

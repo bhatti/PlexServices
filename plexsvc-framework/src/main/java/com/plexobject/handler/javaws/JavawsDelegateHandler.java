@@ -37,7 +37,7 @@ public class JavawsDelegateHandler implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         Pair<String, String> methodAndPayload = getMethodNameAndPayload((String) request
                 .getPayload());
 

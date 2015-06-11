@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.bus.EventBus;
 import com.plexobject.domain.Preconditions;
 import com.plexobject.handler.Request;
@@ -22,17 +21,16 @@ import com.plexobject.predicate.Predicate;
  * 
  */
 public class EventBusImpl implements EventBus {
-    private static final Logger log = Logger
-            .getLogger(EventBusImpl.class);
+    private static final Logger log = Logger.getLogger(EventBusImpl.class);
     private static final int DEFAULT_MAX_DISPATCH_THREADS = 4;
 
     private static class HandlerAndFilter {
         private final long id;
         private final RequestHandler handler;
-        private final Predicate<Request> filter;
+        private final Predicate<Request<Object>> filter;
 
         public HandlerAndFilter(final long id, final RequestHandler handler,
-                final Predicate<Request> filter) {
+                final Predicate<Request<Object>> filter) {
             this.id = id;
             this.handler = handler;
             this.filter = filter;
@@ -77,7 +75,7 @@ public class EventBusImpl implements EventBus {
 
     @Override
     public long subscribe(String channel, RequestHandler handler,
-            Predicate<Request> filter) {
+            Predicate<Request<Object>> filter) {
         Preconditions.checkEmpty(channel, "channel is not specified");
         Preconditions.requireNotNull(handler, "handler is not specified");
         synchronized (channel.intern()) {
@@ -113,7 +111,7 @@ public class EventBusImpl implements EventBus {
     }
 
     @Override
-    public void publish(final String channel, final Request request) {
+    public void publish(final String channel, final Request<Object> request) {
         Preconditions.checkEmpty(channel, "channel is not specified");
         Preconditions.requireNotNull(request, "request is not specified");
         synchronized (channel.intern()) {
@@ -129,7 +127,8 @@ public class EventBusImpl implements EventBus {
                                         || haf.filter.accept(request)) {
                                     haf.handler.handle(request);
                                     // TODO verify this
-                                    request.getResponseDispatcher().send(request.getResponse());
+                                    request.getResponseDispatcher().send(
+                                            request.getResponse());
                                 }
                             } catch (Exception ex) {
                                 log.error("Failed to publish " + request, ex);

@@ -6,7 +6,6 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.log4j.Logger;
 
-
 /**
  * This is base class for encoding implementation classes that provides helper
  * methods
@@ -37,6 +36,7 @@ public abstract class AbstractObjectCodec implements ObjectCodec {
             populateProperties(params, object);
             return object;
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new EncodingException("Failed to decode " + params, ex);
         }
     }

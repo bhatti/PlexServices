@@ -18,7 +18,7 @@ public class ReverseService implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         String data = request.getProperty("data");
         if (data == null) {
             data = "";

@@ -42,6 +42,8 @@ public class ServiceInvocationHelper {
      * @param request
      * @param handler
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    // igoring type of Request so that we can cast to Object
     public void invoke(Request request, RequestHandler handler,
             IncomingInterceptorsLifecycle incomingInterceptorsLifecycle) {
         if (handler != null) {
@@ -77,9 +79,20 @@ public class ServiceInvocationHelper {
                     config.codec());
             request.getResponse().setCodecType(codecType);
 
-            // Note InterceptorAwareRequestBuilder does some conversion but we
-            // would not know payload class there so redoing it here again
-            //
+            // We assume incoming payload is text so we will run through input
+            // interceptors
+            String textPayload = request.getPayload();
+            if (incomingInterceptorsLifecycle != null) {
+                // apply input interceptors
+                if (incomingInterceptorsLifecycle.hasInputInterceptors()) {
+                    for (Interceptor<String> interceptor : incomingInterceptorsLifecycle
+                            .getInputInterceptors()) {
+                        textPayload = interceptor.intercept(textPayload);
+                    }
+                    request.setPayload(textPayload);
+                }
+            }
+
             // decode text input into object
             if (config.payloadClass() != null
                     && config.payloadClass() != Void.class
@@ -88,18 +101,20 @@ public class ServiceInvocationHelper {
                 request.setPayload(ObjectCodecFactory
                         .getInstance()
                         .getObjectCodec(codecType)
-                        .decode((String) request.getPayload(),
-                                config.payloadClass(), request.getProperties()));
+                        .decode(textPayload, config.payloadClass(),
+                                request.getProperties()));
             }
 
             // Invoking request interceptors
             if (incomingInterceptorsLifecycle != null
                     && incomingInterceptorsLifecycle.hasRequestInterceptors()) {
-                for (Interceptor<Request> interceptor : incomingInterceptorsLifecycle
+                for (Interceptor<Request<Object>> interceptor : incomingInterceptorsLifecycle
                         .getRequestInterceptors()) {
                     request = interceptor.intercept(request);
                 }
             }
+            // Note: output interceptors are executed from
+            // AbstractResponseDispatcher
 
             // validate required fields
             requiredFieldValidator.validate(handler,
@@ -159,7 +174,8 @@ public class ServiceInvocationHelper {
         }
     }
 
-    private void authorizeIfNeeded(Request request, ServiceConfigDesc config) {
+    private void authorizeIfNeeded(Request<Object> request,
+            ServiceConfigDesc config) {
         if (authorizer != null && config.rolesAllowed() != null
                 && config.rolesAllowed().length > 0
                 && !config.rolesAllowed()[0].equals("")) {

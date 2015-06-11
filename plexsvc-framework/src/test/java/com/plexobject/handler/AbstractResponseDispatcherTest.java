@@ -30,7 +30,7 @@ public class AbstractResponseDispatcherTest {
     private final AbstractResponseDispatcher dispatcher = new Dispatcher();
     private final Response response = new Response(
             new HashMap<String, Object>(), new HashMap<String, Object>(),
-            "payload");
+            "payload", CodecType.JSON);
 
     @Before
     public void setUp() throws Exception {

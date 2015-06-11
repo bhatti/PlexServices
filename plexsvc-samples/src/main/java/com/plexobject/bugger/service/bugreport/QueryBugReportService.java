@@ -23,7 +23,7 @@ public class QueryBugReportService extends AbstractBugReportService implements
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         final Long projectId = request.hasProperty("projectId") ? request
                 .getLongProperty("projectId") : null;
         final long since = request.hasProperty("since") ? request

@@ -20,10 +20,10 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.http.Handledable;
 import com.plexobject.http.WebContainerProvider;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
@@ -169,9 +169,14 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                     }
                 }, req, resp);
 
-        Request handlerReq = InterceptorAwareRequestBuilder.buildRequest(
-                Protocol.HTTP, method, uri, params, headers, textPayload,
-                codecType, Void.class, dispatcher, serviceRegistry);
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), "", codecType);
+        Request<Object> handlerReq = Request.objectBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(method).setEndpoint(uri)
+                .setProperties(params).setHeaders(headers)
+                .setCodecType(codecType).setPayload(textPayload)
+                .setResponse(response).setResponseDispatcher(dispatcher)
+                .build();
 
         log.info("HTTP Received URI '" + uri + "', request " + handlerReq);
         defaultExecutor.handle(handlerReq);

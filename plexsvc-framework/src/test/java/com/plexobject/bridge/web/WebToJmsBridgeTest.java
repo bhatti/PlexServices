@@ -63,8 +63,8 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request
-                .builder()
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
                 .setEndpoint("/w")
@@ -74,7 +74,8 @@ public class WebToJmsBridgeTest {
                 .setCodecType(CodecType.JSON)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -93,8 +94,8 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request
-                .builder()
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
                 .setEndpoint("/w")
@@ -104,7 +105,8 @@ public class WebToJmsBridgeTest {
                 .setCodecType(CodecType.JSON)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -130,8 +132,8 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        final Request request = Request
-                .builder()
+        final Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
                 .setEndpoint("/w")
@@ -141,7 +143,8 @@ public class WebToJmsBridgeTest {
                 .setCodecType(CodecType.JSON)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 

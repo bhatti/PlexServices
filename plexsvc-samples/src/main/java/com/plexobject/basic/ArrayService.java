@@ -24,7 +24,7 @@ public class ArrayService implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         Integer count = request.getIntegerProperty("count");
         if (count == null) {
             count = 1;

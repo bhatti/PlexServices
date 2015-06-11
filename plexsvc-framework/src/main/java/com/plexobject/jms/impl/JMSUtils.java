@@ -23,7 +23,6 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.domain.Preconditions;
@@ -180,7 +179,7 @@ public class JMSUtils {
                             .getProperties(message);
                     final String respText = respMsg.getText();
                     final Response response = new Response(params, params,
-                            respText);
+                            respText, null);
                     reqHandler.handle(response);
                     promise.setValue(response);
                 } catch (Exception e) {

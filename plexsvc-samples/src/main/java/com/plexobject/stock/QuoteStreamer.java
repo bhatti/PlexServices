@@ -68,8 +68,7 @@ public class QuoteStreamer extends TimerTask {
                         e.getValue());
                 int n = 0;
                 Response response = new Response(new HashMap<String, Object>(),
-                        new HashMap<String, Object>(), q);
-                response.setCodecType(CodecType.JSON);
+                        new HashMap<String, Object>(), q, CodecType.JSON);
                 for (ResponseDispatcher d : dispatchers) {
                     try {
                         d.send(response);

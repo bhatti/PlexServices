@@ -22,11 +22,11 @@ public class NettyHttpServerTest {
     private static final String PING = "ping";
     private static final int HTTP_PORT = 8323;
     private NettyHttpServer server;
-    private final List<Request> requests = new ArrayList<>();
+    private final List<Request<Object>> requests = new ArrayList<>();
     private CountDownLatch latch = new CountDownLatch(1);
     private RequestHandler handler = new RequestHandler() {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             requests.add(request);
             request.getResponse().setPayload(PONG);
             request.getResponseDispatcher().send(request.getResponse());

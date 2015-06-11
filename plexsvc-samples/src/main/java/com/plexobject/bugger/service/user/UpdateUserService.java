@@ -21,7 +21,7 @@ public class UpdateUserService extends AbstractUserService implements
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         User user = request.getPayload();
 
         User saved = userRepository.save(user);

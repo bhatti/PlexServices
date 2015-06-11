@@ -10,7 +10,7 @@ import com.plexobject.service.Interceptor;
 import com.plexobject.service.InterceptorsLifecycle;
 
 public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
-    private final List<Interceptor<Request>> requestInterceptors = new ArrayList<>();
+    private final List<Interceptor<Request<Object>>> requestInterceptors = new ArrayList<>();
     private final List<Interceptor<Response>> responseInterceptors = new ArrayList<>();
     private final List<Interceptor<String>> inputInterceptors = new ArrayList<>();
     private final List<Interceptor<String>> outputInterceptors = new ArrayList<>();
@@ -28,7 +28,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized void addRequestInterceptor(
-            Interceptor<Request> interceptor) {
+            Interceptor<Request<Object>> interceptor) {
         if (!requestInterceptors.contains(interceptor)) {
             requestInterceptors.add(interceptor);
         }
@@ -43,7 +43,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized boolean removeRequestInterceptor(
-            Interceptor<Request> interceptor) {
+            Interceptor<Request<Object>> interceptor) {
         int ndx = requestInterceptors.indexOf(interceptor);
         if (ndx != -1) {
             requestInterceptors.remove(ndx);
@@ -60,7 +60,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      * @return
      */
     @Override
-    public synchronized Collection<Interceptor<Request>> getRequestInterceptors() {
+    public synchronized Collection<Interceptor<Request<Object>>> getRequestInterceptors() {
         return requestInterceptors;
     }
 

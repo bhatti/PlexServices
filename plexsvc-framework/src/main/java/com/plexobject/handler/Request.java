@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.plexobject.domain.Constants;
 import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
@@ -20,10 +19,10 @@ import com.plexobject.service.Protocol;
  * @author shahzad bhatti
  *
  */
-public class Request extends AbstractPayload {
-    public static class Builder {
+public class Request<T> extends AbstractPayload {
+    public static class Builder<T> {
         private Protocol protocol;
-        private Object payload;
+        private T payload;
         private Map<String, Object> properties = new HashMap<>();
         private Map<String, Object> headers = new HashMap<>();
         private Method method;
@@ -32,75 +31,75 @@ public class Request extends AbstractPayload {
         private Response response;
         private ResponseDispatcher responseDispatcher;
 
-        public Builder setProtocol(Protocol protocol) {
+        public Builder<T> setProtocol(Protocol protocol) {
             this.protocol = protocol;
             return this;
         }
 
-        public Builder setMethod(Method method) {
+        public Builder<T> setMethod(Method method) {
             this.method = method;
             return this;
         }
 
-        public Builder setCodecType(CodecType codecType) {
+        public Builder<T> setCodecType(CodecType codecType) {
             this.codecType = codecType;
             return this;
         }
 
-        public Builder setEndpoint(String endpoint) {
+        public Builder<T> setEndpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;
         }
 
-        public Builder setPayload(Object payload) {
+        public Builder<T> setPayload(T payload) {
             this.payload = payload;
             return this;
         }
 
-        public Builder setResponseDispatcher(ResponseDispatcher dispatcher) {
+        public Builder<T> setResponseDispatcher(ResponseDispatcher dispatcher) {
             this.responseDispatcher = dispatcher;
             return this;
         }
 
-        public Builder setSessionId(String sessionId) {
+        public Builder<T> setSessionId(String sessionId) {
             if (sessionId != null) {
                 this.headers.put(Constants.SESSION_ID, sessionId);
             }
             return this;
         }
 
-        public Builder setProperties(Map<String, Object> properties) {
+        public Builder<T> setProperties(Map<String, Object> properties) {
             this.properties.putAll(properties);
             return this;
         }
 
-        public Builder setHeaders(Map<String, Object> headers) {
+        public Builder<T> setHeaders(Map<String, Object> headers) {
             this.headers.putAll(headers);
             return this;
         }
 
-        public Builder setResponse(Response response) {
+        public Builder<T> setResponse(Response response) {
             this.response = response;
             return this;
         }
 
-        public Request build() {
-            return new Request(protocol, method, endpoint, properties, headers,
-                    payload, codecType, response, responseDispatcher);
+        public Request<T> build() {
+            return new Request<T>(protocol, method, endpoint, properties,
+                    headers, payload, codecType, response, responseDispatcher);
         }
     }
 
-    private ResponseDispatcher responseDispatcher;
-    private Response response;
+    private transient ResponseDispatcher responseDispatcher;
+    private transient Response response;
     private Protocol protocol;
     private Method method;
     private String endpoint;
     private CodecType codecType;
 
-    Request() {
+    public Request() {
     }
 
-    Request(Protocol protocol, Method method, String endpoint,
+    public Request(Protocol protocol, Method method, String endpoint,
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             final CodecType codecType, final Response response,
@@ -148,7 +147,7 @@ public class Request extends AbstractPayload {
         return codecType;
     }
 
-    @JsonIgnoreProperties
+    @JsonIgnore
     public ObjectCodec getCodec() {
         return codecType != null ? ObjectCodecFactory.getInstance()
                 .getObjectCodec(codecType) : null;
@@ -189,7 +188,11 @@ public class Request extends AbstractPayload {
                 + ", createdAt=" + createdAt + ", payload=" + payload + "]";
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder<Object> objectBuilder() {
+        return new Builder<Object>();
+    }
+
+    public static Builder<String> stringBuilder() {
+        return new Builder<String>();
     }
 }

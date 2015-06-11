@@ -29,11 +29,11 @@ import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
@@ -74,7 +74,7 @@ public class EventBusToJmsBridge implements Lifecycle {
         }
 
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             Map<String, Object> params = new HashMap<>();
             params.putAll(request.getProperties());
             params.putAll(request.getHeaders());
@@ -140,15 +140,32 @@ public class EventBusToJmsBridge implements Lifecycle {
                         jmsContainer, message.getJMSReplyTo())
                         : new AbstractResponseDispatcher() {
                         };
+                Response response = new Response(new HashMap<String, Object>(),
+                        new HashMap<String, Object>(), null,
+                        entry.getCodecType());
 
-                Request req = InterceptorAwareRequestBuilder.buildRequest(
-                        Protocol.JMS, Method.MESSAGE, null, params, params,
-                        textPayload, entry.getCodecType(),
-                        entry.getRequestTypeClass(), dispatcher, null);
+                Object payload = textPayload;
+                if (entry.getRequestTypeClass() != null
+                        && entry.getRequestTypeClass() != Void.class
+                        && entry.getRequestTypeClass() != null) {
+                    payload = ObjectCodecFactory
+                            .getInstance()
+                            .getObjectCodec(entry.getCodecType())
+                            .decode(textPayload, entry.getRequestTypeClass(),
+                                    params);
+                }
 
-                log.info("Forwarding " + entry + "'s message " + req);
-                eb.publish(entry.getTarget(), req);
+                // TODO do we need entry.getRequestTypeClass()
+                Request<Object> request = Request.objectBuilder()
+                        .setProtocol(Protocol.JMS).setMethod(Method.MESSAGE)
+                        .setProperties(params)
+                        .setCodecType(entry.getCodecType()).setPayload(payload)
+                        .setResponse(response)
+                        .setResponseDispatcher(dispatcher).build();
+                log.info("Forwarding " + entry + "'s message " + request);
+                eb.publish(entry.getTarget(), request);
             } catch (Exception e) {
+                System.out.println("xxxxxError " + e);
                 log.error("Failed to handle request", e);
             }
         }

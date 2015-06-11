@@ -2,7 +2,6 @@ package com.plexobject.bugger.model;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.handler.Request;
 import com.plexobject.security.AuthException;
@@ -18,7 +17,7 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
     }
 
     @Override
-    public void authorize(Request request, String[] roles) throws AuthException {
+    public void authorize(Request<Object> request, String[] roles) throws AuthException {
         if (roles == null || roles.length == 0 || roles[0].equals("")) {
             return;
         }

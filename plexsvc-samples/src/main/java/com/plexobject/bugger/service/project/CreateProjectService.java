@@ -24,7 +24,7 @@ public class CreateProjectService extends AbstractProjectService implements
 
     // Each employee and project lead assigned to a single project
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         Project project = request.getPayload();
         Project saved = projectRepository.save(project);
         request.getResponse().setPayload(saved);
