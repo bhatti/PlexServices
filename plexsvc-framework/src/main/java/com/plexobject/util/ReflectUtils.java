@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.reflections.Reflections;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,6 +16,8 @@ import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.json.JsonObjectCodec;
 
 public class ReflectUtils {
+    private static final Logger logger = Logger.getLogger(ReflectUtils.class);
+
     public static Collection<Class<?>> getAnnotatedClasses(
             Class<? extends Annotation> klass, String... pkgNames) {
         Set<Class<?>> serviceClasses = new HashSet<>();

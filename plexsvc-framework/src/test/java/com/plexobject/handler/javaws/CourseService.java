@@ -1,5 +1,6 @@
 package com.plexobject.handler.javaws;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -29,4 +30,6 @@ public interface CourseService {
     Course get(Long courseId);
 
     boolean exists(Course c, Student s);
+
+    Collection<Customer> getCustomers(List<Customer> list);
 }

@@ -57,7 +57,7 @@ public class JavawsDelegateHandler implements RequestHandler {
                 + RESPONSE_SUFFIX;
         try {
             Object[] args = ReflectUtils.decode(methodAndPayload.second,
-                    implMethod, request.getCodec());
+                    iMethod, request.getCodec());
             Map<String, Object> response = new HashMap<>();
             Object result = implMethod.invoke(delegate, args);
             if (result != null) {

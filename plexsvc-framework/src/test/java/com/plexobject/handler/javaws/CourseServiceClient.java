@@ -2,6 +2,7 @@ package com.plexobject.handler.javaws;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -129,6 +130,24 @@ public class CourseServiceClient extends BaseServiceClient implements
         RequestBuilder request = new RequestBuilder("count", c);
         try {
             return post(COURSE_SERVICE, request, Integer.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Customer> postCustomers(RequestBuilder request)
+            throws NoSuchMethodException, Exception {
+        Method m = CourseService.class.getMethod("getCustomers", List.class);
+        Class<?> klass = m.getParameterTypes()[0].getClass();
+        Type pKlass = m.getGenericParameterTypes()[0];
+        return post(COURSE_SERVICE, request, klass, pKlass);
+    }
+
+    @Override
+    public Collection<Customer> getCustomers(List<Customer> list) {
+        RequestBuilder request = new RequestBuilder("getCustomers", list);
+        try {
+            return postCustomers(request);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

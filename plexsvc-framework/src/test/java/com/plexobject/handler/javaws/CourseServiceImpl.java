@@ -1,6 +1,7 @@
 package com.plexobject.handler.javaws;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,11 @@ public class CourseServiceImpl implements CourseService {
         for (Course c : list) {
             save(c);
         }
+        return list;
+    }
+
+    @Override
+    public Collection<Customer> getCustomers(List<Customer> list) {
         return list;
     }
 }
