@@ -10,7 +10,6 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Preconditions;
 
 /**
@@ -20,6 +19,7 @@ import com.plexobject.domain.Preconditions;
  *
  */
 public class MessageReceiverThread implements Runnable {
+    private static final int DEFAULT_TIMEOUT = 15000;
     private static final Logger log = Logger
             .getLogger(MessageReceiverThread.class);
 
@@ -45,10 +45,12 @@ public class MessageReceiverThread implements Runnable {
             ExceptionListener exceptionListener, Callback callback,
             long timeout, DefaultJMSContainer jmsContainer) {
         Preconditions.checkEmpty(threadName, "threadName is not specified");
-        Preconditions.requireNotNull(destination, "destination is not specified");
+        Preconditions.requireNotNull(destination,
+                "destination is not specified");
         Preconditions.requireNotNull(messageListener,
                 "messageListener is not specified");
-        Preconditions.requireNotNull(jmsContainer, "jmsContainer is not specified");
+        Preconditions.requireNotNull(jmsContainer,
+                "jmsContainer is not specified");
         Preconditions.requireNotNull(callback, "callback is not specified");
         this.threadName = threadName;
         this.destination = destination;
@@ -87,15 +89,19 @@ public class MessageReceiverThread implements Runnable {
             while (!stop) {
                 try {
                     Message msg = timeout > 0 ? consumer.receive(timeout)
-                            : consumer.receive();
+                            : consumer.receive(DEFAULT_TIMEOUT);
                     if (msg != null) {
                         messageListener.onMessage(msg);
+                    } else {
+                        log.info("**** Waiting for JMS message on "
+                                + destination);
                     }
                 } catch (JMSException e) {
-                    log.error("Failed to receive message", e);
+                    log.error("Failed to receive message for " + destination, e);
                     if (exceptionListener != null) {
                         exceptionListener.onException(e);
                     }
+                    break;
                 }
             }
         } catch (JMSException e) {
@@ -128,6 +134,7 @@ public class MessageReceiverThread implements Runnable {
         runnerThread = null;
         try {
             if (consumer != null) {
+                log.warn("*** CLOSING CONSUMER " + destination);
                 consumer.close();
             }
         } catch (Exception e) {

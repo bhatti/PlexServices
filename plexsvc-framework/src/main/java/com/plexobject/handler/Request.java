@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.plexobject.domain.Constants;
+import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
@@ -28,8 +29,8 @@ public class Request extends AbstractPayload {
         private Method method;
         private String endpoint;
         private CodecType codecType;
-
-        private AbstractResponseDispatcher responseDispatcher;
+        private Response response;
+        private ResponseDispatcher responseDispatcher;
 
         public Builder setProtocol(Protocol protocol) {
             this.protocol = protocol;
@@ -56,6 +57,11 @@ public class Request extends AbstractPayload {
             return this;
         }
 
+        public Builder setResponseDispatcher(ResponseDispatcher dispatcher) {
+            this.responseDispatcher = dispatcher;
+            return this;
+        }
+
         public Builder setSessionId(String sessionId) {
             if (sessionId != null) {
                 this.headers.put(Constants.SESSION_ID, sessionId);
@@ -73,19 +79,19 @@ public class Request extends AbstractPayload {
             return this;
         }
 
-        public Builder setResponseDispatcher(
-                AbstractResponseDispatcher responseBuilder) {
-            this.responseDispatcher = responseBuilder;
+        public Builder setResponse(Response response) {
+            this.response = response;
             return this;
         }
 
         public Request build() {
             return new Request(protocol, method, endpoint, properties, headers,
-                    payload, codecType, responseDispatcher);
+                    payload, codecType, response, responseDispatcher);
         }
     }
 
-    private AbstractResponseDispatcher responseBuilder;
+    private ResponseDispatcher responseDispatcher;
+    private Response response;
     private Protocol protocol;
     private Method method;
     private String endpoint;
@@ -94,17 +100,27 @@ public class Request extends AbstractPayload {
     Request() {
     }
 
-    public Request(Protocol protocol, Method method, String endpoint,
+    Request(Protocol protocol, Method method, String endpoint,
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
-            final CodecType codecType,
-            final AbstractResponseDispatcher responseBuilder) {
+            final CodecType codecType, final Response response,
+            final ResponseDispatcher responseDispatcher) {
         super(properties, headers, payload);
+        Preconditions.requireNotNull(protocol, "protocol is required");
+        Preconditions.requireNotNull(method, "method is required");
+        Preconditions.requireNotNull(codecType, "codecType is required");
+        Preconditions.requireNotNull(response, "response is required");
+        Preconditions.requireNotNull(responseDispatcher,
+                "responseDispatcher is required");
         this.protocol = protocol;
         this.method = method;
         this.endpoint = endpoint;
         this.codecType = codecType;
-        this.responseBuilder = responseBuilder;
+        this.response = response;
+        this.responseDispatcher = responseDispatcher;
+        if (response.getCodecType() == null) {
+            response.setCodecType(codecType);
+        }
     }
 
     public Protocol getProtocol() {
@@ -138,10 +154,14 @@ public class Request extends AbstractPayload {
                 .getObjectCodec(codecType) : null;
     }
 
-    @SuppressWarnings("unchecked")
     @JsonIgnore
-    public <T extends AbstractResponseDispatcher> T getResponseDispatcher() {
-        return (T) responseBuilder;
+    public Response getResponse() {
+        return response;
+    }
+
+    @JsonIgnore
+    public ResponseDispatcher getResponseDispatcher() {
+        return responseDispatcher;
     }
 
     @SuppressWarnings("unchecked")
@@ -172,5 +192,4 @@ public class Request extends AbstractPayload {
     public static Builder builder() {
         return new Builder();
     }
-
 }

@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.Response;
 
 /**
  * This class sends response using implementation of http-response
@@ -28,31 +28,29 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
         this.response = response;
     }
 
-    public void addSessionId(String value) {
-        if (value != null) {
-            properties.put(Constants.SESSION_ID, value);
-            response.addCookie(Constants.SESSION_ID, value);
-        }
-    }
-
-    protected void doSend(String payload) {
-        String location = (String) properties.get(HttpResponse.LOCATION);
-
+    @Override
+    protected void doSend(Response reply, String payload) {
+        String location = (String) reply.getProperty(HttpResponse.LOCATION);
         if (location != null) {
             redirect(location);
             return;
         }
+        String sessionId = (String) reply.getProperty(Constants.SESSION_ID);
+        if (sessionId != null) {
+            response.addCookie(Constants.SESSION_ID, sessionId);
+        }
         try {
-            if (codecType != null) {
-                String contentType = (String) properties
-                        .get(HttpResponse.CONTENT_TYPE);
+            if (reply.getCodecType() != null) {
+                String contentType = (String) reply
+                        .getProperty(HttpResponse.CONTENT_TYPE);
                 if (contentType == null) {
-                    response.setContentType(codecType.getContentType());
+                    response.setContentType(reply.getCodecType()
+                            .getContentType());
                 }
             }
-            response.setStatus(getStatus());
+            response.setStatus(reply.getStatus());
             //
-            for (Map.Entry<String, Object> e : properties.entrySet()) {
+            for (Map.Entry<String, Object> e : reply.getProperties().entrySet()) {
                 Object value = e.getValue();
                 if (value != null) {
                     if (value instanceof String) {

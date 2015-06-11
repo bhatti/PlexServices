@@ -34,6 +34,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
+import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.MessageListenerConfig;
@@ -216,7 +217,7 @@ public class WebToJmsBridgeIntegTest {
 
     @Test(expected = IllegalStateException.class)
     public void testAddDuplicateWeb() throws Exception {
-        WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
+        WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/ws",
                 Method.GET, "destination", 5, false, 1);
         bridge.add(entry);
         bridge.add(entry);
@@ -249,18 +250,26 @@ public class WebToJmsBridgeIntegTest {
         properties.put("prop1", "val1");
         Map<String, Object> headers = new HashMap<>();
         headers.put("head1", "val1");
-        Request request = new Request(Protocol.HTTP, method, path, properties,
-                headers, payload, CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
-                    }
-
-                    @Override
-                    public void send(Object r) {
-                        reply = r;
-                    }
-                });
+        Request request = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(method)
+                .setEndpoint(path)
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload(payload)
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), "") {
+                            @Override
+                            public void setPayload(Object payload) {
+                                super.setPayload(payload);
+                                reply = payload;
+                            }
+                        })
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         return request;
     }
 

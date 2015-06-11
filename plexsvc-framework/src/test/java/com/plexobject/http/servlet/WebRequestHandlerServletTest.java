@@ -47,7 +47,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         @Override
         public void handle(Request request) {
             requests.add(request);
-            request.getResponseDispatcher().send(request.getPayload());
+            request.getResponse().setPayload(request.getPayload());
         }
     }
 

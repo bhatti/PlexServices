@@ -15,8 +15,7 @@ import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-update-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @Field(name = "id"),
-        @Field(name = "projectId") })
+@RequiredFields({ @Field(name = "id"), @Field(name = "projectId") })
 public class UpdateBugReportService extends AbstractBugReportService implements
         RequestHandler {
     public UpdateBugReportService(BugReportRepository bugReportRepository,
@@ -35,6 +34,6 @@ public class UpdateBugReportService extends AbstractBugReportService implements
                 .assertNonNull(report.getProjectId(), "undefined_projectId",
                         "projectId", "projectId not specified").end();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseDispatcher().send(saved);
+        request.getResponse().setPayload(saved);
     }
 }

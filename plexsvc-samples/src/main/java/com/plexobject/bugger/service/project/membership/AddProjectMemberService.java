@@ -16,8 +16,7 @@ import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/add", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Manager", endpoint = "queue://{scope}-add-project-member-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @Field(name = "assignedTo"),
-        @Field(name = "projectId") })
+@RequiredFields({ @Field(name = "assignedTo"), @Field(name = "projectId") })
 public class AddProjectMemberService extends AbstractProjectService implements
         RequestHandler {
     public AddProjectMemberService(ProjectRepository projectRepository,
@@ -40,6 +39,6 @@ public class AddProjectMemberService extends AbstractProjectService implements
         } else {
             project.addMember(assignedTo);
         }
-        request.getResponseDispatcher().send(project);
+        request.getResponse().setPayload(project);
     }
 }

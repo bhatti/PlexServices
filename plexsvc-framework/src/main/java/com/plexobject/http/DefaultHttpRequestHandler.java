@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
@@ -40,10 +39,9 @@ public class DefaultHttpRequestHandler implements RequestHandler {
         RequestHandler handler = requestHandlerPaths != null ? requestHandlerPaths
                 .get(request.getEndpoint(), request.getProperties()) : null;
         if (handler == null) {
-            request.getResponseDispatcher().setCodecType(CodecType.TEXT);
-            request.getResponseDispatcher()
-                    .setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponseDispatcher().send(
+            request.getResponse().setCodecType(CodecType.TEXT);
+            request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
+            request.getResponse().setPayload(
                     "Unknown request received payload " + request);
 
             log.error("** Unknown request '"
@@ -56,7 +54,8 @@ public class DefaultHttpRequestHandler implements RequestHandler {
             return;
         }
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
-        request.getResponseDispatcher().setCodecType(
+        // TODO probably unnecessary to set codec type
+        request.getResponse().setCodecType(
                 CodecType.fromAcceptHeader(
                         (String) request.getHeader(Constants.ACCEPT),
                         config.codec()));

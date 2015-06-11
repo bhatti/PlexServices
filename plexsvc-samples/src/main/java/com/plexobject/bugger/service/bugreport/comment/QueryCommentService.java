@@ -39,6 +39,6 @@ public class QueryCommentService extends AbstractBugReportService implements
         for (BugReport r : reports) {
             comments.addAll(r.getComments());
         }
-        request.getResponseDispatcher().send(comments);
+        request.getResponse().setPayload(comments);
     }
 }

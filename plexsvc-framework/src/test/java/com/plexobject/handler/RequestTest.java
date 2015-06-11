@@ -22,7 +22,7 @@ public class RequestTest {
         assertNull(request.getProtocol());
         assertNull(request.getMethod());
         assertNull(request.getEndpoint());
-        assertNull(request.getResponseDispatcher());
+        assertNull(request.getResponse());
         assertNull(request.getSessionId());
         assertNull(request.getPayload());
     }
@@ -32,18 +32,17 @@ public class RequestTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.SESSION_ID, "id");
         Map<String, Object> headers = new HashMap<>();
-        AbstractResponseDispatcher dispatcher = new AbstractResponseDispatcher() {
-            @Override
-            public void addSessionId(String value) {
-            }
-        };
+        Response resp = new Response(properties, headers, "");
         String payload = "{}";
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON, dispatcher);
+                properties, headers, payload, CodecType.JSON, resp,
+                new AbstractResponseDispatcher() {
+                });
+
         assertEquals(Protocol.HTTP, request.getProtocol());
         assertEquals(Method.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
-        assertEquals(dispatcher, request.getResponseDispatcher());
+        assertEquals(resp, request.getResponse());
         assertEquals("id", request.getSessionId());
         assertEquals("{}", request.getPayload());
         assertTrue(request.toString().contains("/w"));
@@ -55,26 +54,26 @@ public class RequestTest {
         Request.Builder builder = Request.builder();
         builder.setSessionId(null);
         builder.setSessionId("id");
-        AbstractResponseDispatcher dispatcher = new AbstractResponseDispatcher() {
-            @Override
-            public void addSessionId(String value) {
-            }
-        };
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
+        Response resp = new Response(properties, headers, "");
 
         builder.setProperties(properties);
         builder.setHeaders(headers);
-        builder.setResponseDispatcher(dispatcher);
+        builder.setResponse(resp);
         builder.setPayload("{}");
         builder.setProtocol(Protocol.HTTP);
         builder.setMethod(Method.GET);
         builder.setEndpoint("/w");
+        builder.setCodecType(CodecType.JSON);
+        builder.setResponseDispatcher(new AbstractResponseDispatcher() {
+        });
+
         Request request = builder.build();
         assertEquals(Protocol.HTTP, request.getProtocol());
         assertEquals(Method.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
-        assertEquals(dispatcher, request.getResponseDispatcher());
+        assertEquals(resp, request.getResponse());
         assertEquals("id", request.getSessionId());
         assertEquals("{}", request.getPayload());
     }
@@ -86,7 +85,11 @@ public class RequestTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON, null);
+                properties, headers, payload, CodecType.JSON, new Response(
+                        new HashMap<String, Object>(),
+                        new HashMap<String, Object>(), null),
+                new AbstractResponseDispatcher() {
+                });
         request.handleUnknown(null, null);
         request.handleUnknown(Constants.PAYLOAD, "payload");
         assertEquals("payload", request.getPayload());
@@ -110,7 +113,11 @@ public class RequestTest {
         properties.put("p1", "v1");
         Map<String, Object> headers = new HashMap<>();
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, null, CodecType.JSON, null);
+                properties, headers, null, CodecType.JSON, new Response(
+                        new HashMap<String, Object>(),
+                        new HashMap<String, Object>(), null),
+                new AbstractResponseDispatcher() {
+                });
         request.setPayload("pay");
         assertEquals("pay", request.getPayload());
 
@@ -147,7 +154,11 @@ public class RequestTest {
         headers.put("head1", "val1");
         headers.put("head2", 2);
         Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, null, CodecType.JSON, null);
+                properties, headers, null, CodecType.JSON, new Response(
+                        new HashMap<String, Object>(),
+                        new HashMap<String, Object>(), null),
+                new AbstractResponseDispatcher() {
+                });
         assertTrue(request.getHeaderNames().contains("head1"));
         assertEquals("val1", request.getHeader("head1"));
         assertEquals("2", request.getHeader("head2"));

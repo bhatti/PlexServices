@@ -25,9 +25,12 @@ import org.junit.runner.RunWith;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.service.ServiceRegistry;
 
 @RunWith(JMockit.class)
 public class NettyWebRequestHandlerTest {
+    @Mocked
+    private ServiceRegistry serviceRegistry;
     @Mocked
     private RequestHandler reqHandler;
     @Mocked

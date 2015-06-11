@@ -175,14 +175,20 @@ public class EventBusToJmsBridgeIntegTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "message";
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
-
-                    }
-                });
+        Request request = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload(payload)
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         final CountDownLatch latch = new CountDownLatch(1);
         final StringBuilder text = new StringBuilder();
         jmsContainer.setMessageListener(
@@ -217,13 +223,14 @@ public class EventBusToJmsBridgeIntegTest {
             public void handle(Request request) {
                 TestUser u = request.getPayload();
                 name.append(u.name);
-                request.getResponseDispatcher().send("ted");
+                request.getResponse().setPayload("ted");
+                // request.getDispatcher().send(request.getResponse());
                 latch.countDown();
             }
         }, null);
         Destination dest = jmsContainer.getDestination("queue://myqueue");
         Map<String, Object> headers = new HashMap<>();
-        headers.put(Constants.ACCEPT, "application/xml");
+        headers.put(Constants.ACCEPT, "application/json");
         jmsContainer.sendReceive(dest, headers, "{\"name\":\"bill\"}",
                 new Handler<Response>() {
                     @Override
@@ -233,8 +240,8 @@ public class EventBusToJmsBridgeIntegTest {
                     }
                 });
         latch.await(1000, TimeUnit.MILLISECONDS);
-        assertEquals("bill", name.toString());
         assertEquals("ted", reply.toString());
+        assertEquals("bill", name.toString());
     }
 
     @Test

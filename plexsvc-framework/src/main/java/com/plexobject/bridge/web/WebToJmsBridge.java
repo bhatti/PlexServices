@@ -16,7 +16,6 @@ import javax.jms.Destination;
 
 import org.apache.log4j.Logger;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
@@ -123,9 +122,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         final WebToJmsEntry entry = getMappingEntry(request);
 
         if (entry == null) {
-            request.getResponseDispatcher()
-                    .setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponseDispatcher().send(
+            request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
+            request.getResponse().setPayload(
                     "Unknown request received " + request.getPayload());
             log.warn("!!!Unknown request received " + request.getPayload()
                     + ", registered " + entriesEndpointsByMethod.keySet()
@@ -142,9 +140,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             if (entry.isAsynchronous()) {
                 jmsContainer.send(destination, params,
                         (String) request.getPayload());
-                request.getResponseDispatcher().setCodecType(
-                        entry.getCodecType());
-                request.getResponseDispatcher().send("");
+                request.getResponse().setCodecType(entry.getCodecType());
+                request.getResponse().setPayload("");
             } else {
                 Future<Response> respFuture = jmsContainer.sendReceive(
                         destination, params, (String) request.getPayload(),
@@ -152,10 +149,9 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                 respFuture.get(entry.getTimeoutSecs(), TimeUnit.SECONDS);
             }
         } catch (TimeoutException e) {
-            request.getResponseDispatcher().setCodecType(CodecType.TEXT);
-            request.getResponseDispatcher().setStatus(
-                    HttpResponse.SC_GATEWAY_TIMEOUT);
-            request.getResponseDispatcher().send(
+            request.getResponse().setCodecType(CodecType.TEXT);
+            request.getResponse().setStatus(HttpResponse.SC_GATEWAY_TIMEOUT);
+            request.getResponse().setPayload(
                     "Request timedout " + entry.getTimeoutSecs() + " secs");
 
         } catch (Exception e) {
@@ -178,19 +174,17 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             public void handle(Response reply) {
                 try {
                     for (String name : reply.getHeaderNames()) {
-                        request.getResponseDispatcher().setProperty(name,
+                        request.getResponse().setProperty(name,
                                 reply.getHeader(name));
                     }
                     for (String name : reply.getPropertyNames()) {
-                        request.getResponseDispatcher().setProperty(name,
+                        request.getResponse().setProperty(name,
                                 reply.getProperty(name));
                     }
-                    request.getResponseDispatcher().setCodecType(
-                            entry.getCodecType());
-                    request.getResponseDispatcher().send(reply.getPayload());
+                    request.getResponse().setCodecType(entry.getCodecType());
+                    request.getResponse().setPayload(reply.getPayload());
                     log.info("Replying back " + reply + ", params " + params
-                            + ", dispatcher" + ": "
-                            + request.getResponseDispatcher());
+                            + ", response" + ": " + request.getResponse());
                 } catch (Exception e) {
                     log.error("Could not send back websocket " + reply, e);
                 }

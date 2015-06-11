@@ -26,6 +26,6 @@ public class UpdateProjectService extends AbstractProjectService implements
     public void handle(Request request) {
         Project project = request.getPayload();
         Project saved = projectRepository.save(project);
-        request.getResponseDispatcher().send(saved);
+        request.getResponse().setPayload(saved);
     }
 }

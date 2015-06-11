@@ -25,6 +25,7 @@ import com.plexobject.bus.EventBus;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
+import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.service.Method;
@@ -141,14 +142,20 @@ public class EventBusToJmsBridgeTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
-
-                    }
-                });
+        Request request = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload(payload)
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         listener.handle(request);
     }
 

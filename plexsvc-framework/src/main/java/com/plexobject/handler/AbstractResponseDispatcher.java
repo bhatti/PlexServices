@@ -1,123 +1,80 @@
 package com.plexobject.handler;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.plexobject.domain.Constants;
-import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
-import com.plexobject.http.HttpResponse;
+import com.plexobject.service.Interceptor;
+import com.plexobject.service.OutgoingInterceptorsLifecycle;
 import com.plexobject.util.ExceptionUtils;
 
 public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
     private static final Logger log = Logger
             .getLogger(AbstractResponseDispatcher.class);
+    private OutgoingInterceptorsLifecycle outgoingInterceptorsLifecycle;
 
-    protected static final String[] HEADER_PROPERTIES = new String[] {
-            HttpResponse.STATUS, HttpResponse.LOCATION, Constants.SESSION_ID };
-    protected CodecType codecType;
-    private int status = HttpResponse.SC_OK;
-    protected final Map<String, Object> properties = new HashMap<>();
-
-    public AbstractResponseDispatcher setStatus(int status) {
-        this.status = status;
-        return this;
+    public OutgoingInterceptorsLifecycle getOutgoingInterceptorsLifecycle() {
+        return outgoingInterceptorsLifecycle;
     }
 
-    public AbstractResponseDispatcher setCodecType(CodecType type) {
-        this.codecType = type;
-        return this;
-    }
-
-    public AbstractResponseDispatcher setProperty(String name, Object value) {
-        properties.put(name, value);
-        return this;
-    }
-
-    public AbstractResponseDispatcher setLocation(String location) {
-        properties.put(HttpResponse.LOCATION, location);
-        return this;
+    public void setOutgoingInterceptorsLifecycle(
+            OutgoingInterceptorsLifecycle outgoingInterceptorsLifecycle) {
+        this.outgoingInterceptorsLifecycle = outgoingInterceptorsLifecycle;
     }
 
     /**
      * This method serializes response in text and sends back to client
      */
-    public void send(Object payload) {
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        if (sessionId != null) {
-            addSessionId(sessionId);
+    @Override
+    public final void send(Response response) {
+        // execute response interceptors if available
+        if (outgoingInterceptorsLifecycle != null
+                && outgoingInterceptorsLifecycle.hasResponseInterceptors()) {
+            for (Interceptor<Response> interceptor : outgoingInterceptorsLifecycle
+                    .getResponseInterceptors()) {
+                response = interceptor.intercept(response);
+            }
         }
+        // nothing to send
+        String replyText = encode(response);
+        // execute output interceptors if available
+        if (outgoingInterceptorsLifecycle != null
+                && outgoingInterceptorsLifecycle.hasOutputInterceptors()) {
+            for (Interceptor<String> interceptor : outgoingInterceptorsLifecycle
+                    .getOutputInterceptors()) {
+                replyText = interceptor.intercept(replyText);
+            }
+        }
+        doSend(response, replyText);
+    }
+
+    protected String encode(Response response) {
+        Object payload = response.getPayload();
         String replyText = null;
         if (payload instanceof Exception) {
             log.warn("Error received " + payload);
             Map<String, Object> resp = ExceptionUtils
                     .toErrors((Exception) payload);
             replyText = ObjectCodecFactory.getInstance()
-                    .getObjectCodec(codecType).encode(resp);
-            for (String name : HEADER_PROPERTIES) {
+                    .getObjectCodec(response.getCodecType()).encode(resp);
+            for (String name : Response.HEADER_PROPERTIES) {
                 Object value = resp.get(name);
                 if (value != null) {
-                    properties.put(name, value);
+                    response.setProperty(name, value);
                 }
             }
         } else {
-            replyText = payload instanceof String ? (String) payload
-                    : ObjectCodecFactory.getInstance()
-                            .getObjectCodec(codecType).encode(payload);
+            replyText = response.getPayload() instanceof String ? (String) response
+                    .getPayload() : ObjectCodecFactory.getInstance()
+                    .getObjectCodec(response.getCodecType())
+                    .encode(response.getPayload());
         }
-        doSend(replyText);
+        return replyText;
     }
 
-    protected void doSend(String payload) {
+    protected void doSend(Response response, String payload) {
 
     }
 
-    public abstract void addSessionId(String value);
-
-    public int getStatus() {
-        if (status > 0) {
-            return status;
-        } else {
-            Object status = properties.get(HttpResponse.STATUS);
-            if (status != null) {
-                if (status instanceof Number) {
-                    return ((Number) status).intValue();
-                } else if (status instanceof String) {
-                    return Integer.parseInt((String) status);
-                }
-            }
-        }
-        return status;
-    }
-
-    @Override
-    public int hashCode() {
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        if (sessionId != null) {
-            sessionId.hashCode();
-        }
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        AbstractResponseDispatcher other = (AbstractResponseDispatcher) obj;
-
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        String otherSessionId = (String) other.properties
-                .get(Constants.SESSION_ID);
-        if (sessionId != null && otherSessionId != null) {
-            return sessionId.equals(otherSessionId);
-        }
-        return false;
-    }
 }

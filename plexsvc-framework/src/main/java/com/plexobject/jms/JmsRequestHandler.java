@@ -15,13 +15,11 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
-
-import com.plexobject.domain.Constants;
-import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.impl.JMSUtils;
+import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
@@ -35,8 +33,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 class JmsRequestHandler implements MessageListener, ExceptionListener {
-    private static final Logger log = Logger
-            .getLogger(JmsRequestHandler.class);
+    private static final Logger log = Logger.getLogger(JmsRequestHandler.class);
 
     private final ServiceRegistry serviceRegistry;
     private final JMSContainer jmsContainer;
@@ -62,23 +59,21 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
         try {
             Map<String, Object> params = JMSUtils.getProperties(message);
             final String textPayload = txtMessage.getText();
+
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsContainer, message.getJMSReplyTo());
-            CodecType codecType = CodecType.fromAcceptHeader(
-                    (String) params.get(Constants.ACCEPT), config.codec());
-            dispatcher.setCodecType(codecType);
 
-            Request req = Request.builder().setProtocol(Protocol.JMS)
-                    .setMethod(Method.MESSAGE).setProperties(params)
-                    .setCodecType(codecType)
-                    .setPayload(textPayload).setResponseDispatcher(dispatcher)
-                    .build();
+            Request req = InterceptorAwareRequestBuilder.buildRequest(
+                    Protocol.JMS, Method.MESSAGE, config.endpoint(), params,
+                    params, textPayload, config.codec(), Void.class,
+                    dispatcher, null);
 
             log.info("### Received " + textPayload + " for "
                     + config.endpoint() + " "
                     + handler.getClass().getSimpleName() + ", headers "
                     + params);
 
+            // service registry will invoke handler and send back reply
             serviceRegistry.invoke(req, handler);
         } catch (JMSException e) {
             log.error("Failed to handle request", e);

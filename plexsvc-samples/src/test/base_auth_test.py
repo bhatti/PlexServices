@@ -16,8 +16,10 @@ class BaseAuthTest(unittest.TestCase):
   # default setup method
   def setUp(self):
     self._cookie = ''
-    self._base_url = 'http://localhost:8181'
-    self._ws_url = 'ws://localhost:8181/ws'
+    #self._base_url = 'http://localhost:8181'
+    #self._ws_url = 'ws://localhost:8181/ws'
+    self._base_url = 'http://localhost:8181/plexsvc-samples'
+    self._ws_url = 'ws://localhost:8181/plexsvc-samples/ws'
 
   @property
   def cookie(self):

@@ -32,6 +32,6 @@ public class QueryProjectService extends AbstractProjectService implements
                         return true;
                     }
                 });
-        request.getResponseDispatcher().send(projects);
+        request.getResponse().setPayload(projects);
     }
 }

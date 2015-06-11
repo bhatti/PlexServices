@@ -13,16 +13,18 @@ import java.util.Properties;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.apache.log4j.Logger;
-
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
+import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
@@ -56,6 +58,34 @@ public class RequestHandlerAdapterJavawsTest {
             logger.info("Adding " + e.getKey() + "==>" + e.getValue());
             serviceRegistry.add(e.getKey(), e.getValue());
         }
+        serviceRegistry.addInputInterceptor(new Interceptor<String>() {
+            @Override
+            public String intercept(String input) {
+                System.out.println("INPUT: " + input);
+                return input;
+            }
+        });
+        serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
+            @Override
+            public String intercept(String output) {
+                System.out.println("OUTPUT: " + output);
+                return output;
+            }
+        });
+        serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
+            @Override
+            public Request intercept(Request input) {
+                System.out.println("INPUT PAYLOAD: " + input);
+                return input;
+            }
+        });
+        serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
+            @Override
+            public Response intercept(Response output) {
+                System.out.println("OUTPUT PAYLOAD: " + output);
+                return output;
+            }
+        });
         serviceRegistry.start();
         Thread.sleep(500);
     }

@@ -58,6 +58,6 @@ public class QueryBugReportService extends AbstractBugReportService implements
                         return true;
                     }
                 });
-        request.getResponseDispatcher().send(reports);
+        request.getResponse().setPayload(reports);
     }
 }

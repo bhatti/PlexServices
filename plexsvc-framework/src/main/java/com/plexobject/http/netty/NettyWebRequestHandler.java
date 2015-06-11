@@ -39,8 +39,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
-
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
@@ -48,8 +46,10 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.Handledable;
+import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.ServiceRegistry;
 
 /**
  * This class handles requests over http and websockets using Netty container
@@ -136,11 +136,11 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                             }
                         }
                     }, req, ctx);
-            String payload = null;
+            String textPayload = null;
 
             if (req instanceof HttpContent) {
                 HttpContent content = (HttpContent) req;
-                payload = content.content().toString(CharsetUtil.UTF_8);
+                textPayload = content.content().toString(CharsetUtil.UTF_8);
             }
             Method method = Method.valueOf(req.getMethod().name());
             int n = uri.indexOf("?");
@@ -150,16 +150,16 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             Map<String, Object> headers = getHeaders(req);
             Map<String, Object> params = getParams(req);
 
-            CodecType reqCodecType = CodecType.fromAcceptHeader(
-                    (String) params.get(Constants.ACCEPT), codecType);
-            Request handlerReq = Request.builder().setProtocol(Protocol.HTTP)
-                    .setMethod(method).setEndpoint(uri).setProperties(params)
-                    .setCodecType(reqCodecType).setHeaders(headers)
-                    .setPayload(payload).setResponseDispatcher(dispatcher)
-                    .build();
+            Request handlerReq = InterceptorAwareRequestBuilder.buildRequest(
+                    Protocol.HTTP, method, uri, params, headers, textPayload,
+                    codecType, Void.class, dispatcher,
+                    ServiceRegistry.getInstance()); // TODO find better way to
+                                                    // inject service registry
+
             log.info("HTTP Received URI '" + uri + "', wsPath '" + wsPath
                     + "', request " + handlerReq);
             handler.handle(handlerReq);
+            handlerReq.getResponseDispatcher().send(handlerReq.getResponse());
         }
 
     }
@@ -266,15 +266,15 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
         final String textPayload = codec.encode(rawRequest.getPayload());
         AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
                 ctx.channel());
-        CodecType reqCodecType = CodecType.fromAcceptHeader(
-                (String) params.get(Constants.ACCEPT), codecType);
-        Request req = Request.builder().setProtocol(Protocol.WEBSOCKET)
-                .setMethod(Method.MESSAGE).setEndpoint(endpoint)
-                .setCodecType(reqCodecType).setProperties(params)
-                .setHeaders(headers).setPayload(textPayload)
-                .setResponseDispatcher(dispatcher).build();
+
+        Request req = InterceptorAwareRequestBuilder.buildRequest(
+                Protocol.WEBSOCKET, Method.MESSAGE, endpoint, params, headers,
+                textPayload, codecType, Void.class, dispatcher,
+                ServiceRegistry.getInstance()); // TODO find better way to
+                                                // inject service registry
 
         handler.handle(req);
+        req.getResponseDispatcher().send(req.getResponse());
 
     }
 

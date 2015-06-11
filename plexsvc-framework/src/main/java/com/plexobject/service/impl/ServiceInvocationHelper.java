@@ -1,21 +1,22 @@
 package com.plexobject.service.impl;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
-
+import com.plexobject.domain.Constants;
 import com.plexobject.domain.Redirectable;
 import com.plexobject.domain.Statusable;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
+import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.RequestInterceptor;
+import com.plexobject.service.IncomingInterceptorsLifecycle;
+import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.validation.IRequiredFieldValidator;
@@ -42,7 +43,7 @@ public class ServiceInvocationHelper {
      * @param handler
      */
     public void invoke(Request request, RequestHandler handler,
-            Collection<RequestInterceptor> interceptors) {
+            IncomingInterceptorsLifecycle incomingInterceptorsLifecycle) {
         if (handler != null) {
             final long started = System.currentTimeMillis();
             ServiceMetrics metrics = serviceRegistry
@@ -56,30 +57,59 @@ public class ServiceInvocationHelper {
                         + config.protocol() + ", request " + request);
             }
 
-            // override payload in request
-            Object payload = null;
-            if (config.payloadClass() != Void.class) {
-                payload = ObjectCodecFactory
+            // check if payload is required
+            if (config.payloadClass() != null
+                    && config.payloadClass() != Void.class
+                    && request.getPayload() == null
+                    && request.getProperties().size() == 0) {
+                request.getResponse().setStatus(HttpResponse.SC_FORBIDDEN);
+                request.getResponse().setPayload(
+                        "Expected payload of type "
+                                + config.payloadClass().getName()
+                                + ", but payload was: " + request);
+                request.getResponseDispatcher().send(request.getResponse());
+                return;
+            }
+            ((AbstractResponseDispatcher) request.getResponseDispatcher())
+                    .setOutgoingInterceptorsLifecycle(serviceRegistry);
+            CodecType codecType = CodecType.fromAcceptHeader(
+                    (String) request.getProperty(Constants.ACCEPT),
+                    config.codec());
+            request.getResponse().setCodecType(codecType);
+
+            // Note InterceptorAwareRequestBuilder does some conversion but we
+            // would not know payload class there so redoing it here again
+            //
+            // decode text input into object
+            if (config.payloadClass() != null
+                    && config.payloadClass() != Void.class
+                    && (request.getPayload() instanceof String || request
+                            .getPayload() == null)) {
+                request.setPayload(ObjectCodecFactory
                         .getInstance()
-                        .getObjectCodec(config.codec())
-                        .decode((String) request.getPayload(),
-                                config.payloadClass(), request.getProperties());
-                if (payload == null) {
-                    request.getResponseDispatcher().setStatus(
-                            HttpResponse.SC_FORBIDDEN);
-                    request.getResponseDispatcher().send(
-                            "Expected payload not defined");
+                        .getObjectCodec(codecType)
+                        .decode(request.getPayload(), config.payloadClass(),
+                                request.getProperties()));
+            }
+
+            // Invoking request interceptors
+            if (incomingInterceptorsLifecycle != null
+                    && incomingInterceptorsLifecycle.hasRequestInterceptors()) {
+                for (Interceptor<Request> interceptor : incomingInterceptorsLifecycle
+                        .getRequestInterceptors()) {
+                    request = interceptor.intercept(request);
                 }
             }
 
             // validate required fields
             requiredFieldValidator.validate(handler,
-                    payload == null ? request.getProperties() : payload);
+                    request.getPayload() == null ? request.getProperties()
+                            : request.getPayload());
 
             // update post parameters
-            if (payload != null) {
-                request.setPayload(payload);
-            } else if (request.getPayload() != null) {
+            if (request.getPayload() != null
+                    && request.getProperties().size() == 0
+                    && request.getProperties().size() % 2 == 0) {
                 String[] nvArr = request.getPayload().toString().split("&");
                 for (String nvStr : nvArr) {
                     String[] nv = nvStr.split("=");
@@ -90,52 +120,43 @@ public class ServiceInvocationHelper {
             }
             //
             try {
-                // invoke interceptor if needed
-                request = invokeInterceptorIfneeded(request, handler,
-                        interceptors);
                 //
                 // invoke authorizer if set
                 authorizeIfNeeded(request, config);
                 handler.handle(request);
                 metrics.addResponseTime(System.currentTimeMillis() - started);
+                // send back the reply
+                if (request.getResponse().getPayload() != null) {
+                    request.getResponseDispatcher().send(request.getResponse());
+                }
             } catch (Exception e) {
                 metrics.incrementErrors();
                 if (e instanceof Redirectable) {
                     if (((Redirectable) e).getLocation() != null) {
-                        request.getResponseDispatcher().setLocation(
+                        request.getResponse().setLocation(
                                 ((Redirectable) e).getLocation());
                     }
                 } else if (e instanceof FileNotFoundException) {
-                    request.getResponseDispatcher().setStatus(
-                            HttpResponse.SC_NOT_FOUND);
+                    request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
                 } else if (e instanceof Statusable) {
-                    request.getResponseDispatcher().setStatus(
+                    request.getResponse().setStatus(
                             ((Statusable) e).getStatus());
                 } else {
-                    request.getResponseDispatcher().setStatus(
+                    request.getResponse().setStatus(
                             HttpResponse.SC_INTERNAL_SERVER_ERROR);
                 }
-                request.getResponseDispatcher().send(e);
+                request.getResponse().setPayload(e);
+                request.getResponseDispatcher().send(request.getResponse());
             }
         } else {
             log.warn("Received Unknown request params "
                     + request.getProperties() + ", payload "
                     + request.getPayload());
-            request.getResponseDispatcher().setCodecType(CodecType.TEXT);
-            request.getResponseDispatcher()
-                    .setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponseDispatcher().send("page not found");
+            request.getResponse().setCodecType(CodecType.TEXT);
+            request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
+            request.getResponse().setPayload("page not found");
+            request.getResponseDispatcher().send(request.getResponse());
         }
-    }
-
-    private Request invokeInterceptorIfneeded(Request request,
-            RequestHandler handler, Collection<RequestInterceptor> interceptors) {
-        if (interceptors != null) {
-            for (RequestInterceptor interceptor : interceptors) {
-                request = interceptor.intercept(request);
-            }
-        }
-        return request;
     }
 
     private void authorizeIfNeeded(Request request, ServiceConfigDesc config) {

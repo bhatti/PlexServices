@@ -15,6 +15,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.predicate.Predicate;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
@@ -45,14 +46,21 @@ public class EventBusImplTest {
         bus.subscribe("channel", handler, null);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request req = new Request(Protocol.HTTP, Method.GET, "/w", properties,
-                headers, "payload", CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
+        Request req = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload("payload")
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
 
-                    }
-                });
         bus.publish("channel", req);
         Thread.sleep(200);
         assertEquals("payload", requests.get(0).getPayload());
@@ -63,14 +71,20 @@ public class EventBusImplTest {
         bus.subscribe("channel", handler, filter);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request req = new Request(Protocol.HTTP, Method.GET, "/w", properties,
-                headers, "payload", CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
-
-                    }
-                });
+        Request req = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload("payload")
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         bus.publish("channel", req);
         Thread.sleep(200);
         assertEquals(0, requests.size());
@@ -86,14 +100,20 @@ public class EventBusImplTest {
         bus.unsubscribe(id);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request req = new Request(Protocol.HTTP, Method.GET, "/w", properties,
-                headers, "payload", CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
-
-                    }
-                });
+        Request req = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload("payload")
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         bus.publish("channel", req);
         Thread.sleep(200);
         assertEquals(0, requests.size());

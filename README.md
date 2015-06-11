@@ -104,7 +104,7 @@ RequestHandler {
     public void handle(Request request) {
       User user = request.getPayload();
       User saved = userRepository.save(user);
-      request.getResponseDispatcher().send(saved);
+      request.getResponse().setPayload(saved);
     }
 }
 
@@ -153,7 +153,7 @@ RequestHandler {
     public void handle(Request request) {
       User user = request.getPayload();
       User saved = userRepository.save(user);
-      request.getResponseDispatcher().send(saved);
+      request.getResponse().setPayload(saved);
     }
 }
 ```
@@ -197,7 +197,7 @@ public class CreateUserService extends AbstractUserService implements RequestHan
     public void handle(Request request) {
       User user = request.getPayload();
       User saved = userRepository.save(user);
-      request.getResponseDispatcher().send(saved);
+      request.getResponse().setPayload(saved);
     }
 }
 ```
@@ -225,7 +225,7 @@ public class CreateBugReportService extends AbstractBugReportService implements 
       public void handle(Request request) {
         BugReport report = request.getPayload();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseDispatcher().send(saved);
+        request.getResponse().setPayload(saved);
       }
 }
 ```
@@ -254,7 +254,7 @@ public class CreateBugReportService extends AbstractBugReportService implements
     public void handle(Request request) {
         BugReport report = request.getPayload();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseDispatcher().send(saved);
+        request.getResponse().setPayload(saved);
     }
 
 }
@@ -307,7 +307,7 @@ public QueryUserService(UserRepository userRepository) {
             return true;
         }
         });
-    request.getResponseDispatcher().send(users);
+    request.getResponse().setPayload(users);
   }
 }
 ```
@@ -331,7 +331,7 @@ public class QueryUserService extends AbstractUserService implements RequestHand
                 return true;
             }
             });
-        request.getResponseDispatcher().send(users);
+        request.getResponse().setPayload(users);
       }
 }
 ```
@@ -358,7 +358,7 @@ public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
     String data = request.getProperty("data");
-    request.getResponseDispatcher().send(data);
+    request.getResponse().setPayload(data);
   }
 }
 
@@ -418,7 +418,7 @@ public class StaticFileServer implements RequestHandler {
             final File filePath = new File(webFolder, path);
 
             if (!filePath.getCanonicalPath().startsWith(canonicalDirPath)) {
-                request.getResponseDispatcher().send(
+                request.getResponse().setPayload(
                         new IOException("Relative path '" + path
                                 + "' not allowed"));
             }
@@ -426,15 +426,15 @@ public class StaticFileServer implements RequestHandler {
                     filePath.getName().lastIndexOf('.'));
             String contentType = contentType = Files.probeContentType(filePath.toPath());
             if (contentType != null) {
-                request.getResponseDispatcher().setProperty(
+                request.getResponse().setProperty(
                         HttpResponse.CONTENT_TYPE, contentType);
             }
             //
-            request.getResponseDispatcher()
-                    .send(new String(Files.readAllBytes(Paths.get(filePath
+            request.getResponse().setPayload(
+                    new String(Files.readAllBytes(Paths.get(filePath
                             .toURI()))));
         } catch (IOException e) {
-            request.getResponseDispatcher().send(e);
+            request.getResponse().setPayload(e);
         }
     }
 }

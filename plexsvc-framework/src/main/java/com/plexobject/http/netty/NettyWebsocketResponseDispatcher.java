@@ -3,13 +3,8 @@ package com.plexobject.http.netty;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
-
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Response;
@@ -19,26 +14,28 @@ public class NettyWebsocketResponseDispatcher extends
     private static final Logger log = Logger
             .getLogger(NettyWebsocketResponseDispatcher.class);
     private final Channel channel;
-    private final Map<String, Object> properties = new HashMap<>();
+    private final String id;
 
     public NettyWebsocketResponseDispatcher(final Channel channel) {
         this.channel = channel;
-    }
-
-    public void addSessionId(String value) {
-        properties.put(Constants.SESSION_ID, value);
+        this.id = channel.remoteAddress().toString();
     }
 
     @Override
-    public void send(Object payload) {
+    protected String encode(Response response) {
+        // encode entire response object instead of just payload
+        String textJson = ObjectCodecFactory.getInstance()
+                .getObjectCodec(response.getCodecType()).encode(response);
+        if (log.isDebugEnabled()) {
+            log.debug("Sending to " + id + ":" + textJson);
+        }
+        System.out.println("Sending to " + id + ":" + textJson);
+        return textJson;
+    }
+
+    @Override
+    protected void doSend(Response response, String responseText) {
         try {
-            Response response = new Response(properties,
-                    new HashMap<String, Object>(), payload);
-            String responseText = ObjectCodecFactory.getInstance()
-                    .getObjectCodec(codecType).encode(response);
-            // if (log.isDebugEnabled()) {
-            // log.debug("Sending " + responseText + " to " + channel);
-            // }
             if (channel.isOpen()) {
                 channel.write(new TextWebSocketFrame(responseText));
                 channel.flush();
@@ -50,7 +47,7 @@ public class NettyWebsocketResponseDispatcher extends
             throw e;
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-                log.debug("Failed to send " + payload + ", " + this, e);
+                log.debug("Failed to send " + responseText + ", " + this, e);
             }
             throw new RuntimeException(e);
         }
@@ -58,12 +55,10 @@ public class NettyWebsocketResponseDispatcher extends
 
     @Override
     public int hashCode() {
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        if (sessionId != null) {
-            return sessionId.hashCode();
-        }
-
-        return channel.localAddress().hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
     }
 
     @Override
@@ -75,13 +70,12 @@ public class NettyWebsocketResponseDispatcher extends
         if (getClass() != obj.getClass())
             return false;
         NettyWebsocketResponseDispatcher other = (NettyWebsocketResponseDispatcher) obj;
-        String sessionId = (String) properties.get(Constants.SESSION_ID);
-        String otherSessionId = (String) other.properties
-                .get(Constants.SESSION_ID);
-        if (sessionId != null && otherSessionId != null) {
-            return sessionId.equals(otherSessionId);
-        }
-        return channel.remoteAddress().equals(other.channel.remoteAddress());
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     @Override

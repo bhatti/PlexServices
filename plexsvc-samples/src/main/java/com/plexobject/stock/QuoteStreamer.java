@@ -2,6 +2,7 @@ package com.plexobject.stock;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Timer;
@@ -10,12 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
-
+import com.plexobject.encode.CodecType;
+import com.plexobject.handler.Response;
 import com.plexobject.handler.ResponseDispatcher;
 
 public class QuoteStreamer extends TimerTask {
-    private static final Logger log = Logger
-            .getLogger(QuoteStreamer.class);
+    private static final Logger log = Logger.getLogger(QuoteStreamer.class);
 
     private int delay = 1000;
     private Map<String, Collection<ResponseDispatcher>> subscribers = new ConcurrentHashMap<>();
@@ -66,9 +67,12 @@ public class QuoteStreamer extends TimerTask {
                 Collection<ResponseDispatcher> dispatchers = new ArrayList<>(
                         e.getValue());
                 int n = 0;
+                Response response = new Response(new HashMap<String, Object>(),
+                        new HashMap<String, Object>(), q);
+                response.setCodecType(CodecType.JSON);
                 for (ResponseDispatcher d : dispatchers) {
                     try {
-                        d.send(q);
+                        d.send(response);
                         log.info(n + "/" + dispatchers.size() + ": Sending "
                                 + q + " to " + d.getClass().getName());
                         n++;

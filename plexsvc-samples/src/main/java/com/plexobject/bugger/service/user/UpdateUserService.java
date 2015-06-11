@@ -25,6 +25,6 @@ public class UpdateUserService extends AbstractUserService implements
         User user = request.getPayload();
 
         User saved = userRepository.save(user);
-        request.getResponseDispatcher().send(saved);
+        request.getResponse().setPayload(saved);
     }
 }

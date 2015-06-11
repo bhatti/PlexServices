@@ -16,8 +16,7 @@ import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Manager", endpoint = "/projects/{id}/membership/remove", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Manager", endpoint = "queue://{scope}-remove-project-member-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @Field(name = "projectId"),
-        @Field(name = "assignedTo") })
+@RequiredFields({ @Field(name = "projectId"), @Field(name = "assignedTo") })
 public class RemoveProjectMemberService extends AbstractProjectService
         implements RequestHandler {
     public RemoveProjectMemberService(ProjectRepository projectRepository,
@@ -41,6 +40,6 @@ public class RemoveProjectMemberService extends AbstractProjectService
         } else {
             project.removeMember(assignedTo);
         }
-        request.getResponseDispatcher().send(project);
+        request.getResponse().setPayload(project);
     }
 }

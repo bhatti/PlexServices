@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
@@ -24,6 +23,7 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.Handledable;
 import com.plexobject.http.WebContainerProvider;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
@@ -142,12 +142,12 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             return;
         }
         // must consume input stream before reading parameters
-        String payload = IOUtils.toString(req.getInputStream());
+        String textPayload = IOUtils.toString(req.getInputStream());
         if (defaultExecutor == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND,
                     "Service is not found");
             log.warn("Received requests but request handler is not found for "
-                    + payload);
+                    + textPayload);
             return;
         }
         Map<String, Object> headers = getHeaders(req);
@@ -161,22 +161,21 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             uri = uri.substring(0, n);
         }
         //
+
         AbstractResponseDispatcher dispatcher = new ServletResponseDispatcher(
                 new Handledable() {
                     @Override
                     public void setHandled(boolean h) {
                     }
                 }, req, resp);
-        CodecType reqCodecType = CodecType.fromAcceptHeader(
-                (String) params.get(Constants.ACCEPT), codecType);
-        dispatcher.setCodecType(reqCodecType);
-        //
-        Request handlerReq = Request.builder().setProtocol(Protocol.HTTP)
-                .setMethod(method).setEndpoint(uri).setProperties(params)
-                .setCodecType(reqCodecType).setHeaders(headers)
-                .setPayload(payload).setResponseDispatcher(dispatcher).build();
+
+        Request handlerReq = InterceptorAwareRequestBuilder.buildRequest(
+                Protocol.HTTP, method, uri, params, headers, textPayload,
+                codecType, Void.class, dispatcher, serviceRegistry);
+
         log.info("HTTP Received URI '" + uri + "', request " + handlerReq);
         defaultExecutor.handle(handlerReq);
+        handlerReq.getResponseDispatcher().send(handlerReq.getResponse());
     }
 
     private static Map<String, Object> getParams(HttpServletRequest request) {

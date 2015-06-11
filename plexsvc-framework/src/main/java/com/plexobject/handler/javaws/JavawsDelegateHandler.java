@@ -65,11 +65,11 @@ public class JavawsDelegateHandler implements RequestHandler {
             } else {
                 response.put(responseTag, new HashMap<String, Object>());
             }
-            request.getResponseDispatcher().send(response);
+            request.getResponse().setPayload(response);
         } catch (Exception e) {
             logger.error("Failed to invoke " + method + ", for request "
                     + request, e);
-            request.getResponseDispatcher().send(e);
+            request.getResponse().setPayload(e);
         }
     }
 

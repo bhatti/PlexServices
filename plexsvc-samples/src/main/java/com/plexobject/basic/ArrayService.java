@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -16,11 +15,9 @@ import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
-
 @ServiceConfig(protocol = Protocol.HTTP, endpoint = "/array", method = Method.GET, codec = CodecType.JSON)
 public class ArrayService implements RequestHandler {
-    private static final Logger log = Logger
-            .getLogger(ReverseService.class);
+    private static final Logger log = Logger.getLogger(ReverseService.class);
 
     public ArrayService() {
         log.info("Array Service Started");
@@ -33,12 +30,12 @@ public class ArrayService implements RequestHandler {
             count = 1;
         }
         List<Map<String, Object>> response = new ArrayList<>();
-        for (int i=0; i<count; i++) {
+        for (int i = 0; i < count; i++) {
             Map<String, Object> entry = new HashMap<>();
             entry.put("date", new Date());
-            entry.put("id", i+1);
+            entry.put("id", i + 1);
             response.add(entry);
         }
-        request.getResponseDispatcher().send(response);
+        request.getResponse().setPayload(response);
     }
 }

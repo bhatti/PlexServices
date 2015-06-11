@@ -12,9 +12,13 @@ import org.junit.Test;
 
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
+import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.http.TestWebUtils;
+import com.plexobject.service.Method;
+import com.plexobject.service.Protocol;
 
 public class NettyWebsocketRequestHandlerTest {
     private static final int HTTP_PORT = 8323;
@@ -29,9 +33,9 @@ public class NettyWebsocketRequestHandlerTest {
         @Override
         public void handle(Request request) {
             requests.add(request);
-            request.getResponseDispatcher().setCodecType(CodecType.JSON);
+            request.getResponse().setCodecType(CodecType.JSON);
 
-            request.getResponseDispatcher().send(PONG);
+            request.getResponse().setPayload(PONG);
         }
     };
 
@@ -51,8 +55,18 @@ public class NettyWebsocketRequestHandlerTest {
 
     @Test
     public void testWebHandler() throws Exception {
-        Request request = Request.builder().setPayload(PING)
-                .setEndpoint("/ping").build();
+        Request request = Request
+                .builder()
+                .setPayload(PING)
+                .setProtocol(Protocol.HTTP)
+                .setCodecType(CodecType.JSON)
+                .setMethod(Method.GET)
+                .setEndpoint("/ping")
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), null))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         String jsonRequest = ObjectCodecFactory.getInstance()
                 .getObjectCodec(CodecType.JSON).encode(request);
         String jsonResponse = TestWebUtils.sendReceiveWebsocketRequest(

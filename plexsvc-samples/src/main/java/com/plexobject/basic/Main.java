@@ -11,13 +11,12 @@ import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
+import com.plexobject.service.Interceptor;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
-import com.plexobject.service.RequestInterceptor;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
-import com.plexobject.service.ServiceTypeDesc;
 
 public class Main implements ServiceRegistryLifecycleAware {
     public static void main(String[] args) throws Exception {
@@ -65,19 +64,18 @@ public class Main implements ServiceRegistryLifecycleAware {
     }
 
     private static void addInterceptors(ServiceRegistry serviceRegistry) {
-        serviceRegistry.add(new ServiceTypeDesc(Protocol.HTTP, Method.GET,
-                null, "/.*"), new RequestInterceptor() {
+        serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
             @Override
             public Request intercept(Request request) {
-                System.out.println(">>>>>>>>>Interceptor 1 " + request);
+                System.out.println(">>>>>>>>>INPUT " + request);
                 return request;
             }
         });
-        serviceRegistry.add(new ServiceTypeDesc(), new RequestInterceptor() {
+        serviceRegistry.addResponseInterceptor(new Interceptor<Object>() {
             @Override
-            public Request intercept(Request request) {
-                System.out.println(">>>>>>>>>>Interceptor 2 " + request);
-                return request;
+            public Object intercept(Object response) {
+                System.out.println(">>>>>>>>>OUTPUT " + response);
+                return response;
             }
         });
     }

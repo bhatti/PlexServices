@@ -63,14 +63,21 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
+        Request request = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload(payload)
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
 
-                    }
-                });
         assertNotNull(bridge.getMappingEntry(request));
     }
 
@@ -86,14 +93,20 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
-
-                    }
-                });
+        Request request = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload(payload)
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
 
         new Expectations() {
             {
@@ -117,14 +130,20 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        final Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON,
-                new AbstractResponseDispatcher() {
-                    @Override
-                    public void addSessionId(String value) {
-
-                    }
-                });
+        Request request = Request
+                .builder()
+                .setProtocol(Protocol.HTTP)
+                .setMethod(Method.GET)
+                .setEndpoint("/w")
+                .setProperties(properties)
+                .setHeaders(headers)
+                .setPayload(payload)
+                .setCodecType(CodecType.JSON)
+                .setResponse(
+                        new Response(new HashMap<String, Object>(),
+                                new HashMap<String, Object>(), ""))
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
 
         new Expectations() {
             {

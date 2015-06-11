@@ -39,6 +39,7 @@ import com.plexobject.jms.MessageListenerConfig;
  */
 public class DefaultJMSContainer extends BaseJMSContainer implements
         MessageReceiverThread.Callback {
+    private static final int DEFAULT_WAIT_TIME = 10000;
     private Connection connection;
     private final ThreadLocal<Session> currentSession = new ThreadLocal<>();
     private final ThreadLocal<Map<String, MessageProducer>> currentProducers = new ThreadLocal<>();
@@ -131,7 +132,8 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
     public synchronized void waitUntilReady() {
         while (!running) {
             try {
-                wait();
+                log.info("Waiting for JMSContainer to start " + running);
+                wait(DEFAULT_WAIT_TIME);
             } catch (InterruptedException e) {
                 Thread.interrupted();
             }
@@ -140,7 +142,8 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
 
     @Override
     public Closeable setMessageListener(final Destination destination,
-            final MessageListener l, final MessageListenerConfig messageListenerConfig)
+            final MessageListener l,
+            final MessageListenerConfig messageListenerConfig)
             throws JMSException, NamingException {
         if (destination instanceof TemporaryQueue) {
             final MessageConsumer consumer = createConsumer(destination);

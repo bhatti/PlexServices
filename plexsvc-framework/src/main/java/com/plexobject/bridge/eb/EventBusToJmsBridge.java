@@ -20,13 +20,10 @@ import javax.jms.TextMessage;
 
 import org.apache.log4j.Logger;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.bus.EventBus;
 import com.plexobject.bus.impl.EventBusImpl;
 import com.plexobject.domain.Configuration;
-import com.plexobject.domain.Constants;
-import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -36,6 +33,7 @@ import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
+import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
@@ -52,7 +50,8 @@ import com.plexobject.util.IOUtils;
  *
  */
 public class EventBusToJmsBridge implements Lifecycle {
-    private static final Logger log = Logger.getLogger(EventBusToJmsBridge.class);
+    private static final Logger log = Logger
+            .getLogger(EventBusToJmsBridge.class);
 
     /**
      * This listener listens to the channel and forwards events to the JMS
@@ -136,27 +135,17 @@ public class EventBusToJmsBridge implements Lifecycle {
             TextMessage txtMessage = (TextMessage) message;
             try {
                 Map<String, Object> params = JMSUtils.getProperties(message);
-                String sessionId = (String) params.get(Constants.SESSION_ID);
-
                 final String textPayload = txtMessage.getText();
-                Object payload = ObjectCodecFactory
-                        .getInstance()
-                        .getObjectCodec(entry.getCodecType())
-                        .decode(textPayload, entry.getRequestTypeClass(),
-                                params);
                 AbstractResponseDispatcher dispatcher = message.getJMSReplyTo() != null ? new JmsResponseDispatcher(
-                        jmsContainer, message.getJMSReplyTo()) : null;
-                CodecType codecType = CodecType.fromAcceptHeader(
-                        (String) params.get(Constants.ACCEPT),
-                        entry.getCodecType());
-                if (dispatcher != null) {
-                    dispatcher.setCodecType(codecType);
-                }
-                Request req = Request.builder().setProtocol(Protocol.JMS)
-                        .setMethod(Method.MESSAGE).setProperties(params)
-                        .setCodecType(codecType).setPayload(payload)
-                        .setSessionId(sessionId)
-                        .setResponseDispatcher(dispatcher).build();
+                        jmsContainer, message.getJMSReplyTo())
+                        : new AbstractResponseDispatcher() {
+                        };
+
+                Request req = InterceptorAwareRequestBuilder.buildRequest(
+                        Protocol.JMS, Method.MESSAGE, null, params, params,
+                        textPayload, entry.getCodecType(),
+                        entry.getRequestTypeClass(), dispatcher, null);
+
                 log.info("Forwarding " + entry + "'s message " + req);
                 eb.publish(entry.getTarget(), req);
             } catch (Exception e) {

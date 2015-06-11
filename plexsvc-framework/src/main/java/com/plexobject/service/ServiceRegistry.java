@@ -13,7 +13,6 @@ import javax.servlet.ServletContext;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.domain.Configuration;
@@ -21,12 +20,14 @@ import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.http.WebContainerProvider;
 import com.plexobject.http.netty.NettyWebContainerProvider;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.metrics.StatsCollector;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.impl.InterceptorLifecycleImpl;
 import com.plexobject.service.impl.ServiceInvocationHelper;
 import com.plexobject.service.impl.ServiceRegistryContainers;
 import com.plexobject.service.impl.ServiceRegistryHandlers;
@@ -37,8 +38,8 @@ import com.plexobject.service.impl.ServiceRegistryHandlers;
  * @author shahzad bhatti
  *
  */
-public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
-        ServiceRegistryMBean {
+public class ServiceRegistry implements ServiceContainer,
+        InterceptorsLifecycle, ServiceRegistryMBean {
     private static final Logger logger = Logger
             .getLogger(ServiceRegistry.class);
 
@@ -53,8 +54,11 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
     private final ServiceRegistryHandlers serviceRegistryHandlers;
     private final ServiceRegistryContainers serviceRegistryContainers;
     private final Map<String, RequestHandler> pingHandlers = new ConcurrentHashMap<>();
+    private final InterceptorsLifecycle interceptorLifecycle = new InterceptorLifecycleImpl();
+
     private final boolean enablePingHandlers;
     private ServletContext servletContext;
+    private static ServiceRegistry instance;
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
         this(config, authorizer, new NettyWebContainerProvider());
@@ -93,6 +97,11 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         } catch (Exception e) {
             logger.error("Could not register mbean for service-registry", e);
         }
+        instance = this;
+    }
+
+    public static ServiceRegistry getInstance() {
+        return instance;
     }
 
     @Override
@@ -149,35 +158,6 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         return serviceMetricsRegistry;
     }
 
-    private void registerServiceHandlerLifecycle(RequestHandler h) {
-        String objName = getPackageName(h) + h.getClass().getSimpleName()
-                + ":type=Lifecycle";
-        try {
-            mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
-                    new ObjectName(objName));
-        } catch (InstanceAlreadyExistsException e) {
-        } catch (Exception e) {
-            logger.error("Could not register mbean " + objName, e);
-        }
-    }
-
-    private static String getPackageName(RequestHandler h) {
-        return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
-                + ".";
-    }
-
-    private void registerMetricsJMX(RequestHandler h) {
-        String objName = getPackageName(h) + h.getClass().getSimpleName()
-                + ":type=Metrics";
-        ServiceMetrics metrics = serviceMetricsRegistry.getServiceMetrics(h);
-        try {
-            mbs.registerMBean(metrics, new ObjectName(objName));
-        } catch (InstanceAlreadyExistsException e) {
-        } catch (Exception e) {
-            logger.error("Could not register mbean " + objName, e);
-        }
-    }
-
     @Override
     public synchronized boolean remove(RequestHandler h) {
         ServiceConfigDesc config = getServiceConfig(h);
@@ -188,7 +168,6 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         if (container == null) {
             return false;
         }
-        serviceRegistryHandlers.removeInterceptors(h);
         if (container.remove(h)) {
             if (enablePingHandlers) {
                 removePingHandler(h, config, container);
@@ -277,23 +256,6 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         this.serviceRegistryLifecycleAware = serviceRegistryLifecycleAware;
     }
 
-    @Override
-    public synchronized void add(ServiceTypeDesc type,
-            RequestInterceptor interceptor) {
-        serviceRegistryHandlers.add(type, interceptor);
-    }
-
-    @Override
-    public synchronized void remove(ServiceTypeDesc type,
-            RequestInterceptor interceptor) {
-        serviceRegistryHandlers.remove(type, interceptor);
-    }
-
-    @Override
-    public Map<ServiceTypeDesc, Collection<RequestInterceptor>> getInterceptors() {
-        return serviceRegistryHandlers.getInterceptors();
-    }
-
     /**
      * This method executes handler by encoding the payload to proper java class
      * and enforces security set by the underlying application.
@@ -302,10 +264,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
      * @param handler
      */
     public void invoke(Request request, RequestHandler handler) {
-        Collection<RequestInterceptor> interceptors = serviceRegistryHandlers
-                .getInterceptors(handler);
-
-        serviceInvocationHelper.invoke(request, handler, interceptors);
+        serviceInvocationHelper.invoke(request, handler, this);
     }
 
     public ServletContext getServletContext() {
@@ -314,6 +273,86 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
 
     public void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
+    }
+
+    @Override
+    public void addRequestInterceptor(Interceptor<Request> interceptor) {
+        interceptorLifecycle.addRequestInterceptor(interceptor);
+    }
+
+    @Override
+    public boolean removeRequestInterceptor(Interceptor<Request> interceptor) {
+        return interceptorLifecycle.removeRequestInterceptor(interceptor);
+    }
+
+    @Override
+    public Collection<Interceptor<Request>> getRequestInterceptors() {
+        return interceptorLifecycle.getRequestInterceptors();
+    }
+
+    @Override
+    public void addResponseInterceptor(Interceptor<Response> interceptor) {
+        interceptorLifecycle.addResponseInterceptor(interceptor);
+    }
+
+    @Override
+    public boolean removeResponseInterceptor(Interceptor<Response> interceptor) {
+        return interceptorLifecycle.removeResponseInterceptor(interceptor);
+    }
+
+    @Override
+    public Collection<Interceptor<Response>> getResponseInterceptors() {
+        return interceptorLifecycle.getResponseInterceptors();
+    }
+
+    @Override
+    public void addInputInterceptor(Interceptor<String> interceptor) {
+        interceptorLifecycle.addInputInterceptor(interceptor);
+    }
+
+    @Override
+    public boolean removeInputInterceptor(Interceptor<String> interceptor) {
+        return interceptorLifecycle.removeInputInterceptor(interceptor);
+    }
+
+    @Override
+    public Collection<Interceptor<String>> getInputInterceptors() {
+        return interceptorLifecycle.getInputInterceptors();
+    }
+
+    @Override
+    public void addOutputInterceptor(Interceptor<String> interceptor) {
+        interceptorLifecycle.addOutputInterceptor(interceptor);
+    }
+
+    @Override
+    public boolean removeOutputInterceptor(Interceptor<String> interceptor) {
+        return interceptorLifecycle.removeOutputInterceptor(interceptor);
+    }
+
+    @Override
+    public Collection<Interceptor<String>> getOutputInterceptors() {
+        return interceptorLifecycle.getOutputInterceptors();
+    }
+
+    @Override
+    public boolean hasInputInterceptors() {
+        return interceptorLifecycle.hasInputInterceptors();
+    }
+
+    @Override
+    public boolean hasRequestInterceptors() {
+        return interceptorLifecycle.hasRequestInterceptors();
+    }
+
+    @Override
+    public boolean hasOutputInterceptors() {
+        return interceptorLifecycle.hasOutputInterceptors();
+    }
+
+    @Override
+    public boolean hasResponseInterceptors() {
+        return interceptorLifecycle.hasResponseInterceptors();
     }
 
     private void addPingHandler(final RequestHandler h,
@@ -331,7 +370,7 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         final RequestHandler pingHandler = new RequestHandler() {
             @Override
             public void handle(Request request) {
-                request.getResponseDispatcher().send(
+                request.getResponse().setPayload(
                         getServiceMetricsRegistry().getServiceMetrics(h)
                                 .getSummary());
             }
@@ -348,6 +387,35 @@ public class ServiceRegistry implements ServiceContainer, InterceptorLifecycle,
         if (pingHandler != null) {
             container.remove(pingHandler);
             removeServiceConfig(pingHandler);
+        }
+    }
+
+    private void registerServiceHandlerLifecycle(RequestHandler h) {
+        String objName = getPackageName(h) + h.getClass().getSimpleName()
+                + ":type=Lifecycle";
+        try {
+            mbs.registerMBean(new ServiceHandlerLifecycle(this, h),
+                    new ObjectName(objName));
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (Exception e) {
+            logger.error("Could not register mbean " + objName, e);
+        }
+    }
+
+    private static String getPackageName(RequestHandler h) {
+        return h.getClass().getPackage().getName().replaceAll(".*\\.", "")
+                + ".";
+    }
+
+    private void registerMetricsJMX(RequestHandler h) {
+        String objName = getPackageName(h) + h.getClass().getSimpleName()
+                + ":type=Metrics";
+        ServiceMetrics metrics = serviceMetricsRegistry.getServiceMetrics(h);
+        try {
+            mbs.registerMBean(metrics, new ObjectName(objName));
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (Exception e) {
+            logger.error("Could not register mbean " + objName, e);
         }
     }
 

@@ -17,8 +17,8 @@ import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/comments", method = Method.POST)
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue://create-project-bugreport-comment-service", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @Field(name = "bugNumber"),
-        @Field(name = "projectId"), @Field(name = "priority") })
+@RequiredFields({ @Field(name = "bugNumber"), @Field(name = "projectId"),
+        @Field(name = "priority") })
 public class CreateCommentService extends AbstractBugReportService implements
         RequestHandler {
     public CreateCommentService(BugReportRepository bugReportRepository,
@@ -38,6 +38,6 @@ public class CreateCommentService extends AbstractBugReportService implements
                         "project not specified").end();
         report.getComments().add(comment);
         bugReportRepository.save(report);
-        request.getResponseDispatcher().send(comment);
+        request.getResponse().setPayload(comment);
     }
 }

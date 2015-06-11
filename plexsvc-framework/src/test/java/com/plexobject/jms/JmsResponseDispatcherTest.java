@@ -1,9 +1,6 @@
 package com.plexobject.jms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.jms.Destination;
@@ -15,7 +12,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.plexobject.encode.CodecType;
+import com.plexobject.handler.Response;
 
 @RunWith(JMockit.class)
 public class JmsResponseDispatcherTest {
@@ -36,36 +33,9 @@ public class JmsResponseDispatcherTest {
                         .send(replyTo, (Map<String, Object>) any, "payload");
             }
         };
-        d.doSend("payload");
-    }
 
-    @Test
-    public void testAddSessionId() throws Exception {
-        JmsResponseDispatcher d = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        d.addSessionId("session");
-    }
-
-    @Test
-    public void testSetStatus() throws Exception {
-        JmsResponseDispatcher d = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        d.setStatus(200);
-        assertEquals(200, d.getStatus());
-    }
-
-    @Test
-    public void testSetCodecType() throws Exception {
-        JmsResponseDispatcher d = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        d.setCodecType(CodecType.JSON);
-    }
-
-    @Test
-    public void testSetProperty() throws Exception {
-        JmsResponseDispatcher d = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        d.setProperty("name", "value");
+        d.doSend(new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), ""), "payload");
     }
 
     @SuppressWarnings("unchecked")
@@ -80,29 +50,8 @@ public class JmsResponseDispatcherTest {
                         .send(replyTo, (Map<String, Object>) any, "payload");
             }
         };
-        d.send("payload");
-    }
-
-    public void testHashCode() throws Exception {
-        JmsResponseDispatcher d = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        assertTrue(d.hashCode() != 0);
-        d.addSessionId("session");
-        assertTrue(d.hashCode() != 0);
-    }
-
-    public void testEquals() throws Exception {
-        JmsResponseDispatcher d1 = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        d1.addSessionId("session1");
-        JmsResponseDispatcher d2 = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        d2.addSessionId("session2");
-        assertFalse(!d1.equals(d2));
-        JmsResponseDispatcher d2a = new JmsResponseDispatcher(jmsContainer,
-                replyTo);
-        d2a.addSessionId("session2");
-        assertEquals(d1, d2);
+        d.send(new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), "payload"));
     }
 
 }

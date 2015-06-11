@@ -6,7 +6,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.deploy.AutoDeployer;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
@@ -30,14 +29,19 @@ public class QuoteServer implements RequestHandler {
 
     @Override
     public void handle(Request request) {
-        QuoteRequest quoteRequest = request.getPayload();
-        log.info("Received " + request);
-        if (quoteRequest.getAction() == Action.SUBSCRIBE) {
-            quoteStreamer.add(quoteRequest.getSymbol(),
-                    request.getResponseDispatcher());
-        } else {
-            quoteStreamer.remove(quoteRequest.getSymbol(),
-                    request.getResponseDispatcher());
+        try {
+            QuoteRequest quoteRequest = request.getPayload();
+            log.info("Received " + request);
+            if (quoteRequest.getAction() == Action.SUBSCRIBE) {
+                quoteStreamer.add(quoteRequest.getSymbol(),
+                        request.getResponseDispatcher());
+            } else {
+                quoteStreamer.remove(quoteRequest.getSymbol(),
+                        request.getResponseDispatcher());
+            }
+        } catch (Exception e) {
+            log.error("Failed to handle request " + request + " due to "
+                    + e.getMessage());
         }
     }
 

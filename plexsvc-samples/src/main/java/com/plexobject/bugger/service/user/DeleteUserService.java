@@ -33,6 +33,6 @@ public class DeleteUserService extends AbstractUserService implements
                 put("deleted", deleted);
             }
         };
-        request.getResponseDispatcher().send(response);
+        request.getResponse().setPayload(response);
     }
 }

@@ -49,7 +49,7 @@ public class StaticFileServer implements RequestHandler {
             final File filePath = new File(webFolder, path);
 
             if (!filePath.getCanonicalPath().startsWith(canonicalDirPath)) {
-                request.getResponseDispatcher().send(
+                request.getResponse().setPayload(
                         new IOException("Relative path '" + path
                                 + "' not allowed"));
             }
@@ -60,15 +60,16 @@ public class StaticFileServer implements RequestHandler {
                 contentType = Files.probeContentType(filePath.toPath());
             }
             if (contentType != null) {
-                request.getResponseDispatcher().setProperty(
-                        HttpResponse.CONTENT_TYPE, contentType);
+                request.getResponse().setProperty(HttpResponse.CONTENT_TYPE,
+                        contentType);
             }
             //
-            request.getResponseDispatcher()
-                    .send(new String(Files.readAllBytes(Paths.get(filePath
-                            .toURI()))));
+            request.getResponse()
+                    .setPayload(
+                            new String(Files.readAllBytes(Paths.get(filePath
+                                    .toURI()))));
         } catch (IOException e) {
-            request.getResponseDispatcher().send(e);
+            request.getResponse().setPayload(e);
         }
     }
 }
