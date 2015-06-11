@@ -12,6 +12,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Response;
 
 @RunWith(JMockit.class)
@@ -35,7 +36,7 @@ public class JmsResponseDispatcherTest {
         };
 
         d.doSend(new Response(new HashMap<String, Object>(),
-                new HashMap<String, Object>(), ""), "payload");
+                new HashMap<String, Object>(), "", CodecType.JSON), "payload");
     }
 
     @SuppressWarnings("unchecked")
@@ -51,7 +52,7 @@ public class JmsResponseDispatcherTest {
             }
         };
         d.send(new Response(new HashMap<String, Object>(),
-                new HashMap<String, Object>(), "payload"));
+                new HashMap<String, Object>(), "payload", CodecType.JSON));
     }
 
 }

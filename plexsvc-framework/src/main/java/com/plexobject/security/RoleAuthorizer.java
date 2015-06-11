@@ -17,5 +17,6 @@ public interface RoleAuthorizer {
      * @param roles
      * @throws AuthException
      */
-    void authorize(Request request, String[] roles) throws AuthException;
+    void authorize(Request<Object> request, String[] roles)
+            throws AuthException;
 }

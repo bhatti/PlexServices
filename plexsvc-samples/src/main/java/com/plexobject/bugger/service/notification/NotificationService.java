@@ -2,7 +2,6 @@ package com.plexobject.bugger.service.notification;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.bugger.model.BugReport;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
@@ -23,7 +22,7 @@ public class NotificationService implements RequestHandler {
 
     // any employee who is member of same project can update bug report
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         log.info("Notifying " + request);
     }
 }

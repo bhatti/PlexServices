@@ -21,7 +21,7 @@ public class LoginService extends AbstractUserService implements RequestHandler 
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         log.info("PAYLOAD " + request.getPayload());
         String username = request.getStringProperty("username");
         String password = request.getStringProperty("password");

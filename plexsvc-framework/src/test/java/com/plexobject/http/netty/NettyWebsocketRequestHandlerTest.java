@@ -27,15 +27,16 @@ public class NettyWebsocketRequestHandlerTest {
     private static final String PING = "ping";
 
     private NettyHttpServer server;
-    private final List<Request> requests = new ArrayList<>();
+    private final List<Request<Object>> requests = new ArrayList<>();
 
     private RequestHandler handler = new RequestHandler() {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             requests.add(request);
             request.getResponse().setCodecType(CodecType.JSON);
 
             request.getResponse().setPayload(PONG);
+            request.getResponseDispatcher().send(request.getResponse());
         }
     };
 
@@ -55,16 +56,12 @@ public class NettyWebsocketRequestHandlerTest {
 
     @Test
     public void testWebHandler() throws Exception {
-        Request request = Request
-                .builder()
-                .setPayload(PING)
-                .setProtocol(Protocol.HTTP)
-                .setCodecType(CodecType.JSON)
-                .setMethod(Method.GET)
-                .setEndpoint("/ping")
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), null))
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setEndpoint("/ping").setCodecType(CodecType.JSON)
+                .setPayload(PING).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         String jsonRequest = ObjectCodecFactory.getInstance()
@@ -73,11 +70,11 @@ public class NettyWebsocketRequestHandlerTest {
                 HTTP_PORT, jsonRequest);
         assertEquals(1, requests.size());
         assertEquals(PING, requests.get(0).getPayload());
-        Request response = ObjectCodecFactory
+        Request<String> reply = ObjectCodecFactory
                 .getInstance()
                 .getObjectCodec(CodecType.JSON)
                 .decode(jsonResponse, Request.class,
                         new HashMap<String, Object>());
-        assertEquals(PONG, response.getPayload());
+        assertEquals(PONG, reply.getPayload());
     }
 }

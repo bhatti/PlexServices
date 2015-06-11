@@ -25,7 +25,7 @@ public class UpdateBugReportService extends AbstractBugReportService implements
 
     // any employee who is member of same project can update bug report
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         BugReport report = request.getPayload();
         ValidationException
                 .builder()

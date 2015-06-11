@@ -23,18 +23,18 @@ import com.plexobject.service.Protocol;
 public class EventBusImplTest {
     private RequestHandler handler = new RequestHandler() {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             requests.add(request);
         }
     };
-    private Predicate<Request> filter = new Predicate<Request>() {
+    private Predicate<Request<Object>> filter = new Predicate<Request<Object>>() {
         @Override
-        public boolean accept(Request obj) {
+        public boolean accept(Request<Object> obj) {
             return obj.getPayload().toString().contains("ok");
         }
     };
 
-    private List<Request> requests = new ArrayList<>();
+    private List<Request<Object>> requests = new ArrayList<>();
     private EventBus bus = new EventBusImpl();
 
     @Before
@@ -46,22 +46,23 @@ public class EventBusImplTest {
         bus.subscribe("channel", handler, null);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request req = Request
-                .builder()
+        String payload = "payload";
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
-                .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)
-                .setPayload("payload")
+                .setEndpoint("/w")
                 .setCodecType(CodecType.JSON)
+                .setPayload(payload)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
-
-        bus.publish("channel", req);
+        bus.publish("channel", request);
         Thread.sleep(200);
         assertEquals("payload", requests.get(0).getPayload());
     }
@@ -71,25 +72,27 @@ public class EventBusImplTest {
         bus.subscribe("channel", handler, filter);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request req = Request
-                .builder()
+        String payload = "payload";
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
-                .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)
-                .setPayload("payload")
+                .setEndpoint("/w")
                 .setCodecType(CodecType.JSON)
+                .setPayload(payload)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
-        bus.publish("channel", req);
+        bus.publish("channel", request);
         Thread.sleep(200);
         assertEquals(0, requests.size());
-        req.setPayload("ok");
-        bus.publish("channel", req);
+        request.setPayload("ok");
+        bus.publish("channel", request);
         Thread.sleep(200);
         assertEquals("ok", requests.get(0).getPayload());
     }
@@ -100,21 +103,23 @@ public class EventBusImplTest {
         bus.unsubscribe(id);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request req = Request
-                .builder()
+        String payload = "payload";
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
-                .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)
-                .setPayload("payload")
+                .setEndpoint("/w")
                 .setCodecType(CodecType.JSON)
+                .setPayload(payload)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
-        bus.publish("channel", req);
+        bus.publish("channel", request);
         Thread.sleep(200);
         assertEquals(0, requests.size());
     }

@@ -23,7 +23,7 @@ public class QueryProjectService extends AbstractProjectService implements
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         Collection<Project> projects = projectRepository
                 .getAll(new Predicate<Project>() {
 

@@ -102,6 +102,7 @@ public class EventBusToJmsBridgeTest {
         bridge.stop();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testOnMessageJmsToEB() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
@@ -117,7 +118,7 @@ public class EventBusToJmsBridgeTest {
                 returns("{}");
                 message.getJMSReplyTo();
                 returns(null);
-                eb.publish("query-user-channel", (Request) any);
+                eb.publish("query-user-channel", (Request<Object>) any);
             }
         };
         listener.onMessage(message);
@@ -142,8 +143,8 @@ public class EventBusToJmsBridgeTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        Request request = Request
-                .builder()
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
                 .setEndpoint("/w")
@@ -153,7 +154,8 @@ public class EventBusToJmsBridgeTest {
                 .setCodecType(CodecType.JSON)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         listener.handle(request);

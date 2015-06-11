@@ -151,10 +151,14 @@ public class EventBusToJmsBridgeIntegTest {
         final StringBuilder name = new StringBuilder();
         eb.subscribe("query-user-channel", new RequestHandler() {
             @Override
-            public void handle(Request request) {
-                TestUser u = request.getPayload();
-                name.append(u.name);
-                latch.countDown();
+            public void handle(Request<Object> request) {
+                try {
+                    TestUser u = request.getPayload();
+                    name.append(u.name);
+                    latch.countDown();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }, null);
         Destination dest = jmsContainer
@@ -175,8 +179,8 @@ public class EventBusToJmsBridgeIntegTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "message";
-        Request request = Request
-                .builder()
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)
                 .setEndpoint("/w")
@@ -186,7 +190,8 @@ public class EventBusToJmsBridgeIntegTest {
                 .setCodecType(CodecType.JSON)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), ""))
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -220,7 +225,7 @@ public class EventBusToJmsBridgeIntegTest {
         final StringBuilder reply = new StringBuilder();
         eb.subscribe("mychannel", new RequestHandler() {
             @Override
-            public void handle(Request request) {
+            public void handle(Request<Object> request) {
                 TestUser u = request.getPayload();
                 name.append(u.name);
                 request.getResponse().setPayload("ted");

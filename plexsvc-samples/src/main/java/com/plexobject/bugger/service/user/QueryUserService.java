@@ -27,7 +27,7 @@ public class QueryUserService extends AbstractUserService implements
     // "roles":["Employee","Administrator","Manager"]},{"id":4,"username":"erica","password":
     // "pass","email":"erica@plexobject.com","roles":["Employee"]}]
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         Collection<User> users = userRepository.getAll(new Predicate<User>() {
 
             @Override

@@ -111,7 +111,7 @@ public class WebToJmsBridgeIntegTest {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
                 Method.GET, "destination", 5, false, 1);
         bridge.add(entry);
-        Request request = newWebRequest("/w", "{}");
+        Request<Object> request = newWebRequest("/w", "{}");
         assertNotNull(bridge.getMappingEntry(request));
     }
 
@@ -128,7 +128,7 @@ public class WebToJmsBridgeIntegTest {
 
     @Test
     public void testHandleUnknown() throws Exception {
-        Request request = newWebRequest("/w", "message");
+        Request<Object> request = newWebRequest("/w", "message");
         bridge.handle(request);
         assertTrue(reply.toString().contains("Unknown request received"));
     }
@@ -139,7 +139,7 @@ public class WebToJmsBridgeIntegTest {
                 Method.GET, "queue://create", 5, true, 1);
         bridge.add(entry);
         bridge.onStarted();
-        Request request = newWebRequest("/w", "message");
+        Request<Object> request = newWebRequest("/w", "message");
         final CountDownLatch latch = new CountDownLatch(1);
         final StringBuilder text = new StringBuilder();
         final Destination dest = jmsContainer.getDestination("queue://create");
@@ -165,7 +165,7 @@ public class WebToJmsBridgeIntegTest {
                 Method.MESSAGE, "queue://svc", 5, false, 1);
         bridge.add(entry);
         bridge.onStarted();
-        Request request = newWebsocketRequest("/ws", "message");
+        Request<Object> request = newWebsocketRequest("/ws", "message");
         final CountDownLatch latch = new CountDownLatch(1);
         final StringBuilder text = new StringBuilder();
         final Destination dest = jmsContainer.getDestination("queue://svc");
@@ -194,7 +194,7 @@ public class WebToJmsBridgeIntegTest {
                 Method.MESSAGE, "queue://tm", 1, false, 1);
         bridge.add(entry);
         bridge.onStarted();
-        Request request = newWebsocketRequest("/ws", "message");
+        Request<Object> request = newWebsocketRequest("/ws", "message");
         final CountDownLatch latch = new CountDownLatch(1);
         final StringBuilder text = new StringBuilder();
         final Destination dest = jmsContainer.getDestination("queue://tm");
@@ -237,21 +237,23 @@ public class WebToJmsBridgeIntegTest {
         assertFalse(bridge.equals(null));
     }
 
-    private static Request newWebRequest(String path, String payload) {
+    private static Request<Object> newWebRequest(String path, String payload) {
         return newRequest(path, payload, Method.GET);
     }
 
-    private static Request newWebsocketRequest(String path, String payload) {
+    private static Request<Object> newWebsocketRequest(String path,
+            String payload) {
         return newRequest(path, payload, Method.MESSAGE);
     }
 
-    private static Request newRequest(String path, String payload, Method method) {
+    private static Request<Object> newRequest(String path, String payload,
+            Method method) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("prop1", "val1");
         Map<String, Object> headers = new HashMap<>();
         headers.put("head1", "val1");
-        Request request = Request
-                .builder()
+        Request<Object> request = Request
+                .objectBuilder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(method)
                 .setEndpoint(path)
@@ -261,7 +263,8 @@ public class WebToJmsBridgeIntegTest {
                 .setCodecType(CodecType.JSON)
                 .setResponse(
                         new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "") {
+                                new HashMap<String, Object>(), "",
+                                CodecType.JSON) {
                             @Override
                             public void setPayload(Object payload) {
                                 super.setPayload(payload);

@@ -45,11 +45,10 @@ import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.Response;
 import com.plexobject.http.Handledable;
-import com.plexobject.service.InterceptorAwareRequestBuilder;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
-import com.plexobject.service.ServiceRegistry;
 
 /**
  * This class handles requests over http and websockets using Netty container
@@ -149,12 +148,14 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             }
             Map<String, Object> headers = getHeaders(req);
             Map<String, Object> params = getParams(req);
-
-            Request handlerReq = InterceptorAwareRequestBuilder.buildRequest(
-                    Protocol.HTTP, method, uri, params, headers, textPayload,
-                    codecType, Void.class, dispatcher,
-                    ServiceRegistry.getInstance()); // TODO find better way to
-                                                    // inject service registry
+            Response response = new Response(new HashMap<String, Object>(),
+                    new HashMap<String, Object>(), "", codecType);
+            Request<Object> handlerReq = Request.objectBuilder()
+                    .setProtocol(Protocol.HTTP).setMethod(method)
+                    .setEndpoint(uri).setProperties(params).setHeaders(headers)
+                    .setCodecType(codecType).setPayload(textPayload)
+                    .setResponse(response).setResponseDispatcher(dispatcher)
+                    .build();
 
             log.info("HTTP Received URI '" + uri + "', wsPath '" + wsPath
                     + "', request " + handlerReq);
@@ -250,7 +251,8 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
 
-        Request rawRequest = codec.decode(jsonMsg, Request.class, params);
+        Request<Object> rawRequest = codec.decode(jsonMsg, Request.class,
+                params);
 
         String endpoint = rawRequest.getEndpoint();
         if (endpoint == null) {
@@ -264,14 +266,17 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
         final String textPayload = codec.encode(rawRequest.getPayload());
         AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
                 ctx.channel());
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), "", codecType);
 
-        Request req = InterceptorAwareRequestBuilder.buildRequest(
-                Protocol.WEBSOCKET, Method.MESSAGE, endpoint, params, headers,
-                textPayload, codecType, Void.class, dispatcher,
-                ServiceRegistry.getInstance()); // TODO find better way to
-                                                // inject service registry
+        Request<Object> handlerReq = Request.objectBuilder()
+                .setProtocol(Protocol.WEBSOCKET).setMethod(Method.MESSAGE)
+                .setEndpoint(endpoint).setProperties(params)
+                .setHeaders(headers).setCodecType(codecType)
+                .setPayload(textPayload).setResponse(response)
+                .setResponseDispatcher(dispatcher).build();
 
-        handler.handle(req);
+        handler.handle(handlerReq);
     }
 
     private String getWebSocketLocation(FullHttpRequest req) {

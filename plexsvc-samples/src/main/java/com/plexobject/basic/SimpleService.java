@@ -18,7 +18,7 @@ public class SimpleService implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request<Object> request) {
         Person person = request.getPayload();
         log.info("Received " + person);
         if (person == null) {

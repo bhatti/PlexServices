@@ -40,12 +40,12 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     private WebRequestHandlerServlet instance = new WebRequestHandlerServlet();
     private Properties props = new Properties();
     private static ServiceRegistry serviceRegistry;
-    private List<Request> requests = new ArrayList<>();
+    private List<Request<Object>> requests = new ArrayList<>();
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/path", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
             requests.add(request);
             request.getResponse().setPayload(request.getPayload());
         }
@@ -219,7 +219,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     }
 
     @Override
-    public void authorize(Request request, String[] roles) throws AuthException {
+    public void authorize(Request<Object> request, String[] roles) throws AuthException {
     }
 
     private void init(boolean auth) throws Exception {

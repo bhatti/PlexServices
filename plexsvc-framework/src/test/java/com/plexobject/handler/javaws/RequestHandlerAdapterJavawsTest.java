@@ -72,13 +72,14 @@ public class RequestHandlerAdapterJavawsTest {
                 return output;
             }
         });
-        serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
-            @Override
-            public Request intercept(Request input) {
-                System.out.println("INPUT PAYLOAD: " + input);
-                return input;
-            }
-        });
+        serviceRegistry
+                .addRequestInterceptor(new Interceptor<Request<Object>>() {
+                    @Override
+                    public Request<Object> intercept(Request<Object> input) {
+                        System.out.println("INPUT PAYLOAD: " + input);
+                        return input;
+                    }
+                });
         serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
             @Override
             public Response intercept(Response output) {

@@ -22,7 +22,7 @@ public class ServiceHandlerLifecycleTest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
         }
     }
 

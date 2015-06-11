@@ -30,27 +30,27 @@ public class AutoDeployerTest {
     public static class WebsocketService implements RequestHandler {
 
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
         }
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public static class WebService implements RequestHandler {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
         }
     }
 
     @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://test", method = Method.MESSAGE, codec = CodecType.JSON)
     public static class JmsService implements RequestHandler {
         @Override
-        public void handle(Request request) {
+        public void handle(Request<Object> request) {
         }
     }
 
     public static class Authorizer implements RoleAuthorizer {
         @Override
-        public void authorize(Request request, String[] roles)
+        public void authorize(Request<Object> request, String[] roles)
                 throws AuthException {
         }
     }

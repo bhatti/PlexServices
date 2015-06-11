@@ -18,7 +18,7 @@ import com.plexobject.service.Protocol;
 public class RequestTest {
     @Test
     public void testCreateUsingDefaultConstructor() throws Exception {
-        Request request = new Request();
+        Request<Object> request = new Request<>();
         assertNull(request.getProtocol());
         assertNull(request.getMethod());
         assertNull(request.getEndpoint());
@@ -32,17 +32,22 @@ public class RequestTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.SESSION_ID, "id");
         Map<String, Object> headers = new HashMap<>();
-        Response resp = new Response(properties, headers, "");
         String payload = "{}";
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON, resp,
-                new AbstractResponseDispatcher() {
-                });
+
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), "", CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProperties(properties).setHeaders(headers)
+                .setEndpoint("/w").setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
 
         assertEquals(Protocol.HTTP, request.getProtocol());
         assertEquals(Method.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
-        assertEquals(resp, request.getResponse());
+        assertEquals(response, request.getResponse());
         assertEquals("id", request.getSessionId());
         assertEquals("{}", request.getPayload());
         assertTrue(request.toString().contains("/w"));
@@ -51,29 +56,23 @@ public class RequestTest {
 
     @Test
     public void testCreateUsingBuilder() throws Exception {
-        Request.Builder builder = Request.builder();
-        builder.setSessionId(null);
-        builder.setSessionId("id");
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), "", CodecType.JSON);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Response resp = new Response(properties, headers, "");
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setSessionId(null).setProperties(properties)
+                .setHeaders(headers).setEndpoint("/w")
+                .setCodecType(CodecType.JSON).setPayload("{}")
+                .setSessionId("id").setResponse(response)
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
 
-        builder.setProperties(properties);
-        builder.setHeaders(headers);
-        builder.setResponse(resp);
-        builder.setPayload("{}");
-        builder.setProtocol(Protocol.HTTP);
-        builder.setMethod(Method.GET);
-        builder.setEndpoint("/w");
-        builder.setCodecType(CodecType.JSON);
-        builder.setResponseDispatcher(new AbstractResponseDispatcher() {
-        });
-
-        Request request = builder.build();
         assertEquals(Protocol.HTTP, request.getProtocol());
         assertEquals(Method.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
-        assertEquals(resp, request.getResponse());
+        assertEquals(response, request.getResponse());
         assertEquals("id", request.getSessionId());
         assertEquals("{}", request.getPayload());
     }
@@ -84,12 +83,16 @@ public class RequestTest {
         properties.put("p1", "v1");
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, payload, CodecType.JSON, new Response(
-                        new HashMap<String, Object>(),
-                        new HashMap<String, Object>(), null),
-                new AbstractResponseDispatcher() {
-                });
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProperties(properties).setHeaders(headers)
+                .setEndpoint("/w").setCodecType(CodecType.JSON)
+                .setPayload(payload).setResponse(response)
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
+
         request.handleUnknown(null, null);
         request.handleUnknown(Constants.PAYLOAD, "payload");
         assertEquals("payload", request.getPayload());
@@ -112,13 +115,15 @@ public class RequestTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("p1", "v1");
         Map<String, Object> headers = new HashMap<>();
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, null, CodecType.JSON, new Response(
-                        new HashMap<String, Object>(),
-                        new HashMap<String, Object>(), null),
-                new AbstractResponseDispatcher() {
-                });
-        request.setPayload("pay");
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProperties(properties).setHeaders(headers)
+                .setEndpoint("/w").setCodecType(CodecType.JSON)
+                .setPayload("pay").setResponse(response)
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
         assertEquals("pay", request.getPayload());
 
         assertTrue(request.hasProperty("p1"));
@@ -129,7 +134,6 @@ public class RequestTest {
         assertEquals("2", request.getStringProperty("p2"));
         assertEquals(new Integer(2), request.getIntegerProperty("p2"));
         assertEquals(new Long(2), request.getLongProperty("p2"));
-        assertEquals(properties, request.getProperties());
         assertNull(request.getStringProperty("p3"));
         assertNull(request.getLongProperty("p3"));
         request.setProperty("p3", 3L);
@@ -153,18 +157,21 @@ public class RequestTest {
         Map<String, Object> headers = new HashMap<>();
         headers.put("head1", "val1");
         headers.put("head2", 2);
-        Request request = new Request(Protocol.HTTP, Method.GET, "/w",
-                properties, headers, null, CodecType.JSON, new Response(
-                        new HashMap<String, Object>(),
-                        new HashMap<String, Object>(), null),
-                new AbstractResponseDispatcher() {
-                });
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, CodecType.JSON);
+        Request<String> request = Request.stringBuilder()
+                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProperties(properties).setHeaders(headers)
+                .setEndpoint("/w").setCodecType(CodecType.JSON)
+                .setPayload(null).setResponse(response)
+                .setResponseDispatcher(new AbstractResponseDispatcher() {
+                }).build();
+
         assertTrue(request.getHeaderNames().contains("head1"));
         assertEquals("val1", request.getHeader("head1"));
         assertEquals("2", request.getHeader("head2"));
         assertNull(request.getHeader("head3"));
         request.setHeader("head3", 3);
         assertEquals("3", request.getHeader("head3"));
-        assertEquals(headers, request.getHeaders());
     }
 }

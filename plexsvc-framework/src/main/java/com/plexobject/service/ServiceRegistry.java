@@ -58,7 +58,6 @@ public class ServiceRegistry implements ServiceContainer,
 
     private final boolean enablePingHandlers;
     private ServletContext servletContext;
-    private static ServiceRegistry instance;
 
     public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
         this(config, authorizer, new NettyWebContainerProvider());
@@ -97,11 +96,6 @@ public class ServiceRegistry implements ServiceContainer,
         } catch (Exception e) {
             logger.error("Could not register mbean for service-registry", e);
         }
-        instance = this;
-    }
-
-    public static ServiceRegistry getInstance() {
-        return instance;
     }
 
     @Override
@@ -263,7 +257,7 @@ public class ServiceRegistry implements ServiceContainer,
      * @param request
      * @param handler
      */
-    public void invoke(Request request, RequestHandler handler) {
+    public void invoke(Request<?> request, RequestHandler handler) {
         serviceInvocationHelper.invoke(request, handler, this);
     }
 
@@ -276,17 +270,18 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public void addRequestInterceptor(Interceptor<Request> interceptor) {
+    public void addRequestInterceptor(Interceptor<Request<Object>> interceptor) {
         interceptorLifecycle.addRequestInterceptor(interceptor);
     }
 
     @Override
-    public boolean removeRequestInterceptor(Interceptor<Request> interceptor) {
+    public boolean removeRequestInterceptor(
+            Interceptor<Request<Object>> interceptor) {
         return interceptorLifecycle.removeRequestInterceptor(interceptor);
     }
 
     @Override
-    public Collection<Interceptor<Request>> getRequestInterceptors() {
+    public Collection<Interceptor<Request<Object>>> getRequestInterceptors() {
         return interceptorLifecycle.getRequestInterceptors();
     }
 
@@ -369,7 +364,7 @@ public class ServiceRegistry implements ServiceContainer,
                 .setRolesAllowed(new String[0]).build();
         final RequestHandler pingHandler = new RequestHandler() {
             @Override
-            public void handle(Request request) {
+            public void handle(Request<Object> request) {
                 request.getResponse().setPayload(
                         getServiceMetricsRegistry().getServiceMetrics(h)
                                 .getSummary());
