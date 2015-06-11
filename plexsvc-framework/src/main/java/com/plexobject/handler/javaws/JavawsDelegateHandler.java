@@ -1,5 +1,6 @@
 package com.plexobject.handler.javaws;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     private final Object delegate;
     private final String responseNamespace;
-    private final Map<String, Method> methods = new HashMap<>();
+    private final Map<String, Pair<Method, Method>> methodsByName = new HashMap<>();
 
     public JavawsDelegateHandler(Object delegate, Configuration config) {
         this.delegate = delegate;
@@ -32,8 +33,8 @@ public class JavawsDelegateHandler implements RequestHandler {
                 "ns2:");
     }
 
-    public void addMethod(Method m) {
-        methods.put(m.getName(), m);
+    public void addMethod(Method iMethod, Method implMethod) {
+        methodsByName.put(iMethod.getName(), Pair.of(iMethod, implMethod));
     }
 
     @Override
@@ -41,23 +42,24 @@ public class JavawsDelegateHandler implements RequestHandler {
         Pair<String, String> methodAndPayload = getMethodNameAndPayload((String) request
                 .getPayload());
 
-        Method method = methods.get(methodAndPayload.first);
-        if (method == null) {
+        final Pair<Method, Method> methods = methodsByName
+                .get(methodAndPayload.first);
+        if (methods == null) {
             throw new ServiceInvocationException("Unknown method "
                     + methodAndPayload.first + ", request "
                     + request.getPayload(), HttpResponse.SC_NOT_FOUND);
         }
-        WebParam webParam = method.getParameterTypes().length > 0 ? method
-                .getParameterTypes()[0].getAnnotation(WebParam.class) : null;
-        String responseItemTag = webParam == null ? "item" : webParam.name();
+        final Method iMethod = methods.first;
+        final Method implMethod = methods.second;
+        String responseItemTag = getItemTag(iMethod, implMethod);
         //
         String responseTag = responseNamespace + methodAndPayload.first
                 + RESPONSE_SUFFIX;
         try {
             Object[] args = ReflectUtils.decode(methodAndPayload.second,
-                    method, request.getCodec());
+                    implMethod, request.getCodec());
             Map<String, Object> response = new HashMap<>();
-            Object result = method.invoke(delegate, args);
+            Object result = implMethod.invoke(delegate, args);
             if (result != null) {
                 Map<String, Object> item = new HashMap<>();
                 item.put(responseItemTag, result);
@@ -67,10 +69,30 @@ public class JavawsDelegateHandler implements RequestHandler {
             }
             request.getResponse().setPayload(response);
         } catch (Exception e) {
-            logger.error("Failed to invoke " + method + ", for request "
+            logger.error("Failed to invoke " + implMethod + ", for request "
                     + request, e);
             request.getResponse().setPayload(e);
         }
+    }
+
+    private String getItemTag(final Method iMethod, final Method implMethod) {
+        WebParam webParam = getWebParamFor(iMethod);
+        if (webParam == null) {
+            webParam = getWebParamFor(implMethod);
+        }
+        String responseItemTag = webParam != null ? webParam.name() : "item";
+        return responseItemTag;
+    }
+
+    private WebParam getWebParamFor(final Method iMethod) {
+        for (Annotation[] annotations : iMethod.getParameterAnnotations()) {
+            for (Annotation a : annotations) {
+                if (a instanceof WebParam) {
+                    return (WebParam) a;
+                }
+            }
+        }
+        return null;
     }
 
     // hard coding to handle JSON messages

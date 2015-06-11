@@ -58,6 +58,16 @@ public class CourseServiceClient extends BaseServiceClient implements
         }
     }
 
+    @Override
+    public List<Course> create(List<Course> courses) {
+        RequestBuilder request = new RequestBuilder("create", courses);
+        try {
+            return postWithListReturnType(request);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private List<Course> postWithListReturnType(RequestBuilder request)
             throws NoSuchMethodException, Exception {
         Method m = CourseService.class.getMethod("count", List.class);

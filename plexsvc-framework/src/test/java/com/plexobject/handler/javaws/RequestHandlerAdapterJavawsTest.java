@@ -72,21 +72,23 @@ public class RequestHandlerAdapterJavawsTest {
                 return output;
             }
         });
-        serviceRegistry
-                .addRequestInterceptor(new Interceptor<Request<Object>>() {
-                    @Override
-                    public Request<Object> intercept(Request<Object> input) {
-                        System.out.println("INPUT PAYLOAD: " + input);
-                        return input;
-                    }
-                });
-        serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
-            @Override
-            public Response intercept(Response output) {
-                System.out.println("OUTPUT PAYLOAD: " + output);
-                return output;
-            }
-        });
+        if (config.getBoolean("debug")) {
+            serviceRegistry
+                    .addRequestInterceptor(new Interceptor<Request<Object>>() {
+                        @Override
+                        public Request<Object> intercept(Request<Object> input) {
+                            System.out.println("INPUT PAYLOAD: " + input);
+                            return input;
+                        }
+                    });
+            serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
+                @Override
+                public Response intercept(Response output) {
+                    System.out.println("OUTPUT PAYLOAD: " + output);
+                    return output;
+                }
+            });
+        }
         serviceRegistry.start();
         Thread.sleep(500);
     }
@@ -168,6 +170,18 @@ public class RequestHandlerAdapterJavawsTest {
         courseService.save(course1);
         Course course2 = buildCourse();
         courseService.save(course2);
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("courseId", course1.getId());
+        List<Course> loaded = courseService.query(criteria);
+        assertEquals(1, loaded.size());
+        assertEquals(course1, loaded.get(0));
+    }
+
+    @Test
+    public void testQueryCreateCourse() throws Exception {
+        Course course1 = buildCourse();
+        Course course2 = buildCourse();
+        courseService.create(Arrays.asList(course1, course2));
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("courseId", course1.getId());
         List<Course> loaded = courseService.query(criteria);

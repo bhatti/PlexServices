@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 
@@ -14,7 +15,7 @@ public class CourseServiceImpl implements CourseService {
     private Map<String, Course> courses = new HashMap<>();
 
     @Override
-    public Course save(Course course) {
+    public Course save(@WebParam(name = "course") Course course) {
         courses.put(course.getId(), course);
         return course;
     }
@@ -96,5 +97,13 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public int count(List<Course> c) {
         return c.size();
+    }
+
+    @Override
+    public List<Course> create(List<Course> list) {
+        for (Course c : list) {
+            save(c);
+        }
+        return list;
     }
 }

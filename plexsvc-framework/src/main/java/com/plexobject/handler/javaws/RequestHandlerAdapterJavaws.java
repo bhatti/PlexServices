@@ -90,9 +90,11 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         }
         //
         int countExported = 0;
-        for (final Method m : serviceClass.getMethods()) {
-            if (isExported(webService, m)) {
-                ((JavawsDelegateHandler) handler).addMethod(m);
+        for (final Method implMethod : serviceClass.getMethods()) {
+            Method iMethod = getExported(webService, implMethod);
+            if (iMethod != null) {
+                ((JavawsDelegateHandler) handler)
+                        .addMethod(iMethod, implMethod);
                 countExported++;
             }
         }
@@ -115,20 +117,21 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         return endpoint;
     }
 
-    private static boolean isExported(Class<?> webService, Method m) {
+    private static Method getExported(Class<?> webService, Method implMethod) {
         try {
-            if (m.getParameterTypes().length <= 1
-                    && webService.getMethod(m.getName(), m.getParameterTypes()) != null) {
-                WebMethod webMethod = m.getAnnotation(WebMethod.class);
+            Method iMethod = webService.getMethod(implMethod.getName(),
+                    implMethod.getParameterTypes());
+            if (implMethod.getParameterTypes().length <= 1 && iMethod != null) {
+                WebMethod webMethod = implMethod.getAnnotation(WebMethod.class);
                 if (webMethod == null || !webMethod.exclude()) {
-                    return true;
+                    return iMethod;
                 }
             }
         } catch (NoSuchMethodException e) {
         } catch (Exception e) {
         }
 
-        return false;
+        return null;
     }
 
     static Class<?> getWebServiceInterface(Class<?> serviceClass) {
