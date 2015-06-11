@@ -41,6 +41,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         // execute output interceptors if available
         if (outgoingInterceptorsLifecycle != null
                 && outgoingInterceptorsLifecycle.hasOutputInterceptors()) {
+
             for (Interceptor<String> interceptor : outgoingInterceptorsLifecycle
                     .getOutputInterceptors()) {
                 replyText = interceptor.intercept(replyText);

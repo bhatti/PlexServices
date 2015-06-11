@@ -29,7 +29,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
     @Override
     public synchronized void addRequestInterceptor(
             Interceptor<Request> interceptor) {
-        if (!requestInterceptors.add(interceptor)) {
+        if (!requestInterceptors.contains(interceptor)) {
             requestInterceptors.add(interceptor);
         }
         hasRequestInterceptors = requestInterceptors.size() > 0;
@@ -73,7 +73,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
     @Override
     public synchronized void addResponseInterceptor(
             Interceptor<Response> interceptor) {
-        if (!responseInterceptors.add(interceptor)) {
+        if (!responseInterceptors.contains(interceptor)) {
             responseInterceptors.add(interceptor);
         }
         hasResponseInterceptors = responseInterceptors.size() > 0;
@@ -117,7 +117,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized void addInputInterceptor(Interceptor<String> interceptor) {
-        if (!inputInterceptors.add(interceptor)) {
+        if (!inputInterceptors.contains(interceptor)) {
             inputInterceptors.add(interceptor);
         }
         hasInputInterceptors = inputInterceptors.size() > 0;
@@ -161,7 +161,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
     @Override
     public synchronized void addOutputInterceptor(
             Interceptor<String> interceptor) {
-        if (!outputInterceptors.add(interceptor)) {
+        if (!outputInterceptors.contains(interceptor)) {
             outputInterceptors.add(interceptor);
         }
         hasOutputInterceptors = outputInterceptors.size() > 0;

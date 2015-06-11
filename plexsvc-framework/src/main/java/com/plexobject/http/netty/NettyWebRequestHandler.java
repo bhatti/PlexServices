@@ -159,9 +159,7 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             log.info("HTTP Received URI '" + uri + "', wsPath '" + wsPath
                     + "', request " + handlerReq);
             handler.handle(handlerReq);
-            handlerReq.getResponseDispatcher().send(handlerReq.getResponse());
         }
-
     }
 
     @Override
