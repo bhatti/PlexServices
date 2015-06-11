@@ -29,6 +29,7 @@ public class NettyHttpServerTest {
         public void handle(Request request) {
             requests.add(request);
             request.getResponse().setPayload(PONG);
+            request.getResponseDispatcher().send(request.getResponse());
             latch.countDown();
         }
     };
