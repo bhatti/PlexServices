@@ -472,21 +472,41 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
 
 
 ### Adding interceptors for handling incoming requests 
-You can add interceptors (similar to filters in java servlets), that can modify
-incoming requests or execute cross cutting logic, e.g.
+You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.
 
 ```java  
-serviceRegistry.add(new ServiceTypeDesc(Protocol.HTTP, Method.GET,
-        null, "/.*"), new RequestInterceptor() {
-    @Override
-    public Request intercept(Request request) {
-        // my business logic 
-        // ...
-        return request;
-    }
+serviceRegistry.addInputInterceptor(new Interceptor<String>() {
+  @Override
+  public String intercept(String input) {
+      logger.info("INPUT: " + input);
+      return input;
+  }
+});
+
+serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
+  @Override
+  public String intercept(String output) {
+      logger.info("OUTPUT: " + output);
+      return output;
+  }
+});
+
+serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
+  @Override
+  public Request intercept(Request input) {
+      logger.info("INPUT PAYLOAD: " + input);
+      return input;
+  }
+});
+
+serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
+  @Override
+  public Response intercept(Response output) {
+      logger.info("OUTPUT PAYLOAD: " + output);
+      return output;
+  }
 });
 ```
-The first parameter is ServiceTypeDesc that defines matching pattern for request type. For example, above code will match all incoming HTTP requests that use GET requests. If you need to match all type of requests, you can just specify null as Method. The last argument of ServiceTypeDesc is endpoint or path of request, which can be regex or exact path.
 
 
 
@@ -609,7 +629,7 @@ eb.publish("test-channel", req);
 eb.subscribe("test-channel", new RequestHandler() {
    @Override
    public void handle(Request request) {
-       System.out.println("Received " + request);
+       logger.info("Received " + request);
    }
 }, null);
 ```
