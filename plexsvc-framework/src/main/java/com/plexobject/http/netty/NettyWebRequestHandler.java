@@ -272,8 +272,6 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                                                 // inject service registry
 
         handler.handle(req);
-        req.getResponseDispatcher().send(req.getResponse());
-
     }
 
     private String getWebSocketLocation(FullHttpRequest req) {

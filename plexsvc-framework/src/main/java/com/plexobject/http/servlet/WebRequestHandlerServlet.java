@@ -175,7 +175,6 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
         log.info("HTTP Received URI '" + uri + "', request " + handlerReq);
         defaultExecutor.handle(handlerReq);
-        handlerReq.getResponseDispatcher().send(handlerReq.getResponse());
     }
 
     private static Map<String, Object> getParams(HttpServletRequest request) {
