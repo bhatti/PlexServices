@@ -130,7 +130,7 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request
+        final Request request = Request
                 .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(Method.GET)

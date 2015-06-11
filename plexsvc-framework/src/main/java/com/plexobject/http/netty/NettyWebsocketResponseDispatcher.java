@@ -29,7 +29,6 @@ public class NettyWebsocketResponseDispatcher extends
         if (log.isDebugEnabled()) {
             log.debug("Sending to " + id + ":" + textJson);
         }
-        System.out.println("Sending to " + id + ":" + textJson);
         return textJson;
     }
 

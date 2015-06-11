@@ -88,8 +88,8 @@ public class ServiceInvocationHelper {
                 request.setPayload(ObjectCodecFactory
                         .getInstance()
                         .getObjectCodec(codecType)
-                        .decode(request.getPayload(), config.payloadClass(),
-                                request.getProperties()));
+                        .decode((String) request.getPayload(),
+                                config.payloadClass(), request.getProperties()));
             }
 
             // Invoking request interceptors
