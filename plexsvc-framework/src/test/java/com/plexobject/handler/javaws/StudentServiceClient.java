@@ -17,7 +17,8 @@ public class StudentServiceClient extends BaseServiceClient implements
     public void clear() {
         RequestBuilder request = new RequestBuilder("clear", "");
         try {
-            post(STUDENT_SERVICE, request, Void.class, null);
+            post(STUDENT_SERVICE, request, Void.class, null,
+                    getItemNameForMethod("clear"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -28,7 +29,8 @@ public class StudentServiceClient extends BaseServiceClient implements
     public int size() {
         RequestBuilder request = new RequestBuilder("size", "");
         try {
-            Integer size = post(STUDENT_SERVICE, request, Integer.class, null);
+            Integer size = post(STUDENT_SERVICE, request, Integer.class, null,
+                    getItemNameForMethod("size"));
             return size;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -40,7 +42,8 @@ public class StudentServiceClient extends BaseServiceClient implements
     public Student save(Student student) {
         RequestBuilder request = new RequestBuilder("save", student);
         try {
-            Student saved = post(STUDENT_SERVICE, request, Student.class, null);
+            Student saved = post(STUDENT_SERVICE, request, Student.class, null,
+                    getItemNameForMethod("save", Student.class));
             return saved;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -56,7 +59,8 @@ public class StudentServiceClient extends BaseServiceClient implements
             Method m = StudentService.class.getMethod("count", List.class);
             Class<?> klass = m.getParameterTypes()[0];
             Type pKlass = m.getGenericParameterTypes()[0];
-            return post(STUDENT_SERVICE, request, klass, pKlass);
+            return post(STUDENT_SERVICE, request, klass, pKlass,
+                    getItemNameForMethod("query", Map.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -67,7 +71,8 @@ public class StudentServiceClient extends BaseServiceClient implements
     public Student get(Long id) {
         RequestBuilder request = new RequestBuilder("get", id);
         try {
-            Student saved = post(STUDENT_SERVICE, request, Student.class, null);
+            Student saved = post(STUDENT_SERVICE, request, Student.class, null,
+                    getItemNameForMethod("get", Long.class));
             return saved;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -79,7 +84,9 @@ public class StudentServiceClient extends BaseServiceClient implements
     public boolean exists(Long studentId, Long courseId) {
         RequestBuilder request = new RequestBuilder("exists", studentId);
         try {
-            return (Boolean) post(STUDENT_SERVICE, request, Boolean.class, null);
+            return (Boolean) post(STUDENT_SERVICE, request, Boolean.class,
+                    null,
+                    getItemNameForMethod("exists", Long.class, Long.class));
         } catch (FileNotFoundException e) {
             return false;
         } catch (Exception e) {
@@ -92,7 +99,8 @@ public class StudentServiceClient extends BaseServiceClient implements
     public int count(List<Student> s) {
         RequestBuilder request = new RequestBuilder("count", s);
         try {
-            return post(STUDENT_SERVICE, request, Integer.class, null);
+            return post(STUDENT_SERVICE, request, Integer.class, null,
+                    getItemNameForMethod("count", List.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

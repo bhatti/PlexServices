@@ -43,7 +43,7 @@ public class RequestHandlerAdapterJavawsTest {
         Properties props = new Properties();
         props.setProperty(Constants.HTTP_PORT,
                 String.valueOf(BaseServiceClient.DEFAULT_PORT));
-        props.setProperty(Constants.JAVAWS_NAMESPACE, "ns2:");
+        props.setProperty(Constants.JAVAWS_NAMESPACE, "");
         Configuration config = new Configuration(props);
         if (config.getBoolean("logTest")) {
             BasicConfigurator.configure();

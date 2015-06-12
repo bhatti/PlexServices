@@ -1,9 +1,11 @@
 package com.plexobject.handler.javaws;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jws.WebParam;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.plexobject.encode.ObjectCodec;
@@ -35,16 +37,34 @@ public class BaseServiceClient {
         }
     }
 
+    protected String getItemNameForMethod(String name,
+            Class<?>... parameterTypes) {
+        Class<?> iface = getClass().getInterfaces()[0];
+        try {
+            Method m = iface.getMethod(name, parameterTypes);
+            WebParam p = ReflectUtils.getWebParamFor(m);
+            return p == null ? null : p.name();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     protected <T> T post(String path, RequestBuilder request,
-            Class<?> responseType, Type pType) throws Exception {
+            Class<?> responseType, Type pType, String item) throws Exception {
         // System.out.println("SENDING " + request);
         String resp = TestWebUtils.post("http://localhost:" + DEFAULT_PORT
                 + path, request.encode(), "Accept", "application/json");
         // System.out.println("RECEIVED " + resp);
         int colon = resp.indexOf("\":");
-        colon = resp.indexOf("\":", colon + 1);
-        String payload = resp.substring(colon + 2, resp.length() - 2);
+        int subtract = 1;
+        if (item != null) {
+            colon = resp.indexOf("\":", colon + 1);
+            subtract = 2;
+        }
+        System.out.println("Substring from " + (colon + 2) + " to " + subtract
+                + " for " + resp);
+        String payload = resp.substring(colon + 2, resp.length() - subtract);
 
         return (T) ReflectUtils.decode(payload, responseType, pType, CODEC);
     }

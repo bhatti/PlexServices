@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.jws.WebMethod;
+import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 
@@ -93,8 +94,10 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         for (final Method implMethod : serviceClass.getMethods()) {
             Method iMethod = getExported(webService, implMethod);
             if (iMethod != null) {
+                String itemName = getItemTag(iMethod, implMethod);
                 ((JavawsDelegateHandler) handler)
-                        .addMethod(iMethod, implMethod);
+                        .addMethod(new JavawsDelegateHandler.MethodInfo(
+                                iMethod, implMethod, itemName));
                 countExported++;
             }
         }
@@ -104,6 +107,16 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
             throw new IllegalArgumentException("No exported methods in "
                     + service);
         }
+    }
+
+    private String getItemTag(final Method iMethod, final Method implMethod) {
+        WebParam webParam = ReflectUtils.getWebParamFor(iMethod);
+        if (webParam == null) {
+            webParam = ReflectUtils.getWebParamFor(implMethod);
+        }
+        String responseItemTag = webParam != null ? webParam.name() : config
+                .getProperty("javaWs.defaultItem");
+        return responseItemTag;
     }
 
     private static String getEndpoint(Class<?> serviceClass, Class<?> webService) {

@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.jws.WebParam;
+
 import org.reflections.Reflections;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -102,5 +104,16 @@ public class ReflectUtils {
             return Double.valueOf(text);
         }
         return payload;
+    }
+
+    public static WebParam getWebParamFor(final Method iMethod) {
+        for (Annotation[] annotations : iMethod.getParameterAnnotations()) {
+            for (Annotation a : annotations) {
+                if (a instanceof WebParam) {
+                    return (WebParam) a;
+                }
+            }
+        }
+        return null;
     }
 }
