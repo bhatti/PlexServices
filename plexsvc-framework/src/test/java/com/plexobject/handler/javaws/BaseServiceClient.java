@@ -62,8 +62,6 @@ public class BaseServiceClient {
             colon = resp.indexOf("\":", colon + 1);
             subtract = 2;
         }
-        System.out.println("Substring from " + (colon + 2) + " to " + subtract
-                + " for " + resp);
         String payload = resp.substring(colon + 2, resp.length() - subtract);
 
         return (T) ReflectUtils.decode(payload, responseType, pType, CODEC);
