@@ -3,6 +3,7 @@ package com.plexobject.handler.javaws;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -101,6 +102,29 @@ public class StudentServiceClient extends BaseServiceClient implements
         try {
             return post(STUDENT_SERVICE, request, Integer.class, null,
                     getItemNameForMethod("count", List.class));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    void mapArg(Map<String, Student> m) {
+
+    }
+
+    void stringList(Collection<String> ids) {
+
+    }
+
+    @WebMethod(exclude = true)
+    @Override
+    public Map<String, Student> getStudents(Collection<String> ids) {
+        RequestBuilder request = new RequestBuilder("getStudents", ids);
+        try {
+            Method m = getClass().getMethod("mapArg", Map.class);
+            Class<?> klass = m.getParameterTypes()[0];
+            Type pKlass = m.getGenericParameterTypes()[0];
+            return post(STUDENT_SERVICE, request, klass, pKlass,
+                    getItemNameForMethod("getStudents", Collection.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

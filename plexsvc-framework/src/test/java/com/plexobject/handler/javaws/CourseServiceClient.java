@@ -154,6 +154,7 @@ public class CourseServiceClient extends BaseServiceClient implements
                 getItemNameForMethod("getCustomers", List.class));
     }
 
+    @WebMethod(exclude = true)
     @Override
     public Collection<Customer> getCustomers(List<Customer> list) {
         RequestBuilder request = new RequestBuilder("getCustomers", list);

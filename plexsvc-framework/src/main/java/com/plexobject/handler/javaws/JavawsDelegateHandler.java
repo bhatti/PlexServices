@@ -82,7 +82,7 @@ public class JavawsDelegateHandler implements RequestHandler {
             }
             request.getResponse().setPayload(response);
         } catch (Exception e) {
-            logger.error("Failed to invoke " + methodInfo.implMethod
+            logger.error("Failed to invoke " + methodInfo.iMethod
                     + ", for request " + request, e);
             request.getResponse().setPayload(e);
         }

@@ -1,6 +1,7 @@
 package com.plexobject.handler.javaws;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,16 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public int count(List<Student> s) {
         return s.size();
+    }
+
+    @Override
+    public Map<String, Student> getStudents(Collection<String> ids) {
+        Map<String, Student> map = new HashMap<>();
+        for (String id : ids) {
+            Student s = students.get(id);
+            map.put(id, s);
+        }
+        return map;
     }
 
 }

@@ -5,12 +5,15 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @XmlRootElement
 public class Student {
     private String id;
     private String name;
     private List<Address> addresses = new ArrayList<>();
     private List<String> courseIds = new ArrayList<>();
+    private Major major;
 
     public Student() {
     }
@@ -50,6 +53,19 @@ public class Student {
 
     public void setAddresses(List<Address> addresses) {
         this.addresses = addresses;
+    }
+
+    public Major getMajor() {
+        return major;
+    }
+
+    public void setMajor(Major major) {
+        this.major = major;
+    }
+
+    @JsonIgnore
+    public void setMajor(MajorDetails d) {
+
     }
 
     @Override
