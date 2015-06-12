@@ -69,7 +69,7 @@ public class ServiceInvocationHelper {
                         "Expected payload of type "
                                 + config.payloadClass().getName()
                                 + ", but payload was: " + request);
-                request.getResponseDispatcher().send(request.getResponse());
+                request.sendResponse();
                 return;
             }
             ((AbstractResponseDispatcher) request.getResponseDispatcher())
@@ -142,7 +142,7 @@ public class ServiceInvocationHelper {
                 metrics.addResponseTime(System.currentTimeMillis() - started);
                 // send back the reply
                 if (request.getResponse().getPayload() != null) {
-                    request.getResponseDispatcher().send(request.getResponse());
+                    request.sendResponse();
                 }
             } catch (Exception e) {
                 metrics.incrementErrors();
@@ -161,7 +161,7 @@ public class ServiceInvocationHelper {
                             HttpResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 request.getResponse().setPayload(e);
-                request.getResponseDispatcher().send(request.getResponse());
+                request.sendResponse();
             }
         } else {
             log.warn("Received Unknown request params "
@@ -170,7 +170,7 @@ public class ServiceInvocationHelper {
             request.getResponse().setCodecType(CodecType.TEXT);
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload("page not found");
-            request.getResponseDispatcher().send(request.getResponse());
+            request.sendResponse();
         }
     }
 

@@ -163,6 +163,10 @@ public class Request<T> extends AbstractPayload {
         return responseDispatcher;
     }
 
+    public void sendResponse() {
+        responseDispatcher.send(response);
+    }
+
     @SuppressWarnings("unchecked")
     @JsonAnySetter
     public void handleUnknown(String key, Object value) {

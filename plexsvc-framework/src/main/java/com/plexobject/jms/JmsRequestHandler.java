@@ -16,7 +16,6 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
-import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;

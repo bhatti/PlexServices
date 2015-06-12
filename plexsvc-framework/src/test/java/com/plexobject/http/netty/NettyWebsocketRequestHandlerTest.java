@@ -36,7 +36,7 @@ public class NettyWebsocketRequestHandlerTest {
             request.getResponse().setCodecType(CodecType.JSON);
 
             request.getResponse().setPayload(PONG);
-            request.getResponseDispatcher().send(request.getResponse());
+            request.sendResponse();
         }
     };
 
