@@ -5,12 +5,12 @@ com.plexobject.bus.impl
 com.plexobject.deploy
 com.plexobject.domain
 com.plexobject.encode
-com.plexobject.encode.gson
 com.plexobject.encode.json
 com.plexobject.encode.text
 com.plexobject.encode.xml
 com.plexobject.fsm
 com.plexobject.handler
+com.plexobject.handler.javaws
 com.plexobject.http
 com.plexobject.http.netty
 com.plexobject.http.servlet
