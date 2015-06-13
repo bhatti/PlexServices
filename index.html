@@ -1,4 +1,3 @@
-
 <!DOCTYPE html><html><head><meta charset="utf-8"><title>Untitled Document.md</title><style></style></head><body>
 <h1 id="plexservices-light-weight-micro-service-framework-for-building-high-performance-and-secured-applications">PlexServices - Light-weight Micro-Service Framework for building high performance and secured applications</h1>
 <h2 id="overview">Overview</h2>
@@ -47,6 +46,8 @@
 </li>
 <li><p>PlexServices also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. </p>
 </li>
+<li><p>PlexServices allows you to import existing JavaWS based services.</p>
+</li>
 <li><p>PlexServices allows you to specify the services you want to deploy or allows support to automatically 
 deplooy all services that implement ServiceConfig annotation.</p>
 </li>
@@ -64,7 +65,15 @@ deplooy all services that implement ServiceConfig annotation.</p>
 <pre><code>cd plexsvc-framework
 ./gradlew jar
 </code></pre><ul>
-<li>Copy and add jar file manually in your application.</li>
+<li>Copy and add jar file (build/libs/plexsvc-framework-0.9-SNAPSHOT.jar) manually in your application.</li>
+</ul>
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+<li>Netty 4.0</li>
+<li>Google GSON 2.3</li>
+<li>Fast JSON  2.4</li>
+<li>XStream 1.4</li>
+<li>JMS API 1.1</li>
 </ul>
 <h2 id="version">Version</h2>
 <ul>
@@ -91,7 +100,7 @@ deplooy all services that implement ServiceConfig annotation.</p>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
       User user = request.getPayload();
       User saved = userRepository.save(user);
-      request.getResponseDispatcher().send(saved);
+      request.getResponse().setPayload(saved);
     }
 }
 </code></pre>
@@ -128,7 +137,7 @@ which is default setting.</p>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
       User user = request.getPayload();
       User saved = userRepository.save(user);
-      request.getResponseDispatcher().send(saved);
+      request.getResponse().setPayload(saved);
     }
 }
 </code></pre>
@@ -167,7 +176,7 @@ ws.onerror = <span class="hljs-function"><span class="hljs-keyword">function</sp
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
       User user = request.getPayload();
       User saved = userRepository.save(user);
-      request.getResponseDispatcher().send(saved);
+      request.getResponse().setPayload(saved);
     }
 }
 </code></pre>
@@ -191,7 +200,7 @@ Note: concurrency parameter specifies number of concurrent consumers that would 
       <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
         BugReport report = request.getPayload();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseDispatcher().send(saved);
+        request.getResponse().setPayload(saved);
       }
 }
 </code></pre>
@@ -217,7 +226,7 @@ classes into JSON when delivering messages over HTTP.</p>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
         BugReport report = request.getPayload();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponseDispatcher().send(saved);
+        request.getResponse().setPayload(saved);
     }
 
 }
@@ -263,7 +272,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
             <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
         }
         });
-    request.getResponseDispatcher().send(users);
+    request.getResponse().setPayload(users);
   }
 }
 </code></pre>
@@ -284,7 +293,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
                 <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
             }
             });
-        request.getResponseDispatcher().send(users);
+        request.getResponse().setPayload(users);
       }
 }
 </code></pre>
@@ -305,7 +314,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
   <span class="hljs-annotation">@Override</span>
   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
     String data = request.getProperty(<span class="hljs-string">"data"</span>);
-    request.getResponseDispatcher().send(data);
+    request.getResponse().setPayload(data);
   }
 }
 
@@ -361,7 +370,7 @@ but here is an example of creating a simple static file server:</p>
             <span class="hljs-keyword">final</span> File filePath = <span class="hljs-keyword">new</span> File(webFolder, path);
 
             <span class="hljs-keyword">if</span> (!filePath.getCanonicalPath().startsWith(canonicalDirPath)) {
-                request.getResponseDispatcher().send(
+                request.getResponse().setPayload(
                         <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Relative path '"</span> + path
                                 + <span class="hljs-string">"' not allowed"</span>));
             }
@@ -369,15 +378,15 @@ but here is an example of creating a simple static file server:</p>
                     filePath.getName().lastIndexOf(<span class="hljs-string">'.'</span>));
             String contentType = contentType = Files.probeContentType(filePath.toPath());
             <span class="hljs-keyword">if</span> (contentType != <span class="hljs-keyword">null</span>) {
-                request.getResponseDispatcher().setProperty(
+                request.getResponse().setProperty(
                         HttpResponse.CONTENT_TYPE, contentType);
             }
             <span class="hljs-comment">//</span>
-            request.getResponseDispatcher()
-                    .send(<span class="hljs-keyword">new</span> String(Files.readAllBytes(Paths.get(filePath
+            request.getResponse().setPayload(
+                    <span class="hljs-keyword">new</span> String(Files.readAllBytes(Paths.get(filePath
                             .toURI()))));
         } <span class="hljs-keyword">catch</span> (IOException e) {
-            request.getResponseDispatcher().send(e);
+            request.getResponse().setPayload(e);
         }
     }
 }
@@ -411,19 +420,39 @@ but here is an example of creating a simple static file server:</p>
 }
 </code></pre>
 <h3 id="adding-interceptors-for-handling-incoming-requests">Adding interceptors for handling incoming requests</h3>
-<p>You can add interceptors (similar to filters in java servlets), that can modify
-incoming requests or execute cross cutting logic, e.g.</p>
-<pre><code class="lang-java">serviceRegistry.add(<span class="hljs-keyword">new</span> ServiceTypeDesc(Protocol.HTTP, Method.GET,
-        <span class="hljs-keyword">null</span>, <span class="hljs-string">"/.*"</span>), <span class="hljs-keyword">new</span> RequestInterceptor() {
-    <span class="hljs-annotation">@Override</span>
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Request <span class="hljs-title">intercept</span><span class="hljs-params">(Request request)</span> </span>{
-        <span class="hljs-comment">// my business logic </span>
-        <span class="hljs-comment">// ...</span>
-        <span class="hljs-keyword">return</span> request;
-    }
+<p>You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.</p>
+<pre><code class="lang-java">serviceRegistry.addInputInterceptor(<span class="hljs-keyword">new</span> Interceptor&lt;String&gt;() {
+  <span class="hljs-annotation">@Override</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">intercept</span><span class="hljs-params">(String input)</span> </span>{
+      logger.info(<span class="hljs-string">"INPUT: "</span> + input);
+      <span class="hljs-keyword">return</span> input;
+  }
+});
+
+serviceRegistry.addOutputInterceptor(<span class="hljs-keyword">new</span> Interceptor&lt;String&gt;() {
+  <span class="hljs-annotation">@Override</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">intercept</span><span class="hljs-params">(String output)</span> </span>{
+      logger.info(<span class="hljs-string">"OUTPUT: "</span> + output);
+      <span class="hljs-keyword">return</span> output;
+  }
+});
+
+serviceRegistry.addRequestInterceptor(<span class="hljs-keyword">new</span> Interceptor&lt;Request&gt;() {
+  <span class="hljs-annotation">@Override</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> Request <span class="hljs-title">intercept</span><span class="hljs-params">(Request input)</span> </span>{
+      logger.info(<span class="hljs-string">"INPUT PAYLOAD: "</span> + input);
+      <span class="hljs-keyword">return</span> input;
+  }
+});
+
+serviceRegistry.addResponseInterceptor(<span class="hljs-keyword">new</span> Interceptor&lt;Response&gt;() {
+  <span class="hljs-annotation">@Override</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">intercept</span><span class="hljs-params">(Response output)</span> </span>{
+      logger.info(<span class="hljs-string">"OUTPUT PAYLOAD: "</span> + output);
+      <span class="hljs-keyword">return</span> output;
+  }
 });
 </code></pre>
-<p>The first parameter is ServiceTypeDesc that defines matching pattern for request type. For example, above code will match all incoming HTTP requests that use GET requests. If you need to match all type of requests, you can just specify null as Method. The last argument of ServiceTypeDesc is endpoint or path of request, which can be regex or exact path.</p>
 <h3 id="creating-http-or-websocket-bridge-for-jms-services">Creating Http or Websocket bridge for JMS services</h3>
 <p>Here is how you can setup bridge between HTTP/Websocket and JMS based services. </p>
 <pre><code class="lang-java">  Configuration config = <span class="hljs-keyword">new</span> Configuration(configFile);
@@ -524,7 +553,7 @@ eb.publish(<span class="hljs-string">"test-channel"</span>, req);
 eb.subscribe(<span class="hljs-string">"test-channel"</span>, <span class="hljs-keyword">new</span> RequestHandler() {
    <span class="hljs-annotation">@Override</span>
    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
-       System.out.println(<span class="hljs-string">"Received "</span> + request);
+       logger.info(<span class="hljs-string">"Received "</span> + request);
    }
 }, <span class="hljs-keyword">null</span>);
 </code></pre>
@@ -542,6 +571,32 @@ EventBusToJmsBridge.run(config, entries);
 <span class="hljs-string">"target"</span>:<span class="hljs-string">"queue://{scope}-assign-bugreport-service-queue"</span>,<span class="hljs-string">"requestType"</span>:
 <span class="hljs-string">"com.plexobject.bugger.model.User"</span>}]
 </code></pre>
+<h3 id="javaws-support">JavaWS support</h3>
+<p>PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let&#39;s assume you have an existing service such as:</p>
+<pre><code class="lang-java"><span class="hljs-keyword">import</span> javax.jws.WebService;
+
+<span class="hljs-annotation">@WebService</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">StudentService</span> </span>{
+    <span class="hljs-function">Student <span class="hljs-title">save</span><span class="hljs-params">(Student student)</span></span>;
+    <span class="hljs-function">List&lt;Student&gt; <span class="hljs-title">query</span><span class="hljs-params">(Map&lt;String, Object&gt; criteria)</span></span>;
+    <span class="hljs-function">Student <span class="hljs-title">get</span><span class="hljs-params">(Long id)</span></span>;
+}
+</code></pre>
+<p>You can convert the implementing service into RequestHandler as follows:</p>
+<pre><code class="lang-java">Configuration config = ...
+RoleAuthorizer roleAuthorizer = ...
+serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, roleAuthorizer);
+RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = <span class="hljs-keyword">new</span> RequestHandlerAdapterJavaws(config);
+Map&lt;ServiceConfigDesc, RequestHandler&gt; handlers = requestHandlerAdapterJavaws
+                .createFromPackages(<span class="hljs-string">"com.plexobject.handler.javaws"</span>);
+<span class="hljs-keyword">for</span> (Map.Entry&lt;ServiceConfigDesc, RequestHandler&gt; e : handlers.entrySet()) {
+  serviceRegistry.add(e.getKey(), e.getValue());
+}
+serviceRegistry.start();
+</code></pre>
+<p>Above code looks for classes that implement WebService and createFromPackages
+returns RequestHandlers. If you have an existing service object then you can
+use create method instead.</p>
 <h3 id="finite-state-machine">Finite State Machine</h3>
 <p>PlexServices provides helper classes to implement finite state machine. For example, here is how you can implement FSM for Android application lifecycle:</p>
 <p><img src="http://upload.wikimedia.org/wikipedia/en/f/f6/Android_application_life_cycle.png" alt="Android Lifecycle"></p>
