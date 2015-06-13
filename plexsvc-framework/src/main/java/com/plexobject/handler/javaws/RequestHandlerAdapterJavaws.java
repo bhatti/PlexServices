@@ -20,6 +20,7 @@ import com.plexobject.util.ReflectUtils;
 
 public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
     private static final String DEFAULT_VERSION = "1.0";
+    private static final String[] DEFAULT_ROLES = new String[0];
     private final Configuration config;
 
     public RequestHandlerAdapterJavaws(Configuration config) {
@@ -66,10 +67,8 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
     @Override
     public Pair<ServiceConfigDesc, RequestHandler> create(Object service,
             String endpoint) {
-        ServiceConfigDesc serviceConfig = endpoint != null ? new ServiceConfigDesc(
-                Protocol.HTTP, com.plexobject.service.Method.POST, Void.class,
-                config.getDefaultCodecType(), DEFAULT_VERSION, endpoint, true,
-                new String[0], 1) : null;
+        ServiceConfigDesc serviceConfig = endpoint != null ? buildConfig(endpoint)
+                : null;
         return create(service, serviceConfig);
     }
 
@@ -84,10 +83,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         RequestHandler handler = new JavawsDelegateHandler(service, config);
         if (serviceConfig == null) {
             String endpoint = getEndpoint(serviceClass, webService);
-            serviceConfig = new ServiceConfigDesc(Protocol.HTTP,
-                    com.plexobject.service.Method.POST, Void.class,
-                    config.getDefaultCodecType(), DEFAULT_VERSION, endpoint,
-                    true, new String[0], 1);
+            serviceConfig = buildConfig(endpoint);
         }
         //
         int countExported = 0;
@@ -134,9 +130,12 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         try {
             Method iMethod = webService.getMethod(implMethod.getName(),
                     implMethod.getParameterTypes());
-            if (implMethod.getParameterTypes().length <= 1 && iMethod != null) {
-                WebMethod webMethod = implMethod.getAnnotation(WebMethod.class);
-                if (webMethod == null || !webMethod.exclude()) {
+            if (iMethod != null && implMethod.getParameterTypes().length <= 1) {
+                WebMethod iWebMethod = iMethod.getAnnotation(WebMethod.class);
+                WebMethod implWebMethod = implMethod
+                        .getAnnotation(WebMethod.class);
+                if ((iWebMethod == null || !iWebMethod.exclude())
+                        && (implWebMethod == null || !implWebMethod.exclude())) {
                     return iMethod;
                 }
             }
@@ -145,6 +144,13 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         }
 
         return null;
+    }
+
+    private ServiceConfigDesc buildConfig(String endpoint) {
+        return new ServiceConfigDesc(Protocol.HTTP,
+                com.plexobject.service.Method.POST, Void.class,
+                config.getDefaultCodecType(), DEFAULT_VERSION, endpoint, true,
+                DEFAULT_ROLES, 1);
     }
 
     static Class<?> getWebServiceInterface(Class<?> serviceClass) {

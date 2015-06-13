@@ -19,6 +19,7 @@ public class JavawsDelegateHandler implements RequestHandler {
     private static final Logger logger = Logger
             .getLogger(JavawsDelegateHandler.class);
     private static final String RESPONSE_SUFFIX = "Response";
+    private static final Map<String, Object> EMPTY_MAP = new HashMap<>();
 
     public static class MethodInfo {
         public final Method iMethod;
@@ -78,7 +79,7 @@ public class JavawsDelegateHandler implements RequestHandler {
                     response.put(responseTag, result);
                 }
             } else {
-                response.put(responseTag, new HashMap<String, Object>());
+                response.put(responseTag, EMPTY_MAP);
             }
             request.getResponse().setPayload(response);
         } catch (Exception e) {
