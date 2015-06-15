@@ -65,7 +65,7 @@ deplooy all services that implement ServiceConfig annotation.</p>
 <pre><code>cd plexsvc-framework
 ./gradlew jar
 </code></pre><ul>
-<li>Copy and add jar file (build/libs/plexsvc-framework-0.9-SNAPSHOT.jar) manually in your application.</li>
+<li>Copy and add jar file (build/libs/plexsvc-framework-1.0-SNAPSHOT.jar) manually in your application.</li>
 </ul>
 <h2 id="dependencies">Dependencies</h2>
 <ul>
@@ -77,7 +77,7 @@ deplooy all services that implement ServiceConfig annotation.</p>
 </ul>
 <h2 id="version">Version</h2>
 <ul>
-<li>0.9</li>
+<li>1.0</li>
 </ul>
 <h2 id="license">License</h2>
 <ul>
@@ -515,8 +515,8 @@ from the JMS handler. If it doesn&#39;t receive the message within timeout then 
 error is returned to the web client.</p>
 <h3 id="configuring-http-ports-in-configuration">Configuring HTTP ports in configuration</h3>
 <p>Here is how you can specify HTTP ports and default websocket path in the properties file:</p>
-<pre><code class="lang-bash">HttpPort=<span class="hljs-number">8181</span>
-HttpWebsocketUri=/ws
+<pre><code class="lang-bash">http.port=<span class="hljs-number">8181</span>
+http.websocketUri=/ws
 </code></pre>
 <p>In above example, we are using ActiveMQ as JMS server</p>
 <h3 id="configuring-jms-provider-in-configuration">Configuring JMS provider in configuration</h3>
@@ -529,7 +529,7 @@ JMSConnectionFactoryLookup=ConnectionFactory
 <p>In above example, we are using ActiveMQ as JMS server</p>
 <h3 id="configuring-jms-container-in-configuration">Configuring JMS container in configuration</h3>
 <p>PlexServices comes with simple JMS container but you can replace it with Spring or other JMS frameworks by defining configuration, e.g.:</p>
-<pre><code class="lang-bash">PlexserviceJMSContainerFactory=com.plexobject.bugger.jms.SpringJMSContainerFactory
+<pre><code class="lang-bash">jms.containerFactory=com.plexobject.bugger.jms.SpringJMSContainerFactory
 </code></pre>
 <p>In above example, we are defining factory to use spring container. You can then define factory as:</p>
 <pre><code class="lang-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SpringJMSContainerFactory</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">JMSContainerFactory</span> </span>{
@@ -680,12 +680,8 @@ serviceRegistry.start();
         <span class="hljs-tag">&lt;<span class="hljs-title">servlet-name</span>&gt;</span>plexservice<span class="hljs-tag">&lt;/<span class="hljs-title">servlet-name</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">servlet-class</span>&gt;</span>com.plexobject.http.servlet.WebRequestHandlerServlet<span class="hljs-tag">&lt;/<span class="hljs-title">servlet-class</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">init-param</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-name</span>&gt;</span>PlexserviceAwareClass<span class="hljs-tag">&lt;/<span class="hljs-title">param-name</span>&gt;</span> 
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-value</span>&gt;</span>com.plexobject.ping.Main<span class="hljs-tag">&lt;/<span class="hljs-title">param-value</span>&gt;</span> 
-        <span class="hljs-tag">&lt;/<span class="hljs-title">init-param</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">init-param</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-name</span>&gt;</span>PlexserviceConfigResourcePath<span class="hljs-tag">&lt;/<span class="hljs-title">param-name</span>&gt;</span> 
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-value</span>&gt;</span>/ping.properties<span class="hljs-tag">&lt;/<span class="hljs-title">param-value</span>&gt;</span> 
+            <span class="hljs-tag">&lt;<span class="hljs-title">param-name</span>&gt;</span>plexserviceConfigResourcePath<span class="hljs-tag">&lt;/<span class="hljs-title">param-name</span>&gt;</span> 
+            <span class="hljs-tag">&lt;<span class="hljs-title">param-value</span>&gt;</span>/myweb.properties<span class="hljs-tag">&lt;/<span class="hljs-title">param-value</span>&gt;</span> 
         <span class="hljs-tag">&lt;/<span class="hljs-title">init-param</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">load-on-startup</span>&gt;</span>1<span class="hljs-tag">&lt;/<span class="hljs-title">load-on-startup</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">servlet</span>&gt;</span>
@@ -695,17 +691,15 @@ serviceRegistry.start();
     <span class="hljs-tag">&lt;/<span class="hljs-title">servlet-mapping</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-title">web-app</span>&gt;</span>
 </code></pre>
-<p>Optionally, you can add class name for the security authorizer, e.g.</p>
-<pre><code class="lang-xml">        <span class="hljs-tag">&lt;<span class="hljs-title">init-param</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-name</span>&gt;</span>PlexserviceRoleAuthorizerClass<span class="hljs-tag">&lt;/<span class="hljs-title">param-name</span>&gt;</span> 
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-value</span>&gt;</span>com.plexobject.ping.MyAuthorizer<span class="hljs-tag">&lt;/<span class="hljs-title">param-value</span>&gt;</span> 
-        <span class="hljs-tag">&lt;/<span class="hljs-title">init-param</span>&gt;</span>
+<p>You can define additional properties in myweb.properties declared above such
+as:</p>
+<pre><code class="lang-bash">service.registryCallbackClass=com.plexobject.basic.Main
 </code></pre>
-<p>If you wish to auto-deploy all services that implement ServiceConfig then you can use com.plexobject.deploy.AutoDeployer as PlexserviceAwareClass, e.g.</p>
-<pre><code class="lang-xml">        <span class="hljs-tag">&lt;<span class="hljs-title">init-param</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-name</span>&gt;</span>PlexserviceAwareClass<span class="hljs-tag">&lt;/<span class="hljs-title">param-name</span>&gt;</span> 
-            <span class="hljs-tag">&lt;<span class="hljs-title">param-value</span>&gt;</span>com.plexobject.deploy.AutoDeployer<span class="hljs-tag">&lt;/<span class="hljs-title">param-value</span>&gt;</span> 
-        <span class="hljs-tag">&lt;/<span class="hljs-title">init-param</span>&gt;</span>
+<p>or if you wish to auto-deploy all services that implement ServiceConfig then you can use com.plexobject.deploy.AutoDeployer , e.g.</p>
+<pre><code class="lang-bash">service.registryCallbackClass=com.plexobject.deploy.AutoDeployer
+</code></pre>
+<p>Optionally, you can add class name for the security authorizer, e.g.</p>
+<pre><code class="lang-bash">service.roleAuthorizerClass=com.plexobject.ping.MyAuthorizer
 </code></pre>
 <p>PlexServices comes with examples that you can use to deploy using</p>
 <pre><code class="lang-bash"><span class="hljs-built_in">cd</span> plexsvc-samples
@@ -717,7 +711,7 @@ in your application package that implement ServiceConfig annotation and deploy t
 <pre><code class="lang-bash">java com.plexobject.deploy.AutoDeployer bugger.properties
 </code></pre>
 <p>You need to specify package name of your services in the properties file, e.g.</p>
-<pre><code class="lang-bash">AutoDeployPackages=com.plexobject.stock
+<pre><code class="lang-bash">service.autoDeployPackages=com.plexobject.stock
 </code></pre>
 <p>Your services must have default constructor for this option to work. You can specify multiple packages separated by comma if needed.</p>
 <h3 id="adding-streaming-quotes-service-over-websockets">Adding Streaming Quotes Service over Websockets</h3>
