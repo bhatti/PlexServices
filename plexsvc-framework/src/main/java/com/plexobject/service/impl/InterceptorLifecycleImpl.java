@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
+import com.plexobject.service.AroundInterceptor;
 import com.plexobject.service.Interceptor;
 import com.plexobject.service.InterceptorsLifecycle;
 
@@ -14,7 +15,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
     private final List<Interceptor<Response>> responseInterceptors = new ArrayList<>();
     private final List<Interceptor<String>> inputInterceptors = new ArrayList<>();
     private final List<Interceptor<String>> outputInterceptors = new ArrayList<>();
-
+    private AroundInterceptor aroundInterceptor;
     private boolean hasRequestInterceptors;
     private boolean hasResponseInterceptors;
     private boolean hasInputInterceptors;
@@ -213,6 +214,17 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
     @Override
     public synchronized boolean hasResponseInterceptors() {
         return hasResponseInterceptors;
+    }
+
+    @Override
+    public void setAroundInterceptor(AroundInterceptor interceptor) {
+        this.aroundInterceptor = interceptor;
+
+    }
+
+    @Override
+    public AroundInterceptor getAroundInterceptor() {
+        return aroundInterceptor;
     }
 
 }

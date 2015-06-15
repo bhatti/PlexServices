@@ -9,4 +9,18 @@ package com.plexobject.service;
 
 public interface InterceptorsLifecycle extends IncomingInterceptorsLifecycle,
         OutgoingInterceptorsLifecycle {
+    /**
+     * This method returns around-interceptor that wraps execution of underlying
+     * service invocation
+     * 
+     * @return
+     */
+    AroundInterceptor getAroundInterceptor();
+
+    /**
+     * This interceptor is called around the underlying service invocation
+     * 
+     * @param interceptor
+     */
+    void setAroundInterceptor(AroundInterceptor interceptor);
 }

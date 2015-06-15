@@ -29,7 +29,7 @@ public class ServiceRegistryJavawsSupport {
     public static Pair<ServiceConfigDesc, RequestHandler> addHandler(
             ServiceRegistry serviceRegistry, String path, Object service) {
         final RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
-                serviceRegistry.getConfiguration());
+                serviceRegistry);
         Class<?> webService = RequestHandlerAdapterJavaws
                 .getWebServiceInterface(service.getClass());
         try {

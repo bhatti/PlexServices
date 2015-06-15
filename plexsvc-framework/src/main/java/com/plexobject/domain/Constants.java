@@ -30,6 +30,5 @@ public interface Constants {
     public static final String JMS_TRASACTED_SESSION = "jms.trasactedSession";
     public static final String JMS_SEND_HEADERS = "jms.sendHeaders";
     public static final String JAVAWS_NAMESPACE = "javaws.namespace";
-    public static final String JAVAWS_INVOKER_CLASS = "javaws.invokerClass";
     public static final int DEFAULT_HTTP_PORT = 8181;
 }

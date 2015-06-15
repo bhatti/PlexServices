@@ -10,21 +10,21 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 
-import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Pair;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.RequestHandlerAdapter;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
+import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
 public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
     private static final String DEFAULT_VERSION = "1.0";
     private static final String[] DEFAULT_ROLES = new String[0];
-    private final Configuration config;
+    private final ServiceRegistry registry;
 
-    public RequestHandlerAdapterJavaws(Configuration config) {
-        this.config = config;
+    public RequestHandlerAdapterJavaws(final ServiceRegistry registry) {
+        this.registry = registry;
     }
 
     public Map<ServiceConfigDesc, RequestHandler> createFromPackages(
@@ -80,7 +80,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         if (webService == null) {
             throw new IllegalArgumentException(service + " is not web service");
         }
-        RequestHandler handler = new JavawsDelegateHandler(service, config);
+        RequestHandler handler = new JavawsDelegateHandler(service, registry);
         if (serviceConfig == null) {
             String endpoint = getEndpoint(serviceClass, webService);
             serviceConfig = buildConfig(endpoint);
@@ -110,8 +110,8 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         if (webParam == null) {
             webParam = ReflectUtils.getWebParamFor(implMethod);
         }
-        String responseItemTag = webParam != null ? webParam.name() : config
-                .getProperty("javaWs.defaultItem");
+        String responseItemTag = webParam != null ? webParam.name() : registry
+                .getConfiguration().getProperty("javaWs.defaultItem");
         return responseItemTag;
     }
 
@@ -148,9 +148,9 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
 
     private ServiceConfigDesc buildConfig(String endpoint) {
         return new ServiceConfigDesc(Protocol.HTTP,
-                com.plexobject.service.Method.POST, Void.class,
-                config.getDefaultCodecType(), DEFAULT_VERSION, endpoint, true,
-                DEFAULT_ROLES, 1);
+                com.plexobject.service.Method.POST, Void.class, registry
+                        .getConfiguration().getDefaultCodecType(),
+                DEFAULT_VERSION, endpoint, true, DEFAULT_ROLES, 1);
     }
 
     static Class<?> getWebServiceInterface(Class<?> serviceClass) {

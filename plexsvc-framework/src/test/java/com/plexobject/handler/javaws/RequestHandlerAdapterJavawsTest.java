@@ -50,10 +50,11 @@ public class RequestHandlerAdapterJavawsTest {
             LogManager.getRootLogger().setLevel(Level.INFO);
         }
         RoleAuthorizer roleAuthorizer = null;
-        requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(config);
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
                 .createFromPackages("com.plexobject.handler.javaws");
         serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
+        requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
+                serviceRegistry);
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             logger.info("Adding " + e.getKey() + "==>" + e.getValue());
@@ -112,7 +113,7 @@ public class RequestHandlerAdapterJavawsTest {
         courseService.exceptionExample(true);
     }
 
-   @Test
+    @Test
     public void testStudentRuntimeException() throws Exception {
         studentService.exceptionExample();
     }

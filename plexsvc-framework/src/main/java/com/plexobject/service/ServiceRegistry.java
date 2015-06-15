@@ -350,6 +350,16 @@ public class ServiceRegistry implements ServiceContainer,
         return interceptorLifecycle.hasResponseInterceptors();
     }
 
+    @Override
+    public AroundInterceptor getAroundInterceptor() {
+        return interceptorLifecycle.getAroundInterceptor();
+    }
+
+    @Override
+    public void setAroundInterceptor(AroundInterceptor interceptor) {
+        interceptorLifecycle.setAroundInterceptor(interceptor);
+    }
+
     private void addPingHandler(final RequestHandler h,
             final ServiceConfigDesc config, final ServiceContainer container) {
         String pingEndpoint = config.endpoint() + ".ping";

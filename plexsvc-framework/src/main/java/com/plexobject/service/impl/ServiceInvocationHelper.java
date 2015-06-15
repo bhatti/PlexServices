@@ -1,6 +1,7 @@
 package com.plexobject.service.impl;
 
 import java.io.FileNotFoundException;
+import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
@@ -15,7 +16,6 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.security.RoleAuthorizer;
-import com.plexobject.service.IncomingInterceptorsLifecycle;
 import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -45,7 +45,7 @@ public class ServiceInvocationHelper {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     // igoring type of Request so that we can cast to Object
     public void invoke(Request request, RequestHandler handler,
-            IncomingInterceptorsLifecycle incomingInterceptorsLifecycle) {
+            final ServiceRegistry registry) {
         if (handler != null) {
             final long started = System.currentTimeMillis();
             ServiceMetrics metrics = serviceRegistry
@@ -82,15 +82,13 @@ public class ServiceInvocationHelper {
             // We assume incoming payload is text so we will run through input
             // interceptors
             String textPayload = request.getPayload();
-            if (incomingInterceptorsLifecycle != null) {
-                // apply input interceptors
-                if (incomingInterceptorsLifecycle.hasInputInterceptors()) {
-                    for (Interceptor<String> interceptor : incomingInterceptorsLifecycle
-                            .getInputInterceptors()) {
-                        textPayload = interceptor.intercept(textPayload);
-                    }
-                    request.setPayload(textPayload);
+            // apply input interceptors
+            if (registry.hasInputInterceptors()) {
+                for (Interceptor<String> interceptor : registry
+                        .getInputInterceptors()) {
+                    textPayload = interceptor.intercept(textPayload);
                 }
+                request.setPayload(textPayload);
             }
 
             // decode text input into object
@@ -106,9 +104,8 @@ public class ServiceInvocationHelper {
             }
 
             // Invoking request interceptors
-            if (incomingInterceptorsLifecycle != null
-                    && incomingInterceptorsLifecycle.hasRequestInterceptors()) {
-                for (Interceptor<Request<Object>> interceptor : incomingInterceptorsLifecycle
+            if (registry.hasRequestInterceptors()) {
+                for (Interceptor<Request<Object>> interceptor : registry
                         .getRequestInterceptors()) {
                     request = interceptor.intercept(request);
                 }
@@ -136,14 +133,8 @@ public class ServiceInvocationHelper {
             //
             try {
                 //
-                // invoke authorizer if set
-                authorizeIfNeeded(request, config);
-                handler.handle(request);
-                metrics.addResponseTime(System.currentTimeMillis() - started);
-                // send back the reply
-                if (request.getResponse().getPayload() != null) {
-                    request.sendResponse();
-                }
+                invokeWithAroundInterceptorIfNeeded(request, handler, registry,
+                        started, metrics, config);
             } catch (Exception e) {
                 metrics.incrementErrors();
                 if (e instanceof Redirectable) {
@@ -170,6 +161,38 @@ public class ServiceInvocationHelper {
             request.getResponse().setCodecType(CodecType.TEXT);
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload("page not found");
+            request.sendResponse();
+        }
+    }
+
+    private void invokeWithAroundInterceptorIfNeeded(
+            final Request<Object> request, final RequestHandler handler,
+            final ServiceRegistry registry, final long started,
+            final ServiceMetrics metrics, final ServiceConfigDesc config)
+            throws Exception {
+        if (registry.getAroundInterceptor() != null) {
+            Callable<Object> callable = new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    invoke(request, handler, started, metrics, config);
+                    return null;
+                }
+            };
+            registry.getAroundInterceptor()
+                    .proceed(handler, "handle", callable);
+        } else {
+            invoke(request, handler, started, metrics, config);
+        }
+    }
+
+    private void invoke(Request<Object> request, RequestHandler handler,
+            final long started, ServiceMetrics metrics, ServiceConfigDesc config) {
+        // invoke authorizer if set
+        authorizeIfNeeded(request, config);
+        handler.handle(request);
+        metrics.addResponseTime(System.currentTimeMillis() - started);
+        // send back the reply
+        if (request.getResponse().getPayload() != null) {
             request.sendResponse();
         }
     }
