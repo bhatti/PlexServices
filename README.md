@@ -7,17 +7,11 @@ PlexServices is a light-weight Java framework for defining secured micro-service
 ## Design Principles 
 PlexServices is designed on following design principles:
 
-- Not MVC framework - PlexServices is only meant for services and it's not general purpose MVC framework.
+- Micro framework - PlexServices is only meant for writing web and messaging services and it's not general purpose MVC framework.
 
-- Not Invented Here: PlexServices leverages other 3rd party frameworks and libraries such as Netty, XStream, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
-
-- Minimize Dependencies: Despite NIH, PlexServices minimizes the dependencies of 3rd party libraries. 
-
-- Technology independent services: PlexServices provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexServices provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
+- Minimal Dependencies: PlexServices depends only on a small number of external libraries for XML/JSON serialization.
 
 - Easily Configurable: PlexServices uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.
-
-- Reactive messaging based services: Though, PlexServices supports both messaging based services and web services. You can use messaging based services to build reactive services and then use web bridge to expose them externally. It also provides event-bus for internal communication and to build loosely coupled components.
 
 - Easily deployable: PlexServices framework supports both war files and embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
 
@@ -44,12 +38,11 @@ PlexServices is designed on following design principles:
 
 - PlexServices supports both war files and Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
 
-- PlexServices also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
+- PlexServices also supports reactive messaging services using JMS APIs and support a number of messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
-- PlexServices allows you to import existing JavaWS based services.
+- PlexServices allows you to import existing JavaWS based services and expose them as REST or POX services. 
 
-- PlexServices allows you to specify the services you want to deploy or allows support to automatically 
-deplooy all services that implement ServiceConfig annotation.
+- PlexServices allows you to auto-deploy services by specifying package names of services, it deploys all services automatically that implement ServiceConfig annotation.
 
 
 ##Building
@@ -1024,5 +1017,4 @@ Here is the html form that displays quotes:
 
 ## Support or Contact
       Email bhatti AT plexobject DOT com for any questions or suggestions.
-
 
