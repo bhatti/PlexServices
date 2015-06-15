@@ -66,7 +66,6 @@ cd plexsvc-framework
 
 ##Dependencies
 - Netty 4.0
-- Google GSON 2.3
 - Fast JSON  2.4
 - XStream 1.4
 - JMS API 1.1
