@@ -1,6 +1,7 @@
 package com.plexobject.jms.impl;
 
 import java.io.Closeable;
+import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -44,6 +45,14 @@ public class JMSUtils {
     private static final String JMS_CORRELATION_ID = "JMSCorrelationID";
     private static final String JMS_TIMESTAMP = "JMSTimestamp";
     private static final String JMS_MESSAGE_ID = "JMSMessageID";
+    private static String localAddress;
+    static {
+        try {
+            localAddress = InetAddress.getLocalHost().getHostName();
+        } catch (Exception e) {
+        }
+    }
+
     private static boolean sendJmsHeaders;
 
     public static void setHeaders(final Map<String, Object> headers,
@@ -214,4 +223,7 @@ public class JMSUtils {
         return promise;
     }
 
+    public static final String getLocalHost() {
+        return localAddress;
+    }
 }

@@ -10,6 +10,8 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 
+import com.plexobject.validation.ValidationException;
+
 @WebService
 @Path("/courses")
 public class CourseServiceImpl implements CourseService {
@@ -111,5 +113,15 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Collection<Customer> getCustomers(List<Customer> list) {
         return list;
+    }
+
+    @Override
+    public void exceptionExample(boolean rt) throws Exception {
+        if (rt)
+            throw ValidationException.builder()
+                    .addError("401", "name", "name not define")
+                    .addError("402", "email", "email not defined").build();
+        else
+            throw new TestException("my error");
     }
 }

@@ -2,7 +2,6 @@ package com.plexobject.service.impl;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.LifecycleAware;
@@ -55,7 +54,6 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
     @Override
     public final synchronized void stop() {
         try {
-            log.info("Stopping...");
             if (running) {
                 doStop();
             }

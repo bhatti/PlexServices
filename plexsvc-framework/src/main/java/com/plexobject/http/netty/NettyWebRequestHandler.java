@@ -31,6 +31,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
 
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
+import com.plexobject.handler.Request.Builder;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.Handledable;
@@ -148,19 +150,34 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             }
             Map<String, Object> headers = getHeaders(req);
             Map<String, Object> params = getParams(req);
-            Response response = new Response(new HashMap<String, Object>(),
-                    new HashMap<String, Object>(), "", codecType);
-            Request<Object> handlerReq = Request.objectBuilder()
-                    .setProtocol(Protocol.HTTP).setMethod(method)
-                    .setEndpoint(uri).setProperties(params).setHeaders(headers)
-                    .setCodecType(codecType).setPayload(textPayload)
-                    .setResponse(response).setResponseDispatcher(dispatcher)
-                    .build();
+            Request<Object> handlerReq = buildRequest(ctx, uri, dispatcher,
+                    textPayload, Protocol.HTTP, method, headers, params);
 
             log.info("HTTP Received URI '" + uri + "', wsPath '" + wsPath
                     + "', request " + handlerReq);
             handler.handle(handlerReq);
         }
+    }
+
+    private Request<Object> buildRequest(final ChannelHandlerContext ctx,
+            String uri, AbstractResponseDispatcher dispatcher,
+            String textPayload, Protocol protocol, Method method,
+            Map<String, Object> headers, Map<String, Object> params) {
+        Response response = new Response(new HashMap<String, Object>(),
+                new HashMap<String, Object>(), "", codecType);
+        SocketAddress remoteAddr = ctx.channel() != null ? ctx.channel()
+                .remoteAddress() : null;
+        Builder<Object> handlerReqBuilder = Request.objectBuilder()
+                .setProtocol(protocol).setMethod(method).setEndpoint(uri)
+                .setProperties(params).setHeaders(headers)
+                .setCodecType(codecType).setPayload(textPayload)
+                .setResponse(response).setResponseDispatcher(dispatcher);
+
+        if (remoteAddr != null) {
+            handlerReqBuilder.setRemoteAddress(remoteAddr.toString());
+        }
+        Request<Object> handlerReq = handlerReqBuilder.build();
+        return handlerReq;
     }
 
     @Override
@@ -266,15 +283,10 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
         final String textPayload = codec.encode(rawRequest.getPayload());
         AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
                 ctx.channel());
-        Response response = new Response(new HashMap<String, Object>(),
-                new HashMap<String, Object>(), "", codecType);
 
-        Request<Object> handlerReq = Request.objectBuilder()
-                .setProtocol(Protocol.WEBSOCKET).setMethod(Method.MESSAGE)
-                .setEndpoint(endpoint).setProperties(params)
-                .setHeaders(headers).setCodecType(codecType)
-                .setPayload(textPayload).setResponse(response)
-                .setResponseDispatcher(dispatcher).build();
+        Request<Object> handlerReq = buildRequest(ctx, endpoint, dispatcher,
+                textPayload, Protocol.WEBSOCKET, Method.MESSAGE, headers,
+                params);
 
         handler.handle(handlerReq);
     }

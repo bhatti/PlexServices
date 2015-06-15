@@ -90,6 +90,8 @@ public class ReflectUtils {
         String text = payload.toString();
         if (klass == Byte.class || klass == Byte.TYPE) {
             return Byte.valueOf(text);
+        } else if (klass == Boolean.class || klass == Boolean.TYPE) {
+            return Boolean.valueOf(text);
         } else if (klass == Character.class || klass == Character.TYPE) {
             return text.charAt(0);
         } else if (klass == Short.class || klass == Short.TYPE) {
@@ -103,7 +105,8 @@ public class ReflectUtils {
         } else if (klass == Double.class || klass == Double.TYPE) {
             return Double.valueOf(text);
         }
-        return payload;
+        throw new IllegalArgumentException("Could not convert " + text + " to "
+                + klass.getName());
     }
 
     public static WebParam getWebParamFor(final Method iMethod) {

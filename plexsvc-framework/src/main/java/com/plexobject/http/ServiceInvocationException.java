@@ -4,10 +4,12 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.ws.WebFault;
 
 import com.plexobject.domain.BaseException;
 
 @XmlRootElement
+@WebFault
 public class ServiceInvocationException extends BaseException {
     private static final long serialVersionUID = 1L;
 

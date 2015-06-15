@@ -63,6 +63,7 @@ public class CourseServiceClient extends BaseServiceClient implements
         }
     }
 
+    @WebMethod(exclude = true)
     @Override
     public List<Course> create(List<Course> courses) {
         RequestBuilder request = new RequestBuilder("create", courses);
@@ -160,6 +161,17 @@ public class CourseServiceClient extends BaseServiceClient implements
         RequestBuilder request = new RequestBuilder("getCustomers", list);
         try {
             return postCustomers(request);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public void exceptionExample(boolean type) throws Exception {
+        RequestBuilder request = new RequestBuilder("exceptionExample", type);
+        try {
+            post(COURSE_SERVICE, request, Void.class, null, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

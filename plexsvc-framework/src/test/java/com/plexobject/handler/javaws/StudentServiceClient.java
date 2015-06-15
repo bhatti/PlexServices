@@ -130,4 +130,14 @@ public class StudentServiceClient extends BaseServiceClient implements
         }
     }
 
+    @Override
+    @WebMethod(exclude = true)
+    public void exceptionExample() {
+        RequestBuilder request = new RequestBuilder("exceptionExample", "");
+        try {
+            post(STUDENT_SERVICE, request, Void.class, null, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -1,12 +1,17 @@
 package com.plexobject.domain;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.ws.WebFault;
+
+import com.plexobject.http.HttpResponse;
 
 @XmlRootElement
+@WebFault
 public abstract class BaseException extends RuntimeException implements
         Statusable {
     private static final long serialVersionUID = 1L;
@@ -94,6 +99,12 @@ public abstract class BaseException extends RuntimeException implements
     private int status;
 
     protected BaseException() {
+    }
+
+    public BaseException(String message, final Error... errors) {
+        super(message);
+        this.errors = Arrays.asList(errors);
+        this.status = HttpResponse.SC_BAD_REQUEST;
     }
 
     protected BaseException(String message, Throwable cause,

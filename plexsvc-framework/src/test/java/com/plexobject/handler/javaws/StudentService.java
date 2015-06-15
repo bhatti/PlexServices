@@ -23,4 +23,6 @@ public interface StudentService {
     boolean exists(Long studentId, Long courseId);
 
     Map<String, Student> getStudents(Collection<String> ids);
+
+    void exceptionExample();
 }

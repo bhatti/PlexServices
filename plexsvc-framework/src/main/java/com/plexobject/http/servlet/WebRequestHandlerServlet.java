@@ -51,14 +51,14 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
     public void init(ServletConfig servletConfig) throws ServletException {
         super.init(servletConfig);
-        String plexserviceCallbackClass = servletConfig
-                .getInitParameter(Constants.PLEXSERVICE_AWARE_CLASS);
         String plexserviceConfigResourcePath = servletConfig
                 .getInitParameter(Constants.PLEXSERVICE_CONFIG_RESOURCE_PATH);
-        String plexserviceRoleAuthorizerClass = servletConfig
-                .getInitParameter(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS);
         try {
             config = new Configuration(plexserviceConfigResourcePath);
+            String plexserviceCallbackClass = config
+                    .getProperty(Constants.PLEXSERVICE_AWARE_CLASS);
+            String plexserviceRoleAuthorizerClass = config
+                    .getProperty(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS);
             RoleAuthorizer authorizer = null;
             if (plexserviceRoleAuthorizerClass != null) {
                 authorizer = (RoleAuthorizer) Class.forName(
@@ -172,7 +172,8 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), "", codecType);
         Request<Object> handlerReq = Request.objectBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(method).setEndpoint(uri)
+                .setProtocol(Protocol.HTTP).setMethod(method)
+                .setRemoteAddress(req.getRemoteAddr()).setEndpoint(uri)
                 .setProperties(params).setHeaders(headers)
                 .setCodecType(codecType).setPayload(textPayload)
                 .setResponse(response).setResponseDispatcher(dispatcher)

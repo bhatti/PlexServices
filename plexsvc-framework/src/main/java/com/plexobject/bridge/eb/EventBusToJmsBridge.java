@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.plexobject.bus.EventBus;
 import com.plexobject.bus.impl.EventBusImpl;
 import com.plexobject.domain.Configuration;
+import com.plexobject.domain.Constants;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -78,6 +79,9 @@ public class EventBusToJmsBridge implements Lifecycle {
             Map<String, Object> params = new HashMap<>();
             params.putAll(request.getProperties());
             params.putAll(request.getHeaders());
+            if (!params.containsKey(Constants.REMOTE_ADDRESS)) {
+                params.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
+            }
             try {
                 String payload = ObjectCodecFactory.getInstance()
                         .getObjectCodec(entry.getCodecType())
@@ -165,7 +169,6 @@ public class EventBusToJmsBridge implements Lifecycle {
                 log.info("Forwarding " + entry + "'s message " + request);
                 eb.publish(entry.getTarget(), request);
             } catch (Exception e) {
-                System.out.println("xxxxxError " + e);
                 log.error("Failed to handle request", e);
             }
         }

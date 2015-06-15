@@ -1,5 +1,10 @@
 package com.plexobject.encode;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.ws.WebFault;
+
+@XmlRootElement
+@WebFault
 public class EncodingException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

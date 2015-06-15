@@ -1,12 +1,14 @@
 package com.plexobject.security;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.ws.WebFault;
 
 import com.plexobject.domain.Redirectable;
 import com.plexobject.domain.Statusable;
 import com.plexobject.http.HttpResponse;
 
 @XmlRootElement
+@WebFault
 public class AuthException extends RuntimeException implements Redirectable,
         Statusable {
     private static final long serialVersionUID = 1L;

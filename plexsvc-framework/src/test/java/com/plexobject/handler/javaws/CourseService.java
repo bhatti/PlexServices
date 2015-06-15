@@ -32,4 +32,6 @@ public interface CourseService {
     boolean exists(Course c, Student s);
 
     Collection<Customer> getCustomers(List<Customer> list);
+
+    void exceptionExample(boolean rt) throws Exception;
 }

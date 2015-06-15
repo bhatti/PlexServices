@@ -68,7 +68,7 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file (build/libs/plexsvc-framework-0.9-SNAPSHOT.jar) manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-1.0-SNAPSHOT.jar) manually in your application.
 
 
 ##Dependencies
@@ -79,7 +79,7 @@ cd plexsvc-framework
 - JMS API 1.1
 
 ##Version
-- 0.9
+- 1.0
 
 ##License
 - MIT
@@ -580,8 +580,8 @@ error is returned to the web client.
 ### Configuring HTTP ports in configuration
 Here is how you can specify HTTP ports and default websocket path in the properties file:
 ```bash 
-HttpPort=8181
-HttpWebsocketUri=/ws
+http.port=8181
+http.websocketUri=/ws
 ```
 In above example, we are using ActiveMQ as JMS server
 
@@ -600,7 +600,7 @@ In above example, we are using ActiveMQ as JMS server
 ### Configuring JMS container in configuration
 PlexServices comes with simple JMS container but you can replace it with Spring or other JMS frameworks by defining configuration, e.g.:
 ```bash
-PlexserviceJMSContainerFactory=com.plexobject.bugger.jms.SpringJMSContainerFactory
+jms.containerFactory=com.plexobject.bugger.jms.SpringJMSContainerFactory
 ```
 
 In above example, we are defining factory to use spring container. You can then define factory as:
@@ -785,12 +785,8 @@ Then add servlet mapping to the web.xml, e.g.
         <servlet-name>plexservice</servlet-name>
         <servlet-class>com.plexobject.http.servlet.WebRequestHandlerServlet</servlet-class>
         <init-param>
-            <param-name>PlexserviceAwareClass</param-name> 
-            <param-value>com.plexobject.ping.Main</param-value> 
-        </init-param>
-        <init-param>
-            <param-name>PlexserviceConfigResourcePath</param-name> 
-            <param-value>/ping.properties</param-value> 
+            <param-name>plexserviceConfigResourcePath</param-name> 
+            <param-value>/myweb.properties</param-value> 
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -801,21 +797,21 @@ Then add servlet mapping to the web.xml, e.g.
 </web-app>  
 ```
 
-Optionally, you can add class name for the security authorizer, e.g.
-```xml
-        <init-param>
-            <param-name>PlexserviceRoleAuthorizerClass</param-name> 
-            <param-value>com.plexobject.ping.MyAuthorizer</param-value> 
-        </init-param>
+You can define additional properties in myweb.properties declared above such
+as:
+```bash
+service.registryCallbackClass=com.plexobject.basic.Main 
+```
+or if you wish to auto-deploy all services that implement ServiceConfig then you can use com.plexobject.deploy.AutoDeployer , e.g.
+```bash
+service.registryCallbackClass=com.plexobject.deploy.AutoDeployer
 ```
 
-If you wish to auto-deploy all services that implement ServiceConfig then you can use com.plexobject.deploy.AutoDeployer as PlexserviceAwareClass, e.g.
-```xml
-        <init-param>
-            <param-name>PlexserviceAwareClass</param-name> 
-            <param-value>com.plexobject.deploy.AutoDeployer</param-value> 
-        </init-param>
+Optionally, you can add class name for the security authorizer, e.g.
+```bash 
+service.roleAuthorizerClass=com.plexobject.ping.MyAuthorizer
 ```
+
 
 PlexServices comes with examples that you can use to deploy using
 ```bash
@@ -832,7 +828,7 @@ java com.plexobject.deploy.AutoDeployer bugger.properties
 ```
 You need to specify package name of your services in the properties file, e.g.
 ```bash
-AutoDeployPackages=com.plexobject.stock
+service.autoDeployPackages=com.plexobject.stock
 ```
 
 Your services must have default constructor for this option to work. You can specify multiple packages separated by comma if needed.

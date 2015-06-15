@@ -27,6 +27,7 @@ import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.plexobject.domain.Configuration;
+import com.plexobject.domain.Constants;
 import com.plexobject.handler.Function;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
@@ -177,6 +178,10 @@ public class SpringJMSContainer extends BaseJMSContainer {
             final Map<String, Object> headers, final String reqPayload,
             final Function<Message, Future<Response>> beforeSend)
             throws JMSException {
+        if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
+            headers.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
+        }
+        //
         JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
         jmsTemplate.setDefaultDestination(destination);
         return jmsTemplate.execute(new SessionCallback<Future<Response>>() {

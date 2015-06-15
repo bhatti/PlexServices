@@ -26,6 +26,7 @@ public class Request<T> extends AbstractPayload {
         private Map<String, Object> properties = new HashMap<>();
         private Map<String, Object> headers = new HashMap<>();
         private Method method;
+        private String remoteAddress;
         private String endpoint;
         private CodecType codecType;
         private Response response;
@@ -83,10 +84,19 @@ public class Request<T> extends AbstractPayload {
             return this;
         }
 
+        public Builder<T> setRemoteAddress(String remoteAddress) {
+            this.remoteAddress = remoteAddress;
+            return this;
+        }
+
         public Request<T> build() {
+            if (remoteAddress != null) {
+                properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
+            }
             return new Request<T>(protocol, method, endpoint, properties,
                     headers, payload, codecType, response, responseDispatcher);
         }
+
     }
 
     private transient ResponseDispatcher responseDispatcher;
@@ -132,6 +142,10 @@ public class Request<T> extends AbstractPayload {
 
     public String getEndpoint() {
         return endpoint;
+    }
+
+    public String getRemoteAddress() {
+        return (String) properties.get(Constants.REMOTE_ADDRESS);
     }
 
     public String getSessionId() {

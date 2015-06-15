@@ -96,8 +96,25 @@ public class RequestHandlerAdapterJavawsTest {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        logger.info("Stopping...");
         serviceRegistry.stop();
+    }
+
+    @Test
+    public void testCourseException() throws Exception {
+        courseService.exceptionExample(false);
+    }
+
+    @Test
+    public void testRtCourseException() throws Exception {
+        BasicConfigurator.configure();
+        LogManager.getRootLogger().setLevel(Level.INFO);
+
+        courseService.exceptionExample(true);
+    }
+
+   @Test
+    public void testStudentRuntimeException() throws Exception {
+        studentService.exceptionExample();
     }
 
     @Test

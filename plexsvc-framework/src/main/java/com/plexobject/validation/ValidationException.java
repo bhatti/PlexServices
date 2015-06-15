@@ -3,6 +3,7 @@ package com.plexobject.validation;
 import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.ws.WebFault;
 
 import com.plexobject.domain.BaseException;
 import com.plexobject.http.HttpResponse;
@@ -14,6 +15,7 @@ import com.plexobject.http.HttpResponse;
  *
  */
 @XmlRootElement
+@WebFault
 public class ValidationException extends BaseException {
     private static final long serialVersionUID = 1L;
 
@@ -24,6 +26,10 @@ public class ValidationException extends BaseException {
     }
 
     protected ValidationException() {
+    }
+
+    public ValidationException(String message, final Error... errors) {
+        super(message, errors);
     }
 
     public ValidationException(String message, Throwable cause,

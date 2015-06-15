@@ -83,4 +83,8 @@ public class StudentServiceImpl implements StudentService {
         return map;
     }
 
+    @Override
+    public void exceptionExample() {
+        throw new RtTestException("my error");
+    }
 }

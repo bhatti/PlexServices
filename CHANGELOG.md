@@ -17,5 +17,6 @@
 0.8 - Added timeout support for web-to-jms bridge
 
 0.9 - Added Finite state machine abstractions
-    - Added support for JavaWS based services 
+
+1.0 - Added support for JavaWS based services 
 

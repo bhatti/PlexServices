@@ -4,12 +4,12 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.plexobject.domain.BaseException;
 import com.plexobject.encode.AbstractObjectCodec;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.EncodingException;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
-import com.plexobject.validation.ValidationException;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -65,10 +65,10 @@ public class XmlObjectCodec extends AbstractObjectCodec {
     }
 
     public XmlObjectCodec() {
-        xstream.alias("error", ValidationException.Error.class);
+        xstream.alias("error", BaseException.Error.class);
         xstream.processAnnotations(new Class[] { Request.class, Response.class });
         xstream.registerConverter(new MapEntryConverter());
-        //xstream.alias("items", Map.class);
+        // xstream.alias("items", Map.class);
         // NamedMapConverter namedMapConverter = new NamedMapConverter(
         // xstream.getMapper(), "attr", "description", String.class,
         // "value", String.class);

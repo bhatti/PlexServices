@@ -254,6 +254,9 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
             throws JMSException, NamingException {
         // log.info("*** Sending " + payload + " to " + destination);
         Message m = createTextMessage(payload);
+        if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
+            headers.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
+        }
         JMSUtils.setHeaders(headers, m);
 
         MessageProducer msgProducer = createProducer(destination);

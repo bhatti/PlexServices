@@ -15,7 +15,8 @@ import com.plexobject.http.HttpResponse;
 import com.plexobject.http.ServiceInvocationException;
 import com.plexobject.util.ReflectUtils;
 
-public class JavawsDelegateHandler implements RequestHandler {
+public class JavawsDelegateHandler implements RequestHandler,
+        ServiceMethodInvoker {
     private static final Logger logger = Logger
             .getLogger(JavawsDelegateHandler.class);
     private static final String RESPONSE_SUFFIX = "Response";
@@ -37,11 +38,13 @@ public class JavawsDelegateHandler implements RequestHandler {
     private final Object delegate;
     private final String responseNamespace;
     private final Map<String, MethodInfo> methodsByName = new HashMap<>();
+    private ServiceMethodInvoker invoker;
 
     public JavawsDelegateHandler(Object delegate, Configuration config) {
         this.delegate = delegate;
         this.responseNamespace = config.getProperty(Constants.JAVAWS_NAMESPACE,
                 "");
+        createInvoker(config);
     }
 
     public void addMethod(MethodInfo info) {
@@ -68,7 +71,8 @@ public class JavawsDelegateHandler implements RequestHandler {
             Object[] args = ReflectUtils.decode(methodAndPayload.second,
                     methodInfo.iMethod, request.getCodec());
             Map<String, Object> response = new HashMap<>();
-            Object result = methodInfo.implMethod.invoke(delegate, args);
+            Object result = invoker.invoke(delegate, methodInfo.implMethod,
+                    args);
             if (result != null) {
                 if (methodInfo.itemName != null
                         && methodInfo.itemName.length() > 0) {
@@ -102,5 +106,28 @@ public class JavawsDelegateHandler implements RequestHandler {
         }
         String payload = text.substring(colon + 1, text.length() - 1);
         return Pair.of(method, payload);
+    }
+
+    @Override
+    public Object invoke(Object object, Method method, Object... args)
+            throws Exception {
+        return method.invoke(object, args);
+
+    }
+
+    private void createInvoker(Configuration config) {
+        String invokerClass = config
+                .getProperty(Constants.JAVAWS_INVOKER_CLASS);
+        try {
+            if (invokerClass != null) {
+                invoker = (ServiceMethodInvoker) Class.forName(invokerClass)
+                        .newInstance();
+            } else {
+                invoker = this;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to create javaws invoker " + invokerClass, e);
+            invoker = this;
+        }
     }
 }
