@@ -23,16 +23,20 @@ import com.plexobject.validation.IRequiredFieldValidator;
 import com.plexobject.validation.RequiredFieldValidator;
 
 public class ServiceInvocationHelper {
+    private static final String SERVICE_USE_AROUND_INTERCEPTOR = "service.useAroundInterceptor";
     private static final Logger log = Logger
             .getLogger(ServiceInvocationHelper.class);
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private final ServiceRegistry serviceRegistry;
     private final RoleAuthorizer authorizer;
+    private final boolean useAroundInterceptor;
 
     public ServiceInvocationHelper(ServiceRegistry serviceRegistry,
             RoleAuthorizer authorizer) {
         this.serviceRegistry = serviceRegistry;
         this.authorizer = authorizer;
+        this.useAroundInterceptor = serviceRegistry.getConfiguration()
+                .getBoolean(SERVICE_USE_AROUND_INTERCEPTOR);
     }
 
     /**
@@ -170,7 +174,7 @@ public class ServiceInvocationHelper {
             final ServiceRegistry registry, final long started,
             final ServiceMetrics metrics, final ServiceConfigDesc config)
             throws Exception {
-        if (registry.getAroundInterceptor() != null) {
+        if (useAroundInterceptor && registry.getAroundInterceptor() != null) {
             Callable<Object> callable = new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {

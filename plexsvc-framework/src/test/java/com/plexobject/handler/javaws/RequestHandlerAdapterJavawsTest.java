@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -25,6 +26,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.service.AroundInterceptor;
 import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -50,11 +52,11 @@ public class RequestHandlerAdapterJavawsTest {
             LogManager.getRootLogger().setLevel(Level.INFO);
         }
         RoleAuthorizer roleAuthorizer = null;
-        Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
-                .createFromPackages("com.plexobject.handler.javaws");
         serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
         requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
                 serviceRegistry);
+        Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
+                .createFromPackages("com.plexobject.handler.javaws");
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             logger.info("Adding " + e.getKey() + "==>" + e.getValue());
@@ -91,6 +93,15 @@ public class RequestHandlerAdapterJavawsTest {
                 }
             });
         }
+        serviceRegistry.setAroundInterceptor(new AroundInterceptor() {
+            @Override
+            public Object proceed(Object service, String method,
+                    Callable<Object> caller) throws Exception {
+                System.out.println("****INVOKING "
+                        + service.getClass().getSimpleName() + "." + method);
+                return caller.call();
+            }
+        });
         serviceRegistry.start();
         Thread.sleep(500);
     }
