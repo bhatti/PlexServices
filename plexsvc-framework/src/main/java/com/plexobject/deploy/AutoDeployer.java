@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
-
 import com.google.common.annotations.VisibleForTesting;
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
@@ -23,8 +22,7 @@ import com.plexobject.util.ReflectUtils;
  *
  */
 public class AutoDeployer implements ServiceRegistryLifecycleAware {
-    private static final Logger log = Logger
-            .getLogger(AutoDeployer.class);
+    private static final Logger log = Logger.getLogger(AutoDeployer.class);
 
     @VisibleForTesting
     ServiceRegistry serviceRegistry;
@@ -43,7 +41,8 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
                 roleAuthorizer = (RoleAuthorizer) Class.forName(
                         roleAuthorizerClass).newInstance();
             }
-            serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
+            serviceRegistry = new ServiceRegistry(config);
+            serviceRegistry.setRoleAuthorizer(roleAuthorizer);
             onStarted(serviceRegistry);
             serviceRegistry.start();
         } catch (Exception e) {

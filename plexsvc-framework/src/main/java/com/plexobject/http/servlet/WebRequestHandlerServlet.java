@@ -64,7 +64,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                 authorizer = (RoleAuthorizer) Class.forName(
                         plexserviceRoleAuthorizerClass).newInstance();
             }
-            serviceRegistry = new ServiceRegistry(config, authorizer,
+            serviceRegistry = new ServiceRegistry(config,
                     new WebContainerProvider() {
                         @Override
                         public Lifecycle getWebContainer(Configuration config,
@@ -75,6 +75,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                             return WebRequestHandlerServlet.this;
                         }
                     });
+            serviceRegistry.setRoleAuthorizer(authorizer);
             serviceRegistry.setServletContext(getServletContext());
             ServiceRegistryLifecycleAware serviceRegistryAware = (ServiceRegistryLifecycleAware) Class
                     .forName(plexserviceCallbackClass).newInstance();

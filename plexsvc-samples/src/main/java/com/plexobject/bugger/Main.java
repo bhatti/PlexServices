@@ -10,7 +10,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.bugger.model.BugReport;
@@ -60,7 +59,8 @@ public class Main {
         this.config = new Configuration(propertyFile);
         startJmsBroker();
 
-        serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(
+        serviceRegistry = new ServiceRegistry(config);
+        serviceRegistry.setRoleAuthorizer(new BuggerRoleAuthorizer(
                 userRepository));
         if (propertyFile != null) {
             Collection<WebToJmsEntry> entries = WebToJmsBridge
@@ -160,14 +160,14 @@ public class Main {
                 "queue://{scope}-query-project-bugreport-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/users", Method.GET,
-                "queue://{scope}-query-user-service-queue", DEFAULT_TIMEOUT_SECS,
-                false, 1), new WebToJmsEntry(DEFAULT_CODEC, "/projects",
-                Method.GET, "queue://{scope}-query-projects-service",
+                "queue://{scope}-query-user-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/bugreports", Method.GET,
-                "queue://{scope}-bugreports-service-queue", DEFAULT_TIMEOUT_SECS,
-                false, 1), new WebToJmsEntry(DEFAULT_CODEC,
-                "/projects/{id}/membership/add", Method.POST,
+                DEFAULT_CODEC, "/projects", Method.GET,
+                "queue://{scope}-query-projects-service", DEFAULT_TIMEOUT_SECS,
+                false, 1), new WebToJmsEntry(DEFAULT_CODEC, "/bugreports",
+                Method.GET, "queue://{scope}-bugreports-service-queue",
+                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
+                DEFAULT_CODEC, "/projects/{id}/membership/add", Method.POST,
                 "queue://{scope}-add-project-member-service-queue",
                 DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
                 DEFAULT_CODEC, "/projects/{id}/membership/remove", Method.POST,

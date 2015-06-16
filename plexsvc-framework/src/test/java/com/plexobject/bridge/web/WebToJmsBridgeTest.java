@@ -50,7 +50,7 @@ public class WebToJmsBridgeTest {
     @Before
     public void setUp() throws Exception {
         Configuration config = new Configuration(new Properties());
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config);
         bridge = new WebToJmsBridge(serviceRegistry, jmsContainer);
     }
 

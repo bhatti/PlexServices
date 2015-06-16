@@ -58,19 +58,19 @@ public class ServiceRegistry implements ServiceContainer,
 
     private final boolean enablePingHandlers;
     private ServletContext servletContext;
+    private RoleAuthorizer roleAuthorizer;
 
-    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer) {
-        this(config, authorizer, new NettyWebContainerProvider());
+    public ServiceRegistry(Configuration config) {
+        this(config, new NettyWebContainerProvider());
     }
 
-    public ServiceRegistry(Configuration config, RoleAuthorizer authorizer,
+    public ServiceRegistry(Configuration config,
             WebContainerProvider webContainerProvider) {
         this.config = config;
-        this.serviceInvocationHelper = new ServiceInvocationHelper(this,
-                authorizer);
+        this.serviceInvocationHelper = new ServiceInvocationHelper(this);
         this.serviceRegistryHandlers = new ServiceRegistryHandlers();
         this.serviceRegistryContainers = new ServiceRegistryContainers(config,
-                authorizer, webContainerProvider, this);
+                webContainerProvider, this);
         this.enablePingHandlers = config.getBoolean("enablePingHandlers");
         String statsCollectorClassName = config
                 .getProperty("statsCollectorClassName");
@@ -358,6 +358,14 @@ public class ServiceRegistry implements ServiceContainer,
     @Override
     public void setAroundInterceptor(AroundInterceptor interceptor) {
         interceptorLifecycle.setAroundInterceptor(interceptor);
+    }
+
+    public RoleAuthorizer getRoleAuthorizer() {
+        return roleAuthorizer;
+    }
+
+    public void setRoleAuthorizer(RoleAuthorizer roleAuthorizer) {
+        this.roleAuthorizer = roleAuthorizer;
     }
 
     private void addPingHandler(final RequestHandler h,

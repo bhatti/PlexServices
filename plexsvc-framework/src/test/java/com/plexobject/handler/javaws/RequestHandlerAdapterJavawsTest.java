@@ -52,7 +52,8 @@ public class RequestHandlerAdapterJavawsTest {
             LogManager.getRootLogger().setLevel(Level.INFO);
         }
         RoleAuthorizer roleAuthorizer = null;
-        serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
+        serviceRegistry = new ServiceRegistry(config);
+        serviceRegistry.setRoleAuthorizer(roleAuthorizer);
         requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
                 serviceRegistry);
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws

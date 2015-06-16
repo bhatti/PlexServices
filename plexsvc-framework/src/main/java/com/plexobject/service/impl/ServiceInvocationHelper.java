@@ -16,7 +16,6 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.javaws.JavawsDelegateHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.metrics.ServiceMetrics;
-import com.plexobject.security.RoleAuthorizer;
 import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -28,12 +27,9 @@ public class ServiceInvocationHelper {
             .getLogger(ServiceInvocationHelper.class);
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private final ServiceRegistry serviceRegistry;
-    private final RoleAuthorizer authorizer;
 
-    public ServiceInvocationHelper(ServiceRegistry serviceRegistry,
-            RoleAuthorizer authorizer) {
+    public ServiceInvocationHelper(ServiceRegistry serviceRegistry) {
         this.serviceRegistry = serviceRegistry;
-        this.authorizer = authorizer;
     }
 
     /**
@@ -201,10 +197,12 @@ public class ServiceInvocationHelper {
 
     private void authorizeIfNeeded(Request<Object> request,
             ServiceConfigDesc config) {
-        if (authorizer != null && config.rolesAllowed() != null
+        if (serviceRegistry.getRoleAuthorizer() != null
+                && config.rolesAllowed() != null
                 && config.rolesAllowed().length > 0
                 && !config.rolesAllowed()[0].equals("")) {
-            authorizer.authorize(request, config.rolesAllowed());
+            serviceRegistry.getRoleAuthorizer().authorize(request,
+                    config.rolesAllowed());
         }
     }
 

@@ -49,7 +49,7 @@ public class ServiceHandlerLifecycleTest {
         properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
         final Configuration config = new Configuration(properties);
 
-        registry = new ServiceRegistry(config, null);
+        registry = new ServiceRegistry(config);
     }
 
     @After

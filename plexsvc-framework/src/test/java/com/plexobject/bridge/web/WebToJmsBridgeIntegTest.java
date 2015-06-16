@@ -83,14 +83,14 @@ public class WebToJmsBridgeIntegTest {
     public void setUp() throws Exception {
         jmsContainer = JMSUtils.getJMSContainer(new Configuration(properties));
         Configuration config = new Configuration(new Properties());
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config);
         bridge = new WebToJmsBridge(serviceRegistry, jmsContainer);
     }
 
     @Test
     public void testConstructor() throws Exception {
         Configuration config = new Configuration(properties);
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(config);
         bridge = new WebToJmsBridge(serviceRegistry, config);
     }
 
