@@ -27,7 +27,7 @@ public class Request<T> extends AbstractPayload {
         private Map<String, Object> headers = new HashMap<>();
         private Method method;
         private String remoteAddress;
-        private String contextPath;
+        private String requestUri;
         private String endpoint;
         private CodecType codecType;
         private Response response;
@@ -48,8 +48,8 @@ public class Request<T> extends AbstractPayload {
             return this;
         }
 
-        public Builder<T> setContextPath(String contextPath) {
-            this.contextPath = contextPath;
+        public Builder<T> setRequestUri(String requestUri) {
+            this.requestUri = requestUri;
             return this;
         }
 
@@ -99,7 +99,7 @@ public class Request<T> extends AbstractPayload {
             if (remoteAddress != null) {
                 properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
             }
-            return new Request<T>(protocol, method, contextPath, endpoint,
+            return new Request<T>(protocol, method, requestUri, endpoint,
                     properties, headers, payload, codecType, response,
                     responseDispatcher);
         }
@@ -113,12 +113,12 @@ public class Request<T> extends AbstractPayload {
     private String endpoint;
     private CodecType codecType;
     private String methodName;
-    private String contextPath;
+    private String requestUri;
 
     public Request() {
     }
 
-    public Request(Protocol protocol, Method method, String contextPath,
+    public Request(Protocol protocol, Method method, String requestUri,
             String endpoint, final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             final CodecType codecType, final Response response,
@@ -132,7 +132,7 @@ public class Request<T> extends AbstractPayload {
                 "responseDispatcher is required");
         this.protocol = protocol;
         this.method = method;
-        this.contextPath = contextPath;
+        this.requestUri = requestUri == null ? endpoint : requestUri;
         this.endpoint = endpoint;
         this.codecType = codecType;
         this.response = response;
@@ -150,16 +150,12 @@ public class Request<T> extends AbstractPayload {
         return method;
     }
 
-    public String getContextPath() {
-        return contextPath;
-    }
-
     public String getEndpoint() {
         return endpoint;
     }
 
-    public String getResourcePath() {
-        return contextPath != null ? contextPath + "/" + endpoint : endpoint;
+    public String getRequestUri() {
+        return requestUri;
     }
 
     public String getRemoteAddress() {
@@ -219,7 +215,7 @@ public class Request<T> extends AbstractPayload {
 
     @Override
     public String toString() {
-        return "Request [method=" + method + ", context=" + contextPath
+        return "Request [method=" + method + ", requestUri=" + requestUri
                 + ", endpoint=" + endpoint + ", properties=" + properties
                 + ", headers=" + headers + ", createdAt=" + createdAt
                 + ", payload=" + payload + "]";
