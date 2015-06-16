@@ -356,7 +356,7 @@ public class PingService implements RequestHandler {
 
 And then at runtime, override configuration, e.g.
 ...
-    ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+    ServiceRegistry serviceRegistry = new ServiceRegistry(config);
     PingService pingService = new PingService();
     serviceRegistry.add(
                     pingService,
@@ -447,15 +447,11 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
-          throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-              request.getSessionId(), request.getRemoteAddress(),
-              "failed to validate session-id");
+          throw new AuthException("authError", "failed to validate session-id");
         }
         for (String role : roles) {
           if (!user.getRoles().contains(role)) {
-            throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-                request.getSessionId(), request.getRemoteAddress(),
-                "failed to match role");
+            throw new AuthException("authError", "failed to match role");
           }
         }
       }
@@ -507,7 +503,7 @@ Here is how you can setup bridge between HTTP/Websocket and JMS based services.
 ```java 
   Configuration config = new Configuration(configFile);
   Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(mappingFile));
-  ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+  ServiceRegistry serviceRegistry = new ServiceRegistry(config);
   serviceRegistry.setWebToJmsEntries(entries);
   serviceRegistry.start();
 ```
@@ -665,7 +661,8 @@ You can convert the implementing service into RequestHandler as follows:
 ```java 
 Configuration config = ...
 RoleAuthorizer roleAuthorizer = ...
-serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
+serviceRegistry = new ServiceRegistry(config);
+serviceRegistry.setRoleAuthorizer(roleAuthorizer);
 RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(config);
 Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
                 .createFromPackages("com.plexobject.handler.javaws");
@@ -721,7 +718,8 @@ PlexServices allows you to specify the services that you want to deploy in
 a container and start the container using service-registry, e.g.
 ```java 
 Configuration config = new Configuration(args[0]);
-serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(userRepository));
+serviceRegistry = new ServiceRegistry(config);
+serviceRegistry.setRoleAuthorizer(new BuggerRoleAuthorizer(userRepository));
 serviceRegistry.add(new CreateUserService(userRepository));
 serviceRegistry.add(new UpdateUserService(userRepository));
 serviceRegistry.add(new QueryUserService(userRepository));

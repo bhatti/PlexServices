@@ -34,12 +34,12 @@ public class JavawsDelegateHandler implements RequestHandler {
     }
 
     private final Object delegate;
-    private final ServiceRegistry registry;
+    private final ServiceRegistry serviceRegistry;
     private final Map<String, MethodInfo> methodsByName = new HashMap<>();
 
     public JavawsDelegateHandler(Object delegate, ServiceRegistry registry) {
         this.delegate = delegate;
-        this.registry = registry;
+        this.serviceRegistry = registry;
     }
 
     public void addMethod(MethodInfo info) {
@@ -57,6 +57,8 @@ public class JavawsDelegateHandler implements RequestHandler {
                     + methodAndPayload.first + ", request "
                     + request.getPayload(), HttpResponse.SC_NOT_FOUND);
         }
+        // set method name
+        request.setMethodName(methodInfo.iMethod.getName());
         //
         final String responseTag = methodAndPayload.first + RESPONSE_SUFFIX;
         try {
@@ -76,7 +78,7 @@ public class JavawsDelegateHandler implements RequestHandler {
     private void invokeWithAroundInterceptorIfNeeded(
             final Request<Object> request, final MethodInfo methodInfo,
             final String responseTag, final Object[] args) throws Exception {
-        if (registry.getAroundInterceptor() != null) {
+        if (serviceRegistry.getAroundInterceptor() != null) {
             Callable<Object> callable = new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
@@ -84,7 +86,7 @@ public class JavawsDelegateHandler implements RequestHandler {
                     return null;
                 }
             };
-            registry.getAroundInterceptor().proceed(delegate,
+            serviceRegistry.getAroundInterceptor().proceed(delegate,
                     methodInfo.iMethod.getName(), callable);
         } else {
             invoke(request, methodInfo, responseTag, args);
@@ -93,6 +95,9 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     private void invoke(Request<Object> request, final MethodInfo methodInfo,
             String responseTag, Object[] args) throws Exception {
+        if (serviceRegistry.getRoleAuthorizer() != null) {
+            serviceRegistry.getRoleAuthorizer().authorize(request, null);
+        }
         Map<String, Object> response = new HashMap<>();
         Object result = methodInfo.implMethod.invoke(delegate, args);
 

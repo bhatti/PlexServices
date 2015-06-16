@@ -29,7 +29,7 @@ public class ValidationException extends BaseException {
     }
 
     public ValidationException(String message, final Error... errors) {
-        super(message, errors);
+        super(message, HttpResponse.SC_BAD_REQUEST, errors);
     }
 
     public ValidationException(String message, Throwable cause,

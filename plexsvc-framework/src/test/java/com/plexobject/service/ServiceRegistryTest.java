@@ -383,7 +383,7 @@ public class ServiceRegistryTest {
                     }
                 }).build();
         RequestHandler h = new WebService();
-        authException = new AuthException("sessionId", "location", "bad auth");
+        authException = new AuthException("authCode", "bad auth");
         registry.invoke(request, h);
         assertTrue(out.toString().contains("AuthException"));
     }
@@ -412,7 +412,7 @@ public class ServiceRegistryTest {
                 }).build();
 
         RequestHandler h = new WebService();
-        authException = new AuthException("sessionId", "bad auth");
+        authException = new AuthException("authCode", "bad auth");
         registry.invoke(request, h);
         assertTrue("Out: " + out, out.toString().contains("AuthException"));
     }

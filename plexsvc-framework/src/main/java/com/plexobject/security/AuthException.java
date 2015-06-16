@@ -12,22 +12,22 @@ import com.plexobject.http.HttpResponse;
 public class AuthException extends RuntimeException implements Redirectable,
         Statusable {
     private static final long serialVersionUID = 1L;
-    private String sessionId;
+    private String errorCode;
     private String location;
 
     AuthException() {
         super("");
     }
 
-    public AuthException(String sessionId, String location, String message) {
+    public AuthException(String errorCode, String message, String location) {
         super(message);
-        this.sessionId = sessionId;
+        this.errorCode = errorCode;
         this.location = location;
     }
 
-    public AuthException(String sessionId, String message) {
+    public AuthException(String errorCode, String message) {
         super(message);
-        this.sessionId = sessionId;
+        this.errorCode = errorCode;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class AuthException extends RuntimeException implements Redirectable,
         return location;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String getErrorCode() {
+        return errorCode;
     }
 }

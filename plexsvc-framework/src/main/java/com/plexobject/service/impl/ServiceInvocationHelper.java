@@ -179,6 +179,9 @@ public class ServiceInvocationHelper {
             registry.getAroundInterceptor()
                     .proceed(handler, "handle", callable);
         } else {
+            // skip authorization for JavaWS because we need additional info for
+            // method names
+            authorizeIfNeeded(request, config);
             invoke(request, handler, started, metrics, config);
         }
     }
@@ -186,7 +189,6 @@ public class ServiceInvocationHelper {
     private void invoke(Request<Object> request, RequestHandler handler,
             final long started, ServiceMetrics metrics, ServiceConfigDesc config) {
         // invoke authorizer if set
-        authorizeIfNeeded(request, config);
         handler.handle(request);
         metrics.addResponseTime(System.currentTimeMillis() - started);
         // send back the reply
@@ -197,10 +199,7 @@ public class ServiceInvocationHelper {
 
     private void authorizeIfNeeded(Request<Object> request,
             ServiceConfigDesc config) {
-        if (serviceRegistry.getRoleAuthorizer() != null
-                && config.rolesAllowed() != null
-                && config.rolesAllowed().length > 0
-                && !config.rolesAllowed()[0].equals("")) {
+        if (serviceRegistry.getRoleAuthorizer() != null) {
             serviceRegistry.getRoleAuthorizer().authorize(request,
                     config.rolesAllowed());
         }

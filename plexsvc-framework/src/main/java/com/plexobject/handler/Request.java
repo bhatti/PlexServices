@@ -105,6 +105,7 @@ public class Request<T> extends AbstractPayload {
     private Method method;
     private String endpoint;
     private CodecType codecType;
+    private String methodName;
 
     public Request() {
     }
@@ -212,5 +213,13 @@ public class Request<T> extends AbstractPayload {
 
     public static Builder<String> stringBuilder() {
         return new Builder<String>();
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 }

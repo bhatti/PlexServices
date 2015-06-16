@@ -8,8 +8,6 @@ import java.util.Set;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.ws.WebFault;
 
-import com.plexobject.http.HttpResponse;
-
 @XmlRootElement
 @WebFault
 public abstract class BaseException extends RuntimeException implements
@@ -101,10 +99,10 @@ public abstract class BaseException extends RuntimeException implements
     protected BaseException() {
     }
 
-    public BaseException(String message, final Error... errors) {
+    public BaseException(String message, int status, final Error... errors) {
         super(message);
         this.errors = Arrays.asList(errors);
-        this.status = HttpResponse.SC_BAD_REQUEST;
+        this.status = status;
     }
 
     protected BaseException(String message, Throwable cause,

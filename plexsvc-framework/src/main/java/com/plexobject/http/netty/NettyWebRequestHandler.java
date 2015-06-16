@@ -168,10 +168,10 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
         SocketAddress remoteAddr = ctx.channel() != null ? ctx.channel()
                 .remoteAddress() : null;
         Builder<Object> handlerReqBuilder = Request.objectBuilder()
-                .setProtocol(protocol).setMethod(method).setEndpoint(uri)
-                .setProperties(params).setHeaders(headers)
-                .setCodecType(codecType).setPayload(textPayload)
-                .setResponse(response).setResponseDispatcher(dispatcher);
+                .setProtocol(protocol).setMethod(method).setProperties(params)
+                .setHeaders(headers).setCodecType(codecType)
+                .setPayload(textPayload).setResponse(response)
+                .setResponseDispatcher(dispatcher);
 
         if (remoteAddr != null) {
             handlerReqBuilder.setRemoteAddress(remoteAddr.toString());

@@ -28,7 +28,7 @@ public class LoginService extends AbstractUserService implements RequestHandler 
 
         User user = userRepository.authenticate(username, password);
         if (user == null) {
-            throw new AuthException(request.getSessionId(),
+            throw new AuthException("authError",
                     "failed to authenticate");
         } else {
             request.getResponse().addSessionId(

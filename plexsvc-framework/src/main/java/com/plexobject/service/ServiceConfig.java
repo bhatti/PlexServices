@@ -26,7 +26,7 @@ public @interface ServiceConfig {
 
     boolean recordStatsdMetrics() default true;
 
-    String[] rolesAllowed() default "";
+    String[] rolesAllowed() default {};
 
     int concurrency() default 1;
 }
