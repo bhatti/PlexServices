@@ -162,7 +162,7 @@ public class EventBusToJmsBridge implements Lifecycle {
                 // TODO do we need entry.getRequestTypeClass()
                 Request<Object> request = Request.objectBuilder()
                         .setProtocol(Protocol.JMS).setMethod(Method.MESSAGE)
-                        .setProperties(params)
+                        .setProperties(params).setEndpoint(entry.getTarget())
                         .setCodecType(entry.getCodecType()).setPayload(payload)
                         .setResponse(response)
                         .setResponseDispatcher(dispatcher).build();

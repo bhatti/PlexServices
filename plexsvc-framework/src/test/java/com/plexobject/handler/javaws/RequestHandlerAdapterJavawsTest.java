@@ -47,7 +47,7 @@ public class RequestHandlerAdapterJavawsTest {
                 String.valueOf(BaseServiceClient.DEFAULT_PORT));
         props.setProperty(Constants.JAVAWS_NAMESPACE, "");
         Configuration config = new Configuration(props);
-        if (config.getBoolean("logTest")) {
+        if (true || config.getBoolean("logTest")) {
             BasicConfigurator.configure();
             LogManager.getRootLogger().setLevel(Level.INFO);
         }

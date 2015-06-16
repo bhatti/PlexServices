@@ -175,10 +175,10 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         Request<Object> handlerReq = Request.objectBuilder()
                 .setProtocol(Protocol.HTTP).setMethod(method)
                 .setRemoteAddress(req.getRemoteAddr()).setEndpoint(uri)
-                .setProperties(params).setHeaders(headers)
-                .setCodecType(codecType).setPayload(textPayload)
-                .setResponse(response).setResponseDispatcher(dispatcher)
-                .build();
+                .setContextPath(req.getContextPath()).setProperties(params)
+                .setHeaders(headers).setCodecType(codecType)
+                .setPayload(textPayload).setResponse(response)
+                .setResponseDispatcher(dispatcher).build();
 
         log.info("HTTP Received URI '" + uri + "', request " + handlerReq);
         defaultExecutor.handle(handlerReq);

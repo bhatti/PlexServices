@@ -14,7 +14,7 @@ import com.plexobject.http.TestWebUtils;
 import com.plexobject.util.ReflectUtils;
 
 public class BaseServiceClient {
-    public static final int DEFAULT_PORT = 8185;
+    public static final int DEFAULT_PORT = 8186;
     private static final ObjectCodec CODEC = new JsonObjectCodec();
 
     // private static final ObjectCodec CODEC = new XmlObjectCodec();

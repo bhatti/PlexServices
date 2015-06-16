@@ -73,7 +73,6 @@ public class ExceptionUtils {
             }
             if (e.getCause() instanceof Exception) {
                 Exception root = (Exception) e.getCause();
-                System.out.println("adding recursive " + root);
                 addErrors(root, errorsMap);
             }
         } catch (Exception ex) {
