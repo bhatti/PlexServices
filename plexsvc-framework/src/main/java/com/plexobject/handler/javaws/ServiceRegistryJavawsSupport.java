@@ -8,6 +8,7 @@ import com.plexobject.domain.Pair;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
+import com.plexobject.util.ReflectUtils;
 
 /**
  * This is helper class to convert JavaWS services into request handlers
@@ -30,8 +31,8 @@ public class ServiceRegistryJavawsSupport {
             ServiceRegistry serviceRegistry, String path, Object service) {
         final RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
                 serviceRegistry);
-        Class<?> webService = RequestHandlerAdapterJavaws
-                .getWebServiceInterface(service.getClass());
+        Class<?> webService = ReflectUtils.getWebServiceInterface(service
+                .getClass());
         try {
             if (webService != null) {
                 Pair<ServiceConfigDesc, RequestHandler> configAndHandler = requestHandlerAdapterJavaws

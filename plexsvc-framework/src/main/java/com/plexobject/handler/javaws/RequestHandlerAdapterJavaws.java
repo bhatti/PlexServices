@@ -34,7 +34,8 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         Map<ServiceConfigDesc, RequestHandler> handlers = new HashMap<>();
         for (Class<?> serviceClass : serviceClasses) {
             if (!serviceClass.isInterface()) {
-                Class<?> webService = getWebServiceInterface(serviceClass);
+                Class<?> webService = ReflectUtils
+                        .getWebServiceInterface(serviceClass);
                 if (webService == null) {
                     continue;
                 }
@@ -76,7 +77,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
     public Pair<ServiceConfigDesc, RequestHandler> create(Object service,
             ServiceConfigDesc serviceConfig) {
         Class<?> serviceClass = service.getClass();
-        Class<?> webService = getWebServiceInterface(serviceClass);
+        Class<?> webService = ReflectUtils.getWebServiceInterface(serviceClass);
         if (webService == null) {
             throw new IllegalArgumentException(service + " is not web service");
         }
@@ -151,17 +152,6 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
                 com.plexobject.service.Method.POST, Void.class, registry
                         .getConfiguration().getDefaultCodecType(),
                 DEFAULT_VERSION, endpoint, true, DEFAULT_ROLES, 1);
-    }
-
-    static Class<?> getWebServiceInterface(Class<?> serviceClass) {
-        Class<?>[] interfaces = serviceClass.getInterfaces();
-        for (Class<?> iface : interfaces) {
-            WebService webService = iface.getAnnotation(WebService.class);
-            if (webService != null) {
-                return iface;
-            }
-        }
-        return null;
     }
 
 }

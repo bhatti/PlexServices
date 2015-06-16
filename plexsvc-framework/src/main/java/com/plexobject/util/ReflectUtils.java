@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.jws.WebParam;
+import javax.jws.WebService;
 
 import org.reflections.Reflections;
 
@@ -65,6 +66,17 @@ public class ReflectUtils {
         } else {
             return decodeObject(payload, klass, pKlass, codec);
         }
+    }
+
+    public static Class<?> getWebServiceInterface(Class<?> serviceClass) {
+        Class<?>[] interfaces = serviceClass.getInterfaces();
+        for (Class<?> iface : interfaces) {
+            WebService webService = iface.getAnnotation(WebService.class);
+            if (webService != null) {
+                return iface;
+            }
+        }
+        return null;
     }
 
     private static Object decodeObject(final String payload,
