@@ -25,6 +25,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
+import com.plexobject.security.AuthException;
 import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.AroundInterceptor;
 import com.plexobject.service.Interceptor;
@@ -51,7 +52,13 @@ public class RequestHandlerAdapterJavawsTest {
             BasicConfigurator.configure();
             LogManager.getRootLogger().setLevel(Level.INFO);
         }
-        SecurityAuthorizer securityAuthorizer = null;
+        SecurityAuthorizer securityAuthorizer = new SecurityAuthorizer() {
+            @Override
+            public void authorize(Request<Object> request, String[] roles)
+                    throws AuthException {
+                System.out.println("Checking Auth");
+            }
+        };
         serviceRegistry = new ServiceRegistry(config);
         serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
         requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(

@@ -167,22 +167,26 @@ public class ServiceInvocationHelper {
             final ServiceRegistry registry, final long started,
             final ServiceMetrics metrics, final ServiceConfigDesc config)
             throws Exception {
-        if (!(handler instanceof JavawsDelegateHandler)
-                && registry.getAroundInterceptor() != null) {
-            Callable<Object> callable = new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    invoke(request, handler, started, metrics, config);
-                    return null;
-                }
-            };
-            registry.getAroundInterceptor()
-                    .proceed(handler, "handle", callable);
-        } else {
-            // skip authorization for JavaWS because we need additional info for
-            // method names
-            authorizeIfNeeded(request, config);
+        if (handler instanceof JavawsDelegateHandler) {
+            // skip authorization and around interceptor for JavaWS because we
+            // need additional info for method names
             invoke(request, handler, started, metrics, config);
+
+        } else {
+            authorizeIfNeeded(request, config);
+            if (registry.getAroundInterceptor() != null) {
+                Callable<Object> callable = new Callable<Object>() {
+                    @Override
+                    public Object call() throws Exception {
+                        invoke(request, handler, started, metrics, config);
+                        return null;
+                    }
+                };
+                registry.getAroundInterceptor().proceed(handler, "handle",
+                        callable);
+            } else {
+                invoke(request, handler, started, metrics, config);
+            }
         }
     }
 
