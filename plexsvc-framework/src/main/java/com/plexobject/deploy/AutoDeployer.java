@@ -8,7 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
@@ -33,16 +33,16 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
     public void deploy(String configFile) {
         try {
             Configuration config = new Configuration(configFile);
-            String roleAuthorizerClass = config
-                    .getProperty(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS);
+            String securityAuthorizerClass = config
+                    .getProperty(Constants.PLEXSERVICE_SECURITY_AUTHORIZER_CLASS);
 
-            RoleAuthorizer roleAuthorizer = null;
-            if (roleAuthorizerClass != null) {
-                roleAuthorizer = (RoleAuthorizer) Class.forName(
-                        roleAuthorizerClass).newInstance();
+            SecurityAuthorizer securityAuthorizer = null;
+            if (securityAuthorizerClass != null) {
+                securityAuthorizer = (SecurityAuthorizer) Class.forName(
+                        securityAuthorizerClass).newInstance();
             }
             serviceRegistry = new ServiceRegistry(config);
-            serviceRegistry.setRoleAuthorizer(roleAuthorizer);
+            serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
             onStarted(serviceRegistry);
             serviceRegistry.start();
         } catch (Exception e) {

@@ -29,7 +29,7 @@ import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.security.AuthException;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.validation.ValidationException;
 
 public class ServiceRegistryTest {
@@ -45,7 +45,7 @@ public class ServiceRegistryTest {
         }
     }
 
-    private RoleAuthorizer authorizer = new RoleAuthorizer() {
+    private SecurityAuthorizer authorizer = new SecurityAuthorizer() {
         @Override
         public void authorize(Request<Object> request, String[] roles)
                 throws AuthException {
@@ -109,7 +109,7 @@ public class ServiceRegistryTest {
         final Configuration config = new Configuration(properties);
 
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         assertEquals(config, registry.getConfiguration());
 
         assertEquals(0, registry.getHandlers().size());
@@ -121,7 +121,7 @@ public class ServiceRegistryTest {
         final Configuration config = initProperties();
 
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         registry.add(new WebsocketService());
         registry.add(new WebService());
         registry.add(new JmsService());
@@ -149,7 +149,7 @@ public class ServiceRegistryTest {
         final Configuration config = initProperties();
 
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         registry.setRequestHandlers(Arrays.asList(new WebsocketService(),
                 new WebService(), new JmsService()));
         assertEquals(3, registry.getHandlers().size());
@@ -173,7 +173,7 @@ public class ServiceRegistryTest {
         };
 
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
         registry.add(h);
         registry.addRequestInterceptor(interceptor1);
@@ -188,7 +188,7 @@ public class ServiceRegistryTest {
     public void testAddRemoveService() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
         assertFalse(registry.exists(h));
         registry.add(h);
@@ -207,7 +207,7 @@ public class ServiceRegistryTest {
         properties.setProperty("enablePingHandlers", "true");
         final Configuration config = initProperties();
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Collection<WebToJmsEntry> entries = Arrays.asList(new WebToJmsEntry(
                 CodecType.JSON, "/w", Method.GET, "queue://w", 5, false, 1),
                 new WebToJmsEntry(CodecType.JSON, "/ws", Method.GET,
@@ -223,7 +223,7 @@ public class ServiceRegistryTest {
     public void testAddWebToJmsEntries() throws Exception {
         final Configuration config = initProperties();
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Collection<WebToJmsEntry> entries = Arrays.asList(new WebToJmsEntry(
                 CodecType.JSON, "/w", Method.GET, "queue://w", 5, false, 1),
                 new WebToJmsEntry(CodecType.JSON, "/ws", Method.GET,
@@ -238,7 +238,7 @@ public class ServiceRegistryTest {
     public void testUnknownRemove() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
         registry.remove(h);
         assertEquals(0, registry.getHandlers().size());
@@ -251,7 +251,7 @@ public class ServiceRegistryTest {
 
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
         registry.add(h);
         assertFalse(registry.isRunning());
@@ -269,7 +269,7 @@ public class ServiceRegistryTest {
 
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         registry.setServiceRegistryLifecycleAware(new ServiceRegistryLifecycleAware() {
             @Override
             public void onStarted(ServiceRegistry serviceRegistry) {
@@ -293,7 +293,7 @@ public class ServiceRegistryTest {
     public void testInvokeNull() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -316,7 +316,7 @@ public class ServiceRegistryTest {
     public void testInvokeWebsocket() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "test";
@@ -339,7 +339,7 @@ public class ServiceRegistryTest {
     public void testInvokeWeb() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{\"username\":\"john\"}";
@@ -364,7 +364,7 @@ public class ServiceRegistryTest {
     public void testInvokeWebWithAuthExceptionAndRedirect() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -392,7 +392,7 @@ public class ServiceRegistryTest {
     public void testInvokeWebWithAuthException() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -421,7 +421,7 @@ public class ServiceRegistryTest {
     public void testInvokeWebWithValidationException() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
@@ -450,7 +450,7 @@ public class ServiceRegistryTest {
     public void testInvokeWebWithException() throws Exception {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
-        registry.setRoleAuthorizer(authorizer);
+        registry.setSecurityAuthorizer(authorizer);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";

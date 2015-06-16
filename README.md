@@ -435,10 +435,10 @@ public class StaticFileServer implements RequestHandler {
 
 ### Defining role-based security
 ```java 
-public class BuggerRoleAuthorizer implements RoleAuthorizer {
+public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
     private final UserRepository userRepository;
 
-    public BuggerRoleAuthorizer(UserRepository userRepository) {
+    public BuggerSecurityAuthorizer(UserRepository userRepository) {
       this.userRepository = userRepository;
     }
 
@@ -660,9 +660,9 @@ You can convert the implementing service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
-RoleAuthorizer roleAuthorizer = ...
+SecurityAuthorizer securityAuthorizer = ...
 serviceRegistry = new ServiceRegistry(config);
-serviceRegistry.setRoleAuthorizer(roleAuthorizer);
+serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
 RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(config);
 Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
                 .createFromPackages("com.plexobject.handler.javaws");
@@ -719,7 +719,7 @@ a container and start the container using service-registry, e.g.
 ```java 
 Configuration config = new Configuration(args[0]);
 serviceRegistry = new ServiceRegistry(config);
-serviceRegistry.setRoleAuthorizer(new BuggerRoleAuthorizer(userRepository));
+serviceRegistry.setSecurityAuthorizer(new BuggerSecurityAuthorizer(userRepository));
 serviceRegistry.add(new CreateUserService(userRepository));
 serviceRegistry.add(new UpdateUserService(userRepository));
 serviceRegistry.add(new QueryUserService(userRepository));
@@ -799,7 +799,7 @@ service.registryCallbackClass=com.plexobject.deploy.AutoDeployer
 
 Optionally, you can add class name for the security authorizer, e.g.
 ```bash 
-service.roleAuthorizerClass=com.plexobject.ping.MyAuthorizer
+service.securityAuthorizerClass=com.plexobject.ping.MyAuthorizer
 ```
 
 

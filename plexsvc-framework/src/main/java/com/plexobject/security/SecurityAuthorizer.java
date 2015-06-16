@@ -8,7 +8,7 @@ import com.plexobject.handler.Request;
  * @author shahzad bhatti
  *
  */
-public interface RoleAuthorizer {
+public interface SecurityAuthorizer {
     /**
      * This method validates request for given roles. It should throw
      * AuthException if request is not authorized

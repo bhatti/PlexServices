@@ -23,7 +23,7 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.Handledable;
 import com.plexobject.http.WebContainerProvider;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
@@ -57,12 +57,12 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             config = new Configuration(plexserviceConfigResourcePath);
             String plexserviceCallbackClass = config
                     .getProperty(Constants.PLEXSERVICE_AWARE_CLASS);
-            String plexserviceRoleAuthorizerClass = config
-                    .getProperty(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS);
-            RoleAuthorizer authorizer = null;
-            if (plexserviceRoleAuthorizerClass != null) {
-                authorizer = (RoleAuthorizer) Class.forName(
-                        plexserviceRoleAuthorizerClass).newInstance();
+            String plexserviceSecurityAuthorizerClass = config
+                    .getProperty(Constants.PLEXSERVICE_SECURITY_AUTHORIZER_CLASS);
+            SecurityAuthorizer authorizer = null;
+            if (plexserviceSecurityAuthorizerClass != null) {
+                authorizer = (SecurityAuthorizer) Class.forName(
+                        plexserviceSecurityAuthorizerClass).newInstance();
             }
             serviceRegistry = new ServiceRegistry(config,
                     new WebContainerProvider() {
@@ -75,7 +75,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                             return WebRequestHandlerServlet.this;
                         }
                     });
-            serviceRegistry.setRoleAuthorizer(authorizer);
+            serviceRegistry.setSecurityAuthorizer(authorizer);
             serviceRegistry.setServletContext(getServletContext());
             ServiceRegistryLifecycleAware serviceRegistryAware = (ServiceRegistryLifecycleAware) Class
                     .forName(plexserviceCallbackClass).newInstance();

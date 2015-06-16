@@ -5,14 +5,14 @@ import org.apache.log4j.Logger;
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.handler.Request;
 import com.plexobject.security.AuthException;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 
-public class BuggerRoleAuthorizer implements RoleAuthorizer {
+public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
     private final Logger log = Logger.getLogger(getClass());
 
     private final UserRepository userRepository;
 
-    public BuggerRoleAuthorizer(UserRepository userRepository) {
+    public BuggerSecurityAuthorizer(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

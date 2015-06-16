@@ -199,8 +199,8 @@ public class ServiceInvocationHelper {
 
     private void authorizeIfNeeded(Request<Object> request,
             ServiceConfigDesc config) {
-        if (serviceRegistry.getRoleAuthorizer() != null) {
-            serviceRegistry.getRoleAuthorizer().authorize(request,
+        if (serviceRegistry.getSecurityAuthorizer() != null) {
+            serviceRegistry.getSecurityAuthorizer().authorize(request,
                     config.rolesAllowed());
         }
     }

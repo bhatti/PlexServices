@@ -14,7 +14,7 @@ import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
 import com.plexobject.bugger.model.BugReport;
 import com.plexobject.bugger.model.BugReport.Priority;
-import com.plexobject.bugger.model.BuggerRoleAuthorizer;
+import com.plexobject.bugger.model.BuggerSecurityAuthorizer;
 import com.plexobject.bugger.model.Comment;
 import com.plexobject.bugger.model.Project;
 import com.plexobject.bugger.model.User;
@@ -60,7 +60,7 @@ public class Main {
         startJmsBroker();
 
         serviceRegistry = new ServiceRegistry(config);
-        serviceRegistry.setRoleAuthorizer(new BuggerRoleAuthorizer(
+        serviceRegistry.setSecurityAuthorizer(new BuggerSecurityAuthorizer(
                 userRepository));
         if (propertyFile != null) {
             Collection<WebToJmsEntry> entries = WebToJmsBridge

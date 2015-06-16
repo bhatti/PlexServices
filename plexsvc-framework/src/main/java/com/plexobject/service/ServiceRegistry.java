@@ -26,7 +26,7 @@ import com.plexobject.http.netty.NettyWebContainerProvider;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.metrics.ServiceMetricsRegistry;
 import com.plexobject.metrics.StatsCollector;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.impl.InterceptorLifecycleImpl;
 import com.plexobject.service.impl.ServiceInvocationHelper;
 import com.plexobject.service.impl.ServiceRegistryContainers;
@@ -58,7 +58,7 @@ public class ServiceRegistry implements ServiceContainer,
 
     private final boolean enablePingHandlers;
     private ServletContext servletContext;
-    private RoleAuthorizer roleAuthorizer;
+    private SecurityAuthorizer securityAuthorizer;
 
     public ServiceRegistry(Configuration config) {
         this(config, new NettyWebContainerProvider());
@@ -360,12 +360,12 @@ public class ServiceRegistry implements ServiceContainer,
         interceptorLifecycle.setAroundInterceptor(interceptor);
     }
 
-    public RoleAuthorizer getRoleAuthorizer() {
-        return roleAuthorizer;
+    public SecurityAuthorizer getSecurityAuthorizer() {
+        return securityAuthorizer;
     }
 
-    public void setRoleAuthorizer(RoleAuthorizer roleAuthorizer) {
-        this.roleAuthorizer = roleAuthorizer;
+    public void setSecurityAuthorizer(SecurityAuthorizer securityAuthorizer) {
+        this.securityAuthorizer = securityAuthorizer;
     }
 
     private void addPingHandler(final RequestHandler h,

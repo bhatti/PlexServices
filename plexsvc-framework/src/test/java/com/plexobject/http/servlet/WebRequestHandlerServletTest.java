@@ -26,7 +26,7 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.StubHttpServletRequest;
 import com.plexobject.http.StubHttpServletResponse;
 import com.plexobject.security.AuthException;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
@@ -36,7 +36,7 @@ import com.plexobject.service.ServiceRegistryLifecycleAware;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
 
 public class WebRequestHandlerServletTest implements ServletConfig,
-        ServiceRegistryLifecycleAware, RoleAuthorizer {
+        ServiceRegistryLifecycleAware, SecurityAuthorizer {
     private WebRequestHandlerServlet instance = new WebRequestHandlerServlet();
     private Properties props = new Properties();
     private static ServiceRegistry serviceRegistry;
@@ -232,7 +232,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         props.setProperty(Constants.PLEXSERVICE_CONFIG_RESOURCE_PATH,
                 propFile.getAbsolutePath());
         if (auth) {
-            props.setProperty(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS,
+            props.setProperty(Constants.PLEXSERVICE_SECURITY_AUTHORIZER_CLASS,
                     getClass().getName());
         }
         instance.init(this);

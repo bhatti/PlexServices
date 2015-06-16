@@ -19,7 +19,7 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.security.AuthException;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
@@ -48,7 +48,7 @@ public class AutoDeployerTest {
         }
     }
 
-    public static class Authorizer implements RoleAuthorizer {
+    public static class Authorizer implements SecurityAuthorizer {
         @Override
         public void authorize(Request<Object> request, String[] roles)
                 throws AuthException {
@@ -105,7 +105,7 @@ public class AutoDeployerTest {
 
     @Test
     public void testRunWithAuthorizer() throws Exception {
-        properties.put(Constants.PLEXSERVICE_ROLE_AUTHORIZER_CLASS,
+        properties.put(Constants.PLEXSERVICE_SECURITY_AUTHORIZER_CLASS,
                 Authorizer.class.getName());
         properties.store(new FileWriter(propFile), "");
         AutoDeployer deployer = new AutoDeployer();

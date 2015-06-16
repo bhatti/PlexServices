@@ -25,7 +25,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
-import com.plexobject.security.RoleAuthorizer;
+import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.AroundInterceptor;
 import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceConfigDesc;
@@ -51,9 +51,9 @@ public class RequestHandlerAdapterJavawsTest {
             BasicConfigurator.configure();
             LogManager.getRootLogger().setLevel(Level.INFO);
         }
-        RoleAuthorizer roleAuthorizer = null;
+        SecurityAuthorizer securityAuthorizer = null;
         serviceRegistry = new ServiceRegistry(config);
-        serviceRegistry.setRoleAuthorizer(roleAuthorizer);
+        serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
         requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
                 serviceRegistry);
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws

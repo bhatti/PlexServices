@@ -95,8 +95,8 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     private void invoke(Request<Object> request, final MethodInfo methodInfo,
             String responseTag, Object[] args) throws Exception {
-        if (serviceRegistry.getRoleAuthorizer() != null) {
-            serviceRegistry.getRoleAuthorizer().authorize(request, null);
+        if (serviceRegistry.getSecurityAuthorizer() != null) {
+            serviceRegistry.getSecurityAuthorizer().authorize(request, null);
         }
         Map<String, Object> response = new HashMap<>();
         Object result = methodInfo.implMethod.invoke(delegate, args);
