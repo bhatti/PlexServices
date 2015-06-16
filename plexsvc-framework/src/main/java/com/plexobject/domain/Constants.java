@@ -6,7 +6,6 @@ public interface Constants {
     public static final String ACCEPT = "Accept";
     public static final String PAYLOAD = "Payload";
     public static final String METHOD = "Method";
-    public static final String HOST = "Host";
     public static final String HTTP_PORT = "http.port";
     public static final String HTTPS_PORT = "https.port";
     public static final String PLEXSERVICE_JMS_CONTAINER_FACTORY_CLASS = "jms.containerFactory";
