@@ -202,7 +202,7 @@ public class ServiceInvocationHelper {
     }
 
     private void authorizeIfNeeded(Request<Object> request,
-            ServiceConfigDesc config) {
+            ServiceConfigDesc config) throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request,
                     config.rolesAllowed());

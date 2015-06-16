@@ -1,5 +1,6 @@
 package com.plexobject.handler.javaws;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,21 +99,31 @@ public class JavawsDelegateHandler implements RequestHandler {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request, null);
         }
-        Map<String, Object> response = new HashMap<>();
-        Object result = methodInfo.implMethod.invoke(delegate, args);
-
-        if (result != null) {
-            if (methodInfo.itemName != null && methodInfo.itemName.length() > 0) {
-                Map<String, Object> item = new HashMap<>();
-                item.put(methodInfo.itemName, result);
-                response.put(responseTag, item);
+        try {
+            Map<String, Object> response = new HashMap<>();
+            Object result = methodInfo.implMethod.invoke(delegate, args);
+            if (result != null) {
+                if (methodInfo.itemName != null
+                        && methodInfo.itemName.length() > 0) {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put(methodInfo.itemName, result);
+                    response.put(responseTag, item);
+                } else {
+                    response.put(responseTag, result);
+                }
             } else {
-                response.put(responseTag, result);
+                response.put(responseTag, EMPTY_MAP);
             }
-        } else {
-            response.put(responseTag, EMPTY_MAP);
+            request.getResponse().setPayload(response);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof Exception) {
+                throw (Exception) e.getCause();
+            } else {
+                throw e;
+            }
+        } catch (Exception e) {
+            throw e;
         }
-        request.getResponse().setPayload(response);
     }
 
     // hard coding to handle JSON messages
