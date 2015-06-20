@@ -18,10 +18,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.plexobject.domain.Address;
-import com.plexobject.domain.Course;
-import com.plexobject.domain.Student;
 import com.plexobject.encode.json.JsonObjectCodec;
+import com.plexobject.school.Address;
+import com.plexobject.school.Course;
+import com.plexobject.school.Student;
 import com.plexobject.util.ReflectUtils;
 
 public class ReflectUtilsTest {

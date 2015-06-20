@@ -1,11 +1,10 @@
-package com.plexobject.service;
+package com.plexobject.school;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.plexobject.domain.Student;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
@@ -16,7 +15,7 @@ public class StudentServiceRest {
     private static Map<String, Student> students = new HashMap<>();
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student.class, endpoint = "/students", method = Method.POST)
-    public class SaveHandler implements RequestHandler {
+    public static class SaveHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
             Student student = request.getPayload();
@@ -26,11 +25,11 @@ public class StudentServiceRest {
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students", method = Method.GET)
-    public class QueryHandler implements RequestHandler {
+    public static class QueryHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
-            Long studentId = request.getProperty("studentId");
-            Long courseId = request.getProperty("courseId");
+            String studentId = request.getStringProperty("studentId");
+            String courseId = request.getStringProperty("courseId");
             List<Student> list = new ArrayList<>();
 
             for (Student student : students.values()) {
@@ -46,11 +45,11 @@ public class StudentServiceRest {
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students/{studentId}", method = Method.GET)
-    public class GetHandler implements RequestHandler {
+    public static class GetHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
-            Long studentId = request.getProperty("studentId");
-            Student s = students.get(String.valueOf(studentId));
+            String studentId = request.getStringProperty("studentId");
+            Student s = students.get(studentId);
 
             if (s == null) {
                 throw new IllegalArgumentException("student not found for "

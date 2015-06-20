@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.school;
 
 public class Customer {
     private String accountNumber;

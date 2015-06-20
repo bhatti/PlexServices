@@ -30,19 +30,21 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
 
     @Override
     protected void doSend(Response reply, String payload) {
-        String location = (String) reply.getProperty(HttpResponse.LOCATION);
+        String location = (String) reply
+                .getStringProperty(HttpResponse.LOCATION);
         if (location != null) {
             redirect(location);
             return;
         }
-        String sessionId = (String) reply.getProperty(Constants.SESSION_ID);
+        String sessionId = (String) reply
+                .getStringProperty(Constants.SESSION_ID);
         if (sessionId != null) {
             response.addCookie(Constants.SESSION_ID, sessionId);
         }
         try {
             if (reply.getCodecType() != null) {
                 String contentType = (String) reply
-                        .getProperty(HttpResponse.CONTENT_TYPE);
+                        .getStringProperty(HttpResponse.CONTENT_TYPE);
                 if (contentType == null) {
                     response.setContentType(reply.getCodecType()
                             .getContentType());

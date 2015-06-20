@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.school;
 
 import java.util.ArrayList;
 import java.util.List;

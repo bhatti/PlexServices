@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.school;
 
 public class RtTestException extends RuntimeException {
     private static final long serialVersionUID = 1L;

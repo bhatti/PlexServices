@@ -27,7 +27,7 @@ public class S3SignService implements RequestHandler {
 
     @Override
     public void handle(Request<Object> request) {
-        String toSign = request.getProperty("to_sign");
+        String toSign = request.getStringProperty("to_sign");
         try {
             // get an hmac_sha1 key from the raw key bytes
             SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(),

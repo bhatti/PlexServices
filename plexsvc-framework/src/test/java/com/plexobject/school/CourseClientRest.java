@@ -1,20 +1,22 @@
-package com.plexobject.service;
+package com.plexobject.school;
 
 import java.net.URLEncoder;
+import java.util.Collection;
 
-import com.plexobject.domain.Course;
-import com.plexobject.domain.Student;
+import com.plexobject.service.BaseServiceClient;
 
 public class CourseClientRest extends BaseServiceClient {
     public static Course save(Course course) throws Exception {
         return post("/courses", course, Course.class);
     }
 
-    public static Course[] enroll(Student[] students) throws Exception {
+    public static Course[] enroll(Collection<Student> students)
+            throws Exception {
         return post("/courses/enroll", students, Course[].class);
     }
 
-    public static Course[] getByStudentId(Long studentId) throws Exception {
+    public static Course[] getCoursesForStudentId(Long studentId)
+            throws Exception {
         return get("/courses/students/" + studentId, Course[].class);
     }
 
@@ -36,11 +38,17 @@ public class CourseClientRest extends BaseServiceClient {
         return get("/courses/" + courseId, Course.class);
     }
 
-    public static Course[] create(Course[] courses) throws Exception {
-        return post("/courses", courses, Course[].class);
+    public static Course[] create(Collection<Course> courses) throws Exception {
+        return post("/courses/create", courses, Course[].class);
     }
 
     public static void error() throws Exception {
         get("/courses/error", Course.class);
     }
+
+    public static Customer[] getCustomers(Collection<Customer> list)
+            throws Exception {
+        return post("/customers", list, Customer[].class);
+    }
+
 }

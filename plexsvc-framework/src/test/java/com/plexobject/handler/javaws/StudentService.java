@@ -6,7 +6,7 @@ import java.util.Map;
 
 import javax.jws.WebService;
 
-import com.plexobject.domain.Student;
+import com.plexobject.school.Student;
 
 @WebService
 public interface StudentService {

@@ -17,7 +17,7 @@ import com.plexobject.util.ReflectUtils;
 
 public class BaseServiceClient {
     public static final int DEFAULT_PORT = 8186;
-    protected static CodecType codecType = CodecType.JSON;
+    public static CodecType codecType = CodecType.JSON;
 
     protected static ObjectCodec getObjectCodec() {
         return codecType == CodecType.JSON ? new JsonObjectCodec()

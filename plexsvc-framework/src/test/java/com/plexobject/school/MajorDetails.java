@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.school;
 
 public class MajorDetails {
     private String major;

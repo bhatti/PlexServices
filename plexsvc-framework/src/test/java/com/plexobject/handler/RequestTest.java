@@ -97,7 +97,7 @@ public class RequestTest {
         request.handleUnknown(Constants.PAYLOAD, "payload");
         assertEquals("payload", request.getPayload());
         request.handleUnknown("key", "1");
-        assertEquals("1", request.getProperty("key"));
+        assertEquals("1", request.getStringProperty("key"));
         request.handleUnknown("key", 1);
         assertEquals(new Integer(1), request.getProperty("key"));
         request.handleUnknown("key", 1L);

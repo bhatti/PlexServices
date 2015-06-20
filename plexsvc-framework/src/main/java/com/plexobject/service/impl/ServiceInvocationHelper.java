@@ -72,7 +72,7 @@ public class ServiceInvocationHelper {
             ((AbstractResponseDispatcher) request.getResponseDispatcher())
                     .setOutgoingInterceptorsLifecycle(serviceRegistry);
             CodecType codecType = CodecType.fromAcceptHeader(
-                    (String) request.getProperty(Constants.ACCEPT),
+                    (String) request.getStringProperty(Constants.ACCEPT),
                     config.codec());
             request.getResponse().setCodecType(codecType);
 

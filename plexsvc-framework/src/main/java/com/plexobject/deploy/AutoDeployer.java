@@ -54,6 +54,11 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
     public void onStarted(ServiceRegistry serviceRegistry) {
         String[] pkgNames = serviceRegistry.getConfiguration()
                 .getProperty(Constants.AUTO_DEPLOY_PACKAGES).split("[\\s;:,]");
+        addHandlersFromPackages(serviceRegistry, pkgNames);
+    }
+
+    public static void addHandlersFromPackages(ServiceRegistry serviceRegistry,
+            String ... pkgNames) {
         Collection<Class<?>> serviceClasses = ReflectUtils.getAnnotatedClasses(
                 ServiceConfig.class, pkgNames);
 

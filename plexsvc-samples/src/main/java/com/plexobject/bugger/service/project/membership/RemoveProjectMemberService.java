@@ -26,9 +26,9 @@ public class RemoveProjectMemberService extends AbstractProjectService
 
     @Override
     public void handle(Request<Object> request) {
-        String projectId = request.getProperty("id");
-        String assignedTo = request.getProperty("assignedTo");
-        boolean projectLead = "true".equals(request.getProperty("projectLead"));
+        String projectId = request.getStringProperty("id");
+        String assignedTo = request.getStringProperty("assignedTo");
+        boolean projectLead = "true".equals(request.getStringProperty("projectLead"));
 
         Project project = projectRepository.load(Long.valueOf(projectId));
         ValidationException

@@ -84,8 +84,8 @@ public class JsonObjectCodec extends AbstractObjectCodec {
                     getClass().getClassLoader());
             return (T) mapper.readValue(text, type);
         } catch (IOException e) {
-            throw new EncodingException("Failed to decode " + text.length()
-                    + ", '" + text + "'", e);
+            throw new EncodingException("Failed to decode " + ", '" + text
+                    + "' to " + type, e);
         } finally {
             Thread.currentThread().setContextClassLoader(savedCL);
         }

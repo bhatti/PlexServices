@@ -9,8 +9,8 @@ import java.util.Map;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
-import com.plexobject.domain.RtTestException;
-import com.plexobject.domain.Student;
+import com.plexobject.school.RtTestException;
+import com.plexobject.school.Student;
 
 @WebService
 public class StudentServiceImpl implements StudentService {

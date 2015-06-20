@@ -8,9 +8,9 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import com.plexobject.domain.Course;
-import com.plexobject.domain.Customer;
-import com.plexobject.domain.Student;
+import com.plexobject.school.Course;
+import com.plexobject.school.Customer;
+import com.plexobject.school.Student;
 
 @WebService
 public interface CourseService {

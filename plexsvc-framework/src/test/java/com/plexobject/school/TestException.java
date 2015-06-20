@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.school;
 
 public class TestException extends Exception {
     private static final long serialVersionUID = 1L;

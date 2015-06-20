@@ -1,4 +1,4 @@
-package com.plexobject.domain;
+package com.plexobject.school;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

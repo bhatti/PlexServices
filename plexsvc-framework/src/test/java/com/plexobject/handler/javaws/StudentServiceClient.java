@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.jws.WebMethod;
 
-import com.plexobject.domain.Student;
+import com.plexobject.school.Student;
 import com.plexobject.service.BaseServiceClient;
 
 public class StudentServiceClient extends BaseServiceClient implements

@@ -1,8 +1,8 @@
-package com.plexobject.service;
+package com.plexobject.school;
 
 import java.net.URLEncoder;
 
-import com.plexobject.domain.Student;
+import com.plexobject.service.BaseServiceClient;
 
 public class StudentClientRest extends BaseServiceClient {
     public static Student save(Student student) throws Exception {

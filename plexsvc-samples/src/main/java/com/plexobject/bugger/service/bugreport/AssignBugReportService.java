@@ -15,8 +15,7 @@ import com.plexobject.validation.ValidationException;
 
 //@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/assign", method = Method.POST, codec = CodecType.JSON)
 @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-assign-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
-@RequiredFields({ @Field(name = "projectId"),
-        @Field(name = "bugReportId"),
+@RequiredFields({ @Field(name = "projectId"), @Field(name = "bugReportId"),
         @Field(name = "assignedTo") })
 public class AssignBugReportService extends AbstractBugReportService implements
         RequestHandler {
@@ -28,8 +27,8 @@ public class AssignBugReportService extends AbstractBugReportService implements
     // any employee who is member of same project can assign bug report
     @Override
     public void handle(Request<Object> request) {
-        String bugReportId = request.getProperty("id");
-        String assignedTo = request.getProperty("assignedTo");
+        String bugReportId = request.getStringProperty("id");
+        String assignedTo = request.getStringProperty("assignedTo");
 
         BugReport report = bugReportRepository.load(Long.valueOf(bugReportId));
         ValidationException

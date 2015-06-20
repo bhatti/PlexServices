@@ -1,12 +1,10 @@
-package com.plexobject.service;
+package com.plexobject.school;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.plexobject.domain.Course;
-import com.plexobject.domain.Student;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.Method;
@@ -18,7 +16,7 @@ public class CourseServiceRest {
     private static Map<String, Course> courses = new HashMap<>();
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course.class, endpoint = "/courses", method = Method.POST)
-    public class SaveHandler implements RequestHandler {
+    public static class SaveHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
             Course course = request.getPayload();
@@ -27,8 +25,17 @@ public class CourseServiceRest {
         }
     }
 
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Customer[].class, endpoint = "/customers", method = Method.POST)
+    public static class CustomersHandler implements RequestHandler {
+        @Override
+        public void handle(Request<Object> request) {
+            Customer[] list = request.getPayload();
+            request.getResponse().setPayload(list);
+        }
+    }
+
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student[].class, endpoint = "/courses/enroll", method = Method.POST)
-    public class EnrollHandler implements RequestHandler {
+    public static class EnrollHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
             Student[] students = request.getPayload();
@@ -48,13 +55,13 @@ public class CourseServiceRest {
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/students/{studentId}", method = Method.GET)
-    public class CoursesForStudentHandler implements RequestHandler {
+    public static class CoursesForStudentHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
-            Long studentId = request.getProperty("studentId");
+            String studentId = request.getStringProperty("studentId");
             List<Course> list = new ArrayList<>();
             for (Course course : courses.values()) {
-                if (course.getStudentIds().contains(String.valueOf(studentId))) {
+                if (course.getStudentIds().contains(studentId)) {
                     list.add(course);
                 }
             }
@@ -63,11 +70,11 @@ public class CourseServiceRest {
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses", method = Method.GET)
-    public class QueryHandler implements RequestHandler {
+    public static class QueryHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
-            Long studentId = request.getProperty("studentId");
-            Long courseId = request.getProperty("courseId");
+            String studentId = request.getStringProperty("studentId");
+            String courseId = request.getStringProperty("courseId");
             List<Course> list = new ArrayList<>();
 
             for (Course course : courses.values()) {
@@ -83,11 +90,11 @@ public class CourseServiceRest {
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/{courseId}", method = Method.GET)
-    public class GetHandler implements RequestHandler {
+    public static class GetHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
-            Long courseId = request.getProperty("courseId");
-            Course c = courses.get(String.valueOf(courseId));
+            String courseId = request.getStringProperty("courseId");
+            Course c = courses.get(courseId);
             if (c == null) {
                 throw new IllegalArgumentException("course not found for "
                         + courseId + ", local " + courses.keySet());
@@ -97,7 +104,7 @@ public class CourseServiceRest {
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course[].class, endpoint = "/courses/create", method = Method.POST)
-    public class CreateHandler implements RequestHandler {
+    public static class CreateHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
             Course[] list = request.getPayload();
@@ -109,10 +116,10 @@ public class CourseServiceRest {
     }
 
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/error", method = Method.GET)
-    public class ErrorHandler implements RequestHandler {
+    public static class ErrorHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
-            if (request.getProperty("rt") != null)
+            if (request.getStringProperty("rt") != null)
                 throw ValidationException.builder()
                         .addError("401", "name", "name not define")
                         .addError("402", "email", "email not defined").build();
