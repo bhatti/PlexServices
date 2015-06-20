@@ -8,6 +8,10 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
+import com.plexobject.domain.Course;
+import com.plexobject.domain.Customer;
+import com.plexobject.domain.Student;
+
 @WebService
 public interface CourseService {
     void clear();

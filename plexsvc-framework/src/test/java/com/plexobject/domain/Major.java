@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.domain;
 
 public class Major {
     private String name;

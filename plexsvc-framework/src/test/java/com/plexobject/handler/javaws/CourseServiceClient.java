@@ -8,6 +8,11 @@ import java.util.Map;
 
 import javax.jws.WebMethod;
 
+import com.plexobject.domain.Course;
+import com.plexobject.domain.Customer;
+import com.plexobject.domain.Student;
+import com.plexobject.service.BaseServiceClient;
+
 public class CourseServiceClient extends BaseServiceClient implements
         CourseService {
 

@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.jws.WebService;
 
+import com.plexobject.domain.Student;
+
 @WebService
 public interface StudentService {
     void clear();

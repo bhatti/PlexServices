@@ -9,6 +9,9 @@ import java.util.Map;
 
 import javax.jws.WebMethod;
 
+import com.plexobject.domain.Student;
+import com.plexobject.service.BaseServiceClient;
+
 public class StudentServiceClient extends BaseServiceClient implements
         StudentService {
     private static final String STUDENT_SERVICE = "/StudentService";

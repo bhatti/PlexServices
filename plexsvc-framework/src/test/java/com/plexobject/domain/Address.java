@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.domain;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

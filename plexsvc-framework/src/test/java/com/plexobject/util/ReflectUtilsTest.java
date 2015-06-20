@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -18,6 +18,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.plexobject.domain.Address;
+import com.plexobject.domain.Course;
+import com.plexobject.domain.Student;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.util.ReflectUtils;
 

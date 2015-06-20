@@ -9,6 +9,9 @@ import java.util.Map;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
+import com.plexobject.domain.RtTestException;
+import com.plexobject.domain.Student;
+
 @WebService
 public class StudentServiceImpl implements StudentService {
     private Map<String, Student> students = new HashMap<>();

@@ -10,6 +10,10 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 
+import com.plexobject.domain.Course;
+import com.plexobject.domain.Customer;
+import com.plexobject.domain.Student;
+import com.plexobject.domain.TestException;
 import com.plexobject.validation.ValidationException;
 
 @WebService

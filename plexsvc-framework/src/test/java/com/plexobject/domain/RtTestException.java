@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.domain;
 
 public class RtTestException extends RuntimeException {
     private static final long serialVersionUID = 1L;

@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.service;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -77,4 +77,24 @@ public class BaseServiceClient {
         return (T) ReflectUtils.decode(payload, responseType, pType,
                 getObjectCodec());
     }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> T post(String path, Object input, Class<?> responseType)
+            throws Exception {
+        String jsonInput = getObjectCodec().encode(input);
+        String resp = TestWebUtils.post("http://localhost:" + DEFAULT_PORT
+                + path, jsonInput, "Accept", getAcceptHeader());
+        return (T) ReflectUtils.decode(resp, responseType, null,
+                getObjectCodec());
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> T get(String path, Class<?> responseType)
+            throws Exception {
+        String resp = TestWebUtils.get("http://localhost:" + DEFAULT_PORT
+                + path, "Accept", getAcceptHeader());
+        return (T) ReflectUtils.decode(resp, responseType, null,
+                getObjectCodec());
+    }
+
 }
