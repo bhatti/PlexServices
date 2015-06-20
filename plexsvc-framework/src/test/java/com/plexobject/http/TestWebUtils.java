@@ -201,11 +201,17 @@ public class TestWebUtils {
         return new NettyWebContainerProvider().getWebContainer(config, handler);
     }
 
-    public static String get(String target) throws IOException {
+    public static String get(String target, String... headers)
+            throws IOException {
         URL url = new URL(target);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
-        con.setRequestProperty("Content-Type", "application/json");
+        if (headers.length == 0) {
+            con.setRequestProperty("Content-Type", "application/json");
+        }
+        for (int i = 0; i < headers.length - 1; i += 2) {
+            con.setRequestProperty(headers[i], headers[i + 1]);
+        }
         return getResponse(con);
     }
 
@@ -214,7 +220,9 @@ public class TestWebUtils {
         URL url = new URL(target);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
+        if (headers.length == 0) {
+            con.setRequestProperty("Content-Type", "application/json");
+        }
         for (int i = 0; i < headers.length - 1; i += 2) {
             con.setRequestProperty(headers[i], headers[i + 1]);
         }

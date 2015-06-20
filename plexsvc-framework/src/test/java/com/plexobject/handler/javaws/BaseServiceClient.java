@@ -19,7 +19,7 @@ public class BaseServiceClient {
     public static final int DEFAULT_PORT = 8186;
     protected static CodecType codecType = CodecType.JSON;
 
-    private static ObjectCodec getObjectCodec() {
+    protected static ObjectCodec getObjectCodec() {
         return codecType == CodecType.JSON ? new JsonObjectCodec()
                 : new XmlObjectCodec();
     }
@@ -54,12 +54,17 @@ public class BaseServiceClient {
         }
     }
 
+    protected static String getAcceptHeader() {
+        return codecType == CodecType.JSON ? "application/json"
+                : "application/xml";
+    }
+
     @SuppressWarnings("unchecked")
     protected <T> T post(String path, RequestBuilder request,
             Class<?> responseType, Type pType, String item) throws Exception {
         // System.out.println("SENDING " + request);
         String resp = TestWebUtils.post("http://localhost:" + DEFAULT_PORT
-                + path, request.encode(), "Accept", "application/json");
+                + path, request.encode(), "Accept", getAcceptHeader());
         // System.out.println("RECEIVED " + resp);
         int colon = resp.indexOf("\":");
         int subtract = 1;
