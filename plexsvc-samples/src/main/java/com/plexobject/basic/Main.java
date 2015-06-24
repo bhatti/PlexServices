@@ -26,7 +26,7 @@ public class Main implements ServiceRegistryLifecycleAware {
                     + " properties-file [web|jms]");
             System.exit(1);
         }
-        BasicConfigurator.configure();
+        //BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.INFO);
         Configuration config = new Configuration(args[0]);
         PingService pingService = new PingService();

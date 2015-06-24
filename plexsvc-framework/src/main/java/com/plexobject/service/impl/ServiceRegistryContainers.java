@@ -63,7 +63,8 @@ public class ServiceRegistryContainers {
      * This method starts all containers
      */
     public synchronized void start() {
-        for (ServiceContainer g : _containers.values()) {
+        for (ServiceContainer g : new HashSet<ServiceContainer>(
+                _containers.values())) {
             if (g.getHandlers().size() > 0) {
                 g.start();
             }
@@ -74,7 +75,8 @@ public class ServiceRegistryContainers {
      * This method stops all containers
      */
     public synchronized void stop() {
-        for (ServiceContainer g : _containers.values()) {
+        for (ServiceContainer g : new HashSet<ServiceContainer>(
+                _containers.values())) {
             if (g.getHandlers().size() > 0) {
                 g.stop();
             }

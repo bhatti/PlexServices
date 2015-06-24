@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.activemq.broker.BrokerService;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -146,11 +145,6 @@ public class Main {
         bugReport.addComment(comment);
     }
 
-    void run() throws InterruptedException {
-        serviceRegistry.start();
-        // WebToJmsBridge.run(config, getJmsToJmsEntries());
-    }
-
     static Collection<WebToJmsEntry> getJmsToJmsEntries() {
         return Arrays.asList(new WebToJmsEntry(DEFAULT_CODEC,
                 "/projects/{projectId}/bugreports/{id}/assign", Method.POST,
@@ -202,11 +196,9 @@ public class Main {
                     + " properties-file [bridge-mapping-file.json]");
             System.exit(1);
         }
-        BasicConfigurator.configure();
+        // BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.INFO);
-        Main main = new Main(args[0], args.length > 1 ? args[1] : null);
-        main.run();
-
+        new Main(args[0], args.length > 1 ? args[1] : null);
         Thread.currentThread().join();
     }
 }

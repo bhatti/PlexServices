@@ -34,7 +34,7 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
     @Override
     public final synchronized void start() {
         try {
-            log.info("Starting..., running " + running);
+            log.info("Starting ...");
             if (!running) {
                 doStart();
                 for (RequestHandler h : getHandlers()) {

@@ -132,7 +132,9 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
     public synchronized void waitUntilReady() {
         while (!running) {
             try {
-                log.info("Waiting for JMSContainer to start " + running);
+                if (log.isDebugEnabled()) {
+                    log.debug("Waiting for JMSContainer to start " + running);
+                }
                 wait(DEFAULT_WAIT_TIME);
             } catch (InterruptedException e) {
                 Thread.interrupted();

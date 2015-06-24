@@ -19,7 +19,7 @@ import com.plexobject.domain.Preconditions;
  *
  */
 public class MessageReceiverThread implements Runnable {
-    private static final int DEFAULT_TIMEOUT = 15000;
+    private static final int DEFAULT_TIMEOUT = 150000;
     private static final Logger log = Logger
             .getLogger(MessageReceiverThread.class);
 
@@ -93,8 +93,10 @@ public class MessageReceiverThread implements Runnable {
                     if (msg != null) {
                         messageListener.onMessage(msg);
                     } else {
-                        log.info("**** Waiting for JMS message on "
-                                + destination);
+                        if (log.isDebugEnabled()) {
+                            log.debug("**** Waiting for JMS message on "
+                                    + destination);
+                        }
                     }
                 } catch (JMSException e) {
                     log.error("Failed to receive message for " + destination, e);
