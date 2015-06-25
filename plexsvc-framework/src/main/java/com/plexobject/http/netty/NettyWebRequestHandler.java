@@ -49,7 +49,7 @@ import com.plexobject.handler.Request.Builder;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.Handledable;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 
 /**
@@ -143,7 +143,7 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                 HttpContent content = (HttpContent) req;
                 textPayload = content.content().toString(CharsetUtil.UTF_8);
             }
-            Method method = Method.valueOf(req.getMethod().name());
+            RequestMethod method = RequestMethod.valueOf(req.getMethod().name());
             int n = uri.indexOf("?");
             if (n != -1) {
                 uri = uri.substring(0, n);
@@ -161,7 +161,7 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
 
     private Request<Object> buildRequest(final ChannelHandlerContext ctx,
             String uri, AbstractResponseDispatcher dispatcher,
-            String textPayload, Protocol protocol, Method method,
+            String textPayload, Protocol protocol, RequestMethod method,
             Map<String, Object> headers, Map<String, Object> params) {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), "", codecType);
@@ -285,7 +285,7 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                 ctx.channel());
 
         Request<Object> handlerReq = buildRequest(ctx, endpoint, dispatcher,
-                textPayload, Protocol.WEBSOCKET, Method.MESSAGE, headers,
+                textPayload, Protocol.WEBSOCKET, RequestMethod.MESSAGE, headers,
                 params);
 
         handler.handle(handlerReq);

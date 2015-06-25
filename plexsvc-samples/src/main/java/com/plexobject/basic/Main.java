@@ -3,7 +3,6 @@ package com.plexobject.basic;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 
@@ -13,8 +12,8 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.service.Interceptor;
-import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
@@ -26,7 +25,7 @@ public class Main implements ServiceRegistryLifecycleAware {
                     + " properties-file [web|jms]");
             System.exit(1);
         }
-        //BasicConfigurator.configure();
+        // BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.INFO);
         Configuration config = new Configuration(args[0]);
         PingService pingService = new PingService();
@@ -39,20 +38,23 @@ public class Main implements ServiceRegistryLifecycleAware {
         // ensure activemq is already running
         if ("jms".equalsIgnoreCase(type)) {
             serviceRegistry.add(ServiceConfigDesc.builder(pingService)
-                    .setMethod(Method.MESSAGE).setProtocol(Protocol.JMS)
+                    .setMethod(RequestMethod.MESSAGE).setProtocol(Protocol.JMS)
                     .setEndpoint("queue://ping").build(), pingService);
-            Collection<WebToJmsEntry> entries = Arrays.asList(
-                    new WebToJmsEntry(CodecType.JSON, "/ping", Method.GET,
-                            "queue://ping", 5, false, 1), new WebToJmsEntry(
-                            CodecType.JSON, "/ping", Method.MESSAGE,
-                            "queue://ping", 5, false, 1));
+            Collection<WebToJmsEntry> entries = Arrays
+                    .asList(new WebToJmsEntry(CodecType.JSON, "/ping",
+                            RequestMethod.GET, "queue://ping", 5, false, 1),
+                            new WebToJmsEntry(CodecType.JSON, "/ping",
+                                    RequestMethod.MESSAGE, "queue://ping", 5,
+                                    false, 1));
             serviceRegistry.setWebToJmsEntries(entries);
         } else if ("websocket".equalsIgnoreCase(type)) {
+            serviceRegistry.add(
+                    ServiceConfigDesc.builder(pingService)
+                            .setMethod(RequestMethod.MESSAGE)
+                            .setProtocol(Protocol.WEBSOCKET)
+                            .setEndpoint("/ping").build(), pingService);
             serviceRegistry.add(ServiceConfigDesc.builder(pingService)
-                    .setMethod(Method.MESSAGE).setProtocol(Protocol.WEBSOCKET)
-                    .setEndpoint("/ping").build(), pingService);
-            serviceRegistry.add(ServiceConfigDesc.builder(pingService)
-                    .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                    .setMethod(RequestMethod.GET).setProtocol(Protocol.HTTP)
                     .setEndpoint("/ping").build(), pingService);
         } else {
             serviceRegistry.add(pingService);

@@ -2,7 +2,7 @@ package com.plexobject.bridge.web;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.encode.CodecType;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 
 /**
  * This class defines mapping from http to jms
@@ -13,7 +13,7 @@ import com.plexobject.service.Method;
 public class WebToJmsEntry {
     private CodecType codecType = CodecType.JSON;
     private String endpoint;
-    private Method method;
+    private RequestMethod method;
     private String destination;
     private int timeoutSecs;
     private boolean asynchronous;
@@ -28,7 +28,7 @@ public class WebToJmsEntry {
                 e.asynchronous, e.concurrency);
     }
 
-    public WebToJmsEntry(CodecType codecType, String endpoint, Method method,
+    public WebToJmsEntry(CodecType codecType, String endpoint, RequestMethod method,
             String destination, int timeoutSecs, boolean asynchronous,
             int concurrency) {
         this.codecType = codecType;
@@ -56,11 +56,11 @@ public class WebToJmsEntry {
         this.endpoint = endpoint;
     }
 
-    public Method getMethod() {
+    public RequestMethod getMethod() {
         return method;
     }
 
-    public void setMethod(Method method) {
+    public void setMethod(RequestMethod method) {
         this.method = method;
     }
 

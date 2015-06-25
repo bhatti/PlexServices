@@ -27,7 +27,7 @@ import com.plexobject.http.StubHttpServletRequest;
 import com.plexobject.http.StubHttpServletResponse;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.SecurityAuthorizer;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfigDesc;
@@ -42,7 +42,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     private static ServiceRegistry serviceRegistry;
     private List<Request<Object>> requests = new ArrayList<>();
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/path", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/path", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -112,7 +112,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         init(true);
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
-                .setMethod(Method.HEAD).build();
+                .setMethod(RequestMethod.HEAD).build();
         serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
@@ -126,7 +126,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         init(true);
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
-                .setMethod(Method.POST).build();
+                .setMethod(RequestMethod.POST).build();
         serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
@@ -143,7 +143,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         init(true);
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
-                .setMethod(Method.PUT).build();
+                .setMethod(RequestMethod.PUT).build();
         serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
@@ -158,7 +158,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         init(true);
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
-                .setMethod(Method.DELETE).build();
+                .setMethod(RequestMethod.DELETE).build();
         serviceRegistry.add(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");

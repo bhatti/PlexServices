@@ -15,7 +15,7 @@ import com.plexobject.http.WebContainerProvider;
 import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceContainer;
 import com.plexobject.service.ServiceRegistry;
@@ -95,7 +95,7 @@ public class ServiceRegistryContainers {
         if (container == null) {
             try {
                 if (protocol == Protocol.HTTP || protocol == Protocol.WEBSOCKET) {
-                    container = getWebServiceContainer(new ConcurrentHashMap<Method, RouteResolver<RequestHandler>>());
+                    container = getWebServiceContainer(new ConcurrentHashMap<RequestMethod, RouteResolver<RequestHandler>>());
                     _containers.put(Protocol.HTTP, container);
                     _containers.put(Protocol.WEBSOCKET, container);
                 } else if (protocol == Protocol.JMS) {
@@ -112,7 +112,7 @@ public class ServiceRegistryContainers {
     }
 
     private ServiceContainer getWebServiceContainer(
-            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
+            final Map<RequestMethod, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
         RequestHandler executor = new DefaultHttpRequestHandler(
                 serviceRegistry, requestHandlerPathsByMethod);
         Lifecycle server = webContainerProvider.getWebContainer(config,

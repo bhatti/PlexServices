@@ -376,7 +376,7 @@ public class ServiceRegistry implements ServiceContainer,
                 .builder(config)
                 .setCodecType(CodecType.TEXT)
                 .setMethod(
-                        config.protocol() == Protocol.HTTP ? Method.GET
+                        config.protocol() == Protocol.HTTP ? RequestMethod.GET
                                 : config.method()).setEndpoint(pingEndpoint)
                 .setPayloadClass(Void.class).setRecordStatsdMetrics(false)
                 .setRolesAllowed(new String[0]).build();

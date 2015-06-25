@@ -10,7 +10,7 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.LifecycleAware;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.impl.AbstractServiceContainer;
@@ -22,13 +22,13 @@ import com.plexobject.service.impl.AbstractServiceContainer;
  *
  */
 public class DefaultWebServiceContainer extends AbstractServiceContainer {
-    private final Map<Method, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod;
+    private final Map<RequestMethod, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod;
     private final Lifecycle server;
 
     public DefaultWebServiceContainer(
             final Configuration config,
             final ServiceRegistry serviceRegistry,
-            final Map<Method, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod,
+            final Map<RequestMethod, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod,
             final Lifecycle server) {
         super(config, serviceRegistry);
         this.requestHandlerEndpointsByMethod = requestHandlerEndpointsByMethod;
@@ -77,7 +77,7 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
                 + config.endpoint() + ", codec " + config.codec());
     }
 
-    private RouteResolver<RequestHandler> getRouteResolver(Method method) {
+    private RouteResolver<RequestHandler> getRouteResolver(RequestMethod method) {
         RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
                 .get(method);
         if (requestHandlerEndpoints == null) {

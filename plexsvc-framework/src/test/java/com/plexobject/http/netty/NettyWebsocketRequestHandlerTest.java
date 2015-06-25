@@ -17,7 +17,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.TestWebUtils;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 
 public class NettyWebsocketRequestHandlerTest {
@@ -59,7 +59,7 @@ public class NettyWebsocketRequestHandlerTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/ping").setCodecType(CodecType.JSON)
                 .setPayload(PING).setResponse(response)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {

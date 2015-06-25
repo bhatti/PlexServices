@@ -8,12 +8,11 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.predicate.Predicate;
-import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 
-//@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements
         RequestHandler {
     public QueryUserService(UserRepository userRepository) {

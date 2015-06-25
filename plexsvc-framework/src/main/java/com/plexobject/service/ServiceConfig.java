@@ -18,7 +18,7 @@ public @interface ServiceConfig {
 
     CodecType codec() default CodecType.JSON;
 
-    Method method();
+    RequestMethod method();
 
     String version() default "1.0";
 

@@ -13,7 +13,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 
 public class ServiceConfigDescTest {
-    @ServiceConfig(protocol = Protocol.HTTP, version = "1.0", endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, version = "1.0", endpoint = "/w", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -23,7 +23,7 @@ public class ServiceConfigDescTest {
     @Test
     public void testCreateWithHandlerClass() {
         ServiceConfigDesc desc = new ServiceConfigDesc(WebService.class);
-        assertEquals(Method.GET, desc.method());
+        assertEquals(RequestMethod.GET, desc.method());
         assertEquals(Protocol.HTTP, desc.protocol());
         assertEquals(Void.class, desc.payloadClass());
         assertEquals(CodecType.JSON, desc.codec());
@@ -37,7 +37,7 @@ public class ServiceConfigDescTest {
     @Test
     public void testCreateWithHandlerObject() {
         ServiceConfigDesc desc = new ServiceConfigDesc(new WebService());
-        assertEquals(Method.GET, desc.method());
+        assertEquals(RequestMethod.GET, desc.method());
         assertEquals(Protocol.HTTP, desc.protocol());
         assertEquals(Void.class, desc.payloadClass());
         assertEquals(CodecType.JSON, desc.codec());
@@ -53,7 +53,7 @@ public class ServiceConfigDescTest {
         ServiceConfigDesc.Builder builder = ServiceConfigDesc
                 .builder(new WebService());
         builder.setCodecType(CodecType.XML);
-        builder.setMethod(Method.PUT);
+        builder.setMethod(RequestMethod.PUT);
         builder.setProtocol(Protocol.WEBSOCKET);
         builder.setPayloadClass(Void.class);
         builder.setVersion("2");
@@ -61,7 +61,7 @@ public class ServiceConfigDescTest {
         builder.setRecordStatsdMetrics(false);
         builder.setRolesAllowed(new String[0]);
         ServiceConfigDesc desc = builder.build();
-        assertEquals(Method.PUT, desc.method());
+        assertEquals(RequestMethod.PUT, desc.method());
         assertEquals(Protocol.WEBSOCKET, desc.protocol());
         assertEquals(Void.class, desc.payloadClass());
         assertEquals(CodecType.XML, desc.codec());
@@ -73,11 +73,11 @@ public class ServiceConfigDescTest {
 
     @Test
     public void testCreateWithWebToJmsEntry() {
-        WebToJmsEntry e = new WebToJmsEntry(CodecType.JSON, "/w", Method.GET,
+        WebToJmsEntry e = new WebToJmsEntry(CodecType.JSON, "/w", RequestMethod.GET,
                 "queue://name", 5, false, 1);
         ServiceConfigDesc.Builder builder = ServiceConfigDesc.builder(e);
         ServiceConfigDesc desc = builder.build();
-        assertEquals(Method.GET, desc.method());
+        assertEquals(RequestMethod.GET, desc.method());
         assertEquals(Protocol.HTTP, desc.protocol());
         assertEquals(Void.class, desc.payloadClass());
         assertEquals(CodecType.JSON, desc.codec());

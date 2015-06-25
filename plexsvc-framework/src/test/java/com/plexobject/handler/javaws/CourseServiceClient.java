@@ -88,25 +88,52 @@ public class CourseServiceClient extends BaseServiceClient implements
         return post(COURSE_SERVICE, request, klass, pKlass, item);
     }
 
+    private List<Course> getWithListReturnType(String query, String item)
+            throws NoSuchMethodException, Exception {
+        Method m = CourseService.class.getMethod("count", List.class);
+        Class<?> klass = m.getParameterTypes()[0].getClass();
+        Type pKlass = m.getGenericParameterTypes()[0];
+        return get(COURSE_SERVICE + "?" + query, klass, pKlass, item);
+    }
+
+    private <T> T getWithReturnType(String query, String item,
+            Class<?> returnType) throws NoSuchMethodException, Exception {
+        return get(COURSE_SERVICE + "?" + query, returnType, null, item);
+    }
+
     @WebMethod(exclude = true)
     @Override
     public List<Course> getCoursesForStudentId(Long studentId) {
-        RequestBuilder request = new RequestBuilder("getCoursesForStudentId",
-                studentId);
         try {
-            return postWithListReturnType(request,
+            return getWithListReturnType(
+                    "methodName=getCoursesForStudentId&studentId=" + studentId,
                     getItemNameForMethod("getCoursesForStudentId", Long.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private List<Customer> getCustomers(String query)
+            throws NoSuchMethodException, Exception {
+        Method m = CourseService.class.getMethod("getCustomers", Long.class,
+                String.class);
+        Class<?> klass = m.getReturnType();
+        Type pKlass = m.getGenericReturnType();
+        return get(COURSE_SERVICE + "?" + query, klass, pKlass, null);
+    }
+
     @WebMethod(exclude = true)
     @Override
     public List<Course> query(Map<String, Object> criteria) {
-        RequestBuilder request = new RequestBuilder("query", criteria);
         try {
-            return postWithListReturnType(request,
+            Method m = CourseService.class.getMethod("query", Map.class);
+            Class<?> klass = m.getReturnType();
+            Type pKlass = m.getGenericReturnType();
+            StringBuilder query = new StringBuilder("methodName=query&");
+            for (Map.Entry<String, Object> e : criteria.entrySet()) {
+                query.append(e.getKey() + "=" + e.getValue() + "&");
+            }
+            return get(COURSE_SERVICE + "?" + query, klass, pKlass,
                     getItemNameForMethod("query", Map.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -116,11 +143,9 @@ public class CourseServiceClient extends BaseServiceClient implements
     @WebMethod(exclude = true)
     @Override
     public Course get(Long courseId) {
-        RequestBuilder request = new RequestBuilder("get", courseId);
         try {
-            Course resp = post(COURSE_SERVICE, request, Course.class, null,
-                    getItemNameForMethod("get", Long.class));
-            return resp;
+            return getWithReturnType("methodName=get&courseId=" + courseId,
+                    getItemNameForMethod("get", Long.class), Course.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -151,21 +176,12 @@ public class CourseServiceClient extends BaseServiceClient implements
         }
     }
 
-    private List<Customer> postCustomers(RequestBuilder request)
-            throws NoSuchMethodException, Exception {
-        Method m = CourseService.class.getMethod("getCustomers", List.class);
-        Class<?> klass = m.getParameterTypes()[0].getClass();
-        Type pKlass = m.getGenericParameterTypes()[0];
-        return post(COURSE_SERVICE, request, klass, pKlass,
-                getItemNameForMethod("getCustomers", List.class));
-    }
-
     @WebMethod(exclude = true)
     @Override
-    public Collection<Customer> getCustomers(List<Customer> list) {
-        RequestBuilder request = new RequestBuilder("getCustomers", list);
+    public Collection<Customer> getCustomers(Long id1, String id2) {
         try {
-            return postCustomers(request);
+            return getCustomers("methodName=getCustomers&id1=" + id1 + "&id2="
+                    + id2);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

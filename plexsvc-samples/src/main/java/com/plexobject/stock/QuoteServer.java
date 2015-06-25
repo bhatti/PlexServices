@@ -10,13 +10,13 @@ import com.plexobject.deploy.AutoDeployer;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", payloadClass = QuoteRequest.class, method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", payloadClass = QuoteRequest.class, method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "symbol"), @Field(name = "action") })
 public class QuoteServer implements RequestHandler {
     public enum Action {

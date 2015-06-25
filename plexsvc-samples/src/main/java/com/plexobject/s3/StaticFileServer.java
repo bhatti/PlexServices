@@ -12,11 +12,11 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
-import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = RequestMethod.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private Map<String, String> mimeTypes = new HashMap<String, String>() {
         private static final long serialVersionUID = 1L;

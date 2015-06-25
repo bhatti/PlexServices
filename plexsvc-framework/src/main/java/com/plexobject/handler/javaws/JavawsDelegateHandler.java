@@ -13,6 +13,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.ServiceInvocationException;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
@@ -26,11 +27,26 @@ public class JavawsDelegateHandler implements RequestHandler {
         public final Method iMethod;
         public final Method implMethod;
         public final String itemName;
+        public final RequestMethod requestMethod;
+        public final String[] paramNames;
 
-        public MethodInfo(Method iMethod, Method implMethod, String itemName) {
+        public MethodInfo(Method iMethod, Method implMethod, String itemName,
+                RequestMethod requestMethod, String[] paramNames) {
             this.iMethod = iMethod;
             this.implMethod = implMethod;
             this.itemName = itemName;
+            this.requestMethod = requestMethod;
+            this.paramNames = paramNames;
+        }
+
+        public boolean useNameParams() {
+            return paramNames.length > 0
+                    && paramNames.length == iMethod.getParameterTypes().length;
+        }
+
+        public boolean useMapProperties() {
+            return iMethod.getParameterTypes().length == 1
+                    && Map.class == iMethod.getParameterTypes()[0];
         }
     }
 
@@ -49,13 +65,13 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     @Override
     public void handle(final Request<Object> request) {
-        Pair<String, String> methodAndPayload = getMethodNameAndPayload((String) request
-                .getPayload());
+        Pair<String, String> methodAndPayload = getMethodNameAndPayload(request);
 
         final MethodInfo methodInfo = methodsByName.get(methodAndPayload.first);
         if (methodInfo == null) {
             throw new ServiceInvocationException("Unknown method "
-                    + methodAndPayload.first + ", request "
+                    + methodAndPayload.first + ", available "
+                    + methodsByName.keySet() + ", request "
                     + request.getPayload(), HttpResponse.SC_NOT_FOUND);
         }
         // set method name
@@ -65,8 +81,17 @@ public class JavawsDelegateHandler implements RequestHandler {
         try {
             // make sure you use iMethod to decode because implMethod might have
             // erased parameterized type
-            final Object[] args = ReflectUtils.decode(methodAndPayload.second,
-                    methodInfo.iMethod, request.getCodec());
+            // We can get input parameters either from JSON text, form/query
+            // parameters or method simply takes Map so we just pass all request
+            // properties
+            final Object[] args = methodInfo.useNameParams() ? ReflectUtils
+                    .decode(methodInfo.iMethod, methodInfo.paramNames,
+                            request.getProperties())
+                    : methodAndPayload.second == null
+                            && methodInfo.useMapProperties() ? new Object[] { request
+                            .getProperties() } : ReflectUtils.decode(
+                            methodAndPayload.second, methodInfo.iMethod,
+                            request.getCodec());
             invokeWithAroundInterceptorIfNeeded(request, methodInfo,
                     responseTag, args);
         } catch (Exception e) {
@@ -128,9 +153,16 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     // hard coding to handle JSON messages
     // TODO handle XML messages
-    private static Pair<String, String> getMethodNameAndPayload(String text) {
+    private static Pair<String, String> getMethodNameAndPayload(
+            Request<Object> request) {
+        String text = request.getPayload();
         if (text == null || text.length() == 0 || text.charAt(0) != '{') {
-            throw new IllegalArgumentException("Unsupported request " + text);
+            String method = request.getStringProperty("methodName");
+            if (method == null) {
+                throw new IllegalArgumentException("Unsupported request "
+                        + text);
+            }
+            return Pair.of(method, null);
         }
         int colon = text.indexOf(':');
         String method = text.substring(1, colon);
@@ -140,5 +172,4 @@ public class JavawsDelegateHandler implements RequestHandler {
         String payload = text.substring(colon + 1, text.length() - 1);
         return Pair.of(method, payload);
     }
-
 }

@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jws.WebParam;
@@ -30,6 +31,28 @@ public class ReflectUtils {
             serviceClasses.addAll(reflections.getTypesAnnotatedWith(klass));
         }
         return serviceClasses;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Object[] decode(Method m, String[] paramNames,
+            Map<String, Object> props) throws Exception {
+        Pair<Class, Type>[] pairs = new Pair[m.getParameterTypes().length];
+        for (int i = 0; i < m.getParameterTypes().length; i++) {
+            pairs[i] = Pair.of((Class) m.getParameterTypes()[i],
+                    m.getGenericParameterTypes()[i]);
+        }
+        return decode(pairs, paramNames, props);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static Object[] decode(Pair<Class, Type>[] types,
+            String[] paramNames, Map<String, Object> props) throws Exception {
+        Object[] args = new Object[types.length];
+        for (int i = 0; i < types.length; i++) {
+            Class<?> klass = types[i].first;
+            args[i] = decodePrimitive(props.get(paramNames[i]), klass);
+        }
+        return args;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -99,6 +122,12 @@ public class ReflectUtils {
     }
 
     private static Object decodePrimitive(Object payload, Class<?> klass) {
+        if (payload == null) {
+            return null;
+        }
+        if (klass == String.class && payload instanceof String) {
+            return (String) payload;
+        }
         String text = payload.toString();
         if (klass == Byte.class || klass == Byte.TYPE) {
             return Byte.valueOf(text);
@@ -116,6 +145,8 @@ public class ReflectUtils {
             return Float.valueOf(text);
         } else if (klass == Double.class || klass == Double.TYPE) {
             return Double.valueOf(text);
+        } else if (klass == String.class) {
+            return text;
         }
         throw new IllegalArgumentException("Could not convert " + text + " to "
                 + klass.getName());
@@ -131,4 +162,5 @@ public class ReflectUtils {
         }
         return null;
     }
+
 }

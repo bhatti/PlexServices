@@ -7,14 +7,14 @@ import java.util.Map;
 
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 
 public class StudentServiceRest {
     private static Map<String, Student> students = new HashMap<>();
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student.class, endpoint = "/students", method = Method.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student.class, endpoint = "/students", method = RequestMethod.POST)
     public static class SaveHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -24,7 +24,7 @@ public class StudentServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students", method = Method.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students", method = RequestMethod.GET)
     public static class QueryHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -44,7 +44,7 @@ public class StudentServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students/{studentId}", method = Method.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students/{studentId}", method = RequestMethod.GET)
     public static class GetHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {

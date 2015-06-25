@@ -2,7 +2,6 @@ package com.plexobject.handler.javaws;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -234,13 +233,8 @@ public class RequestHandlerAdapterJavawsTest {
 
     @Test
     public void testGetCustomers() throws Exception {
-
-        Customer c1 = new Customer("AAAAA", true);
-        Customer c2 = new Customer("BBBBB", false);
-        Collection<Customer> result = courseService.getCustomers(Arrays.asList(
-                c1, c2));
-        assertTrue(result.contains(c1));
-        assertTrue(result.contains(c2));
+        Collection<Customer> result = courseService.getCustomers(1L, "2");
+        assertEquals(2, result.size());
     }
 
     private static Student buildStudent() throws Exception {

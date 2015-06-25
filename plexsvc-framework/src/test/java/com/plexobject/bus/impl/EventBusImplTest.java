@@ -17,7 +17,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.predicate.Predicate;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 
 public class EventBusImplTest {
@@ -50,7 +50,7 @@ public class EventBusImplTest {
         Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setProperties(properties)
                 .setHeaders(headers)
                 .setEndpoint("/w")
@@ -76,7 +76,7 @@ public class EventBusImplTest {
         Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setProperties(properties)
                 .setHeaders(headers)
                 .setEndpoint("/w")
@@ -107,7 +107,7 @@ public class EventBusImplTest {
         Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setProperties(properties)
                 .setHeaders(headers)
                 .setEndpoint("/w")

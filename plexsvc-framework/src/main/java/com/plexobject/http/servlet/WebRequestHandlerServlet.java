@@ -25,7 +25,7 @@ import com.plexobject.http.Handledable;
 import com.plexobject.http.WebContainerProvider;
 import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
@@ -90,27 +90,27 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(Method.GET, req, resp);
+        handle(RequestMethod.GET, req, resp);
     }
 
     protected void doHead(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(Method.HEAD, req, resp);
+        handle(RequestMethod.HEAD, req, resp);
     }
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(Method.POST, req, resp);
+        handle(RequestMethod.POST, req, resp);
     }
 
     protected void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(Method.PUT, req, resp);
+        handle(RequestMethod.PUT, req, resp);
     }
 
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(Method.DELETE, req, resp);
+        handle(RequestMethod.DELETE, req, resp);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         super.destroy();
     }
 
-    private void handle(Method method, HttpServletRequest req,
+    private void handle(RequestMethod method, HttpServletRequest req,
             HttpServletResponse resp) throws IOException {
         if (!isRunning()) {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,

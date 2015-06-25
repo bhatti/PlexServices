@@ -20,13 +20,13 @@ import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.SecurityAuthorizer;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
 
 public class AutoDeployerTest {
-    @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/ws", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     public static class WebsocketService implements RequestHandler {
 
         @Override
@@ -34,14 +34,14 @@ public class AutoDeployerTest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public static class WebService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://test", method = Method.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://test", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     public static class JmsService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {

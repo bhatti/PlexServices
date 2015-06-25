@@ -26,7 +26,7 @@ import com.plexobject.handler.Handler;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
 
@@ -57,7 +57,7 @@ public class WebToJmsBridgeTest {
     @Test
     public void testAdd() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "destination", 5, false, 1);
+                RequestMethod.GET, "destination", 5, false, 1);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
@@ -66,7 +66,7 @@ public class WebToJmsBridgeTest {
         Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)
@@ -86,7 +86,7 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleAsynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue://{scope}-assign-bugreport-service-queue",
+                RequestMethod.GET, "queue://{scope}-assign-bugreport-service-queue",
                 5, false, 1);
         entry.setAsynchronous(true);
         bridge.add(entry);
@@ -97,7 +97,7 @@ public class WebToJmsBridgeTest {
         Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)
@@ -124,7 +124,7 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleSynchronous() throws Exception {
         final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue://{scope}-assign-bugreport-service-queue",
+                RequestMethod.GET, "queue://{scope}-assign-bugreport-service-queue",
                 5, false, 1);
         entry.setAsynchronous(false);
         bridge.add(entry);
@@ -135,7 +135,7 @@ public class WebToJmsBridgeTest {
         final Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)

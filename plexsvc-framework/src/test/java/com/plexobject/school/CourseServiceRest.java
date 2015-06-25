@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.validation.ValidationException;
@@ -15,7 +15,7 @@ import com.plexobject.validation.ValidationException;
 public class CourseServiceRest {
     private static Map<String, Course> courses = new HashMap<>();
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course.class, endpoint = "/courses", method = Method.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course.class, endpoint = "/courses", method = RequestMethod.POST)
     public static class SaveHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -25,7 +25,7 @@ public class CourseServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Customer[].class, endpoint = "/customers", method = Method.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Customer[].class, endpoint = "/customers", method = RequestMethod.POST)
     public static class CustomersHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -34,7 +34,7 @@ public class CourseServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student[].class, endpoint = "/courses/enroll", method = Method.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student[].class, endpoint = "/courses/enroll", method = RequestMethod.POST)
     public static class EnrollHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -54,7 +54,7 @@ public class CourseServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/students/{studentId}", method = Method.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/students/{studentId}", method = RequestMethod.GET)
     public static class CoursesForStudentHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -69,7 +69,7 @@ public class CourseServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses", method = Method.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses", method = RequestMethod.GET)
     public static class QueryHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -89,7 +89,7 @@ public class CourseServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/{courseId}", method = Method.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/{courseId}", method = RequestMethod.GET)
     public static class GetHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -103,7 +103,7 @@ public class CourseServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course[].class, endpoint = "/courses/create", method = Method.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course[].class, endpoint = "/courses/create", method = RequestMethod.POST)
     public static class CreateHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -115,7 +115,7 @@ public class CourseServiceRest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/error", method = Method.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/error", method = RequestMethod.GET)
     public static class ErrorHandler implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {

@@ -5,16 +5,16 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.plexobject.encode.CodecType;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 
 public class WebToJmsEntryTest {
     @Test
     public void testCreateWebToJmsEntry() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/url",
-                Method.GET, "destination", 5, false, 1);
+                RequestMethod.GET, "destination", 5, false, 1);
         assertEquals(CodecType.JSON, entry.getCodecType());
         assertEquals("/url", entry.getEndpoint());
-        assertEquals(Method.GET, entry.getMethod());
+        assertEquals(RequestMethod.GET, entry.getMethod());
         assertEquals("destination", entry.getDestination());
         assertEquals(5, entry.getTimeoutSecs());
     }
@@ -36,8 +36,8 @@ public class WebToJmsEntryTest {
     @Test
     public void testGetSetMethod() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry();
-        entry.setMethod(Method.GET);
-        assertEquals(Method.GET, entry.getMethod());
+        entry.setMethod(RequestMethod.GET);
+        assertEquals(RequestMethod.GET, entry.getMethod());
     }
 
     @Test

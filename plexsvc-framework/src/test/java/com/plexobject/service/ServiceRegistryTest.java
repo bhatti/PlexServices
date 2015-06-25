@@ -67,7 +67,7 @@ public class ServiceRegistryTest {
     private List<Request<Object>> requests = new ArrayList<>();
 
     //
-    @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/ws", method = Method.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/ws", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     public class WebsocketService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -75,7 +75,7 @@ public class ServiceRegistryTest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -84,7 +84,7 @@ public class ServiceRegistryTest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://test", method = Method.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, endpoint = "queue://test", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     public class JmsService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {
@@ -209,8 +209,8 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
         Collection<WebToJmsEntry> entries = Arrays.asList(new WebToJmsEntry(
-                CodecType.JSON, "/w", Method.GET, "queue://w", 5, false, 1),
-                new WebToJmsEntry(CodecType.JSON, "/ws", Method.GET,
+                CodecType.JSON, "/w", RequestMethod.GET, "queue://w", 5, false, 1),
+                new WebToJmsEntry(CodecType.JSON, "/ws", RequestMethod.GET,
                         "queue://w", 5, false, 1));
         RequestHandler h = new WebService();
         registry.add(h);
@@ -225,8 +225,8 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
         Collection<WebToJmsEntry> entries = Arrays.asList(new WebToJmsEntry(
-                CodecType.JSON, "/w", Method.GET, "queue://w", 5, false, 1),
-                new WebToJmsEntry(CodecType.JSON, "/ws", Method.GET,
+                CodecType.JSON, "/w", RequestMethod.GET, "queue://w", 5, false, 1),
+                new WebToJmsEntry(CodecType.JSON, "/ws", RequestMethod.GET,
                         "queue://w", 5, false, 1));
         RequestHandler h = new WebService();
         registry.add(h);
@@ -301,7 +301,7 @@ public class ServiceRegistryTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/w").setProperties(properties)
                 .setHeaders(headers).setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -324,7 +324,7 @@ public class ServiceRegistryTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/w").setProperties(properties)
                 .setHeaders(headers).setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -346,7 +346,7 @@ public class ServiceRegistryTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/w").setProperties(properties)
                 .setHeaders(headers).setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -372,7 +372,7 @@ public class ServiceRegistryTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/w").setProperties(properties)
                 .setHeaders(headers).setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -400,7 +400,7 @@ public class ServiceRegistryTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/w").setProperties(properties)
                 .setHeaders(headers).setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -429,7 +429,7 @@ public class ServiceRegistryTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/w").setProperties(properties)
                 .setHeaders(headers).setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -458,7 +458,7 @@ public class ServiceRegistryTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setEndpoint("/w").setProperties(properties)
                 .setHeaders(headers).setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)

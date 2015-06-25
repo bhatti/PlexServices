@@ -83,7 +83,7 @@ PlexServices uses Netty server as embedded web server to host web services by de
 ### Defining a REST service for creating a user
 ```java 
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
-    rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
+    rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements
@@ -132,7 +132,7 @@ which is default setting.
 
 ```java 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
-    rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
+    rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements
@@ -176,7 +176,7 @@ ws.onerror = function(err) {
 ```java 
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", 
-      method = Method.MESSAGE, 
+      method = RequestMethod.MESSAGE, 
       concurrency = 10,
       codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
@@ -202,7 +202,7 @@ Note: concurrency parameter specifies number of concurrent consumers that would 
 ```java 
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
-      method = Method.POST, 
+      method = RequestMethod.POST, 
       codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugNumber"),
         @Field(name = "projectId"), @Field(name = "priority")
@@ -231,7 +231,7 @@ classes into JSON when delivering messages over HTTP.
 ```java 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", 
-      method = Method.MESSAGE, codec = CodecType.JSON)
+      method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugNumber"),
         @Field(name = "projectId"), @Field(name = "priority")
         })
@@ -284,7 +284,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
 ### Defining a REST service for querying users
 ```java 
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
-  rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
+  rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.GET, 
   codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements
 RequestHandler {
@@ -309,7 +309,7 @@ public QueryUserService(UserRepository userRepository) {
 ```java 
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", 
-      method = Method.MESSAGE, 
+      method = RequestMethod.MESSAGE, 
       codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements RequestHandler {
     public QueryUserService(UserRepository userRepository) {
@@ -345,7 +345,7 @@ Above example describes rules for validating username, password, email and zipco
 ### Overriding service configuration at runtime and deploying same service via different protocols
 In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = RequestMethod.GET, codec = CodecType.JSON)
 public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
@@ -361,19 +361,19 @@ And then at runtime, override configuration, e.g.
     serviceRegistry.add(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
+                            .setMethod(RequestMethod.MESSAGE)
                             .setEndpoint("queue://ping")
                             .setProtocol(Protocol.JMS)
                             .build());
     serviceRegistry.add(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
+                            .setMethod(RequestMethod.MESSAGE)
                             .setProtocol(Protocol.WEBSOCKET)
                             .build());
     serviceRegistry.add(pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                            .setMethod(RequestMethod.GET).setProtocol(Protocol.HTTP)
                             .build());
 
     serviceRegistry.start();
@@ -386,7 +386,7 @@ Though, PlexServices framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:
 
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = RequestMethod.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private File webFolder;
 
@@ -829,7 +829,7 @@ quote quotes over the websockets.
 
 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "symbol"),
         @Field(name = "action") })
 public class QuoteServer implements RequestHandler {

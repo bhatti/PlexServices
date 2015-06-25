@@ -1,6 +1,8 @@
 package com.plexobject.handler;
 
-import com.plexobject.domain.Pair;
+import java.util.Map;
+
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfigDesc;
 
 /**
@@ -11,11 +13,12 @@ import com.plexobject.service.ServiceConfigDesc;
  *
  */
 public interface RequestHandlerAdapter {
-    Pair<ServiceConfigDesc, RequestHandler> create(Class<?> serviceClass,
+    Map<ServiceConfigDesc, RequestHandler> create(Class<?> serviceClass,
             ServiceConfigDesc desc);
 
-    Pair<ServiceConfigDesc, RequestHandler> create(Object service,
+    Map<ServiceConfigDesc, RequestHandler> create(Object service,
             ServiceConfigDesc desc);
 
-    Pair<ServiceConfigDesc, RequestHandler> create(Object service, String path);
+    Map<ServiceConfigDesc, RequestHandler> create(Object service, String path,
+            RequestMethod method);
 }

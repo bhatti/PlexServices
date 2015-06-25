@@ -64,7 +64,6 @@ public class XmlObjectCodecTest {
     @Test(expected = EncodingException.class)
     public void testDecodeBadXml() {
         Object obj = instance.decode("[x]", Employee.class, null);
-        System.out.println("obj " + obj);
         assertNull(obj);
     }
 

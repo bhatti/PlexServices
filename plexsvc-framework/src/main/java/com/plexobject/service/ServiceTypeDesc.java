@@ -12,11 +12,11 @@ public class ServiceTypeDesc implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final Protocol protocol;
-    private final Method method;
+    private final RequestMethod method;
     private final String version;
     private final String endpoint;
 
-    public ServiceTypeDesc(Protocol protocol, Method method, String version,
+    public ServiceTypeDesc(Protocol protocol, RequestMethod method, String version,
             String endpoint) {
         this.protocol = protocol;
         this.method = method;
@@ -32,7 +32,7 @@ public class ServiceTypeDesc implements Serializable {
         return protocol;
     }
 
-    public Method method() {
+    public RequestMethod method() {
         return method;
     }
 

@@ -28,7 +28,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.MessageListenerConfig;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 
 @RunWith(JMockit.class)
@@ -146,7 +146,7 @@ public class EventBusToJmsBridgeTest {
         Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)

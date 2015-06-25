@@ -19,7 +19,7 @@ import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.ServiceRegistryTest.TestUser;
 
 public class ServiceHandlerLifecycleTest {
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = Method.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request<Object> request) {

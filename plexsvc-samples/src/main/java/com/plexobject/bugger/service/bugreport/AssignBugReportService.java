@@ -6,15 +6,14 @@ import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.validation.Field;
 import com.plexobject.validation.RequiredFields;
 import com.plexobject.validation.ValidationException;
 
-//@ServiceConfig(protocol = Protocol.HTTP, rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports/{id}/assign", method = Method.POST, codec = CodecType.JSON)
-@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-assign-bugreport-service-queue", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-assign-bugreport-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "projectId"), @Field(name = "bugReportId"),
         @Field(name = "assignedTo") })
 public class AssignBugReportService extends AbstractBugReportService implements

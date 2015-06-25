@@ -45,7 +45,7 @@ import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 
 public class EventBusToJmsBridgeIntegTest {
@@ -182,7 +182,7 @@ public class EventBusToJmsBridgeIntegTest {
         Request<Object> request = Request
                 .objectBuilder()
                 .setProtocol(Protocol.HTTP)
-                .setMethod(Method.GET)
+                .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)

@@ -10,7 +10,7 @@ import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 
 /**
@@ -25,7 +25,7 @@ public class Request<T> extends AbstractPayload {
         private T payload;
         private Map<String, Object> properties = new HashMap<>();
         private Map<String, Object> headers = new HashMap<>();
-        private Method method;
+        private RequestMethod method;
         private String remoteAddress;
         private String requestUri;
         private String endpoint;
@@ -38,7 +38,7 @@ public class Request<T> extends AbstractPayload {
             return this;
         }
 
-        public Builder<T> setMethod(Method method) {
+        public Builder<T> setMethod(RequestMethod method) {
             this.method = method;
             return this;
         }
@@ -109,7 +109,7 @@ public class Request<T> extends AbstractPayload {
     private transient ResponseDispatcher responseDispatcher;
     private transient Response response;
     private Protocol protocol;
-    private Method method;
+    private RequestMethod method;
     private String endpoint;
     private CodecType codecType;
     private String methodName;
@@ -118,7 +118,7 @@ public class Request<T> extends AbstractPayload {
     public Request() {
     }
 
-    public Request(Protocol protocol, Method method, String requestUri,
+    public Request(Protocol protocol, RequestMethod method, String requestUri,
             String endpoint, final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             final CodecType codecType, final Response response,
@@ -146,7 +146,7 @@ public class Request<T> extends AbstractPayload {
         return protocol;
     }
 
-    public Method getMethod() {
+    public RequestMethod getMethod() {
         return method;
     }
 

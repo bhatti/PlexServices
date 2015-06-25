@@ -39,7 +39,7 @@ import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceRegistry;
 
@@ -98,9 +98,9 @@ public class WebToJmsBridgeIntegTest {
     public void testSetWebToJmsEntries() throws Exception {
         assertNull(bridge.getMappingEntry(newWebRequest("/ping", "{}")));
         bridge.setWebToJmsEntries(Arrays.asList(
-                new WebToJmsEntry(CodecType.JSON, "/ping", Method.GET,
+                new WebToJmsEntry(CodecType.JSON, "/ping", RequestMethod.GET,
                         "destination", 5, false, 1), new WebToJmsEntry(
-                        CodecType.JSON, "/ws", Method.MESSAGE, "destination",
+                        CodecType.JSON, "/ws", RequestMethod.MESSAGE, "destination",
                         5, false, 1)));
         assertNotNull(bridge.getMappingEntry(newWebRequest("/ping", "{}")));
         assertNotNull(bridge.getMappingEntry(newWebsocketRequest("/ws", "{}")));
@@ -109,7 +109,7 @@ public class WebToJmsBridgeIntegTest {
     @Test
     public void testAdd() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "destination", 5, false, 1);
+                RequestMethod.GET, "destination", 5, false, 1);
         bridge.add(entry);
         Request<Object> request = newWebRequest("/w", "{}");
         assertNotNull(bridge.getMappingEntry(request));
@@ -136,7 +136,7 @@ public class WebToJmsBridgeIntegTest {
     @Test
     public void testHandleAsynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                Method.GET, "queue://create", 5, true, 1);
+                RequestMethod.GET, "queue://create", 5, true, 1);
         bridge.add(entry);
         bridge.onStarted();
         Request<Object> request = newWebRequest("/w", "message");
@@ -162,7 +162,7 @@ public class WebToJmsBridgeIntegTest {
     @Test
     public void testHandleSynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/ws",
-                Method.MESSAGE, "queue://svc", 5, false, 1);
+                RequestMethod.MESSAGE, "queue://svc", 5, false, 1);
         bridge.add(entry);
         bridge.onStarted();
         Request<Object> request = newWebsocketRequest("/ws", "message");
@@ -191,7 +191,7 @@ public class WebToJmsBridgeIntegTest {
     @Test
     public void testHandleSynchronousTimeout() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/ws",
-                Method.MESSAGE, "queue://tm", 1, false, 1);
+                RequestMethod.MESSAGE, "queue://tm", 1, false, 1);
         bridge.add(entry);
         bridge.onStarted();
         Request<Object> request = newWebsocketRequest("/ws", "message");
@@ -218,7 +218,7 @@ public class WebToJmsBridgeIntegTest {
     @Test(expected = IllegalStateException.class)
     public void testAddDuplicateWeb() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/ws",
-                Method.GET, "destination", 5, false, 1);
+                RequestMethod.GET, "destination", 5, false, 1);
         bridge.add(entry);
         bridge.add(entry);
     }
@@ -226,7 +226,7 @@ public class WebToJmsBridgeIntegTest {
     @Test(expected = IllegalStateException.class)
     public void testAddDuplicateWebsocket() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/ws",
-                Method.MESSAGE, "destination", 5, false, 1);
+                RequestMethod.MESSAGE, "destination", 5, false, 1);
         bridge.add(entry);
         bridge.add(entry);
     }
@@ -238,16 +238,16 @@ public class WebToJmsBridgeIntegTest {
     }
 
     private static Request<Object> newWebRequest(String path, String payload) {
-        return newRequest(path, payload, Method.GET);
+        return newRequest(path, payload, RequestMethod.GET);
     }
 
     private static Request<Object> newWebsocketRequest(String path,
             String payload) {
-        return newRequest(path, payload, Method.MESSAGE);
+        return newRequest(path, payload, RequestMethod.MESSAGE);
     }
 
     private static Request<Object> newRequest(String path, String payload,
-            Method method) {
+            RequestMethod method) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("prop1", "val1");
         Map<String, Object> headers = new HashMap<>();
@@ -279,7 +279,7 @@ public class WebToJmsBridgeIntegTest {
     @Test
     public void testLoad() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/ws",
-                Method.MESSAGE, "destination", 5, false, 1);
+                RequestMethod.MESSAGE, "destination", 5, false, 1);
         File jsonFile = File.createTempFile("entry", "json");
         FileWriter out = new FileWriter(jsonFile);
         String jsonStr = "[" + new JsonObjectCodec().encode(entry) + "]";

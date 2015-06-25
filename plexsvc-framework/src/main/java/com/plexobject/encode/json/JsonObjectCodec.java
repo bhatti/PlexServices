@@ -61,6 +61,9 @@ public class JsonObjectCodec extends AbstractObjectCodec {
     }
 
     public <T> T decode(String text, final TypeReference<T> type) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         try {
             return mapper.readValue(text, type);
         } catch (IOException e) {

@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 
 public class RequestTest {
@@ -37,7 +37,7 @@ public class RequestTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), "", CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setProperties(properties).setHeaders(headers)
                 .setEndpoint("/w").setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -45,7 +45,7 @@ public class RequestTest {
                 }).build();
 
         assertEquals(Protocol.HTTP, request.getProtocol());
-        assertEquals(Method.GET, request.getMethod());
+        assertEquals(RequestMethod.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
         assertEquals(response, request.getResponse());
         assertEquals("id", request.getSessionId());
@@ -61,7 +61,7 @@ public class RequestTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setSessionId(null).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
                 .setCodecType(CodecType.JSON).setPayload("{}")
@@ -70,7 +70,7 @@ public class RequestTest {
                 }).build();
 
         assertEquals(Protocol.HTTP, request.getProtocol());
-        assertEquals(Method.GET, request.getMethod());
+        assertEquals(RequestMethod.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
         assertEquals(response, request.getResponse());
         assertEquals("id", request.getSessionId());
@@ -86,7 +86,7 @@ public class RequestTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setProperties(properties).setHeaders(headers)
                 .setEndpoint("/w").setCodecType(CodecType.JSON)
                 .setPayload(payload).setResponse(response)
@@ -118,7 +118,7 @@ public class RequestTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setProperties(properties).setHeaders(headers)
                 .setEndpoint("/w").setCodecType(CodecType.JSON)
                 .setPayload("pay").setResponse(response)
@@ -160,7 +160,7 @@ public class RequestTest {
         Response response = new Response(new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, CodecType.JSON);
         Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(Method.GET)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
                 .setProperties(properties).setHeaders(headers)
                 .setEndpoint("/w").setCodecType(CodecType.JSON)
                 .setPayload(null).setResponse(response)

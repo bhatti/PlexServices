@@ -5,11 +5,11 @@ import org.apache.log4j.Logger;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.Method;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON, concurrency = 10)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = RequestMethod.GET, codec = CodecType.JSON, concurrency = 10)
 public class PingService implements RequestHandler {
     private static final Logger log = Logger.getLogger(PingService.class);
 

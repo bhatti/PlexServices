@@ -15,7 +15,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
     private final int concurrency;
 
     public static class Builder {
-        private Method method;
+        private RequestMethod method;
         private Protocol protocol;
         private Class<?> payloadClass = Void.class;
         private CodecType codecType;
@@ -28,7 +28,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
         public Builder(WebToJmsEntry e) {
             if (e != null) {
                 this.method = e.getMethod();
-                this.protocol = e.getMethod() == Method.MESSAGE ? Protocol.WEBSOCKET
+                this.protocol = e.getMethod() == RequestMethod.MESSAGE ? Protocol.WEBSOCKET
                         : Protocol.HTTP;
                 this.payloadClass = Void.class;
                 this.codecType = e.getCodecType();
@@ -76,7 +76,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
             }
         }
 
-        public Builder setMethod(Method method) {
+        public Builder setMethod(RequestMethod method) {
             this.method = method;
             return this;
         }
@@ -143,7 +143,14 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
                 .concurrency());
     }
 
-    public ServiceConfigDesc(Protocol protocol, Method method,
+    public ServiceConfigDesc(ServiceConfigDesc config, RequestMethod method) {
+        this(config.protocol(), method, config.payloadClass(), config.codec(),
+                config.version(), config.endpoint(), config
+                        .recordStatsdMetrics(), config.rolesAllowed(), config
+                        .concurrency());
+    }
+
+    public ServiceConfigDesc(Protocol protocol, RequestMethod method,
             Class<?> payloadClass, CodecType codecType, String version,
             String endpoint, boolean recordStatsdMetrics,
             String[] rolesAllowed, int concurrency) {

@@ -36,7 +36,7 @@ import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.util.IOUtils;
 
@@ -161,7 +161,7 @@ public class EventBusToJmsBridge implements Lifecycle {
 
                 // TODO do we need entry.getRequestTypeClass()
                 Request<Object> request = Request.objectBuilder()
-                        .setProtocol(Protocol.JMS).setMethod(Method.MESSAGE)
+                        .setProtocol(Protocol.JMS).setMethod(RequestMethod.MESSAGE)
                         .setProperties(params).setEndpoint(entry.getTarget())
                         .setCodecType(entry.getCodecType()).setPayload(payload)
                         .setResponse(response)

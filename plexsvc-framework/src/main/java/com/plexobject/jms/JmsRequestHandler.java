@@ -21,7 +21,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -67,7 +67,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             Response response = new Response(new HashMap<String, Object>(),
                     new HashMap<String, Object>(), "", config.codec());
             Request<String> request = Request.stringBuilder()
-                    .setProtocol(Protocol.JMS).setMethod(Method.MESSAGE)
+                    .setProtocol(Protocol.JMS).setMethod(RequestMethod.MESSAGE)
                     .setProperties(params).setEndpoint(config.endpoint())
                     .setCodecType(config.codec()).setPayload(textPayload)
                     .setResponse(response).setResponseDispatcher(dispatcher)

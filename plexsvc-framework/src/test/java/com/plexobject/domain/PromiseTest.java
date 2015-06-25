@@ -88,8 +88,7 @@ public class PromiseTest {
         assertFalse(promise.isCancelled());
         assertFalse(promise.isTimedout());
         assertFalse(promise.isDone());
-        Integer n = promise.get();
-        System.out.println(n);
+        promise.get();
     }
 
     @Test(expected = CancellationException.class)

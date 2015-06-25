@@ -212,7 +212,6 @@ public class TestWebUtils {
         for (int i = 0; i < headers.length - 1; i += 2) {
             con.setRequestProperty(headers[i], headers[i + 1]);
         }
-
         return getResponse(con);
     }
 

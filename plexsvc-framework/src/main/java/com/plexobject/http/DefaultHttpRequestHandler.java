@@ -8,7 +8,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.route.RouteResolver;
-import com.plexobject.service.Method;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceRegistry;
 
 /**
@@ -20,12 +20,12 @@ import com.plexobject.service.ServiceRegistry;
 public class DefaultHttpRequestHandler implements RequestHandler {
     private static final Logger log = Logger
             .getLogger(DefaultHttpRequestHandler.class);
-    private final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
+    private final Map<RequestMethod, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
     private final ServiceRegistry serviceRegistry;
 
     public DefaultHttpRequestHandler(
             final ServiceRegistry serviceRegistry,
-            final Map<Method, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
+            final Map<RequestMethod, RouteResolver<RequestHandler>> requestHandlerPathsByMethod) {
         this.serviceRegistry = serviceRegistry;
         this.requestHandlerPathsByMethod = requestHandlerPathsByMethod;
     }

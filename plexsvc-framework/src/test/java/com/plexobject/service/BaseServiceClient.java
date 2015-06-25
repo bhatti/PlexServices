@@ -89,12 +89,36 @@ public class BaseServiceClient {
     }
 
     @SuppressWarnings("unchecked")
-    protected static <T> T get(String path, Class<?> responseType)
-            throws Exception {
+    protected static <T> T get(String path, Class<?> responseType, Type pType,
+            String item) throws Exception {
+        // System.out.println("SENDING " + request);
         String resp = TestWebUtils.get("http://localhost:" + DEFAULT_PORT
                 + path, "Accept", getAcceptHeader());
-        return (T) ReflectUtils.decode(resp, responseType, null,
+        // System.out.println("RECEIVED " + resp);
+        int colon = resp.indexOf("\":");
+        int subtract = 1;
+        if (item != null) {
+            colon = resp.indexOf("\":", colon + 1);
+            subtract = 2;
+        }
+        String payload = resp.substring(colon + 2, resp.length() - subtract);
+
+        return (T) ReflectUtils.decode(payload, responseType, pType,
                 getObjectCodec());
     }
 
+    @SuppressWarnings("unchecked")
+    protected static <T> T get(String path, Class<?> responseType)
+            throws Exception {
+        // System.out.println("SENDING " + request);
+        String resp = TestWebUtils.get("http://localhost:" + DEFAULT_PORT
+                + path, null, "Accept", getAcceptHeader());
+        // System.out.println("RECEIVED " + resp);
+        int colon = resp.indexOf("\":");
+        int subtract = 1;
+        String payload = resp.substring(colon + 2, resp.length() - subtract);
+
+        return (T) ReflectUtils.decode(payload, responseType, null,
+                getObjectCodec());
+    }
 }
