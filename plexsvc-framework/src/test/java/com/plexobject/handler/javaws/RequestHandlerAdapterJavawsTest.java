@@ -123,12 +123,12 @@ public class RequestHandlerAdapterJavawsTest {
         serviceRegistry.stop();
     }
 
-    // @Test
+    @Test
     public void testCourseException() throws Exception {
         courseService.exceptionExample(false);
     }
 
-    // @Test
+    @Test
     public void testRtCourseException() throws Exception {
         BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.INFO);
@@ -136,7 +136,7 @@ public class RequestHandlerAdapterJavawsTest {
         courseService.exceptionExample(true);
     }
 
-    // @Test
+    @Test
     public void testStudentRuntimeException() throws Exception {
         studentService.exceptionExample();
     }

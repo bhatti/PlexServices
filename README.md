@@ -1,4 +1,4 @@
-#PlexServices - Light-weight Micro-Service Framework for building high performance and secured applications 
+#PlexServices - Micro Framework for building high performance and secured services 
 
 ##Overview
 
@@ -62,6 +62,7 @@ cd plexsvc-framework
 ```
 
 - Copy and add jar file (build/libs/plexsvc-framework-1.0-SNAPSHOT.jar) manually in your application.
+
 
 
 ##Dependencies

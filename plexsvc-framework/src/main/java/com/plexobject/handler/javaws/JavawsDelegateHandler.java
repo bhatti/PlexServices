@@ -23,7 +23,7 @@ public class JavawsDelegateHandler implements RequestHandler {
     private static final String RESPONSE_SUFFIX = "Response";
     private static final Map<String, Object> EMPTY_MAP = new HashMap<>();
 
-    public static class MethodInfo {
+    static class MethodInfo {
         public final Method iMethod;
         public final Method implMethod;
         public final String webParamName;
