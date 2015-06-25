@@ -25,8 +25,8 @@ import com.plexobject.http.Handledable;
 import com.plexobject.http.WebContainerProvider;
 import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.ServiceRegistryLifecycleAware;
 import com.plexobject.util.IOUtils;
@@ -39,8 +39,7 @@ import com.plexobject.util.IOUtils;
  *
  */
 public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
-
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(WebRequestHandlerServlet.class);
 
     private static final long serialVersionUID = 1L;
@@ -69,6 +68,8 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                         @Override
                         public Lifecycle getWebContainer(Configuration config,
                                 RequestHandler executor) {
+                            logger.info("PLEXSVC Setting default executor "
+                                    + executor);
                             WebRequestHandlerServlet.this.defaultExecutor = executor;
                             WebRequestHandlerServlet.this.codecType = config
                                     .getDefaultCodecType(); // serviceRegistry.getServiceConfig(defaultExecutor).codec();
@@ -80,9 +81,10 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
             ServiceRegistryLifecycleAware serviceRegistryAware = (ServiceRegistryLifecycleAware) Class
                     .forName(plexserviceCallbackClass).newInstance();
             serviceRegistry
-                    .setServiceRegistryLifecycleAware(serviceRegistryAware);
+                    .addServiceRegistryLifecycleAware(serviceRegistryAware);
             serviceRegistry.start();
-            log.info("**** Started service registry via war servlet ***" + this);
+            logger.info("PLEXSVC Started service registry via war servlet ***"
+                    + this);
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -138,7 +140,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         if (!isRunning()) {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                     "Service not running");
-            log.warn("Received requests but service registry is not running "
+            logger.warn("PLEXSVC Received requests but service registry is not running "
                     + this);
             return;
         }
@@ -147,7 +149,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
         if (defaultExecutor == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND,
                     "Service is not found");
-            log.warn("Received requests but request handler is not found for "
+            logger.warn("PLEXSVC Received requests (defaultExecutor is not set) but request handler is not found for "
                     + textPayload);
             return;
         }
@@ -180,7 +182,8 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                 .setPayload(textPayload).setResponse(response)
                 .setResponseDispatcher(dispatcher).build();
 
-        log.info("HTTP Received URI '" + uri + "', request " + handlerReq);
+        logger.info("PLEXSVC HTTP Received URI '" + uri + "', request "
+                + handlerReq);
         defaultExecutor.handle(handlerReq);
     }
 

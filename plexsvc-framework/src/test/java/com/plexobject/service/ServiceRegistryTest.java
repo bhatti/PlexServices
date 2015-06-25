@@ -270,7 +270,7 @@ public class ServiceRegistryTest {
         final Configuration config = new Configuration(properties);
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
-        registry.setServiceRegistryLifecycleAware(new ServiceRegistryLifecycleAware() {
+        registry.addServiceRegistryLifecycleAware(new ServiceRegistryLifecycleAware() {
             @Override
             public void onStarted(ServiceRegistry serviceRegistry) {
             }

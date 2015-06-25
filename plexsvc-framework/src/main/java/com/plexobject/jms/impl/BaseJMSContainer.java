@@ -16,7 +16,7 @@ import com.plexobject.jms.JMSContainer;
 
 public abstract class BaseJMSContainer implements JMSContainer,
         ExceptionListener {
-    protected final Logger log = Logger.getLogger(getClass());
+    protected final Logger logger = Logger.getLogger(getClass());
     protected final Configuration config;
     protected final DestinationResolver destinationResolver;
     protected boolean running;
@@ -41,7 +41,7 @@ public abstract class BaseJMSContainer implements JMSContainer,
 
     @Override
     public void onException(JMSException e) {
-        log.error("******JMS Error\n\n\n", e);
+        logger.error("PLEXSVC JMS Error\n\n\n", e);
         final List<ExceptionListener> copyExceptionListeners = new ArrayList<>();
 
         synchronized (exceptionListeners) {

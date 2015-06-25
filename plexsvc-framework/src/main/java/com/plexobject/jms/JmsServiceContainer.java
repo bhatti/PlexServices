@@ -74,7 +74,7 @@ public class JmsServiceContainer extends AbstractServiceContainer {
             jmsHandler = new JmsRequestHandler(serviceRegistry, jmsContainer,
                     h, destination);
             jmsHandlersByRequestHandler.put(h, jmsHandler);
-            log.info("Adding JMS service " + h.getClass().getSimpleName()
+            logger.info("PLEXSVC Adding JMS service " + h.getClass().getSimpleName()
                     + " for " + h + ", codec " + config.codec());
         } catch (RuntimeException e) {
             throw e;
@@ -91,7 +91,7 @@ public class JmsServiceContainer extends AbstractServiceContainer {
             if (jmsHandler != null) {
                 jmsHandler.close();
                 ServiceConfigDesc config = serviceRegistry.getServiceConfig(h);
-                log.info("Removing service " + h.getClass().getSimpleName()
+                logger.info("PLEXSVC Removing service " + h.getClass().getSimpleName()
                         + " for " + config.endpoint());
                 return true;
             }

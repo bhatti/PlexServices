@@ -23,7 +23,7 @@ import com.plexobject.validation.IRequiredFieldValidator;
 import com.plexobject.validation.RequiredFieldValidator;
 
 public class ServiceInvocationHelper {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(ServiceInvocationHelper.class);
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
     private final ServiceRegistry serviceRegistry;
@@ -50,8 +50,8 @@ public class ServiceInvocationHelper {
 
             ServiceConfigDesc config = serviceRegistry
                     .getServiceConfig(handler);
-            if (log.isDebugEnabled()) {
-                log.debug("Received request for handler "
+            if (logger.isDebugEnabled()) {
+                logger.debug("Received request for handler "
                         + handler.getClass().getSimpleName() + ", protocol "
                         + config.protocol() + ", request " + request);
             }
@@ -152,7 +152,7 @@ public class ServiceInvocationHelper {
                 request.sendResponse();
             }
         } else {
-            log.warn("Received Unknown request params "
+            logger.warn("PLEXSVC Received Unknown request params "
                     + request.getProperties() + ", payload "
                     + request.getPayload());
             request.getResponse().setCodecType(CodecType.TEXT);

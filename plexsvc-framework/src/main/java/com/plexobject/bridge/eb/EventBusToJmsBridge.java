@@ -51,7 +51,7 @@ import com.plexobject.util.IOUtils;
  *
  */
 public class EventBusToJmsBridge implements Lifecycle {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(EventBusToJmsBridge.class);
 
     /**
@@ -89,10 +89,10 @@ public class EventBusToJmsBridge implements Lifecycle {
                 jmsContainer.send(
                         jmsContainer.getDestination(entry.getTarget()), params,
                         payload);
-                log.info("Forwarding " + entry + "'s message " + payload);
+                logger.info("Forwarding " + entry + "'s message " + payload);
 
             } catch (Exception e) {
-                log.error("Failed to send request", e);
+                logger.error("Failed to send request", e);
             }
         }
 
@@ -166,21 +166,21 @@ public class EventBusToJmsBridge implements Lifecycle {
                         .setCodecType(entry.getCodecType()).setPayload(payload)
                         .setResponse(response)
                         .setResponseDispatcher(dispatcher).build();
-                log.info("Forwarding " + entry + "'s message " + request);
+                logger.info("Forwarding " + entry + "'s message " + request);
                 eb.publish(entry.getTarget(), request);
             } catch (Exception e) {
-                log.error("Failed to handle request", e);
+                logger.error("Failed to handle request", e);
             }
         }
 
         @Override
         public void onException(JMSException ex) {
-            log.error("Found error while listening, will resubscribe", ex);
+            logger.error("Found error while listening, will resubscribe", ex);
             try {
                 stop();
                 start();
             } catch (Exception e) {
-                log.error("Failed to resubscribe", e);
+                logger.error("Failed to resubscribe", e);
             }
         }
 
@@ -268,7 +268,7 @@ public class EventBusToJmsBridge implements Lifecycle {
             JmsListener listener = new JmsListener(jmsContainer, eb, e);
             jmsListeners.put(e, listener);
         }
-        log.info("Adding " + e);
+        logger.info("Adding " + e);
     }
 
     /**

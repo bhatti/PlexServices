@@ -16,7 +16,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 public abstract class AbstractServiceContainer implements ServiceContainer {
-    protected final Logger log = Logger.getLogger(getClass());
+    protected final Logger logger = Logger.getLogger(getClass());
     protected final ServiceRegistry serviceRegistry;
     protected final Configuration config;
     protected boolean running;
@@ -34,7 +34,7 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
     @Override
     public final synchronized void start() {
         try {
-            log.info("Starting ...");
+            logger.info("PLEXSVC Starting ...");
             if (!running) {
                 doStart();
                 for (RequestHandler h : getHandlers()) {

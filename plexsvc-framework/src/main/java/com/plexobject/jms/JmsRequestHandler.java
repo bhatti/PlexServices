@@ -34,7 +34,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 class JmsRequestHandler implements MessageListener, ExceptionListener {
-    private static final Logger log = Logger.getLogger(JmsRequestHandler.class);
+    private static final Logger logger = Logger.getLogger(JmsRequestHandler.class);
 
     private final ServiceRegistry serviceRegistry;
     private final JMSContainer jmsContainer;
@@ -73,7 +73,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                     .setResponse(response).setResponseDispatcher(dispatcher)
                     .build();
 
-            log.info("### Received " + textPayload + " for "
+            logger.info("PLEXSVC Received " + textPayload + " for "
                     + config.endpoint() + " "
                     + handler.getClass().getSimpleName() + ", headers "
                     + params);
@@ -81,18 +81,18 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             // service registry will invoke handler and send back reply
             serviceRegistry.invoke(request, handler);
         } catch (JMSException e) {
-            log.error("Failed to handle request", e);
+            logger.error("PLEXSVC Failed to handle request", e);
         }
     }
 
     @Override
     public void onException(JMSException ex) {
-        log.error("Found error while listening, will resubscribe", ex);
+        logger.error("PLEXSVC Found error while listening, will resubscribe", ex);
         try {
             close();
             registerListener();
         } catch (Exception e) {
-            log.error("Failed to resubscribe", e);
+            logger.error("PLEXSVC Failed to resubscribe", e);
         }
     }
 

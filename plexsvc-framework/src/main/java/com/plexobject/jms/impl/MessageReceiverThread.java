@@ -20,7 +20,7 @@ import com.plexobject.domain.Preconditions;
  */
 public class MessageReceiverThread implements Runnable {
     private static final int DEFAULT_TIMEOUT = 150000;
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(MessageReceiverThread.class);
 
     interface Callback {
@@ -93,13 +93,13 @@ public class MessageReceiverThread implements Runnable {
                     if (msg != null) {
                         messageListener.onMessage(msg);
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("**** Waiting for JMS message on "
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("**** Waiting for JMS message on "
                                     + destination);
                         }
                     }
                 } catch (JMSException e) {
-                    log.error("Failed to receive message for " + destination, e);
+                    logger.error("PLEXSVC Failed to receive message for " + destination, e);
                     if (exceptionListener != null) {
                         exceptionListener.onException(e);
                     }
@@ -107,12 +107,12 @@ public class MessageReceiverThread implements Runnable {
                 }
             }
         } catch (JMSException e) {
-            log.error("Failed to create consumer", e);
+            logger.error("PLEXSVC Failed to create consumer", e);
             if (exceptionListener != null) {
                 exceptionListener.onException(e);
             }
         } catch (NamingException e) {
-            log.error("Failed to lookup destination", e);
+            logger.error("PLEXSVC Failed to lookup destination", e);
             if (exceptionListener != null) {
                 exceptionListener.onException(new JMSException(e.toString()));
             }
@@ -136,11 +136,10 @@ public class MessageReceiverThread implements Runnable {
         runnerThread = null;
         try {
             if (consumer != null) {
-                log.warn("*** CLOSING CONSUMER " + destination);
                 consumer.close();
             }
         } catch (Exception e) {
-            log.error("Failed to close consumer for " + destination);
+            logger.error("PLEXSVC Failed to close consumer for " + destination);
         }
         callback.onStopped(this);
     }

@@ -49,7 +49,7 @@ public class ServiceRegistry implements ServiceContainer,
     private StatsCollector statsd;
     private ServiceMetricsRegistry serviceMetricsRegistry;
     private MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    private ServiceRegistryLifecycleAware serviceRegistryLifecycleAware;
+    private Collection<ServiceRegistryLifecycleAware> serviceRegistryLifecycleAwares = new HashSet<>();
     private final ServiceInvocationHelper serviceInvocationHelper;
     private final ServiceRegistryHandlers serviceRegistryHandlers;
     private final ServiceRegistryContainers serviceRegistryContainers;
@@ -79,7 +79,7 @@ public class ServiceRegistry implements ServiceContainer,
                 this.statsd = (StatsCollector) Class.forName(
                         statsCollectorClassName).newInstance();
             } catch (Exception e) {
-                logger.error("Could not create stats collector", e);
+                logger.error("PLEXSVC Could not create stats collector", e);
             }
             // String servicePrefix = config.getProperty("serviceConfigs", "");
             // this.statsd = new NonBlockingStatsDClient(config.getProperty(
@@ -94,7 +94,7 @@ public class ServiceRegistry implements ServiceContainer,
                     "PlexServices:name=ServiceRegistry"));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
-            logger.error("Could not register mbean for service-registry", e);
+            logger.error("PLEXSVC Could not register mbean for service-registry", e);
         }
     }
 
@@ -209,10 +209,9 @@ public class ServiceRegistry implements ServiceContainer,
 
     @Override
     public synchronized void start() {
-        if (serviceRegistryLifecycleAware != null) {
-            logger.info("invoking onStarted for "
-                    + serviceRegistryLifecycleAware + " ...");
-            serviceRegistryLifecycleAware.onStarted(this);
+        for (ServiceRegistryLifecycleAware srl : serviceRegistryLifecycleAwares) {
+            logger.info("PLEXSVC invoking onStarted for " + srl + " ...");
+            srl.onStarted(this);
         }
         serviceRegistryContainers.start();
         running = true;
@@ -222,8 +221,8 @@ public class ServiceRegistry implements ServiceContainer,
     public synchronized void stop() {
         serviceRegistryContainers.stop();
         running = false;
-        if (serviceRegistryLifecycleAware != null) {
-            serviceRegistryLifecycleAware.onStopped(this);
+        for (ServiceRegistryLifecycleAware srl : serviceRegistryLifecycleAwares) {
+            srl.onStopped(this);
         }
     }
 
@@ -245,9 +244,15 @@ public class ServiceRegistry implements ServiceContainer,
         webToJmsBridge.add(e);
     }
 
-    public void setServiceRegistryLifecycleAware(
+    public synchronized void addServiceRegistryLifecycleAware(
             ServiceRegistryLifecycleAware serviceRegistryLifecycleAware) {
-        this.serviceRegistryLifecycleAware = serviceRegistryLifecycleAware;
+        this.serviceRegistryLifecycleAwares.add(serviceRegistryLifecycleAware);
+    }
+
+    public synchronized void removeServiceRegistryLifecycleAware(
+            ServiceRegistryLifecycleAware serviceRegistryLifecycleAware) {
+        this.serviceRegistryLifecycleAwares
+                .remove(serviceRegistryLifecycleAware);
     }
 
     /**
@@ -411,7 +416,7 @@ public class ServiceRegistry implements ServiceContainer,
                     new ObjectName(objName));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
-            logger.error("Could not register mbean " + objName, e);
+            logger.error("PLEXSVC Could not register mbean " + objName, e);
         }
     }
 
@@ -428,7 +433,7 @@ public class ServiceRegistry implements ServiceContainer,
             mbs.registerMBean(metrics, new ObjectName(objName));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
-            logger.error("Could not register mbean " + objName, e);
+            logger.error("PLEXSVC Could not register mbean " + objName, e);
         }
     }
 

@@ -10,7 +10,7 @@ import com.plexobject.service.OutgoingInterceptorsLifecycle;
 import com.plexobject.util.ExceptionUtils;
 
 public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(AbstractResponseDispatcher.class);
     private OutgoingInterceptorsLifecycle outgoingInterceptorsLifecycle;
 
@@ -54,7 +54,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         Object payload = response.getPayload();
         String replyText = null;
         if (payload instanceof Exception) {
-            log.warn("Error received " + payload);
+            logger.warn("PLEXSVC Error received " + payload);
             Map<String, Object> resp = ExceptionUtils
                     .toErrors((Exception) payload);
             replyText = ObjectCodecFactory.getInstance()

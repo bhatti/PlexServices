@@ -19,7 +19,7 @@ import com.plexobject.encode.CodecType;
  *
  */
 public class Configuration {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(Configuration.class);
 
     private final Properties properties = new Properties();
@@ -103,7 +103,7 @@ public class Configuration {
 
     private static InputStream getInputStream(String propertyFile)
             throws IOException {
-        log.info("Loading configuration from " + propertyFile);
+        logger.info("PLEXSVC Loading configuration from " + propertyFile);
         if (new File(propertyFile).exists()) {
             return new BufferedInputStream(new FileInputStream(propertyFile));
         }

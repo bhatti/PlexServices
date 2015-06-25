@@ -95,7 +95,7 @@ public class JavawsDelegateHandler implements RequestHandler {
             invokeWithAroundInterceptorIfNeeded(request, methodInfo,
                     responseTag, args);
         } catch (Exception e) {
-            logger.error("Failed to invoke " + methodInfo.iMethod
+            logger.error("PLEXSVC Failed to invoke " + methodInfo.iMethod
                     + ", for request " + request, e);
             request.getResponse().setPayload(e);
         }

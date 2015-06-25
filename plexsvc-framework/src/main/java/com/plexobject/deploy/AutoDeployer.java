@@ -22,7 +22,7 @@ import com.plexobject.util.ReflectUtils;
  *
  */
 public class AutoDeployer implements ServiceRegistryLifecycleAware {
-    private static final Logger log = Logger.getLogger(AutoDeployer.class);
+    private static final Logger logger = Logger.getLogger(AutoDeployer.class);
 
     @VisibleForTesting
     ServiceRegistry serviceRegistry;
@@ -46,7 +46,7 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
             onStarted(serviceRegistry);
             serviceRegistry.start();
         } catch (Exception e) {
-            log.error("Failed to deploy", e);
+            logger.error("PLEXSVC Failed to deploy", e);
         }
     }
 
@@ -66,12 +66,12 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
             try {
                 RequestHandler handler = (RequestHandler) serviceClass
                         .newInstance();
-                log.info("Registering " + serviceClass.getName()
+                logger.info("PLEXSVC Registering " + serviceClass.getName()
                         + " for auto-deployment...");
                 serviceRegistry.add(handler);
             } catch (Exception e) {
-                log.error(
-                        "Failed to add request handler for "
+                logger.error(
+                        "PLEXSVC Failed to add request handler for "
                                 + serviceClass.getName(), e);
             }
         }

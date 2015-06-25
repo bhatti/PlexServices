@@ -18,7 +18,7 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 public class DefaultHttpRequestHandler implements RequestHandler {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(DefaultHttpRequestHandler.class);
     private final Map<RequestMethod, RouteResolver<RequestHandler>> requestHandlerPathsByMethod;
     private final ServiceRegistry serviceRegistry;
@@ -42,7 +42,7 @@ public class DefaultHttpRequestHandler implements RequestHandler {
             request.getResponse().setPayload(
                     "Unknown request received payload " + request);
             request.sendResponse();
-            log.error("** Unknown request '"
+            logger.error("PLEXSVC Unknown request '"
                     + request.getEndpoint()
                     + ", received payload "
                     + request

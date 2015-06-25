@@ -14,7 +14,7 @@ import com.plexobject.handler.Response;
  *
  */
 public class JmsResponseDispatcher extends AbstractResponseDispatcher {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(JmsResponseDispatcher.class);
 
     private final JMSContainer messageListenerContainer;
@@ -31,14 +31,14 @@ public class JmsResponseDispatcher extends AbstractResponseDispatcher {
         try {
             messageListenerContainer.send(replyTo, reply.getProperties(),
                     payload);
-            if (log.isDebugEnabled()) {
-                log.debug("Sending reply " + payload + " to " + replyTo);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Sending reply " + payload + " to " + replyTo);
             }
         } catch (Exception e) {
             if (e.toString().contains("temp-queue")) {
-                log.error("Failed to send " + payload + " because " + e);
+                logger.error("PLEXSVC Failed to send " + payload + " because " + e);
             } else {
-                log.error("Failed to send " + payload, e);
+                logger.error("PLEXSVC Failed to send " + payload, e);
             }
         }
     }

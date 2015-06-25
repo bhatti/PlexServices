@@ -83,7 +83,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
         }
         try {
             connection.start();
-            log.info("Starting ...");
+            logger.info("PLEXSVC Starting ...");
             synchronized (receivers) {
                 for (MessageReceiverThread t : receivers) {
                     if (!t.isRunning()) {
@@ -108,7 +108,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
             return;
         }
         try {
-            log.info("Stopping ...");
+            logger.info("PLEXSVC Stopping ...");
 
             synchronized (receivers) {
                 for (MessageReceiverThread t : receivers) {
@@ -132,8 +132,8 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
     public synchronized void waitUntilReady() {
         while (!running) {
             try {
-                if (log.isDebugEnabled()) {
-                    log.debug("Waiting for JMSContainer to start " + running);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Waiting for JMSContainer to start " + running);
                 }
                 wait(DEFAULT_WAIT_TIME);
             } catch (InterruptedException e) {
@@ -156,7 +156,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
                     try {
                         consumer.close();
                     } catch (Exception e) {
-                        log.error("Failed to close consumer for " + destination);
+                        logger.error("PLEXSVC Failed to close consumer for " + destination);
                     }
                 }
             };
@@ -180,7 +180,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
                         try {
                             t.stop();
                         } catch (Exception e) {
-                            log.error("Failed to close message-receiver thread for "
+                            logger.error("PLEXSVC Failed to close message-receiver thread for "
                                     + destination);
                         }
                     }
@@ -254,7 +254,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
     public void send(final Destination destination,
             final Map<String, Object> headers, final String payload)
             throws JMSException, NamingException {
-        // log.info("*** Sending " + payload + " to " + destination);
+        // log.info("PLEXSVC Sending " + payload + " to " + destination);
         Message m = createTextMessage(payload);
         if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
             headers.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
@@ -267,7 +267,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
             try {
                 msgProducer.close();
             } catch (JMSException e) {
-                log.warn("Failed to close producer", e);
+                logger.warn("PLEXSVC Failed to close producer", e);
             }
         }
     }

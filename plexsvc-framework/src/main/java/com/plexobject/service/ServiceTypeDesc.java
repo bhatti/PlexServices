@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 
 public class ServiceTypeDesc implements Serializable {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(ServiceTypeDesc.class);
 
     private static final long serialVersionUID = 1L;
@@ -78,7 +78,7 @@ public class ServiceTypeDesc implements Serializable {
                         return false;
                     }
                 } catch (PatternSyntaxException e) {
-                    log.warn("Illegal endpoint regex " + other.endpoint);
+                    logger.warn("PLEXSVC Illegal endpoint regex " + other.endpoint);
                 }
             }
         }

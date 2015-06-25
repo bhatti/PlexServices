@@ -21,7 +21,7 @@ import com.plexobject.predicate.Predicate;
  * 
  */
 public class EventBusImpl implements EventBus {
-    private static final Logger log = Logger.getLogger(EventBusImpl.class);
+    private static final Logger logger = Logger.getLogger(EventBusImpl.class);
     private static final int DEFAULT_MAX_DISPATCH_THREADS = 4;
 
     private static class HandlerAndFilter {
@@ -130,7 +130,7 @@ public class EventBusImpl implements EventBus {
                                     request.sendResponse();
                                 }
                             } catch (Exception ex) {
-                                log.error("Failed to publish " + request, ex);
+                                logger.error("PLEXSVC Failed to publish " + request, ex);
                             }
                         }
                     }

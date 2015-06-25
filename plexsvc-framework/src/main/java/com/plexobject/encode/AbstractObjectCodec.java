@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
  *
  */
 public abstract class AbstractObjectCodec implements ObjectCodec {
-    protected final Logger log = Logger.getLogger(getClass());
+    protected final Logger logger = Logger.getLogger(getClass());
     private static final BeanUtilsBean beanUtilsBean = new BeanUtilsBean(
             new ConvertUtilsBean() {
                 @SuppressWarnings("unchecked")
@@ -48,7 +48,7 @@ public abstract class AbstractObjectCodec implements ObjectCodec {
                     String name = toCamelCase(e.getKey());
                     beanUtilsBean.setProperty(object, name, e.getValue());
                 } catch (Exception ex) {
-                    log.warn("Failed to set \"" + e.getKey()
+                    logger.warn("PLEXSVC Failed to set \"" + e.getKey()
                             + "\" with value \"" + e.getValue() + "\"", ex);
                 }
             }

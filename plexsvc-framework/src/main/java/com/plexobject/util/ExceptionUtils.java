@@ -22,7 +22,7 @@ import com.plexobject.domain.BaseException;
  *
  */
 public class ExceptionUtils {
-    private static final Logger log = Logger.getLogger(ExceptionUtils.class);
+    private static final Logger logger = Logger.getLogger(ExceptionUtils.class);
     private static final String ERRORS = "errors";
     private static final String ERROR_TYPE = "errorType";
 
@@ -77,7 +77,7 @@ public class ExceptionUtils {
             }
         } catch (Exception ex) {
             e.printStackTrace();
-            log.error("Failed to convert exception " + e, ex);
+            logger.error("PLEXSVC Failed to convert exception " + e, ex);
         }
     }
 }

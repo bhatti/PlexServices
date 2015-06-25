@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.Logger;
+
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Preconditions;
 import com.plexobject.handler.RequestHandler;
@@ -27,6 +29,9 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 public class ServiceRegistryContainers {
+    private static final Logger logger = Logger
+            .getLogger(ServiceRegistryContainers.class);
+
     private final ServiceRegistry serviceRegistry;
     private final WebContainerProvider webContainerProvider;
     private final Configuration config;
@@ -63,6 +68,7 @@ public class ServiceRegistryContainers {
      * This method starts all containers
      */
     public synchronized void start() {
+        logger.info("PLEXSVC Starting " + _containers.size() + " containers...");
         for (ServiceContainer g : new HashSet<ServiceContainer>(
                 _containers.values())) {
             if (g.getHandlers().size() > 0) {
@@ -75,6 +81,7 @@ public class ServiceRegistryContainers {
      * This method stops all containers
      */
     public synchronized void stop() {
+        logger.info("PLEXSVC Stoping " + _containers.size() + " containers...");
         for (ServiceContainer g : new HashSet<ServiceContainer>(
                 _containers.values())) {
             if (g.getHandlers().size() > 0) {

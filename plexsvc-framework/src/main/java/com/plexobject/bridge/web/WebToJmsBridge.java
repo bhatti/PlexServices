@@ -42,7 +42,7 @@ import com.plexobject.util.IOUtils;
  *
  */
 public class WebToJmsBridge implements RequestHandler, LifecycleAware {
-    private static final Logger log = Logger.getLogger(WebToJmsBridge.class);
+    private static final Logger logger = Logger.getLogger(WebToJmsBridge.class);
     private final JMSContainer jmsContainer;
     private final ServiceRegistry serviceRegistry;
     //
@@ -92,7 +92,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for http
         serviceRegistry.add(ServiceConfigDesc.builder(e).build(), this);
-        log.info("Adding Web->JMS mapping for " + e.getShortString());
+        logger.info("Adding Web->JMS mapping for " + e.getShortString());
     }
 
     private void addWebsocket(WebToJmsEntry e) {
@@ -110,7 +110,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for webscoket
         serviceRegistry.add(ServiceConfigDesc.builder(e).build(), this);
-        log.info("Adding Websocket->JMS mapping for " + e.getShortString());
+        logger.info("Adding Websocket->JMS mapping for " + e.getShortString());
     }
 
     /**
@@ -125,12 +125,12 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload(
                     "Unknown request received " + request.getPayload());
-            log.warn("!!!Unknown request received " + request.getPayload()
+            logger.warn("PLEXSVC Unknown request received " + request.getPayload()
                     + ", registered " + entriesEndpointsByMethod.keySet()
                     + ": " + entriesEndpointsByMethod.values());
             return;
         }
-        log.info("** Handling " + request + ", mapping " + entry);
+        logger.info("** Handling " + request + ", mapping " + entry);
         Map<String, Object> params = new HashMap<>();
         params.putAll(request.getProperties());
         params.putAll(request.getHeaders());
@@ -155,7 +155,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     "Request timedout " + entry.getTimeoutSecs() + " secs");
 
         } catch (Exception e) {
-            log.error("Failed to send request", e);
+            logger.error("Failed to send request", e);
         }
     }
 
@@ -183,10 +183,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     }
                     request.getResponse().setCodecType(entry.getCodecType());
                     request.getResponse().setPayload(reply.getPayload());
-                    log.info("Replying back " + reply + ", params " + params
+                    logger.info("Replying back " + reply + ", params " + params
                             + ", response" + ": " + request.getResponse());
                 } catch (Exception e) {
-                    log.error("Could not send back websocket " + reply, e);
+                    logger.error("Could not send back websocket " + reply, e);
                 }
             }
         };

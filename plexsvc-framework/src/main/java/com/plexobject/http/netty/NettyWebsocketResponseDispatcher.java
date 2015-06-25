@@ -11,7 +11,7 @@ import com.plexobject.handler.Response;
 
 public class NettyWebsocketResponseDispatcher extends
         AbstractResponseDispatcher {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(NettyWebsocketResponseDispatcher.class);
     private final Channel channel;
     private final String id;
@@ -26,8 +26,8 @@ public class NettyWebsocketResponseDispatcher extends
         // encode entire response object instead of just payload
         String textJson = ObjectCodecFactory.getInstance()
                 .getObjectCodec(response.getCodecType()).encode(response);
-        if (log.isDebugEnabled()) {
-            log.debug("Sending to " + id + ":" + textJson);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Sending to " + id + ":" + textJson);
         }
         return textJson;
     }
@@ -45,8 +45,8 @@ public class NettyWebsocketResponseDispatcher extends
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Failed to send " + responseText + ", " + this, e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to send " + responseText + ", " + this, e);
             }
             throw new RuntimeException(e);
         }

@@ -36,7 +36,7 @@ import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.MessageListenerContainer;
 
 public class JMSUtils {
-    private static final Logger log = Logger.getLogger(JMSUtils.class);
+    private static final Logger logger = Logger.getLogger(JMSUtils.class);
     public static final String JMS_CONNECTION_FACTORY_LOOKUP = "JMSConnectionFactoryLookup";
     public static final String JMS_PROVIDER_URL = "JMSProviderUrl";
     public static final String JMS_CONTEXT_FACTORY = "JMSContextFactory";
@@ -77,7 +77,7 @@ public class JMSUtils {
             } else if (value instanceof Double) {
                 reqMsg.setDoubleProperty(name, (Double) value);
             } else {
-                log.info("*** key " + name + ", value " + value);
+                //logger.debug("*** key " + name + ", value " + value);
                 reqMsg.setStringProperty(e.getKey(), e.getValue().toString());
             }
         }
@@ -170,12 +170,12 @@ public class JMSUtils {
                 try {
                     consumerCloseable[0].close();
                 } catch (Exception e) {
-                    log.warn("Failed to close", e);
+                    logger.warn("PLEXSVC Failed to close", e);
                 }
                 try {
                     replyTo.delete();
                 } catch (Exception e) {
-                    log.warn("Failed to delete temp queue", e);
+                    logger.warn("PLEXSVC Failed to delete temp queue", e);
                 }
             }
         };
@@ -192,14 +192,14 @@ public class JMSUtils {
                     reqHandler.handle(response);
                     promise.setValue(response);
                 } catch (Exception e) {
-                    log.error("Failed to forward message " + message, e);
+                    logger.error("PLEXSVC Failed to forward message " + message, e);
                     promise.setError(e);
                 } finally {
                     try {
                         Thread.sleep(100);
                         closeable.close();
                     } catch (Exception ex) {
-                        log.warn("Failed to close", ex);
+                        logger.warn("PLEXSVC Failed to close", ex);
                     }
                 }
             }
@@ -214,7 +214,7 @@ public class JMSUtils {
                 try {
                     closeable.close();
                 } catch (Exception ex) {
-                    log.warn("Failed to close", ex);
+                    logger.warn("PLEXSVC Failed to close", ex);
                 }
             }
         };

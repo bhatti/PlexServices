@@ -33,7 +33,7 @@ import com.plexobject.service.Lifecycle;
  *
  */
 public class NettyHttpServer implements Lifecycle {
-    private static final Logger log = Logger
+    private static final Logger logger = Logger
             .getLogger(NettyHttpServer.class);
 
     static class NettyServerInitializer extends
@@ -80,7 +80,7 @@ public class NettyHttpServer implements Lifecycle {
                 SelfSignedCertificate ssc = new SelfSignedCertificate();
                 sslCtx = SslContext.newServerContext(ssc.certificate(),
                         ssc.privateKey());
-                log.info("Enabled self-signed SSL support");
+                logger.info("Enabled self-signed SSL support");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -102,7 +102,7 @@ public class NettyHttpServer implements Lifecycle {
             try {
                 sslCtx = SslContext.newServerContext(certFile, keyFile,
                         keyPassword);
-                log.info("Enabled SSL support");
+                logger.info("Enabled SSL support");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -124,7 +124,7 @@ public class NettyHttpServer implements Lifecycle {
                 Constants.DEFAULT_HTTP_PORT);
 
         try {
-            log.info("##### Starting web server on " + httpPort);
+            logger.info("PLEXSVC Starting web server on " + httpPort);
             channel = bootstrap.bind(httpPort).sync().channel();
             // ch.closeFuture().sync(); // Wait until the server socket is
             // closed
@@ -142,7 +142,7 @@ public class NettyHttpServer implements Lifecycle {
             channel.close().sync();
 
             channel = null;
-            log.info("Stopped HTTP server");
+            logger.info("PLEXSVC Stopped HTTP server");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -160,7 +160,7 @@ public class NettyHttpServer implements Lifecycle {
             }
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
-            log.info("Destroyed HTTP server");
+            logger.info("PLEXSVC Destroyed HTTP server");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

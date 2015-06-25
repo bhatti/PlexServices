@@ -141,7 +141,7 @@ public class SpringJMSContainer extends BaseJMSContainer {
                 try {
                     messageListenerContainer.shutdown();
                 } catch (Exception e) {
-                    log.error("Failed to close message listener for "
+                    logger.error("Failed to close message listener for "
                             + destination);
                 }
             }

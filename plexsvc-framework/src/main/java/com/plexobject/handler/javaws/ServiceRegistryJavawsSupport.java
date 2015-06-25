@@ -41,11 +41,14 @@ public class ServiceRegistryJavawsSupport {
 
         try {
             if (webService != null) {
-                handlers.putAll(requestHandlerAdapterJavaws.create(service,
-                        path, RequestMethod.POST));
+                for (Map.Entry<ServiceConfigDesc, RequestHandler> e : requestHandlerAdapterJavaws
+                        .create(service, path, RequestMethod.POST).entrySet()) {
+                    serviceRegistry.add(e.getKey(), e.getValue());
+                    handlers.put(e.getKey(), e.getValue());
+                }
             }
         } catch (Exception ex) {
-            logger.error("Could not add " + path + "=>" + service, ex);
+            logger.error("PLEXSVC Could not add " + path + "=>" + service, ex);
         }
         return handlers;
     }

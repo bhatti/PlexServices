@@ -16,7 +16,7 @@ import com.plexobject.handler.Response;
  *
  */
 public class HttpResponseDispatcher extends AbstractResponseDispatcher {
-    protected static final Logger log = Logger
+    protected static final Logger logger = Logger
             .getLogger(HttpResponseDispatcher.class);
 
     private final Handledable handledable;
@@ -66,7 +66,7 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
             response.send(payload);
             handledable.setHandled(true);
         } catch (Exception e) {
-            log.error("Failed to write " + payload + ", " + this, e);
+            logger.error("PLEXSVC Failed to write " + payload + ", " + this, e);
         }
     }
 
