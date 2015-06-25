@@ -60,7 +60,7 @@ public class RequestHandlerAdapterJavawsTest {
             @Override
             public void authorize(Request<Object> request, String[] roles)
                     throws AuthException {
-                System.out.println("Checking Auth");
+                // System.out.println("Checking Auth");
             }
         };
         serviceRegistry = new ServiceRegistry(config);
@@ -77,14 +77,14 @@ public class RequestHandlerAdapterJavawsTest {
         serviceRegistry.addInputInterceptor(new Interceptor<String>() {
             @Override
             public String intercept(String input) {
-                System.out.println("INPUT: " + input);
+                // System.out.println("INPUT: " + input);
                 return input;
             }
         });
         serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
             @Override
             public String intercept(String output) {
-                System.out.println("OUTPUT: " + output);
+                // System.out.println("OUTPUT: " + output);
                 return output;
             }
         });
@@ -109,8 +109,8 @@ public class RequestHandlerAdapterJavawsTest {
             @Override
             public Object proceed(Object service, String method,
                     Callable<Object> caller) throws Exception {
-                System.out.println("****INVOKING "
-                        + service.getClass().getSimpleName() + "." + method);
+                // System.out.println("****INVOKING "
+                // + service.getClass().getSimpleName() + "." + method);
                 return caller.call();
             }
         });
@@ -123,12 +123,12 @@ public class RequestHandlerAdapterJavawsTest {
         serviceRegistry.stop();
     }
 
-    @Test
+    // @Test
     public void testCourseException() throws Exception {
         courseService.exceptionExample(false);
     }
 
-    @Test
+    // @Test
     public void testRtCourseException() throws Exception {
         BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.INFO);
@@ -136,7 +136,7 @@ public class RequestHandlerAdapterJavawsTest {
         courseService.exceptionExample(true);
     }
 
-    @Test
+    // @Test
     public void testStudentRuntimeException() throws Exception {
         studentService.exceptionExample();
     }

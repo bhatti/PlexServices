@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import org.reflections.Reflections;
@@ -152,15 +151,15 @@ public class ReflectUtils {
                 + klass.getName());
     }
 
-    public static WebParam getWebParamFor(final Method iMethod) {
+    @SuppressWarnings("unchecked")
+    public static <T> T getMethodParameterAnnotation(final Method iMethod, Class<?> type) {
         for (Annotation[] annotations : iMethod.getParameterAnnotations()) {
             for (Annotation a : annotations) {
-                if (a instanceof WebParam) {
-                    return (WebParam) a;
+                if (type.isAssignableFrom(a.getClass())) {
+                    return (T) a;
                 }
             }
         }
         return null;
     }
-
 }

@@ -26,17 +26,20 @@ public class JavawsDelegateHandler implements RequestHandler {
     public static class MethodInfo {
         public final Method iMethod;
         public final Method implMethod;
-        public final String itemName;
+        public final String webParamName;
         public final RequestMethod requestMethod;
         public final String[] paramNames;
+        public final String methodPath;
 
-        public MethodInfo(Method iMethod, Method implMethod, String itemName,
-                RequestMethod requestMethod, String[] paramNames) {
+        public MethodInfo(Method iMethod, Method implMethod,
+                String webParamName, RequestMethod requestMethod,
+                String[] paramNames, String methodPath) {
             this.iMethod = iMethod;
             this.implMethod = implMethod;
-            this.itemName = itemName;
+            this.webParamName = webParamName;
             this.requestMethod = requestMethod;
             this.paramNames = paramNames;
+            this.methodPath = methodPath;
         }
 
         public boolean useNameParams() {
@@ -53,6 +56,7 @@ public class JavawsDelegateHandler implements RequestHandler {
     private final Object delegate;
     private final ServiceRegistry serviceRegistry;
     private final Map<String, MethodInfo> methodsByName = new HashMap<>();
+    private MethodInfo defaultMethodInfo;
 
     public JavawsDelegateHandler(Object delegate, ServiceRegistry registry) {
         this.delegate = delegate;
@@ -61,6 +65,7 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     public void addMethod(MethodInfo info) {
         methodsByName.put(info.iMethod.getName(), info);
+        defaultMethodInfo = info;
     }
 
     @Override
@@ -128,10 +133,10 @@ public class JavawsDelegateHandler implements RequestHandler {
             Map<String, Object> response = new HashMap<>();
             Object result = methodInfo.implMethod.invoke(delegate, args);
             if (result != null) {
-                if (methodInfo.itemName != null
-                        && methodInfo.itemName.length() > 0) {
+                if (methodInfo.webParamName != null
+                        && methodInfo.webParamName.length() > 0) {
                     Map<String, Object> item = new HashMap<>();
-                    item.put(methodInfo.itemName, result);
+                    item.put(methodInfo.webParamName, result);
                     response.put(responseTag, item);
                 } else {
                     response.put(responseTag, result);
@@ -153,15 +158,19 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     // hard coding to handle JSON messages
     // TODO handle XML messages
-    private static Pair<String, String> getMethodNameAndPayload(
-            Request<Object> request) {
+    private Pair<String, String> getMethodNameAndPayload(Request<Object> request) {
         String text = request.getPayload();
         if (text == null || text.length() == 0 || text.charAt(0) != '{') {
             String method = request.getStringProperty("methodName");
             if (method == null) {
+                if (methodsByName.size() == 1) {
+                    return Pair.of(defaultMethodInfo.iMethod.getName(), null);
+                }
+                //
                 throw new IllegalArgumentException("Unsupported request "
-                        + text);
+                        + request.getProperties());
             }
+            //
             return Pair.of(method, null);
         }
         int colon = text.indexOf(':');

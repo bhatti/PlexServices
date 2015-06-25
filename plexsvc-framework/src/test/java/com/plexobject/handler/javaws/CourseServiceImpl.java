@@ -35,6 +35,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @POST
+    @Path("/courses/enroll")
     public List<Course> enroll(List<Student> students) {
         List<Course> list = new ArrayList<>();
         for (Student student : students) {
@@ -64,6 +65,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @GET
+    @Path("/courses/query")
     public List<Course> query(Map<String, Object> criteria) {
         String studentId = (String) criteria.get("studentId");
         String courseId = (String) criteria.get("courseId");
@@ -123,6 +125,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @POST
+    @Path("/courses/create")
     public List<Course> create(List<Course> list) {
         for (Course c : list) {
             save(c);

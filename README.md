@@ -677,13 +677,17 @@ public class CourseServiceImpl implements CourseService {
         }
         return c;
     }
-
+    @Override
+    @GET
+    @Path("/courses/query")
+    public List<Course> query(Map<String, Object> criteria) {
+        . . .
+        return list;
+    }
 }
 
 ```
-You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. 
-
-You can convert the JavaWS service into RequestHandler as follows:
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JavaWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...

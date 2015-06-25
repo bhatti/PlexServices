@@ -61,7 +61,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public List<Course> enroll(List<Student> students) {
         RequestBuilder request = new RequestBuilder("enroll", students);
         try {
-            return postWithListReturnType(request,
+            return postWithListReturnType(COURSE_SERVICE + "/enroll", request,
                     getItemNameForMethod("enroll", List.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -73,19 +73,20 @@ public class CourseServiceClient extends BaseServiceClient implements
     public List<Course> create(List<Course> courses) {
         RequestBuilder request = new RequestBuilder("create", courses);
         try {
-            return postWithListReturnType(request,
+            return postWithListReturnType(COURSE_SERVICE + "/create", request,
                     getItemNameForMethod("create", List.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private List<Course> postWithListReturnType(RequestBuilder request,
-            String item) throws NoSuchMethodException, Exception {
+    private List<Course> postWithListReturnType(String path,
+            RequestBuilder request, String item) throws NoSuchMethodException,
+            Exception {
         Method m = CourseService.class.getMethod("count", List.class);
         Class<?> klass = m.getParameterTypes()[0].getClass();
         Type pKlass = m.getGenericParameterTypes()[0];
-        return post(COURSE_SERVICE, request, klass, pKlass, item);
+        return post(path, request, klass, pKlass, item);
     }
 
     private List<Course> getWithListReturnType(String query, String item)
@@ -133,7 +134,7 @@ public class CourseServiceClient extends BaseServiceClient implements
             for (Map.Entry<String, Object> e : criteria.entrySet()) {
                 query.append(e.getKey() + "=" + e.getValue() + "&");
             }
-            return get(COURSE_SERVICE + "?" + query, klass, pKlass,
+            return get(COURSE_SERVICE + "/query?" + query, klass, pKlass,
                     getItemNameForMethod("query", Map.class));
         } catch (Exception e) {
             throw new RuntimeException(e);

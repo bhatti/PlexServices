@@ -143,13 +143,6 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
                 .concurrency());
     }
 
-    public ServiceConfigDesc(ServiceConfigDesc config, RequestMethod method) {
-        this(config.protocol(), method, config.payloadClass(), config.codec(),
-                config.version(), config.endpoint(), config
-                        .recordStatsdMetrics(), config.rolesAllowed(), config
-                        .concurrency());
-    }
-
     public ServiceConfigDesc(Protocol protocol, RequestMethod method,
             Class<?> payloadClass, CodecType codecType, String version,
             String endpoint, boolean recordStatsdMetrics,

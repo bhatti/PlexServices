@@ -47,7 +47,8 @@ public class BaseServiceClient {
         Class<?> iface = getClass().getInterfaces()[0];
         try {
             Method m = iface.getMethod(name, parameterTypes);
-            WebParam p = ReflectUtils.getWebParamFor(m);
+            WebParam p = ReflectUtils.getMethodParameterAnnotation(m,
+                    WebParam.class);
             return p == null ? null : p.name();
         } catch (Exception e) {
             return null;

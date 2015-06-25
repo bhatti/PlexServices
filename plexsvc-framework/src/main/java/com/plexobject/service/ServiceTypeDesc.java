@@ -5,7 +5,6 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.Logger;
 
-
 public class ServiceTypeDesc implements Serializable {
     private static final Logger logger = Logger
             .getLogger(ServiceTypeDesc.class);
@@ -16,8 +15,8 @@ public class ServiceTypeDesc implements Serializable {
     private final String version;
     private final String endpoint;
 
-    public ServiceTypeDesc(Protocol protocol, RequestMethod method, String version,
-            String endpoint) {
+    public ServiceTypeDesc(Protocol protocol, RequestMethod method,
+            String version, String endpoint) {
         this.protocol = protocol;
         this.method = method;
         this.version = version;
@@ -78,7 +77,8 @@ public class ServiceTypeDesc implements Serializable {
                         return false;
                     }
                 } catch (PatternSyntaxException e) {
-                    logger.warn("PLEXSVC Illegal endpoint regex " + other.endpoint);
+                    logger.warn("PLEXSVC Illegal endpoint regex "
+                            + other.endpoint);
                 }
             }
         }

@@ -95,7 +95,6 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         if (webService == null) {
             throw new IllegalArgumentException(service + " is not web service");
         }
-        Map<RequestMethod, ServiceConfigDesc> configs = new HashMap<>();
         Map<ServiceConfigDesc, RequestHandler> handlers = new HashMap<>();
         if (defaultServiceConfig == null) {
             String endpoint = getEndpoint(serviceClass, webService);
@@ -105,7 +104,11 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         for (final Method implMethod : serviceClass.getMethods()) {
             Method iMethod = getExported(webService, implMethod);
             if (iMethod != null) {
-                String itemName = getItemTag(iMethod, implMethod);
+                String itemName = getWebParamName(iMethod, implMethod);
+                String methodPath = getMethodPath(iMethod, implMethod);
+                if (methodPath == null) {
+                    methodPath = defaultServiceConfig.endpoint();
+                }
                 String[] paramNames = getParams(implMethod);
                 if (implMethod.getParameterTypes().length > 1
                         && paramNames.length != implMethod.getParameterTypes().length) {
@@ -114,39 +117,50 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
                 }
                 RequestMethod requestMethod = getRequestMethod(iMethod,
                         implMethod);
-                ServiceConfigDesc serviceConfig = configs.get(requestMethod);
-                if (serviceConfig == null) {
-                    serviceConfig = new ServiceConfigDesc(defaultServiceConfig,
-                            requestMethod);
-                    configs.put(requestMethod, serviceConfig);
-                }
+                ServiceConfigDesc serviceConfig = ServiceConfigDesc
+                        .builder(defaultServiceConfig).setMethod(requestMethod)
+                        .setEndpoint(methodPath).build();
                 RequestHandler handler = handlers.get(serviceConfig);
                 if (handler == null) {
                     handler = new JavawsDelegateHandler(service, registry);
                     handlers.put(serviceConfig, handler);
                 }
+                //
                 ((JavawsDelegateHandler) handler)
                         .addMethod(new JavawsDelegateHandler.MethodInfo(
                                 iMethod, implMethod, itemName, requestMethod,
-                                paramNames));
+                                paramNames, methodPath));
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Added handler " + handler + " for "
+                    logger.debug("Added handler "
+                            + handler.getClass().getSimpleName() + " for "
                             + requestMethod + " " + iMethod.getName()
-                            + ", service " + service.getClass().getSimpleName());
+                            + ", path " + methodPath + ", service "
+                            + service.getClass().getSimpleName());
                 }
             }
         }
         return handlers;
     }
 
-    private String getItemTag(final Method iMethod, final Method implMethod) {
-        WebParam webParam = ReflectUtils.getWebParamFor(iMethod);
+    private String getWebParamName(final Method iMethod, final Method implMethod) {
+        WebParam webParam = ReflectUtils.getMethodParameterAnnotation(iMethod,
+                WebParam.class);
         if (webParam == null) {
-            webParam = ReflectUtils.getWebParamFor(implMethod);
+            webParam = ReflectUtils.getMethodParameterAnnotation(implMethod,
+                    WebParam.class);
         }
+
         String responseItemTag = webParam != null ? webParam.name() : registry
-                .getConfiguration().getProperty("javaWs.defaultItem");
+                .getConfiguration().getProperty("javaWs.defaultWebParamName");
         return responseItemTag;
+    }
+
+    private String getMethodPath(final Method iMethod, final Method implMethod) {
+        Path path = iMethod.getAnnotation(Path.class);
+        if (path == null) {
+            path = implMethod.getAnnotation(Path.class);
+        }
+        return path == null ? null : path.value();
     }
 
     private String[] getParams(final Method implMethod) {
