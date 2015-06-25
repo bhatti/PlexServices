@@ -646,17 +646,44 @@ Here is a sample json file that describes mapping:
 ### JavaWS support
 PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
 ```java 
+import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
 
 @WebService
-public interface StudentService {
-    Student save(Student student);
-    List<Student> query(Map<String, Object> criteria);
-    Student get(Long id);
-}
-```
+@Path("/courses")
+public class CourseServiceImpl implements CourseService {
+    private Map<String, Course> courses = new HashMap<>();
 
-You can convert the implementing service into RequestHandler as follows:
+    @Override
+    @POST
+    public Course save(@WebParam(name = "course") Course course) {
+        courses.put(course.getId(), course);
+        return course;
+    }
+
+    @Override
+    @GET
+    public Course get(@QueryParam("courseId") Long courseId) {
+        Course c = courses.get(String.valueOf(courseId));
+        if (c == null) {
+            throw new IllegalArgumentException("course not found for "
+                    + courseId + ", local " + courses.keySet());
+        }
+        return c;
+    }
+
+}
+
+```
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. 
+
+You can convert the JavaWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
