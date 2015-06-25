@@ -33,7 +33,7 @@ import com.plexobject.util.ReflectUtils;
 public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
     private static final Logger logger = Logger
             .getLogger(RequestHandlerAdapterJavaws.class);
-
+    private static final String JAVA_WS_DEFAULT_WEB_PARAM_NAME = "javaWs.defaultWebParamName";
     private static final String DEFAULT_VERSION = "1.0";
     private static final String[] DEFAULT_ROLES = new String[0];
     private final ServiceRegistry registry;
@@ -93,7 +93,8 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         Class<?> serviceClass = service.getClass();
         Class<?> webService = ReflectUtils.getWebServiceInterface(serviceClass);
         if (webService == null) {
-            throw new IllegalArgumentException(service + " is not web service");
+            throw new IllegalArgumentException(service
+                    + " does not define WebService annotations");
         }
         Map<ServiceConfigDesc, RequestHandler> handlers = new HashMap<>();
         if (defaultServiceConfig == null) {
@@ -151,7 +152,7 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         }
 
         String responseItemTag = webParam != null ? webParam.name() : registry
-                .getConfiguration().getProperty("javaWs.defaultWebParamName");
+                .getConfiguration().getProperty(JAVA_WS_DEFAULT_WEB_PARAM_NAME);
         return responseItemTag;
     }
 
@@ -233,5 +234,4 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
                 registry.getConfiguration().getDefaultCodecType(),
                 DEFAULT_VERSION, endpoint, true, DEFAULT_ROLES, 1);
     }
-
 }
