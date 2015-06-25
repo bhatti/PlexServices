@@ -7,17 +7,11 @@ PlexServices is a light-weight Java framework for defining secured micro-service
 ## Design Principles 
 PlexServices is designed on following design principles:
 
-- Not MVC framework - PlexServices is only meant for services and it's not general purpose MVC framework.
+- Micro framework - PlexServices is only meant for writing web and messaging services and it's not general purpose MVC framework.
 
-- Not Invented Here: PlexServices leverages other 3rd party frameworks and libraries such as Netty, XStream, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.
-
-- Minimize Dependencies: Despite NIH, PlexServices minimizes the dependencies of 3rd party libraries. 
-
-- Technology independent services: PlexServices provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexServices provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.
+- Minimal Dependencies: PlexServices depends only on a small number of external libraries for XML/JSON serialization.
 
 - Easily Configurable: PlexServices uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.
-
-- Reactive messaging based services: Though, PlexServices supports both messaging based services and web services. You can use messaging based services to build reactive services and then use web bridge to expose them externally. It also provides event-bus for internal communication and to build loosely coupled components.
 
 - Easily deployable: PlexServices framework supports both war files and embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.
 
@@ -44,12 +38,11 @@ PlexServices is designed on following design principles:
 
 - PlexServices supports both war files and Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.
 
-- PlexServices also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
+- PlexServices also supports reactive messaging services using JMS APIs and support a number of messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
-- PlexServices allows you to import existing JavaWS based services.
+- PlexServices allows you to import existing JavaWS based services and expose them as REST or POX services. 
 
-- PlexServices allows you to specify the services you want to deploy or allows support to automatically 
-deplooy all services that implement ServiceConfig annotation.
+- PlexServices allows you to auto-deploy services by specifying package names of services, it deploys all services automatically that implement ServiceConfig annotation.
 
 
 ##Building
@@ -73,7 +66,6 @@ cd plexsvc-framework
 
 ##Dependencies
 - Netty 4.0
-- Google GSON 2.3
 - Fast JSON  2.4
 - XStream 1.4
 - JMS API 1.1
@@ -91,7 +83,7 @@ PlexServices uses Netty server as embedded web server to host web services by de
 ### Defining a REST service for creating a user
 ```java 
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
-    rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
+    rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements
@@ -140,7 +132,7 @@ which is default setting.
 
 ```java 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
-    rolesAllowed = "Administrator", endpoint = "/users", method = Method.POST, 
+    rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
 public class CreateUserService extends AbstractUserService implements
@@ -184,7 +176,7 @@ ws.onerror = function(err) {
 ```java 
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", 
-      method = Method.MESSAGE, 
+      method = RequestMethod.MESSAGE, 
       concurrency = 10,
       codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
@@ -210,7 +202,7 @@ Note: concurrency parameter specifies number of concurrent consumers that would 
 ```java 
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
-      method = Method.POST, 
+      method = RequestMethod.POST, 
       codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugNumber"),
         @Field(name = "projectId"), @Field(name = "priority")
@@ -239,7 +231,7 @@ classes into JSON when delivering messages over HTTP.
 ```java 
 @ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", 
-      method = Method.MESSAGE, codec = CodecType.JSON)
+      method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugNumber"),
         @Field(name = "projectId"), @Field(name = "priority")
         })
@@ -292,7 +284,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
 ### Defining a REST service for querying users
 ```java 
 @ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
-  rolesAllowed = "Administrator", endpoint = "/users", method = Method.GET, 
+  rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.GET, 
   codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements
 RequestHandler {
@@ -317,7 +309,7 @@ public QueryUserService(UserRepository userRepository) {
 ```java 
 @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", 
-      method = Method.MESSAGE, 
+      method = RequestMethod.MESSAGE, 
       codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements RequestHandler {
     public QueryUserService(UserRepository userRepository) {
@@ -353,7 +345,7 @@ Above example describes rules for validating username, password, email and zipco
 ### Overriding service configuration at runtime and deploying same service via different protocols
 In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = Method.GET, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/ping", method = RequestMethod.GET, codec = CodecType.JSON)
 public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
@@ -364,24 +356,24 @@ public class PingService implements RequestHandler {
 
 And then at runtime, override configuration, e.g.
 ...
-    ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+    ServiceRegistry serviceRegistry = new ServiceRegistry(config);
     PingService pingService = new PingService();
     serviceRegistry.add(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
+                            .setMethod(RequestMethod.MESSAGE)
                             .setEndpoint("queue://ping")
                             .setProtocol(Protocol.JMS)
                             .build());
     serviceRegistry.add(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
+                            .setMethod(RequestMethod.MESSAGE)
                             .setProtocol(Protocol.WEBSOCKET)
                             .build());
     serviceRegistry.add(pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                            .setMethod(RequestMethod.GET).setProtocol(Protocol.HTTP)
                             .build());
 
     serviceRegistry.start();
@@ -394,7 +386,7 @@ Though, PlexServices framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:
 
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = Method.GET, codec = CodecType.TEXT)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/static/*", method = RequestMethod.GET, codec = CodecType.TEXT)
 public class StaticFileServer implements RequestHandler {
     private File webFolder;
 
@@ -443,10 +435,10 @@ public class StaticFileServer implements RequestHandler {
 
 ### Defining role-based security
 ```java 
-public class BuggerRoleAuthorizer implements RoleAuthorizer {
+public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
     private final UserRepository userRepository;
 
-    public BuggerRoleAuthorizer(UserRepository userRepository) {
+    public BuggerSecurityAuthorizer(UserRepository userRepository) {
       this.userRepository = userRepository;
     }
 
@@ -455,15 +447,11 @@ public class BuggerRoleAuthorizer implements RoleAuthorizer {
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         if (user == null) {
-          throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-              request.getSessionId(), request.getRemoteAddress(),
-              "failed to validate session-id");
+          throw new AuthException("authError", "failed to validate session-id");
         }
         for (String role : roles) {
           if (!user.getRoles().contains(role)) {
-            throw new AuthException(HttpResponse.SC_UNAUTHORIZED,
-                request.getSessionId(), request.getRemoteAddress(),
-                "failed to match role");
+            throw new AuthException("authError", "failed to match role");
           }
         }
       }
@@ -515,7 +503,7 @@ Here is how you can setup bridge between HTTP/Websocket and JMS based services.
 ```java 
   Configuration config = new Configuration(configFile);
   Collection<WebToJmsEntry> entries = WebToJmsBridge.load(new File(mappingFile));
-  ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
+  ServiceRegistry serviceRegistry = new ServiceRegistry(config);
   serviceRegistry.setWebToJmsEntries(entries);
   serviceRegistry.start();
 ```
@@ -672,8 +660,9 @@ You can convert the implementing service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
-RoleAuthorizer roleAuthorizer = ...
-serviceRegistry = new ServiceRegistry(config, roleAuthorizer);
+SecurityAuthorizer securityAuthorizer = ...
+serviceRegistry = new ServiceRegistry(config);
+serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
 RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(config);
 Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
                 .createFromPackages("com.plexobject.handler.javaws");
@@ -729,7 +718,8 @@ PlexServices allows you to specify the services that you want to deploy in
 a container and start the container using service-registry, e.g.
 ```java 
 Configuration config = new Configuration(args[0]);
-serviceRegistry = new ServiceRegistry(config, new BuggerRoleAuthorizer(userRepository));
+serviceRegistry = new ServiceRegistry(config);
+serviceRegistry.setSecurityAuthorizer(new BuggerSecurityAuthorizer(userRepository));
 serviceRegistry.add(new CreateUserService(userRepository));
 serviceRegistry.add(new UpdateUserService(userRepository));
 serviceRegistry.add(new QueryUserService(userRepository));
@@ -809,7 +799,7 @@ service.registryCallbackClass=com.plexobject.deploy.AutoDeployer
 
 Optionally, you can add class name for the security authorizer, e.g.
 ```bash 
-service.roleAuthorizerClass=com.plexobject.ping.MyAuthorizer
+service.securityAuthorizerClass=com.plexobject.ping.MyAuthorizer
 ```
 
 
@@ -839,7 +829,7 @@ quote quotes over the websockets.
 
 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = Method.MESSAGE, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.WEBSOCKET, endpoint = "/quotes", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "symbol"),
         @Field(name = "action") })
 public class QuoteServer implements RequestHandler {
@@ -1024,5 +1014,4 @@ Here is the html form that displays quotes:
 
 ## Support or Contact
       Email bhatti AT plexobject DOT com for any questions or suggestions.
-
 

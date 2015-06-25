@@ -5,17 +5,11 @@
 <h2 id="design-principles">Design Principles</h2>
 <p>PlexServices is designed on following design principles:</p>
 <ul>
-<li><p>Not MVC framework - PlexServices is only meant for services and it&#39;s not general purpose MVC framework.</p>
+<li><p>Micro framework - PlexServices is only meant for writing web and messaging services and it&#39;s not general purpose MVC framework.</p>
 </li>
-<li><p>Not Invented Here: PlexServices leverages other 3rd party frameworks and libraries such as Netty, XStream, Jackson, etc. for providing support of web services and data conversion. However it encapsulates them with interfaces so that they can be replaced if needed.</p>
-</li>
-<li><p>Minimize Dependencies: Despite NIH, PlexServices minimizes the dependencies of 3rd party libraries. </p>
-</li>
-<li><p>Technology independent services: PlexServices provides plain POJO based abstractions for creating services, while encapsulating APIs of 3rd party libraries. For example, PlexServices provides same interface for different kind of services and you use level Java objects for services and underlying framework will do all conversion.</p>
+<li><p>Minimal Dependencies: PlexServices depends only on a small number of external libraries for XML/JSON serialization.</p>
 </li>
 <li><p>Easily Configurable: PlexServices uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.</p>
-</li>
-<li><p>Reactive messaging based services: Though, PlexServices supports both messaging based services and web services. You can use messaging based services to build reactive services and then use web bridge to expose them externally. It also provides event-bus for internal communication and to build loosely coupled components.</p>
 </li>
 <li><p>Easily deployable: PlexServices framework supports both war files and embeddable Netty server for easily deplying services. It allows you to determine what services should be deployed together at runtime, thus encourages light weight services that can be deployed independently if needed.</p>
 </li>
@@ -44,12 +38,11 @@
 </li>
 <li><p>PlexServices supports both war files and Netty 4.0+ for hosting web services and you can deploy both http and websocket services to the same server.</p>
 </li>
-<li><p>PlexServices also supports JMS compatible messageing middlewares such as ActiveMQ, SwiftMQ, etc. </p>
+<li><p>PlexServices also supports reactive messaging services using JMS APIs and support a number of messageing middlewares such as ActiveMQ, SwiftMQ, etc. </p>
 </li>
-<li><p>PlexServices allows you to import existing JavaWS based services.</p>
+<li><p>PlexServices allows you to import existing JavaWS based services and expose them as REST or POX services. </p>
 </li>
-<li><p>PlexServices allows you to specify the services you want to deploy or allows support to automatically 
-deplooy all services that implement ServiceConfig annotation.</p>
+<li><p>PlexServices allows you to auto-deploy services by specifying package names of services, it deploys all services automatically that implement ServiceConfig annotation.</p>
 </li>
 </ul>
 <h2 id="building">Building</h2>
@@ -70,7 +63,6 @@ deplooy all services that implement ServiceConfig annotation.</p>
 <h2 id="dependencies">Dependencies</h2>
 <ul>
 <li>Netty 4.0</li>
-<li>Google GSON 2.3</li>
 <li>Fast JSON  2.4</li>
 <li>XStream 1.4</li>
 <li>JMS API 1.1</li>
@@ -87,7 +79,7 @@ deplooy all services that implement ServiceConfig annotation.</p>
 <p>PlexServices uses Netty server as embedded web server to host web services by default and you can easily build REST services as follows:</p>
 <h3 id="defining-a-rest-service-for-creating-a-user">Defining a REST service for creating a user</h3>
 <pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, payloadClass = User.class, 
-    rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = Method.POST, 
+    rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = RequestMethod.POST, 
     codec = CodecType.JSON)
 <span class="hljs-annotation">@RequiredFields</span>({ <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"username"</span>) })
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span>
@@ -124,7 +116,7 @@ json_resp = json.loads(resp.text)
 <p>PlexServices supports both war files and embedded Netty server for hosting webservices, however websockets is only supported under Netty server, 
 which is default setting.</p>
 <pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
-    rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = Method.POST, 
+    rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = RequestMethod.POST, 
     codec = CodecType.JSON)
 <span class="hljs-annotation">@RequiredFields</span>({ <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"username"</span>) })
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span>
@@ -163,7 +155,7 @@ ws.onerror = <span class="hljs-function"><span class="hljs-keyword">function</sp
 <h3 id="defining-a-jms-service-for-creating-a-user">Defining a JMS service for creating a user</h3>
 <pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"queue://{scope}-create-user-service-queue"</span>, 
-      method = Method.MESSAGE, 
+      method = RequestMethod.MESSAGE, 
       concurrency = <span class="hljs-number">10</span>,
       codec = CodecType.JSON)
 <span class="hljs-annotation">@RequiredFields</span>({ <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"username"</span>) })
@@ -185,7 +177,7 @@ Note: concurrency parameter specifies number of concurrent consumers that would 
 <h3 id="defining-a-rest-service-with-parameterized-urls">Defining a REST service with parameterized URLs</h3>
 <pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, payloadClass = BugReport.class, 
       rolesAllowed = <span class="hljs-string">"Employee"</span>, endpoint = <span class="hljs-string">"/projects/{projectId}/bugreports"</span>, 
-      method = Method.POST, 
+      method = RequestMethod.POST, 
       codec = CodecType.JSON)
 <span class="hljs-annotation">@RequiredFields</span>({ <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"bugNumber"</span>),
         <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"projectId"</span>), <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"priority"</span>)
@@ -211,7 +203,7 @@ classes into JSON when delivering messages over HTTP.</p>
 <h3 id="defining-a-websocket-based-service-to-create-bug-report">Defining a Websocket based service to create bug-report</h3>
 <pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
       rolesAllowed = <span class="hljs-string">"Employee"</span>, endpoint = <span class="hljs-string">"queue://{scope}-create-bugreport-service-queue"</span>, 
-      method = Method.MESSAGE, codec = CodecType.JSON)
+      method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 <span class="hljs-annotation">@RequiredFields</span>({ <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"bugNumber"</span>),
         <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"projectId"</span>), <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"priority"</span>)
         })
@@ -257,7 +249,7 @@ ws.onerror = <span class="hljs-function"><span class="hljs-keyword">function</sp
 PlexServices automatically passes any json parameters sent as part of request, which are consumed by the service.</p>
 <h3 id="defining-a-rest-service-for-querying-users">Defining a REST service for querying users</h3>
 <pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, payloadClass = User.class, 
-  rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = Method.GET, 
+  rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"/users"</span>, method = RequestMethod.GET, 
   codec = CodecType.JSON)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QueryUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span>
 <span class="hljs-title">RequestHandler</span> </span>{
@@ -279,7 +271,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
 <h3 id="defining-a-jms-service-for-querying-users">Defining a JMS service for querying users</h3>
 <pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.JMS, payloadClass = User.class, 
       rolesAllowed = <span class="hljs-string">"Administrator"</span>, endpoint = <span class="hljs-string">"queue://{scope}-query-user-service-queue"</span>, 
-      method = Method.MESSAGE, 
+      method = RequestMethod.MESSAGE, 
       codec = CodecType.JSON)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QueryUserService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractUserService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">QueryUserService</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
@@ -309,7 +301,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
 <p>Above example describes rules for validating username, password, email and zipcode. You can specify min/max size of data fields or use regex to verify the data.</p>
 <h3 id="overriding-service-configuration-at-runtime-and-deploying-same-service-via-different-protocols">Overriding service configuration at runtime and deploying same service via different protocols</h3>
 <p>In addition to defining service configurations via annotations, you can also override them at runtime and deploy same service via multiple protocols, e.g.</p>
-<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, endpoint = <span class="hljs-string">"/ping"</span>, method = Method.GET, codec = CodecType.JSON)
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, endpoint = <span class="hljs-string">"/ping"</span>, method = RequestMethod.GET, codec = CodecType.JSON)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PingService</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
   <span class="hljs-annotation">@Override</span>
   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request request)</span> </span>{
@@ -320,24 +312,24 @@ PlexServices automatically passes any json parameters sent as part of request, w
 
 And then at runtime, override configuration, e.g.
 ...
-    ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, <span class="hljs-keyword">null</span>);
+    ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config);
     PingService pingService = <span class="hljs-keyword">new</span> PingService();
     serviceRegistry.add(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
+                            .setMethod(RequestMethod.MESSAGE)
                             .setEndpoint(<span class="hljs-string">"queue://ping"</span>)
                             .setProtocol(Protocol.JMS)
                             .build());
     serviceRegistry.add(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.MESSAGE)
+                            .setMethod(RequestMethod.MESSAGE)
                             .setProtocol(Protocol.WEBSOCKET)
                             .build());
     serviceRegistry.add(pingService,
                     ServiceConfigDesc.builder(pingService)
-                            .setMethod(Method.GET).setProtocol(Protocol.HTTP)
+                            .setMethod(RequestMethod.GET).setProtocol(Protocol.HTTP)
                             .build());
 
     serviceRegistry.start();
@@ -346,7 +338,7 @@ And then at runtime, override configuration, e.g.
 <h3 id="creating-a-static-file-server">Creating a static file server</h3>
 <p>Though, PlexServices framework is meant for REST or messaging based services,
 but here is an example of creating a simple static file server:</p>
-<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, endpoint = <span class="hljs-string">"/static/*"</span>, method = Method.GET, codec = CodecType.TEXT)
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.HTTP, endpoint = <span class="hljs-string">"/static/*"</span>, method = RequestMethod.GET, codec = CodecType.TEXT)
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StaticFileServer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
     <span class="hljs-keyword">private</span> File webFolder;
 
@@ -393,10 +385,10 @@ but here is an example of creating a simple static file server:</p>
 </code></pre>
 <p>  The end-point can contain variables such as scope that are initialized from configuration.</p>
 <h3 id="defining-role-based-security">Defining role-based security</h3>
-<pre><code class="lang-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BuggerRoleAuthorizer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RoleAuthorizer</span> </span>{
+<pre><code class="lang-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BuggerSecurityAuthorizer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">SecurityAuthorizer</span> </span>{
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> UserRepository userRepository;
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">BuggerRoleAuthorizer</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">BuggerSecurityAuthorizer</span><span class="hljs-params">(UserRepository userRepository)</span> </span>{
       <span class="hljs-keyword">this</span>.userRepository = userRepository;
     }
 
@@ -405,15 +397,11 @@ but here is an example of creating a simple static file server:</p>
         String sessionId = request.getSessionId();
         User user = userRepository.getUserBySessionId(sessionId);
         <span class="hljs-keyword">if</span> (user == <span class="hljs-keyword">null</span>) {
-          <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AuthException(HttpResponse.SC_UNAUTHORIZED,
-              request.getSessionId(), request.getRemoteAddress(),
-              <span class="hljs-string">"failed to validate session-id"</span>);
+          <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AuthException(<span class="hljs-string">"authError"</span>, <span class="hljs-string">"failed to validate session-id"</span>);
         }
         <span class="hljs-keyword">for</span> (String role : roles) {
           <span class="hljs-keyword">if</span> (!user.getRoles().contains(role)) {
-            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AuthException(HttpResponse.SC_UNAUTHORIZED,
-                request.getSessionId(), request.getRemoteAddress(),
-                <span class="hljs-string">"failed to match role"</span>);
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AuthException(<span class="hljs-string">"authError"</span>, <span class="hljs-string">"failed to match role"</span>);
           }
         }
       }
@@ -457,7 +445,7 @@ serviceRegistry.addResponseInterceptor(<span class="hljs-keyword">new</span> Int
 <p>Here is how you can setup bridge between HTTP/Websocket and JMS based services. </p>
 <pre><code class="lang-java">  Configuration config = <span class="hljs-keyword">new</span> Configuration(configFile);
   Collection&lt;WebToJmsEntry&gt; entries = WebToJmsBridge.load(<span class="hljs-keyword">new</span> File(mappingFile));
-  ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, <span class="hljs-keyword">null</span>);
+  ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config);
   serviceRegistry.setWebToJmsEntries(entries);
   serviceRegistry.start();
 </code></pre>
@@ -584,8 +572,9 @@ EventBusToJmsBridge.run(config, entries);
 </code></pre>
 <p>You can convert the implementing service into RequestHandler as follows:</p>
 <pre><code class="lang-java">Configuration config = ...
-RoleAuthorizer roleAuthorizer = ...
-serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, roleAuthorizer);
+SecurityAuthorizer securityAuthorizer = ...
+serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config);
+serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
 RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = <span class="hljs-keyword">new</span> RequestHandlerAdapterJavaws(config);
 Map&lt;ServiceConfigDesc, RequestHandler&gt; handlers = requestHandlerAdapterJavaws
                 .createFromPackages(<span class="hljs-string">"com.plexobject.handler.javaws"</span>);
@@ -631,7 +620,8 @@ can start/stop services or view statistics, e.g.
 <p>PlexServices allows you to specify the services that you want to deploy in
 a container and start the container using service-registry, e.g.</p>
 <pre><code class="lang-java">Configuration config = <span class="hljs-keyword">new</span> Configuration(args[<span class="hljs-number">0</span>]);
-serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config, <span class="hljs-keyword">new</span> BuggerRoleAuthorizer(userRepository));
+serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config);
+serviceRegistry.setSecurityAuthorizer(<span class="hljs-keyword">new</span> BuggerSecurityAuthorizer(userRepository));
 serviceRegistry.add(<span class="hljs-keyword">new</span> CreateUserService(userRepository));
 serviceRegistry.add(<span class="hljs-keyword">new</span> UpdateUserService(userRepository));
 serviceRegistry.add(<span class="hljs-keyword">new</span> QueryUserService(userRepository));
@@ -699,7 +689,7 @@ as:</p>
 <pre><code class="lang-bash">service.registryCallbackClass=com.plexobject.deploy.AutoDeployer
 </code></pre>
 <p>Optionally, you can add class name for the security authorizer, e.g.</p>
-<pre><code class="lang-bash">service.roleAuthorizerClass=com.plexobject.ping.MyAuthorizer
+<pre><code class="lang-bash">service.securityAuthorizerClass=com.plexobject.ping.MyAuthorizer
 </code></pre>
 <p>PlexServices comes with examples that you can use to deploy using</p>
 <pre><code class="lang-bash"><span class="hljs-built_in">cd</span> plexsvc-samples
@@ -717,7 +707,7 @@ in your application package that implement ServiceConfig annotation and deploy t
 <h3 id="adding-streaming-quotes-service-over-websockets">Adding Streaming Quotes Service over Websockets</h3>
 <p>Here is a small example of creating a streaming quote server that sends real-time
 quote quotes over the websockets.</p>
-<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.WEBSOCKET, endpoint = <span class="hljs-string">"/quotes"</span>, method = Method.MESSAGE, codec = CodecType.JSON)
+<pre><code class="lang-java"><span class="hljs-annotation">@ServiceConfig</span>(protocol = Protocol.WEBSOCKET, endpoint = <span class="hljs-string">"/quotes"</span>, method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 <span class="hljs-annotation">@RequiredFields</span>({ <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"symbol"</span>),
         <span class="hljs-annotation">@Field</span>(name = <span class="hljs-string">"action"</span>) })
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QuoteServer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RequestHandler</span> </span>{
