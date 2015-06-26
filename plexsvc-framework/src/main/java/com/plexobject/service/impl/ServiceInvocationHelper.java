@@ -64,7 +64,7 @@ public class ServiceInvocationHelper {
                         "Expected payload of type "
                                 + config.payloadClass().getName()
                                 + ", but payload was: " + request);
-                request.sendResponseSafe();
+                request.sendResponse();
                 return;
             }
             ((AbstractResponseDispatcher) request.getResponseDispatcher())
@@ -149,7 +149,7 @@ public class ServiceInvocationHelper {
                             HttpResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 request.getResponse().setPayload(e);
-                request.sendResponseSafe();
+                request.sendResponse();
             }
         } else {
             logger.warn("PLEXSVC Received Unknown request params "
@@ -158,7 +158,7 @@ public class ServiceInvocationHelper {
             request.getResponse().setCodecType(CodecType.TEXT);
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload("page not found");
-            request.sendResponseSafe();
+            request.sendResponse();
         }
     }
 
@@ -196,7 +196,7 @@ public class ServiceInvocationHelper {
         metrics.addResponseTime(System.currentTimeMillis() - started);
         // send back the reply
         if (request.getResponse().getPayload() != null) {
-            request.sendResponseSafe();
+            request.sendResponse();
         }
     }
 

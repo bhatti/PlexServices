@@ -225,7 +225,7 @@ public class EventBusToJmsBridgeIntegTest {
                 TestUser u = request.getPayload();
                 name.append(u.name);
                 request.getResponse().setPayload("ted");
-                request.sendResponseSafe();
+                request.sendResponse();
                 // request.getDispatcher().send(request.getResponse());
                 latch.countDown();
             }

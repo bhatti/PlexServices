@@ -126,7 +126,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload(
                     "Unknown request received " + request.getPayload());
-            request.sendResponseSafe();
+            request.sendResponse();
             logger.warn("PLEXSVC Unknown request received "
                     + request.getPayload() + ", registered "
                     + entriesEndpointsByMethod.keySet() + ": "
@@ -145,7 +145,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                         (String) request.getPayload());
                 request.getResponse().setCodecType(entry.getCodecType());
                 request.getResponse().setPayload("");
-                request.sendResponseSafe();
+                request.sendResponse();
             } else {
                 Future<Response> respFuture = jmsContainer.sendReceive(
                         destination, params, (String) request.getPayload(),
@@ -157,7 +157,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             request.getResponse().setStatus(HttpResponse.SC_GATEWAY_TIMEOUT);
             request.getResponse().setPayload(
                     "Request timedout " + entry.getTimeoutSecs() + " secs");
-            request.sendResponseSafe();
+            request.sendResponse();
         } catch (Exception e) {
             logger.error("Failed to send request", e);
         }
@@ -187,7 +187,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     }
                     request.getResponse().setCodecType(entry.getCodecType());
                     request.getResponse().setPayload(reply.getPayload());
-                    request.sendResponseSafe();
+                    request.sendResponse();
                     logger.info("Replying back " + reply + ", params " + params
                             + ", response" + ": " + request.getResponse());
                 } catch (Exception e) {

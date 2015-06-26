@@ -115,7 +115,7 @@ public class Request extends AbstractPayload {
     private CodecType codecType;
     private String methodName;
     private String requestUri;
-    private boolean sentResponse;
+    private Object lastSentPayload;
 
     public Request() {
     }
@@ -196,16 +196,15 @@ public class Request extends AbstractPayload {
         return responseDispatcher;
     }
 
-    public synchronized void sendResponseSafe() {
-        if (sentResponse) {
-            throw new IllegalStateException("Response already sent");
+    public synchronized void sendResponse() {
+        if (response.getPayload() != null) {
+            if (response.getPayload() == lastSentPayload) {
+                throw new IllegalStateException("Response already sent "
+                        + response.getPayload());
+            }
+            lastSentPayload = response.getPayload();
+            responseDispatcher.send(response);
         }
-        sentResponse = true;
-        sendResponse();
-    }
-
-    public void sendResponse() {
-        responseDispatcher.send(response);
     }
 
     @SuppressWarnings("unchecked")

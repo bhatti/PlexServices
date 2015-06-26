@@ -41,7 +41,7 @@ public class DefaultHttpRequestHandler implements RequestHandler {
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload(
                     "Unknown request received payload " + request);
-            request.sendResponseSafe(); // TODO verify if this is needed
+            request.sendResponse(); // TODO verify if this is needed
             logger.error("PLEXSVC Unknown request '"
                     + request.getEndpoint()
                     + ", received payload "
