@@ -1,4 +1,4 @@
-package com.plexobject.bugger.jms;
+package com.plexobject.jms;
 
 import java.io.Closeable;
 import java.io.IOException;

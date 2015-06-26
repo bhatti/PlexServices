@@ -21,22 +21,9 @@ import com.plexobject.bugger.repository.BugReportRepository;
 import com.plexobject.bugger.repository.CommentRepository;
 import com.plexobject.bugger.repository.ProjectRepository;
 import com.plexobject.bugger.repository.UserRepository;
-import com.plexobject.bugger.service.bugreport.AssignBugReportService;
-import com.plexobject.bugger.service.bugreport.CreateBugReportService;
-import com.plexobject.bugger.service.bugreport.QueryBugReportService;
-import com.plexobject.bugger.service.bugreport.QueryProjectBugReportService;
-import com.plexobject.bugger.service.bugreport.UpdateBugReportService;
-import com.plexobject.bugger.service.log.LogService;
-import com.plexobject.bugger.service.project.CreateProjectService;
-import com.plexobject.bugger.service.project.QueryProjectService;
-import com.plexobject.bugger.service.project.UpdateProjectService;
-import com.plexobject.bugger.service.project.membership.AddProjectMemberService;
-import com.plexobject.bugger.service.project.membership.RemoveProjectMemberService;
-import com.plexobject.bugger.service.user.CreateUserService;
-import com.plexobject.bugger.service.user.DeleteUserService;
-import com.plexobject.bugger.service.user.LoginService;
-import com.plexobject.bugger.service.user.QueryUserService;
-import com.plexobject.bugger.service.user.UpdateUserService;
+import com.plexobject.bugger.service.BugReportServices;
+import com.plexobject.bugger.service.ProjectServices;
+import com.plexobject.bugger.service.UserServices;
 import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.service.RequestMethod;
@@ -82,35 +69,34 @@ public class Main {
     }
 
     private void addServices(ServiceRegistry serviceRegistry) {
-        serviceRegistry.add(new LogService());
-        serviceRegistry.add(new CreateUserService(userRepository));
-        serviceRegistry.add(new UpdateUserService(userRepository));
-        serviceRegistry.add(new QueryUserService(userRepository));
-        serviceRegistry.add(new DeleteUserService(userRepository));
-        serviceRegistry.add(new LoginService(userRepository));
+        serviceRegistry.add(new UserServices.CreateUserService(userRepository));
+        serviceRegistry.add(new UserServices.UpdateUserService(userRepository));
+        serviceRegistry.add(new UserServices.QueryUserService(userRepository));
+        serviceRegistry.add(new UserServices.DeleteUserService(userRepository));
+        serviceRegistry.add(new UserServices.LoginService(userRepository));
 
         //
-        serviceRegistry.add(new CreateProjectService(projectRepository,
+        serviceRegistry.add(new ProjectServices.CreateProjectService(projectRepository,
                 userRepository));
-        serviceRegistry.add(new UpdateProjectService(projectRepository,
+        serviceRegistry.add(new ProjectServices.UpdateProjectService(projectRepository,
                 userRepository));
-        serviceRegistry.add(new QueryProjectService(projectRepository,
+        serviceRegistry.add(new ProjectServices.QueryProjectService(projectRepository,
                 userRepository));
-        serviceRegistry.add(new AddProjectMemberService(projectRepository,
+        serviceRegistry.add(new ProjectServices.AddProjectMemberService(projectRepository,
                 userRepository));
-        serviceRegistry.add(new RemoveProjectMemberService(projectRepository,
+        serviceRegistry.add(new ProjectServices.RemoveProjectMemberService(projectRepository,
                 userRepository));
         //
-        serviceRegistry.add(new CreateBugReportService(bugreportRepository,
+        serviceRegistry.add(new BugReportServices.CreateBugReportService(bugreportRepository,
                 userRepository));
-        serviceRegistry.add(new UpdateBugReportService(bugreportRepository,
+        serviceRegistry.add(new BugReportServices.UpdateBugReportService(bugreportRepository,
                 userRepository));
-        serviceRegistry.add(new QueryBugReportService(bugreportRepository,
+        serviceRegistry.add(new BugReportServices.QueryBugReportService(bugreportRepository,
                 userRepository));
-        serviceRegistry.add(new QueryProjectBugReportService(
+        serviceRegistry.add(new BugReportServices.QueryProjectBugReportService(
                 bugreportRepository, userRepository));
 
-        serviceRegistry.add(new AssignBugReportService(bugreportRepository,
+        serviceRegistry.add(new BugReportServices.AssignBugReportService(bugreportRepository,
                 userRepository));
     }
 
