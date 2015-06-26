@@ -23,8 +23,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public void clear() {
         RequestBuilder request = new RequestBuilder("clear", "");
         try {
-            post(COURSE_SERVICE, request, Void.class, null,
-                    getItemNameForMethod("clear"));
+            post(COURSE_SERVICE, request, Void.class, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -35,8 +34,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public int size() {
         RequestBuilder request = new RequestBuilder("size", "");
         try {
-            Integer size = post(COURSE_SERVICE, request, Integer.class, null,
-                    getItemNameForMethod("size"));
+            Integer size = post(COURSE_SERVICE, request, Integer.class, null);
             return size;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -48,8 +46,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public Course save(Course course) {
         RequestBuilder request = new RequestBuilder("save", course);
         try {
-            Course saved = post(COURSE_SERVICE, request, Course.class, null,
-                    getItemNameForMethod("save", Course.class));
+            Course saved = post(COURSE_SERVICE, request, Course.class, null);
             return saved;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -61,8 +58,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public List<Course> enroll(List<Student> students) {
         RequestBuilder request = new RequestBuilder("enroll", students);
         try {
-            return postWithListReturnType(COURSE_SERVICE + "/enroll", request,
-                    getItemNameForMethod("enroll", List.class));
+            return postWithListReturnType(COURSE_SERVICE + "/enroll", request);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -73,42 +69,39 @@ public class CourseServiceClient extends BaseServiceClient implements
     public List<Course> create(List<Course> courses) {
         RequestBuilder request = new RequestBuilder("create", courses);
         try {
-            return postWithListReturnType(COURSE_SERVICE + "/create", request,
-                    getItemNameForMethod("create", List.class));
+            return postWithListReturnType(COURSE_SERVICE + "/create", request);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     private List<Course> postWithListReturnType(String path,
-            RequestBuilder request, String item) throws NoSuchMethodException,
-            Exception {
+            RequestBuilder request) throws NoSuchMethodException, Exception {
         Method m = CourseService.class.getMethod("count", List.class);
         Class<?> klass = m.getParameterTypes()[0].getClass();
         Type pKlass = m.getGenericParameterTypes()[0];
-        return post(path, request, klass, pKlass, item);
+        return post(path, request, klass, pKlass);
     }
 
-    private List<Course> getWithListReturnType(String query, String item)
+    private List<Course> getWithListReturnType(String query)
             throws NoSuchMethodException, Exception {
         Method m = CourseService.class.getMethod("count", List.class);
         Class<?> klass = m.getParameterTypes()[0].getClass();
         Type pKlass = m.getGenericParameterTypes()[0];
-        return get(COURSE_SERVICE + "?" + query, klass, pKlass, item);
+        return get(COURSE_SERVICE + "?" + query, klass, pKlass);
     }
 
-    private <T> T getWithReturnType(String query, String item,
-            Class<?> returnType) throws NoSuchMethodException, Exception {
-        return get(COURSE_SERVICE + "?" + query, returnType, null, item);
+    private <T> T getWithReturnType(String query, Class<?> returnType)
+            throws NoSuchMethodException, Exception {
+        return get(COURSE_SERVICE + "?" + query, returnType, null);
     }
 
     @WebMethod(exclude = true)
     @Override
     public List<Course> getCoursesForStudentId(Long studentId) {
         try {
-            return getWithListReturnType(
-                    "methodName=getCoursesForStudentId&studentId=" + studentId,
-                    getItemNameForMethod("getCoursesForStudentId", Long.class));
+            return getWithListReturnType("methodName=getCoursesForStudentId&studentId="
+                    + studentId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -120,7 +113,7 @@ public class CourseServiceClient extends BaseServiceClient implements
                 String.class);
         Class<?> klass = m.getReturnType();
         Type pKlass = m.getGenericReturnType();
-        return get(COURSE_SERVICE + "?" + query, klass, pKlass, null);
+        return get(COURSE_SERVICE + "?" + query, klass, pKlass);
     }
 
     @WebMethod(exclude = true)
@@ -134,8 +127,7 @@ public class CourseServiceClient extends BaseServiceClient implements
             for (Map.Entry<String, Object> e : criteria.entrySet()) {
                 query.append(e.getKey() + "=" + e.getValue() + "&");
             }
-            return get(COURSE_SERVICE + "/query?" + query, klass, pKlass,
-                    getItemNameForMethod("query", Map.class));
+            return get(COURSE_SERVICE + "/query?" + query, klass, pKlass);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -146,7 +138,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public Course get(Long courseId) {
         try {
             return getWithReturnType("methodName=get&courseId=" + courseId,
-                    getItemNameForMethod("get", Long.class), Course.class);
+                    Course.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -157,8 +149,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public boolean exists(Course c, Student s) {
         RequestBuilder request = new RequestBuilder("exists", c);
         try {
-            Boolean resp = post(COURSE_SERVICE, request, Boolean.class, null,
-                    getItemNameForMethod("exists", Course.class, Student.class));
+            Boolean resp = post(COURSE_SERVICE, request, Boolean.class, null);
             return resp;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -170,8 +161,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public int count(List<Course> c) {
         RequestBuilder request = new RequestBuilder("count", c);
         try {
-            return post(COURSE_SERVICE, request, Integer.class, null,
-                    getItemNameForMethod("count", List.class));
+            return post(COURSE_SERVICE, request, Integer.class, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -193,7 +183,7 @@ public class CourseServiceClient extends BaseServiceClient implements
     public void exceptionExample(boolean type) throws Exception {
         RequestBuilder request = new RequestBuilder("exceptionExample", type);
         try {
-            post(COURSE_SERVICE, request, Void.class, null, null);
+            post(COURSE_SERVICE, request, Void.class, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
