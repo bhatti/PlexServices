@@ -1,7 +1,6 @@
 package com.plexobject.handler.javaws;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -13,7 +12,6 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.ServiceInvocationException;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
@@ -23,47 +21,17 @@ public class JavawsDelegateHandler implements RequestHandler {
     private static final String RESPONSE_SUFFIX = "Response";
     private static final Map<String, Object> EMPTY_MAP = new HashMap<>();
 
-    static class MethodInfo {
-        public final Method iMethod;
-        public final Method implMethod;
-        public final String webParamName;
-        public final RequestMethod requestMethod;
-        public final String[] paramNames;
-        public final String methodPath;
-
-        public MethodInfo(Method iMethod, Method implMethod,
-                String webParamName, RequestMethod requestMethod,
-                String[] paramNames, String methodPath) {
-            this.iMethod = iMethod;
-            this.implMethod = implMethod;
-            this.webParamName = webParamName;
-            this.requestMethod = requestMethod;
-            this.paramNames = paramNames;
-            this.methodPath = methodPath;
-        }
-
-        public boolean useNameParams() {
-            return paramNames.length > 0
-                    && paramNames.length == iMethod.getParameterTypes().length;
-        }
-
-        public boolean useMapProperties() {
-            return iMethod.getParameterTypes().length == 1
-                    && Map.class == iMethod.getParameterTypes()[0];
-        }
-    }
-
     private final Object delegate;
     private final ServiceRegistry serviceRegistry;
-    private final Map<String, MethodInfo> methodsByName = new HashMap<>();
-    private MethodInfo defaultMethodInfo;
+    private final Map<String, JavawsServiceMethod> methodsByName = new HashMap<>();
+    private JavawsServiceMethod defaultMethodInfo;
 
     public JavawsDelegateHandler(Object delegate, ServiceRegistry registry) {
         this.delegate = delegate;
         this.serviceRegistry = registry;
     }
 
-    public void addMethod(MethodInfo info) {
+    public void addMethod(JavawsServiceMethod info) {
         methodsByName.put(info.iMethod.getName(), info);
         defaultMethodInfo = info;
     }
@@ -72,7 +40,8 @@ public class JavawsDelegateHandler implements RequestHandler {
     public void handle(final Request<Object> request) {
         Pair<String, String> methodAndPayload = getMethodNameAndPayload(request);
 
-        final MethodInfo methodInfo = methodsByName.get(methodAndPayload.first);
+        final JavawsServiceMethod methodInfo = methodsByName
+                .get(methodAndPayload.first);
         if (methodInfo == null) {
             throw new ServiceInvocationException("Unknown method "
                     + methodAndPayload.first + ", available "
@@ -107,8 +76,9 @@ public class JavawsDelegateHandler implements RequestHandler {
     }
 
     private void invokeWithAroundInterceptorIfNeeded(
-            final Request<Object> request, final MethodInfo methodInfo,
-            final String responseTag, final Object[] args) throws Exception {
+            final Request<Object> request,
+            final JavawsServiceMethod methodInfo, final String responseTag,
+            final Object[] args) throws Exception {
         if (serviceRegistry.getAroundInterceptor() != null) {
             Callable<Object> callable = new Callable<Object>() {
                 @Override
@@ -124,8 +94,9 @@ public class JavawsDelegateHandler implements RequestHandler {
         }
     }
 
-    private void invoke(Request<Object> request, final MethodInfo methodInfo,
-            String responseTag, Object[] args) throws Exception {
+    private void invoke(Request<Object> request,
+            final JavawsServiceMethod methodInfo, String responseTag,
+            Object[] args) throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request, null);
         }
@@ -133,14 +104,7 @@ public class JavawsDelegateHandler implements RequestHandler {
             Map<String, Object> response = new HashMap<>();
             Object result = methodInfo.implMethod.invoke(delegate, args);
             if (result != null) {
-                if (methodInfo.webParamName != null
-                        && methodInfo.webParamName.length() > 0) {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put(methodInfo.webParamName, result);
-                    response.put(responseTag, item);
-                } else {
-                    response.put(responseTag, result);
-                }
+                response.put(responseTag, result);
             } else {
                 response.put(responseTag, EMPTY_MAP);
             }

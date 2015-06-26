@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jws.WebMethod;
-import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -33,7 +32,6 @@ import com.plexobject.util.ReflectUtils;
 public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
     private static final Logger logger = Logger
             .getLogger(RequestHandlerAdapterJavaws.class);
-    private static final String JAVA_WS_DEFAULT_WEB_PARAM_NAME = "javaWs.defaultWebParamName";
     private static final String DEFAULT_VERSION = "1.0";
     private static final String[] DEFAULT_ROLES = new String[0];
     private final ServiceRegistry registry;
@@ -105,7 +103,6 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         for (final Method implMethod : serviceClass.getMethods()) {
             Method iMethod = getExported(webService, implMethod);
             if (iMethod != null) {
-                String itemName = getWebParamName(iMethod, implMethod);
                 String methodPath = getMethodPath(iMethod, implMethod);
                 if (methodPath == null) {
                     methodPath = defaultServiceConfig.endpoint();
@@ -128,9 +125,8 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
                 }
                 //
                 ((JavawsDelegateHandler) handler)
-                        .addMethod(new JavawsDelegateHandler.MethodInfo(
-                                iMethod, implMethod, itemName, requestMethod,
-                                paramNames, methodPath));
+                        .addMethod(new JavawsServiceMethod(iMethod, implMethod,
+                                requestMethod, paramNames, methodPath));
                 if (logger.isDebugEnabled()) {
                     logger.debug("Added handler "
                             + handler.getClass().getSimpleName() + " for "
@@ -141,19 +137,6 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
             }
         }
         return handlers;
-    }
-
-    private String getWebParamName(final Method iMethod, final Method implMethod) {
-        WebParam webParam = ReflectUtils.getMethodParameterAnnotation(iMethod,
-                WebParam.class);
-        if (webParam == null) {
-            webParam = ReflectUtils.getMethodParameterAnnotation(implMethod,
-                    WebParam.class);
-        }
-
-        String responseItemTag = webParam != null ? webParam.name() : registry
-                .getConfiguration().getProperty(JAVA_WS_DEFAULT_WEB_PARAM_NAME);
-        return responseItemTag;
     }
 
     private String getMethodPath(final Method iMethod, final Method implMethod) {
