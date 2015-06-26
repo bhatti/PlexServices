@@ -49,7 +49,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    void addRequestInterceptor(Interceptor<Request<Object>> interceptor);
+    void addRequestInterceptor(Interceptor<Request> interceptor);
 
     /**
      * This method removes interceptor, which is invoked before passing request
@@ -57,7 +57,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    boolean removeRequestInterceptor(Interceptor<Request<Object>> interceptor);
+    boolean removeRequestInterceptor(Interceptor<Request> interceptor);
 
     /**
      * This method returns request interceptors, which is invoked before passing
@@ -65,7 +65,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @return
      */
-    Collection<Interceptor<Request<Object>>> getRequestInterceptors();
+    Collection<Interceptor<Request>> getRequestInterceptors();
 
     /**
      * This method returns true if request interceptors exist

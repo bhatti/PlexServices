@@ -111,14 +111,13 @@ public class NettyWebRequestHandlerTest {
         nettyHandler.exceptionCaught(ctx, new Exception());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testChannelRead0() throws Exception {
         HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
                 HttpMethod.GET, "http://localhost?one=1&two=2");
         new Expectations() {
             {
-                reqHandler.handle((Request<Object>) any);
+                reqHandler.handle((Request) any);
             }
         };
 

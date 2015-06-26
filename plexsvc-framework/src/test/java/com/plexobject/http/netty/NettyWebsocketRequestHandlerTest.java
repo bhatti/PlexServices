@@ -15,10 +15,9 @@ import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.Response;
 import com.plexobject.http.TestWebUtils;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 
 public class NettyWebsocketRequestHandlerTest {
     private static final int HTTP_PORT = 8323;
@@ -27,16 +26,16 @@ public class NettyWebsocketRequestHandlerTest {
     private static final String PING = "ping";
 
     private NettyHttpServer server;
-    private final List<Request<Object>> requests = new ArrayList<>();
+    private final List<Request> requests = new ArrayList<>();
 
     private RequestHandler handler = new RequestHandler() {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             requests.add(request);
             request.getResponse().setCodecType(CodecType.JSON);
 
             request.getResponse().setPayload(PONG);
-            request.sendResponse();
+            request.sendResponseSafe();
         }
     };
 
@@ -56,12 +55,9 @@ public class NettyWebsocketRequestHandlerTest {
 
     @Test
     public void testWebHandler() throws Exception {
-        Response response = new Response(new HashMap<String, Object>(),
-                new HashMap<String, Object>(), null, CodecType.JSON);
-        Request<String> request = Request.stringBuilder()
-                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
-                .setEndpoint("/ping").setCodecType(CodecType.JSON)
-                .setPayload(PING).setResponse(response)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setEndpoint("/ping")
+                .setCodecType(CodecType.JSON).setPayload(PING)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         String jsonRequest = ObjectCodecFactory.getInstance()
@@ -70,7 +66,7 @@ public class NettyWebsocketRequestHandlerTest {
                 HTTP_PORT, jsonRequest);
         assertEquals(1, requests.size());
         assertEquals(PING, requests.get(0).getPayload());
-        Request<String> reply = ObjectCodecFactory
+        Request reply = ObjectCodecFactory
                 .getInstance()
                 .getObjectCodec(CodecType.JSON)
                 .decode(jsonResponse, Request.class,

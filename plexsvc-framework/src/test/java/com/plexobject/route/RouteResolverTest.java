@@ -22,7 +22,7 @@ public class RouteResolverTest {
         }
 
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
 
         }
 

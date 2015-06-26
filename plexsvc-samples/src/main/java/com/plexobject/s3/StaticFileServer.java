@@ -37,7 +37,7 @@ public class StaticFileServer implements RequestHandler {
     }
 
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         String path = request.getEndpoint().replaceAll("^.static.", "");
         try {
             if (new File(path).isAbsolute()) {

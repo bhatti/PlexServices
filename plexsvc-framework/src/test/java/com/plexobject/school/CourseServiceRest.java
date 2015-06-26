@@ -18,7 +18,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course.class, endpoint = "/courses", method = RequestMethod.POST)
     public static class SaveHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             Course course = request.getPayload();
             courses.put(course.getId(), course);
             request.getResponse().setPayload(course);
@@ -28,7 +28,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Customer[].class, endpoint = "/customers", method = RequestMethod.POST)
     public static class CustomersHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             Customer[] list = request.getPayload();
             request.getResponse().setPayload(list);
         }
@@ -37,7 +37,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student[].class, endpoint = "/courses/enroll", method = RequestMethod.POST)
     public static class EnrollHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             Student[] students = request.getPayload();
 
             List<Course> list = new ArrayList<>();
@@ -57,7 +57,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/students/{studentId}", method = RequestMethod.GET)
     public static class CoursesForStudentHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             String studentId = request.getStringProperty("studentId");
             List<Course> list = new ArrayList<>();
             for (Course course : courses.values()) {
@@ -72,7 +72,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses", method = RequestMethod.GET)
     public static class QueryHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             String studentId = request.getStringProperty("studentId");
             String courseId = request.getStringProperty("courseId");
             List<Course> list = new ArrayList<>();
@@ -92,7 +92,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/{courseId}", method = RequestMethod.GET)
     public static class GetHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             String courseId = request.getStringProperty("courseId");
             Course c = courses.get(courseId);
             if (c == null) {
@@ -106,7 +106,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course[].class, endpoint = "/courses/create", method = RequestMethod.POST)
     public static class CreateHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             Course[] list = request.getPayload();
             for (Course c : list) {
                 courses.put(c.getId(), c);
@@ -118,7 +118,7 @@ public class CourseServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/error", method = RequestMethod.GET)
     public static class ErrorHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             if (request.getStringProperty("rt") != null)
                 throw ValidationException.builder()
                         .addError("401", "name", "name not define")

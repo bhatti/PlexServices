@@ -68,9 +68,9 @@ public class Main implements ServiceRegistryLifecycleAware {
 
     private static void addInterceptors(ServiceRegistry serviceRegistry) {
         serviceRegistry
-                .addRequestInterceptor(new Interceptor<Request<Object>>() {
+                .addRequestInterceptor(new Interceptor<Request>() {
                     @Override
-                    public Request<Object> intercept(Request<Object> request) {
+                    public Request intercept(Request request) {
                         System.out.println(">>>>>>>>>INPUT " + request);
                         return request;
                     }

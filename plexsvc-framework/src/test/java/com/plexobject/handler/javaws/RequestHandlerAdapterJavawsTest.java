@@ -58,7 +58,7 @@ public class RequestHandlerAdapterJavawsTest {
         }
         SecurityAuthorizer securityAuthorizer = new SecurityAuthorizer() {
             @Override
-            public void authorize(Request<Object> request, String[] roles)
+            public void authorize(Request request, String[] roles)
                     throws AuthException {
                 // System.out.println("Checking Auth");
             }
@@ -90,9 +90,9 @@ public class RequestHandlerAdapterJavawsTest {
         });
         if (config.getBoolean("debug")) {
             serviceRegistry
-                    .addRequestInterceptor(new Interceptor<Request<Object>>() {
+                    .addRequestInterceptor(new Interceptor<Request>() {
                         @Override
-                        public Request<Object> intercept(Request<Object> input) {
+                        public Request intercept(Request input) {
                             System.out.println("INPUT PAYLOAD: " + input);
                             return input;
                         }

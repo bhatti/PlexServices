@@ -7,6 +7,6 @@ package com.plexobject.handler;
  *
  * @param <T>
  */
-public interface RequestHandler extends Handler<Request<Object>> {
+public interface RequestHandler extends Handler<Request> {
 
 }

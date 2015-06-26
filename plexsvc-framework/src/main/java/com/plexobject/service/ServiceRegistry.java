@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 
 import com.plexobject.bridge.web.WebToJmsBridge;
 import com.plexobject.bridge.web.WebToJmsEntry;
+import com.plexobject.bus.EventBus;
+import com.plexobject.bus.impl.EventBusImpl;
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
@@ -59,6 +61,7 @@ public class ServiceRegistry implements ServiceContainer,
     private final boolean enablePingHandlers;
     private ServletContext servletContext;
     private SecurityAuthorizer securityAuthorizer;
+    private EventBus eventBus = new EventBusImpl();
 
     public ServiceRegistry(Configuration config) {
         this(config, new NettyWebContainerProvider());
@@ -94,7 +97,8 @@ public class ServiceRegistry implements ServiceContainer,
                     "PlexServices:name=ServiceRegistry"));
         } catch (InstanceAlreadyExistsException e) {
         } catch (Exception e) {
-            logger.error("PLEXSVC Could not register mbean for service-registry", e);
+            logger.error(
+                    "PLEXSVC Could not register mbean for service-registry", e);
         }
     }
 
@@ -262,7 +266,7 @@ public class ServiceRegistry implements ServiceContainer,
      * @param request
      * @param handler
      */
-    public void invoke(Request<?> request, RequestHandler handler) {
+    public void invoke(Request request, RequestHandler handler) {
         serviceInvocationHelper.invoke(request, handler, this);
     }
 
@@ -275,18 +279,17 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public void addRequestInterceptor(Interceptor<Request<Object>> interceptor) {
+    public void addRequestInterceptor(Interceptor<Request> interceptor) {
         interceptorLifecycle.addRequestInterceptor(interceptor);
     }
 
     @Override
-    public boolean removeRequestInterceptor(
-            Interceptor<Request<Object>> interceptor) {
+    public boolean removeRequestInterceptor(Interceptor<Request> interceptor) {
         return interceptorLifecycle.removeRequestInterceptor(interceptor);
     }
 
     @Override
-    public Collection<Interceptor<Request<Object>>> getRequestInterceptors() {
+    public Collection<Interceptor<Request>> getRequestInterceptors() {
         return interceptorLifecycle.getRequestInterceptors();
     }
 
@@ -373,6 +376,14 @@ public class ServiceRegistry implements ServiceContainer,
         this.securityAuthorizer = securityAuthorizer;
     }
 
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public void setEventBus(EventBus eventBus) {
+        this.eventBus = eventBus;
+    }
+
     private void addPingHandler(final RequestHandler h,
             final ServiceConfigDesc config, final ServiceContainer container) {
         String pingEndpoint = config.endpoint() + ".ping";
@@ -387,7 +398,7 @@ public class ServiceRegistry implements ServiceContainer,
                 .setRolesAllowed(new String[0]).build();
         final RequestHandler pingHandler = new RequestHandler() {
             @Override
-            public void handle(Request<Object> request) {
+            public void handle(Request request) {
                 request.getResponse().setPayload(
                         getServiceMetricsRegistry().getServiceMetrics(h)
                                 .getSummary());

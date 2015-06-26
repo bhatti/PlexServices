@@ -17,14 +17,20 @@ public class Response extends AbstractPayload {
             HttpResponse.STATUS, HttpResponse.LOCATION, Constants.SESSION_ID };
     private CodecType codecType;
     private int status = HttpResponse.SC_OK;
+    private final Request request;
 
-    public Response(final Map<String, Object> properties,
+    public Response(final Request request,
+            final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             CodecType codecType) {
         super(properties, headers, payload);
+        this.request = request;
         this.codecType = codecType;
     }
 
+    public Request getRequest() {
+        return request;
+    }
     public Response setStatus(int status) {
         this.status = status;
         return this;

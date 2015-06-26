@@ -2,7 +2,6 @@ package com.plexobject.jms;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.jms.Destination;
@@ -19,10 +18,9 @@ import org.apache.log4j.Logger;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.Response;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
@@ -34,7 +32,8 @@ import com.plexobject.service.ServiceRegistry;
  *
  */
 class JmsRequestHandler implements MessageListener, ExceptionListener {
-    private static final Logger logger = Logger.getLogger(JmsRequestHandler.class);
+    private static final Logger logger = Logger
+            .getLogger(JmsRequestHandler.class);
 
     private final ServiceRegistry serviceRegistry;
     private final JMSContainer jmsContainer;
@@ -64,14 +63,17 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsContainer, message.getJMSReplyTo());
 
-            Response response = new Response(new HashMap<String, Object>(),
-                    new HashMap<String, Object>(), "", config.codec());
-            Request<String> request = Request.stringBuilder()
-                    .setProtocol(Protocol.JMS).setMethod(RequestMethod.MESSAGE)
-                    .setProperties(params).setEndpoint(config.endpoint())
+            Request request = Request
+                    .builder()
+                    .setProtocol(Protocol.JMS)
+                    .setMethod(RequestMethod.MESSAGE)
+                    .setProperties(params)
+                    .setEndpoint(config.endpoint())
+                    .setReplyEndpoint(
+                            message.getJMSReplyTo() != null ? message
+                                    .getJMSReplyTo().toString() : null)
                     .setCodecType(config.codec()).setPayload(textPayload)
-                    .setResponse(response).setResponseDispatcher(dispatcher)
-                    .build();
+                    .setResponseDispatcher(dispatcher).build();
 
             logger.info("PLEXSVC Received " + textPayload + " for "
                     + config.endpoint() + " "
@@ -87,7 +89,8 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
 
     @Override
     public void onException(JMSException ex) {
-        logger.error("PLEXSVC Found error while listening, will resubscribe", ex);
+        logger.error("PLEXSVC Found error while listening, will resubscribe",
+                ex);
         try {
             close();
             registerListener();

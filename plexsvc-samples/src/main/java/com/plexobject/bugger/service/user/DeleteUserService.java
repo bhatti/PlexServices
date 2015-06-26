@@ -22,7 +22,7 @@ public class DeleteUserService extends AbstractUserService implements
     }
 
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         String id = request.getStringProperty("id");
         final boolean deleted = userRepository.delete(Long.valueOf(id));
         Map<String, Boolean> response = new HashMap<String, Boolean>() {

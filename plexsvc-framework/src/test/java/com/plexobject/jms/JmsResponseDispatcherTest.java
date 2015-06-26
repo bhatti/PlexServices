@@ -35,7 +35,7 @@ public class JmsResponseDispatcherTest {
             }
         };
 
-        d.doSend(new Response(new HashMap<String, Object>(),
+        d.doSend(new Response(null, new HashMap<String, Object>(),
                 new HashMap<String, Object>(), "", CodecType.JSON), "payload");
     }
 
@@ -51,7 +51,7 @@ public class JmsResponseDispatcherTest {
                         .send(replyTo, (Map<String, Object>) any, "payload");
             }
         };
-        d.send(new Response(new HashMap<String, Object>(),
+        d.send(new Response(null, new HashMap<String, Object>(),
                 new HashMap<String, Object>(), "payload", CodecType.JSON));
     }
 

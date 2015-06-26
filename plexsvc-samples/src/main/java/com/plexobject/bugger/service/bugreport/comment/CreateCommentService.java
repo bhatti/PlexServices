@@ -27,7 +27,7 @@ public class CreateCommentService extends AbstractBugReportService implements
 
     // any employee who is member of same project can create comment
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         Comment comment = request.getPayload();
         BugReport report = bugReportRepository.load(Long.valueOf(comment
                 .getBugId()));

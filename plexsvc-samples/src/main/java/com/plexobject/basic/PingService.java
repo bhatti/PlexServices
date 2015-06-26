@@ -18,7 +18,7 @@ public class PingService implements RequestHandler {
     }
 
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         String data = request.getStringProperty("data");
         if (data == null) {
             data = "";

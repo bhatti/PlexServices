@@ -17,5 +17,5 @@ public interface SecurityAuthorizer {
      * @param roles
      * @throws Exception
      */
-    void authorize(Request<Object> request, String[] roles) throws Exception;
+    void authorize(Request request, String[] roles) throws Exception;
 }

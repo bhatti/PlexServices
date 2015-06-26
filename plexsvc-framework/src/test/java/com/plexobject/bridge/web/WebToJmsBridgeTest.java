@@ -26,8 +26,8 @@ import com.plexobject.handler.Handler;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceRegistry;
 
 @RunWith(JMockit.class)
@@ -63,8 +63,8 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request<Object> request = Request
-                .objectBuilder()
+        Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
@@ -72,10 +72,6 @@ public class WebToJmsBridgeTest {
                 .setHeaders(headers)
                 .setPayload(payload)
                 .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -94,8 +90,8 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request<Object> request = Request
-                .objectBuilder()
+        Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
@@ -103,10 +99,6 @@ public class WebToJmsBridgeTest {
                 .setHeaders(headers)
                 .setPayload(payload)
                 .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -132,8 +124,8 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        final Request<Object> request = Request
-                .objectBuilder()
+        final Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
@@ -141,10 +133,6 @@ public class WebToJmsBridgeTest {
                 .setHeaders(headers)
                 .setPayload(payload)
                 .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 

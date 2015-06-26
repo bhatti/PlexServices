@@ -14,7 +14,7 @@ public class LogService implements RequestHandler {
     private static final Logger log = Logger.getLogger(LogService.class);
 
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         log.info(request.toString());
     }
 

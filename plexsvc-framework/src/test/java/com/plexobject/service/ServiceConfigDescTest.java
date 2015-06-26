@@ -16,7 +16,7 @@ public class ServiceConfigDescTest {
     @ServiceConfig(protocol = Protocol.HTTP, version = "1.0", endpoint = "/w", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
         }
     }
 

@@ -22,7 +22,7 @@ public class UpdateProjectService extends AbstractProjectService implements
     }
 
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         Project project = request.getPayload();
         Project saved = projectRepository.save(project);
         request.getResponse().setPayload(saved);

@@ -23,7 +23,7 @@ public class CreateBugReportService extends AbstractBugReportService implements
 
     // any employee who is member of same project can create bug report
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         BugReport report = request.getPayload();
         report.validate();
         BugReport saved = bugReportRepository.save(report);

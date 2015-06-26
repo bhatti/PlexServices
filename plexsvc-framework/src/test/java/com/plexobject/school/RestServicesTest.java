@@ -40,7 +40,7 @@ public class RestServicesTest {
         BaseServiceClient.codecType = CodecType.JSON;
         SecurityAuthorizer securityAuthorizer = new SecurityAuthorizer() {
             @Override
-            public void authorize(Request<Object> request, String[] roles)
+            public void authorize(Request request, String[] roles)
                     throws AuthException {
             }
         };

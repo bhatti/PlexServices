@@ -24,7 +24,7 @@ public class AddProjectMemberService extends AbstractProjectService implements
     }
 
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         String projectId = request.getStringProperty("id");
         String assignedTo = request.getStringProperty("assignedTo");
         boolean projectLead = "true".equals(request

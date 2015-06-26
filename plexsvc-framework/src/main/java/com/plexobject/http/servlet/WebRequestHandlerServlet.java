@@ -20,7 +20,6 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.Response;
 import com.plexobject.http.Handledable;
 import com.plexobject.http.WebContainerProvider;
 import com.plexobject.security.SecurityAuthorizer;
@@ -172,14 +171,12 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                     }
                 }, req, resp);
 
-        Response response = new Response(new HashMap<String, Object>(),
-                new HashMap<String, Object>(), "", codecType);
-        Request<Object> handlerReq = Request.objectBuilder()
+        Request handlerReq = Request.builder()
                 .setProtocol(Protocol.HTTP).setMethod(method)
                 .setRemoteAddress(req.getRemoteAddr()).setEndpoint(uri)
                 .setRequestUri(req.getRequestURI()).setProperties(params)
                 .setHeaders(headers).setCodecType(codecType)
-                .setPayload(textPayload).setResponse(response)
+                .setPayload(textPayload)
                 .setResponseDispatcher(dispatcher).build();
 
         logger.info("PLEXSVC HTTP Received URI '" + uri + "', request "

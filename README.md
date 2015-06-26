@@ -647,7 +647,6 @@ Here is a sample json file that describes mapping:
 ### JavaWS support
 PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
 ```java 
-import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -663,7 +662,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @POST
-    public Course save(@WebParam(name = "course") Course course) {
+    public Course save(Course course) {
         courses.put(course.getId(), course);
         return course;
     }

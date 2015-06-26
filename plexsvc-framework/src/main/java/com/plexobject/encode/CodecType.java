@@ -7,7 +7,7 @@ package com.plexobject.encode;
  *
  */
 public enum CodecType {
-    JSON, GSON, HTML, XML, TEXT;
+    NONE, JSON, HTML, XML, TEXT;
     /**
      * This method is used to set content-type header of response
      * 
@@ -22,7 +22,6 @@ public enum CodecType {
         case TEXT:
             return "application/text";
         case JSON:
-        case GSON:
         default:
             return "application/json";
         }
@@ -42,8 +41,6 @@ public enum CodecType {
             return XML;
         } else if ("application/json".equals(accept)) {
             return JSON;
-        } else if ("application/gson".equals(accept)) {
-            return GSON;
         } else if ("application/text".equals(accept)) {
             return TEXT;
         } else if ("text/html".equals(accept)) {

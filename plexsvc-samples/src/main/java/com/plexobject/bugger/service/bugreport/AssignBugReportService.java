@@ -25,7 +25,7 @@ public class AssignBugReportService extends AbstractBugReportService implements
 
     // any employee who is member of same project can assign bug report
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         String bugReportId = request.getStringProperty("id");
         String assignedTo = request.getStringProperty("assignedTo");
 

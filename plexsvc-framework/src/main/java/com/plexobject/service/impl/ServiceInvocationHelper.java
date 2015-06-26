@@ -39,8 +39,6 @@ public class ServiceInvocationHelper {
      * @param request
      * @param handler
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    // igoring type of Request so that we can cast to Object
     public void invoke(Request request, RequestHandler handler,
             final ServiceRegistry registry) {
         if (handler != null) {
@@ -66,7 +64,7 @@ public class ServiceInvocationHelper {
                         "Expected payload of type "
                                 + config.payloadClass().getName()
                                 + ", but payload was: " + request);
-                request.sendResponse();
+                request.sendResponseSafe();
                 return;
             }
             ((AbstractResponseDispatcher) request.getResponseDispatcher())
@@ -78,31 +76,33 @@ public class ServiceInvocationHelper {
 
             // We assume incoming payload is text so we will run through input
             // interceptors
-            String textPayload = request.getPayload();
-            // apply input interceptors
-            if (registry.hasInputInterceptors()) {
-                for (Interceptor<String> interceptor : registry
-                        .getInputInterceptors()) {
-                    textPayload = interceptor.intercept(textPayload);
+            if (codecType != CodecType.NONE
+                    && request.getPayload() instanceof String) {
+                String textPayload = request.getPayload();
+                // apply input interceptors
+                if (registry.hasInputInterceptors()) {
+                    for (Interceptor<String> interceptor : registry
+                            .getInputInterceptors()) {
+                        textPayload = interceptor.intercept(textPayload);
+                    }
+                    request.setPayload(textPayload);
                 }
-                request.setPayload(textPayload);
-            }
 
-            // decode text input into object
-            if (config.payloadClass() != null
-                    && config.payloadClass() != Void.class
-                    && (request.getPayload() instanceof String || request
-                            .getPayload() == null)) {
-                request.setPayload(ObjectCodecFactory
-                        .getInstance()
-                        .getObjectCodec(codecType)
-                        .decode(textPayload, config.payloadClass(),
-                                request.getProperties()));
+                // decode text input into object
+                if (config.payloadClass() != null
+                        && config.payloadClass() != Void.class
+                        && (request.getPayload() instanceof String || request
+                                .getPayload() == null)) {
+                    request.setPayload(ObjectCodecFactory
+                            .getInstance()
+                            .getObjectCodec(codecType)
+                            .decode(textPayload, config.payloadClass(),
+                                    request.getProperties()));
+                }
             }
-
             // Invoking request interceptors
             if (registry.hasRequestInterceptors()) {
-                for (Interceptor<Request<Object>> interceptor : registry
+                for (Interceptor<Request> interceptor : registry
                         .getRequestInterceptors()) {
                     request = interceptor.intercept(request);
                 }
@@ -149,7 +149,7 @@ public class ServiceInvocationHelper {
                             HttpResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 request.getResponse().setPayload(e);
-                request.sendResponse();
+                request.sendResponseSafe();
             }
         } else {
             logger.warn("PLEXSVC Received Unknown request params "
@@ -158,15 +158,14 @@ public class ServiceInvocationHelper {
             request.getResponse().setCodecType(CodecType.TEXT);
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload("page not found");
-            request.sendResponse();
+            request.sendResponseSafe();
         }
     }
 
-    private void invokeWithAroundInterceptorIfNeeded(
-            final Request<Object> request, final RequestHandler handler,
-            final ServiceRegistry registry, final long started,
-            final ServiceMetrics metrics, final ServiceConfigDesc config)
-            throws Exception {
+    private void invokeWithAroundInterceptorIfNeeded(final Request request,
+            final RequestHandler handler, final ServiceRegistry registry,
+            final long started, final ServiceMetrics metrics,
+            final ServiceConfigDesc config) throws Exception {
         if (handler instanceof JavawsDelegateHandler) {
             // skip authorization and around interceptor for JavaWS because we
             // need additional info for method names
@@ -190,19 +189,19 @@ public class ServiceInvocationHelper {
         }
     }
 
-    private void invoke(Request<Object> request, RequestHandler handler,
+    private void invoke(Request request, RequestHandler handler,
             final long started, ServiceMetrics metrics, ServiceConfigDesc config) {
         // invoke authorizer if set
         handler.handle(request);
         metrics.addResponseTime(System.currentTimeMillis() - started);
         // send back the reply
         if (request.getResponse().getPayload() != null) {
-            request.sendResponse();
+            request.sendResponseSafe();
         }
     }
 
-    private void authorizeIfNeeded(Request<Object> request,
-            ServiceConfigDesc config) throws Exception {
+    private void authorizeIfNeeded(Request request, ServiceConfigDesc config)
+            throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request,
                     config.rolesAllowed());

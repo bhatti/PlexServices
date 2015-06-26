@@ -17,7 +17,7 @@ public class StudentServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student.class, endpoint = "/students", method = RequestMethod.POST)
     public static class SaveHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             Student student = request.getPayload();
             students.put(student.getId(), student);
             request.getResponse().setPayload(student);
@@ -27,7 +27,7 @@ public class StudentServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students", method = RequestMethod.GET)
     public static class QueryHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             String studentId = request.getStringProperty("studentId");
             String courseId = request.getStringProperty("courseId");
             List<Student> list = new ArrayList<>();
@@ -47,7 +47,7 @@ public class StudentServiceRest {
     @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students/{studentId}", method = RequestMethod.GET)
     public static class GetHandler implements RequestHandler {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             String studentId = request.getStringProperty("studentId");
             Student s = students.get(studentId);
 

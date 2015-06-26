@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
-import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +13,8 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.security.AuthException;
+import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 
 public class AbstractResponseDispatcherTest {
     private String payload;
@@ -28,20 +29,22 @@ public class AbstractResponseDispatcherTest {
     }
 
     private final AbstractResponseDispatcher dispatcher = new Dispatcher();
-    private final Response response = new Response(
-            new HashMap<String, Object>(), new HashMap<String, Object>(),
-            "payload", CodecType.JSON);
+    private final Request request = Request.builder()
+            .setProtocol(Protocol.EVENT_BUS).setCodecType(CodecType.JSON)
+            .setMethod(RequestMethod.MESSAGE).setResponseDispatcher(dispatcher)
+            .setPayload("payload").build();
 
     @Before
     public void setUp() throws Exception {
-        response.setLocation("loc");
-        response.setCodecType(CodecType.JSON);
+        request.getResponse().setLocation("loc");
+        request.getResponse().setCodecType(CodecType.JSON);
     }
 
     @Test
     public void testSendError() throws Exception {
-        response.setPayload(new AuthException("authCode", "error message"));
-        dispatcher.send(response);
+        request.getResponse().setPayload(
+                new AuthException("authCode", "error message"));
+        dispatcher.send(request.getResponse());
         assertTrue(payload.contains("\"errorType\":\"AuthException\""));
         assertTrue(payload.contains("\"errorCode\":\"authCode\""));
         assertTrue(payload.contains("\"message\":\"error message\""));
@@ -50,34 +53,34 @@ public class AbstractResponseDispatcherTest {
 
     @Test
     public void testSendString() throws Exception {
-        response.setProperty(Constants.SESSION_ID, "session");
-        response.setPayload("hello");
-        dispatcher.send(response);
+        request.getResponse().setProperty(Constants.SESSION_ID, "session");
+        request.getResponse().setPayload("hello");
+        dispatcher.send(request.getResponse());
 
         assertEquals("hello", payload);
     }
 
     @Test
     public void testSendObject() throws Exception {
-        response.setProperty(Constants.SESSION_ID, "session");
-        response.setPayload(null);
-        dispatcher.send(response);
+        request.getResponse().setProperty(Constants.SESSION_ID, "session");
+        request.getResponse().setPayload(null);
+        dispatcher.send(request.getResponse());
         assertNull(payload);
 
-        response.setPayload(new Date(0));
-        dispatcher.send(response);
+        request.getResponse().setPayload(new Date(0));
+        dispatcher.send(request.getResponse());
 
         assertEquals("0", payload);
     }
 
     @Test
     public void testGetSetStatus() throws Exception {
-        response.setStatus(0);
-        assertEquals(0, response.getStatus());
-        response.setProperty(HttpResponse.STATUS, 200);
-        assertEquals(200, response.getStatus());
-        response.setStatus(10);
-        assertEquals(10, response.getStatus());
+        request.getResponse().setStatus(0);
+        assertEquals(0, request.getResponse().getStatus());
+        request.getResponse().setProperty(HttpResponse.STATUS, 200);
+        assertEquals(200, request.getResponse().getStatus());
+        request.getResponse().setStatus(10);
+        assertEquals(10, request.getResponse().getStatus());
     }
 
 }

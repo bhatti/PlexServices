@@ -25,11 +25,10 @@ import com.plexobject.bus.EventBus;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
-import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.MessageListenerConfig;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 
 @RunWith(JMockit.class)
 public class EventBusToJmsBridgeTest {
@@ -102,7 +101,6 @@ public class EventBusToJmsBridgeTest {
         bridge.stop();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testOnMessageJmsToEB() throws Exception {
         EventBusToJmsEntry entry = new EventBusToJmsEntry(CodecType.JSON,
@@ -118,7 +116,7 @@ public class EventBusToJmsBridgeTest {
                 returns("{}");
                 message.getJMSReplyTo();
                 returns(null);
-                eb.publish("query-user-channel", (Request<Object>) any);
+                eb.publish("query-user-channel", (Request) any);
             }
         };
         listener.onMessage(message);
@@ -143,8 +141,8 @@ public class EventBusToJmsBridgeTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        Request<Object> request = Request
-                .objectBuilder()
+        Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
@@ -152,10 +150,6 @@ public class EventBusToJmsBridgeTest {
                 .setHeaders(headers)
                 .setPayload(payload)
                 .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         listener.handle(request);

@@ -37,7 +37,7 @@ public class JavawsDelegateHandler implements RequestHandler {
     }
 
     @Override
-    public void handle(final Request<Object> request) {
+    public void handle(final Request request) {
         Pair<String, String> methodAndPayload = getMethodNameAndPayload(request);
 
         final JavawsServiceMethod methodInfo = methodsByName
@@ -76,7 +76,7 @@ public class JavawsDelegateHandler implements RequestHandler {
     }
 
     private void invokeWithAroundInterceptorIfNeeded(
-            final Request<Object> request,
+            final Request request,
             final JavawsServiceMethod methodInfo, final String responseTag,
             final Object[] args) throws Exception {
         if (serviceRegistry.getAroundInterceptor() != null) {
@@ -94,7 +94,7 @@ public class JavawsDelegateHandler implements RequestHandler {
         }
     }
 
-    private void invoke(Request<Object> request,
+    private void invoke(Request request,
             final JavawsServiceMethod methodInfo, String responseTag,
             Object[] args) throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
@@ -122,7 +122,7 @@ public class JavawsDelegateHandler implements RequestHandler {
 
     // hard coding to handle JSON messages
     // TODO handle XML messages
-    private Pair<String, String> getMethodNameAndPayload(Request<Object> request) {
+    private Pair<String, String> getMethodNameAndPayload(Request request) {
         String text = request.getPayload();
         if (text == null || text.length() == 0 || text.charAt(0) != '{') {
             String method = request.getStringProperty("methodName");

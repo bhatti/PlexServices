@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -28,7 +27,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @POST
-    public Course save(@WebParam(name = "course") Course course) {
+    public Course save(Course course) {
         courses.put(course.getId(), course);
         return course;
     }

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jws.WebMethod;
-import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 
@@ -16,7 +15,7 @@ import com.plexobject.predicate.Predicate;
 @Path("/bugReports")
 public class BugReportServiceImpl implements BugReportService {
     @Override
-    public BugReport create(@WebParam(name = "bugReport") BugReport report) {
+    public BugReport create(BugReport report) {
         report.validate();
         BugReport saved = SharedRepository.bugReportRepository.save(report);
         return saved;

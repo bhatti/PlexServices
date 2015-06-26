@@ -17,7 +17,7 @@ public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
     }
 
     @Override
-    public void authorize(Request<Object> request, String[] roles) throws AuthException {
+    public void authorize(Request request, String[] roles) throws AuthException {
         if (roles == null || roles.length == 0 || roles[0].equals("")) {
             return;
         }

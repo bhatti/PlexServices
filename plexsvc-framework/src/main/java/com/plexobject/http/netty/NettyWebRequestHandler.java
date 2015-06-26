@@ -47,10 +47,9 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Request.Builder;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.Response;
 import com.plexobject.http.Handledable;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 
 /**
  * This class handles requests over http and websockets using Netty container
@@ -121,7 +120,8 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                 handshakers.put(ctx.channel().remoteAddress().toString(),
                         handshaker);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("handshaking with " + ctx.channel().remoteAddress());
+                    logger.debug("handshaking with "
+                            + ctx.channel().remoteAddress());
                 }
             }
         } else {
@@ -145,40 +145,38 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                 HttpContent content = (HttpContent) req;
                 textPayload = content.content().toString(CharsetUtil.UTF_8);
             }
-            RequestMethod method = RequestMethod.valueOf(req.getMethod().name());
+            RequestMethod method = RequestMethod
+                    .valueOf(req.getMethod().name());
             int n = uri.indexOf("?");
             if (n != -1) {
                 uri = uri.substring(0, n);
             }
             Map<String, Object> headers = getHeaders(req);
             Map<String, Object> params = getParams(req);
-            Request<Object> handlerReq = buildRequest(ctx, uri, dispatcher,
+            Request handlerReq = buildRequest(ctx, uri, dispatcher,
                     textPayload, Protocol.HTTP, method, headers, params);
 
-            logger.info("PLEXSVC HTTP Received URI '" + uri + "', wsPath '" + wsPath
-                    + "', request " + handlerReq);
+            logger.info("PLEXSVC HTTP Received URI '" + uri + "', wsPath '"
+                    + wsPath + "', request " + handlerReq);
             handler.handle(handlerReq);
         }
     }
 
-    private Request<Object> buildRequest(final ChannelHandlerContext ctx,
-            String uri, AbstractResponseDispatcher dispatcher,
-            String textPayload, Protocol protocol, RequestMethod method,
+    private Request buildRequest(final ChannelHandlerContext ctx, String uri,
+            AbstractResponseDispatcher dispatcher, String textPayload,
+            Protocol protocol, RequestMethod method,
             Map<String, Object> headers, Map<String, Object> params) {
-        Response response = new Response(new HashMap<String, Object>(),
-                new HashMap<String, Object>(), "", codecType);
         SocketAddress remoteAddr = ctx.channel() != null ? ctx.channel()
                 .remoteAddress() : null;
-        Builder<Object> handlerReqBuilder = Request.objectBuilder()
-                .setEndpoint(uri).setProtocol(protocol).setMethod(method)
-                .setProperties(params).setHeaders(headers)
-                .setCodecType(codecType).setPayload(textPayload)
-                .setResponse(response).setResponseDispatcher(dispatcher);
+        Builder handlerReqBuilder = Request.builder().setEndpoint(uri)
+                .setProtocol(protocol).setMethod(method).setProperties(params)
+                .setHeaders(headers).setCodecType(codecType)
+                .setPayload(textPayload).setResponseDispatcher(dispatcher);
 
         if (remoteAddr != null) {
             handlerReqBuilder.setRemoteAddress(remoteAddr.toString());
         }
-        Request<Object> handlerReq = handlerReqBuilder.build();
+        Request handlerReq = handlerReqBuilder.build();
         return handlerReq;
     }
 
@@ -229,8 +227,9 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
-        logger.warn("PLEXSVC exceptionCaught: Channel failed with remote address "
-                + ctx.channel().remoteAddress(), cause);
+        logger.warn(
+                "PLEXSVC exceptionCaught: Channel failed with remote address "
+                        + ctx.channel().remoteAddress(), cause);
         ctx.close();
     }
 
@@ -264,14 +263,13 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
         }
 
         String jsonMsg = ((TextWebSocketFrame) frame).text();
-        logger.info("PLEXSVC Websocket handler " + ctx.channel().remoteAddress()
-                + " received " + jsonMsg);
+        logger.info("PLEXSVC Websocket handler "
+                + ctx.channel().remoteAddress() + " received " + jsonMsg);
 
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
 
-        Request<Object> rawRequest = codec.decode(jsonMsg, Request.class,
-                params);
+        Request rawRequest = codec.decode(jsonMsg, Request.class, params);
 
         String endpoint = rawRequest.getEndpoint();
         if (endpoint == null) {
@@ -286,9 +284,9 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
         AbstractResponseDispatcher dispatcher = new NettyWebsocketResponseDispatcher(
                 ctx.channel());
 
-        Request<Object> handlerReq = buildRequest(ctx, endpoint, dispatcher,
-                textPayload, Protocol.WEBSOCKET, RequestMethod.MESSAGE, headers,
-                params);
+        Request handlerReq = buildRequest(ctx, endpoint, dispatcher,
+                textPayload, Protocol.WEBSOCKET, RequestMethod.MESSAGE,
+                headers, params);
 
         handler.handle(handlerReq);
     }

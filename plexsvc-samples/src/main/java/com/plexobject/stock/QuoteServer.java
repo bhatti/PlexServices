@@ -28,16 +28,14 @@ public class QuoteServer implements RequestHandler {
     private QuoteStreamer quoteStreamer = new QuoteStreamer();
 
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         try {
             QuoteRequest quoteRequest = request.getPayload();
             log.info("Received " + request);
             if (quoteRequest.getAction() == Action.SUBSCRIBE) {
-                quoteStreamer.add(quoteRequest.getSymbol(),
-                        request.getResponseDispatcher());
+                quoteStreamer.add(quoteRequest.getSymbol(), request);
             } else {
-                quoteStreamer.remove(quoteRequest.getSymbol(),
-                        request.getResponseDispatcher());
+                quoteStreamer.remove(quoteRequest.getSymbol(), request);
             }
         } catch (Exception e) {
             log.error("Failed to handle request " + request + " due to "

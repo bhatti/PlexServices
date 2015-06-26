@@ -45,8 +45,8 @@ import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 
 public class EventBusToJmsBridgeIntegTest {
     public static class TestUser {
@@ -151,7 +151,7 @@ public class EventBusToJmsBridgeIntegTest {
         final StringBuilder name = new StringBuilder();
         eb.subscribe("query-user-channel", new RequestHandler() {
             @Override
-            public void handle(Request<Object> request) {
+            public void handle(Request request) {
                 try {
                     TestUser u = request.getPayload();
                     name.append(u.name);
@@ -179,8 +179,8 @@ public class EventBusToJmsBridgeIntegTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "message";
-        Request<Object> request = Request
-                .objectBuilder()
+        Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setEndpoint("/w")
@@ -188,10 +188,6 @@ public class EventBusToJmsBridgeIntegTest {
                 .setHeaders(headers)
                 .setPayload(payload)
                 .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -225,10 +221,11 @@ public class EventBusToJmsBridgeIntegTest {
         final StringBuilder reply = new StringBuilder();
         eb.subscribe("mychannel", new RequestHandler() {
             @Override
-            public void handle(Request<Object> request) {
+            public void handle(Request request) {
                 TestUser u = request.getPayload();
                 name.append(u.name);
                 request.getResponse().setPayload("ted");
+                request.sendResponseSafe();
                 // request.getDispatcher().send(request.getResponse());
                 latch.countDown();
             }

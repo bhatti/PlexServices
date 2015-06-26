@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
+import com.plexobject.bus.impl.EventBusServiceContainer;
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Preconditions;
 import com.plexobject.handler.RequestHandler;
@@ -17,8 +18,8 @@ import com.plexobject.http.WebContainerProvider;
 import com.plexobject.jms.JmsServiceContainer;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceContainer;
 import com.plexobject.service.ServiceRegistry;
 
@@ -108,6 +109,9 @@ public class ServiceRegistryContainers {
                 } else if (protocol == Protocol.JMS) {
                     container = new JmsServiceContainer(config, serviceRegistry);
                     _containers.put(Protocol.JMS, container);
+                } else if (protocol == Protocol.EVENT_BUS) {
+                    container = new EventBusServiceContainer(config, serviceRegistry);
+                    _containers.put(Protocol.EVENT_BUS, container);
                 }
             } catch (RuntimeException e) {
                 throw e;

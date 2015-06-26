@@ -30,14 +30,13 @@ import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JmsResponseDispatcher;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Lifecycle;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.util.IOUtils;
 
 /**
@@ -75,7 +74,7 @@ public class EventBusToJmsBridge implements Lifecycle {
         }
 
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             Map<String, Object> params = new HashMap<>();
             params.putAll(request.getProperties());
             params.putAll(request.getHeaders());
@@ -144,9 +143,6 @@ public class EventBusToJmsBridge implements Lifecycle {
                         jmsContainer, message.getJMSReplyTo())
                         : new AbstractResponseDispatcher() {
                         };
-                Response response = new Response(new HashMap<String, Object>(),
-                        new HashMap<String, Object>(), null,
-                        entry.getCodecType());
 
                 Object payload = textPayload;
                 if (entry.getRequestTypeClass() != null
@@ -160,11 +156,10 @@ public class EventBusToJmsBridge implements Lifecycle {
                 }
 
                 // TODO do we need entry.getRequestTypeClass()
-                Request<Object> request = Request.objectBuilder()
-                        .setProtocol(Protocol.JMS).setMethod(RequestMethod.MESSAGE)
-                        .setProperties(params).setEndpoint(entry.getTarget())
+                Request request = Request.builder().setProtocol(Protocol.JMS)
+                        .setMethod(RequestMethod.MESSAGE).setProperties(params)
+                        .setEndpoint(entry.getTarget())
                         .setCodecType(entry.getCodecType()).setPayload(payload)
-                        .setResponse(response)
                         .setResponseDispatcher(dispatcher).build();
                 logger.info("Forwarding " + entry + "'s message " + request);
                 eb.publish(entry.getTarget(), request);

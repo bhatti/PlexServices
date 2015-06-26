@@ -77,7 +77,7 @@ public class JMSUtils {
             } else if (value instanceof Double) {
                 reqMsg.setDoubleProperty(name, (Double) value);
             } else {
-                //logger.debug("*** key " + name + ", value " + value);
+                // logger.debug("*** key " + name + ", value " + value);
                 reqMsg.setStringProperty(e.getKey(), e.getValue().toString());
             }
         }
@@ -187,12 +187,14 @@ public class JMSUtils {
                     final Map<String, Object> params = JMSUtils
                             .getProperties(message);
                     final String respText = respMsg.getText();
-                    final Response response = new Response(params, params,
-                            respText, null);
+                    // TODO 6/26/15 setting request to null, verify
+                    final Response response = new Response(null, params,
+                            params, respText, null);
                     reqHandler.handle(response);
                     promise.setValue(response);
                 } catch (Exception e) {
-                    logger.error("PLEXSVC Failed to forward message " + message, e);
+                    logger.error(
+                            "PLEXSVC Failed to forward message " + message, e);
                     promise.setError(e);
                 } finally {
                     try {

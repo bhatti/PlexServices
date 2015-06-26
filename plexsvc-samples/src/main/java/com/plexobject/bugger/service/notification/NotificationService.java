@@ -21,7 +21,7 @@ public class NotificationService implements RequestHandler {
 
     // any employee who is member of same project can update bug report
     @Override
-    public void handle(Request<Object> request) {
+    public void handle(Request request) {
         log.info("Notifying " + request);
     }
 }

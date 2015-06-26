@@ -10,8 +10,8 @@ import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 
 /**
  * This class encapsulates a request object
@@ -19,88 +19,88 @@ import com.plexobject.service.Protocol;
  * @author shahzad bhatti
  *
  */
-public class Request<T> extends AbstractPayload {
-    public static class Builder<T> {
+public class Request extends AbstractPayload {
+    public static class Builder {
         private Protocol protocol;
-        private T payload;
+        private Object payload;
         private Map<String, Object> properties = new HashMap<>();
         private Map<String, Object> headers = new HashMap<>();
         private RequestMethod method;
         private String remoteAddress;
         private String requestUri;
         private String endpoint;
+        private String replyEndpoint;
         private CodecType codecType;
-        private Response response;
         private ResponseDispatcher responseDispatcher;
 
-        public Builder<T> setProtocol(Protocol protocol) {
+        public Builder setProtocol(Protocol protocol) {
             this.protocol = protocol;
             return this;
         }
 
-        public Builder<T> setMethod(RequestMethod method) {
+        public Builder setMethod(RequestMethod method) {
             this.method = method;
             return this;
         }
 
-        public Builder<T> setCodecType(CodecType codecType) {
+        public Builder setCodecType(CodecType codecType) {
             this.codecType = codecType;
             return this;
         }
 
-        public Builder<T> setRequestUri(String requestUri) {
+        public Builder setRequestUri(String requestUri) {
             this.requestUri = requestUri;
             return this;
         }
 
-        public Builder<T> setEndpoint(String endpoint) {
+        public Builder setEndpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;
         }
 
-        public Builder<T> setPayload(T payload) {
+        public Builder setReplyEndpoint(String replyEndpoint) {
+            this.replyEndpoint = replyEndpoint;
+            return this;
+        }
+
+        public Builder setPayload(Object payload) {
             this.payload = payload;
             return this;
         }
 
-        public Builder<T> setResponseDispatcher(ResponseDispatcher dispatcher) {
+        public Builder setResponseDispatcher(ResponseDispatcher dispatcher) {
             this.responseDispatcher = dispatcher;
             return this;
         }
 
-        public Builder<T> setSessionId(String sessionId) {
+        public Builder setSessionId(String sessionId) {
             if (sessionId != null) {
                 this.headers.put(Constants.SESSION_ID, sessionId);
             }
             return this;
         }
 
-        public Builder<T> setProperties(Map<String, Object> properties) {
+        public Builder setProperties(Map<String, Object> properties) {
             this.properties.putAll(properties);
             return this;
         }
 
-        public Builder<T> setHeaders(Map<String, Object> headers) {
+        public Builder setHeaders(Map<String, Object> headers) {
             this.headers.putAll(headers);
             return this;
         }
 
-        public Builder<T> setResponse(Response response) {
-            this.response = response;
-            return this;
-        }
-
-        public Builder<T> setRemoteAddress(String remoteAddress) {
+        public Builder setRemoteAddress(String remoteAddress) {
             this.remoteAddress = remoteAddress;
             return this;
         }
 
-        public Request<T> build() {
+        public Request build() {
             if (remoteAddress != null) {
                 properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
             }
-            return new Request<T>(protocol, method, requestUri, endpoint,
-                    properties, headers, payload, codecType, response,
+            return new Request(protocol, method, requestUri, endpoint,
+                    replyEndpoint, properties, headers, payload, codecType,
                     responseDispatcher);
         }
 
@@ -111,35 +111,36 @@ public class Request<T> extends AbstractPayload {
     private Protocol protocol;
     private RequestMethod method;
     private String endpoint;
+    private String replyEndpoint;
     private CodecType codecType;
     private String methodName;
     private String requestUri;
+    private boolean sentResponse;
 
     public Request() {
     }
 
-    public Request(Protocol protocol, RequestMethod method, String requestUri,
-            String endpoint, final Map<String, Object> properties,
+    public Request(final Protocol protocol, final RequestMethod method,
+            final String requestUri, final String endpoint,
+            final String replyEndpoint, final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
-            final CodecType codecType, final Response response,
+            final CodecType codecType,
             final ResponseDispatcher responseDispatcher) {
         super(properties, headers, payload);
         Preconditions.requireNotNull(protocol, "protocol is required");
         Preconditions.requireNotNull(method, "method is required");
         Preconditions.requireNotNull(codecType, "codecType is required");
-        Preconditions.requireNotNull(response, "response is required");
         Preconditions.requireNotNull(responseDispatcher,
                 "responseDispatcher is required");
         this.protocol = protocol;
         this.method = method;
         this.requestUri = requestUri == null ? endpoint : requestUri;
         this.endpoint = endpoint;
+        this.replyEndpoint = replyEndpoint;
         this.codecType = codecType;
-        this.response = response;
         this.responseDispatcher = responseDispatcher;
-        if (response.getCodecType() == null) {
-            response.setCodecType(codecType);
-        }
+        this.response = new Response(this, new HashMap<String, Object>(),
+                new HashMap<String, Object>(), null, codecType);
     }
 
     public Protocol getProtocol() {
@@ -152,6 +153,10 @@ public class Request<T> extends AbstractPayload {
 
     public String getEndpoint() {
         return endpoint;
+    }
+
+    public String getReplyEndpoint() {
+        return replyEndpoint;
     }
 
     public String getRequestUri() {
@@ -191,6 +196,14 @@ public class Request<T> extends AbstractPayload {
         return responseDispatcher;
     }
 
+    public synchronized void sendResponseSafe() {
+        if (sentResponse) {
+            throw new IllegalStateException("Response already sent");
+        }
+        sentResponse = true;
+        sendResponse();
+    }
+
     public void sendResponse() {
         responseDispatcher.send(response);
     }
@@ -221,12 +234,8 @@ public class Request<T> extends AbstractPayload {
                 + ", payload=" + payload + "]";
     }
 
-    public static Builder<Object> objectBuilder() {
-        return new Builder<Object>();
-    }
-
-    public static Builder<String> stringBuilder() {
-        return new Builder<String>();
+    public static Builder builder() {
+        return new Builder();
     }
 
     public String getMethodName() {

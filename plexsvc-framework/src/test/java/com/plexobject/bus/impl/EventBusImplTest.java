@@ -15,26 +15,25 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.Response;
 import com.plexobject.predicate.Predicate;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 
 public class EventBusImplTest {
     private RequestHandler handler = new RequestHandler() {
         @Override
-        public void handle(Request<Object> request) {
+        public void handle(Request request) {
             requests.add(request);
         }
     };
-    private Predicate<Request<Object>> filter = new Predicate<Request<Object>>() {
+    private Predicate<Request> filter = new Predicate<Request>() {
         @Override
-        public boolean accept(Request<Object> obj) {
+        public boolean accept(Request obj) {
             return obj.getPayload().toString().contains("ok");
         }
     };
 
-    private List<Request<Object>> requests = new ArrayList<>();
+    private List<Request> requests = new ArrayList<>();
     private EventBus bus = new EventBusImpl();
 
     @Before
@@ -47,8 +46,8 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "payload";
-        Request<Object> request = Request
-                .objectBuilder()
+        Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setProperties(properties)
@@ -56,10 +55,6 @@ public class EventBusImplTest {
                 .setEndpoint("/w")
                 .setCodecType(CodecType.JSON)
                 .setPayload(payload)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         bus.publish("channel", request);
@@ -73,8 +68,8 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "payload";
-        Request<Object> request = Request
-                .objectBuilder()
+        Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setProperties(properties)
@@ -82,10 +77,6 @@ public class EventBusImplTest {
                 .setEndpoint("/w")
                 .setCodecType(CodecType.JSON)
                 .setPayload(payload)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         bus.publish("channel", request);
@@ -104,8 +95,8 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "payload";
-        Request<Object> request = Request
-                .objectBuilder()
+        Request request = Request
+                .builder()
                 .setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET)
                 .setProperties(properties)
@@ -113,10 +104,6 @@ public class EventBusImplTest {
                 .setEndpoint("/w")
                 .setCodecType(CodecType.JSON)
                 .setPayload(payload)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON))
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         bus.publish("channel", request);

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jws.WebMethod;
-import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import com.plexobject.school.Course;
@@ -21,9 +20,9 @@ public interface CourseService {
     int size();
 
     @WebMethod
-    Course save(@WebParam(name = "course") Course course);
+    Course save(Course course);
 
-    List<Course> create(@WebParam(name = "courses") List<Course> courses);
+    List<Course> create(List<Course> courses);
 
     List<Course> enroll(List<Student> students);
 

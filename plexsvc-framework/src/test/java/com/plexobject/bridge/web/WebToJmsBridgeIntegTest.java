@@ -39,8 +39,8 @@ import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceRegistry;
 
 public class WebToJmsBridgeIntegTest {
@@ -97,11 +97,10 @@ public class WebToJmsBridgeIntegTest {
     @Test
     public void testSetWebToJmsEntries() throws Exception {
         assertNull(bridge.getMappingEntry(newWebRequest("/ping", "{}")));
-        bridge.setWebToJmsEntries(Arrays.asList(
-                new WebToJmsEntry(CodecType.JSON, "/ping", RequestMethod.GET,
-                        "destination", 5, false, 1), new WebToJmsEntry(
-                        CodecType.JSON, "/ws", RequestMethod.MESSAGE, "destination",
-                        5, false, 1)));
+        bridge.setWebToJmsEntries(Arrays.asList(new WebToJmsEntry(
+                CodecType.JSON, "/ping", RequestMethod.GET, "destination", 5,
+                false, 1), new WebToJmsEntry(CodecType.JSON, "/ws",
+                RequestMethod.MESSAGE, "destination", 5, false, 1)));
         assertNotNull(bridge.getMappingEntry(newWebRequest("/ping", "{}")));
         assertNotNull(bridge.getMappingEntry(newWebsocketRequest("/ws", "{}")));
     }
@@ -111,7 +110,7 @@ public class WebToJmsBridgeIntegTest {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
                 RequestMethod.GET, "destination", 5, false, 1);
         bridge.add(entry);
-        Request<Object> request = newWebRequest("/w", "{}");
+        Request request = newWebRequest("/w", "{}");
         assertNotNull(bridge.getMappingEntry(request));
     }
 
@@ -128,7 +127,7 @@ public class WebToJmsBridgeIntegTest {
 
     @Test
     public void testHandleUnknown() throws Exception {
-        Request<Object> request = newWebRequest("/w", "message");
+        Request request = newWebRequest("/w", "message");
         bridge.handle(request);
         assertTrue(reply.toString().contains("Unknown request received"));
     }
@@ -139,7 +138,7 @@ public class WebToJmsBridgeIntegTest {
                 RequestMethod.GET, "queue://create", 5, true, 1);
         bridge.add(entry);
         bridge.onStarted();
-        Request<Object> request = newWebRequest("/w", "message");
+        Request request = newWebRequest("/w", "message");
         final CountDownLatch latch = new CountDownLatch(1);
         final StringBuilder text = new StringBuilder();
         final Destination dest = jmsContainer.getDestination("queue://create");
@@ -165,7 +164,7 @@ public class WebToJmsBridgeIntegTest {
                 RequestMethod.MESSAGE, "queue://svc", 5, false, 1);
         bridge.add(entry);
         bridge.onStarted();
-        Request<Object> request = newWebsocketRequest("/ws", "message");
+        Request request = newWebsocketRequest("/ws", "message");
         final CountDownLatch latch = new CountDownLatch(1);
         final StringBuilder text = new StringBuilder();
         final Destination dest = jmsContainer.getDestination("queue://svc");
@@ -194,7 +193,7 @@ public class WebToJmsBridgeIntegTest {
                 RequestMethod.MESSAGE, "queue://tm", 1, false, 1);
         bridge.add(entry);
         bridge.onStarted();
-        Request<Object> request = newWebsocketRequest("/ws", "message");
+        Request request = newWebsocketRequest("/ws", "message");
         final CountDownLatch latch = new CountDownLatch(1);
         final StringBuilder text = new StringBuilder();
         final Destination dest = jmsContainer.getDestination("queue://tm");
@@ -212,7 +211,8 @@ public class WebToJmsBridgeIntegTest {
         bridge.handle(request);
         latch.await(2000, TimeUnit.MILLISECONDS);
         assertEquals("message", text.toString());
-        assertTrue(reply.toString().contains("Request timedout"));
+        assertTrue(reply.toString(),
+                reply.toString().contains("Request timedout"));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -237,41 +237,29 @@ public class WebToJmsBridgeIntegTest {
         assertFalse(bridge.equals(null));
     }
 
-    private static Request<Object> newWebRequest(String path, String payload) {
+    private static Request newWebRequest(String path, String payload) {
         return newRequest(path, payload, RequestMethod.GET);
     }
 
-    private static Request<Object> newWebsocketRequest(String path,
-            String payload) {
+    private static Request newWebsocketRequest(String path, String payload) {
         return newRequest(path, payload, RequestMethod.MESSAGE);
     }
 
-    private static Request<Object> newRequest(String path, String payload,
+    private static Request newRequest(String path, String payload,
             RequestMethod method) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("prop1", "val1");
         Map<String, Object> headers = new HashMap<>();
         headers.put("head1", "val1");
-        Request<Object> request = Request
-                .objectBuilder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(method)
-                .setEndpoint(path)
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(method).setEndpoint(path).setProperties(properties)
+                .setHeaders(headers).setPayload(payload)
                 .setCodecType(CodecType.JSON)
-                .setResponse(
-                        new Response(new HashMap<String, Object>(),
-                                new HashMap<String, Object>(), "",
-                                CodecType.JSON) {
-                            @Override
-                            public void setPayload(Object payload) {
-                                super.setPayload(payload);
-                                reply = payload;
-                            }
-                        })
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
+                    @Override
+                    protected void doSend(Response response, String payload) {
+                        reply = response.getPayload();
+                    }
                 }).build();
         return request;
     }

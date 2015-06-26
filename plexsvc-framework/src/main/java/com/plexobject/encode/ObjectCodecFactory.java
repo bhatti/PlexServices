@@ -22,6 +22,7 @@ public class ObjectCodecFactory {
         // encoders.put(CodecType.GSON, new GsonObjectCodec());
         encoders.put(CodecType.TEXT, new TextObjectCodec());
         encoders.put(CodecType.XML, new XmlObjectCodec());
+        encoders.put(CodecType.NONE, new NoneObjectCodec());
     }
 
     public static ObjectCodecFactory getInstance() {

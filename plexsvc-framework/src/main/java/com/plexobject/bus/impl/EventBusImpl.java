@@ -27,10 +27,10 @@ public class EventBusImpl implements EventBus {
     private static class HandlerAndFilter {
         private final long id;
         private final RequestHandler handler;
-        private final Predicate<Request<Object>> filter;
+        private final Predicate<Request> filter;
 
         public HandlerAndFilter(final long id, final RequestHandler handler,
-                final Predicate<Request<Object>> filter) {
+                final Predicate<Request> filter) {
             this.id = id;
             this.handler = handler;
             this.filter = filter;
@@ -69,13 +69,17 @@ public class EventBusImpl implements EventBus {
     }
 
     public EventBusImpl(int maxDispatchThreads) {
-        this.executor = Executors.newFixedThreadPool(maxDispatchThreads > 0
-                && maxDispatchThreads < 16 ? maxDispatchThreads : 1);
+        this(Executors.newFixedThreadPool(maxDispatchThreads > 0
+                && maxDispatchThreads < 16 ? maxDispatchThreads : 1));
+    }
+
+    public EventBusImpl(final ExecutorService executor) {
+        this.executor = executor;
     }
 
     @Override
     public long subscribe(String channel, RequestHandler handler,
-            Predicate<Request<Object>> filter) {
+            Predicate<Request> filter) {
         Preconditions.checkEmpty(channel, "channel is not specified");
         Preconditions.requireNotNull(handler, "handler is not specified");
         synchronized (channel.intern()) {
@@ -111,7 +115,7 @@ public class EventBusImpl implements EventBus {
     }
 
     @Override
-    public void publish(final String channel, final Request<Object> request) {
+    public void publish(final String channel, final Request request) {
         Preconditions.checkEmpty(channel, "channel is not specified");
         Preconditions.requireNotNull(request, "request is not specified");
         synchronized (channel.intern()) {
@@ -127,10 +131,11 @@ public class EventBusImpl implements EventBus {
                                         || haf.filter.accept(request)) {
                                     haf.handler.handle(request);
                                     // TODO verify this
-                                    request.sendResponse();
+                                    // request.sendResponse();
                                 }
                             } catch (Exception ex) {
-                                logger.error("PLEXSVC Failed to publish " + request, ex);
+                                logger.error("PLEXSVC Failed to publish "
+                                        + request, ex);
                             }
                         }
                     }
