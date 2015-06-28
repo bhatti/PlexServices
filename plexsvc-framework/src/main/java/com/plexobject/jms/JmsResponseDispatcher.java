@@ -36,7 +36,8 @@ public class JmsResponseDispatcher extends AbstractResponseDispatcher {
             }
         } catch (Exception e) {
             if (e.toString().contains("temp-queue")) {
-                logger.error("PLEXSVC Failed to send " + payload + " because " + e);
+                logger.error("PLEXSVC Failed to send " + payload + " because "
+                        + e);
             } else {
                 logger.error("PLEXSVC Failed to send " + payload, e);
             }

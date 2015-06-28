@@ -191,11 +191,11 @@ public class JMSUtils {
                     final Response response = new Response(null, params,
                             params, respText, null);
                     reqHandler.handle(response);
-                    promise.setValue(response);
+                    promise.complete(response);
                 } catch (Exception e) {
                     logger.error(
                             "PLEXSVC Failed to forward message " + message, e);
-                    promise.setError(e);
+                    promise.completeExceptionally(e);
                 } finally {
                     try {
                         Thread.sleep(100);

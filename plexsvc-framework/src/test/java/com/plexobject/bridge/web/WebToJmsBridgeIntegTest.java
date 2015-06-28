@@ -41,6 +41,7 @@ import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
+import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
 public class WebToJmsBridgeIntegTest {
@@ -68,6 +69,7 @@ public class WebToJmsBridgeIntegTest {
     private WebToJmsBridge bridge;
     private static Properties properties = new Properties();
     private static BrokerService broker;
+    private ServiceRegistry serviceRegistry;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -83,15 +85,22 @@ public class WebToJmsBridgeIntegTest {
     public void setUp() throws Exception {
         jmsContainer = JMSUtils.getJMSContainer(new Configuration(properties));
         Configuration config = new Configuration(new Properties());
-        ServiceRegistry serviceRegistry = new ServiceRegistry(config);
+        serviceRegistry = new ServiceRegistry(config);
         bridge = new WebToJmsBridge(serviceRegistry, jmsContainer);
+        WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
+                RequestMethod.GET, "destination", 5, false, 1);
+        ServiceConfigDesc desc = new ServiceConfigDesc.Builder(entry).build();
+        // add handler for invocation later so that we mimic actual execution
+        // path
+        serviceRegistry.addRequestHandler(desc, bridge);
     }
 
     @Test
     public void testConstructor() throws Exception {
         Configuration config = new Configuration(properties);
         ServiceRegistry serviceRegistry = new ServiceRegistry(config);
-        bridge = new WebToJmsBridge(serviceRegistry, config);
+        JMSContainer jmsContainer = JMSUtils.getJMSContainer(config);
+        bridge = new WebToJmsBridge(serviceRegistry, jmsContainer);
     }
 
     @Test
@@ -128,7 +137,7 @@ public class WebToJmsBridgeIntegTest {
     @Test
     public void testHandleUnknown() throws Exception {
         Request request = newWebRequest("/w", "message");
-        bridge.handle(request);
+        serviceRegistry.invoke(request, bridge);
         assertTrue(reply.toString().contains("Unknown request received"));
     }
 
@@ -208,7 +217,7 @@ public class WebToJmsBridgeIntegTest {
                 }
             }
         }, new MessageListenerConfig());
-        bridge.handle(request);
+        serviceRegistry.invoke(request, bridge);
         latch.await(2000, TimeUnit.MILLISECONDS);
         assertEquals("message", text.toString());
         assertTrue(reply.toString(),

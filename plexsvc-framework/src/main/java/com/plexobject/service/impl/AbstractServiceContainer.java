@@ -2,7 +2,6 @@ package com.plexobject.service.impl;
 
 import org.apache.log4j.Logger;
 
-import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.ServiceContainer;
@@ -18,12 +17,9 @@ import com.plexobject.service.ServiceRegistry;
 public abstract class AbstractServiceContainer implements ServiceContainer {
     protected final Logger logger = Logger.getLogger(getClass());
     protected final ServiceRegistry serviceRegistry;
-    protected final Configuration config;
     protected boolean running;
 
-    public AbstractServiceContainer(Configuration config,
-            ServiceRegistry serviceRegistry) {
-        this.config = config;
+    public AbstractServiceContainer(ServiceRegistry serviceRegistry) {
         this.serviceRegistry = serviceRegistry;
     }
 
@@ -34,7 +30,8 @@ public abstract class AbstractServiceContainer implements ServiceContainer {
     @Override
     public final synchronized void start() {
         try {
-            logger.info("PLEXSVC Starting ...");
+            logger.info("PLEXSVC Starting ..." + running + ", handlers "
+                    + getHandlers().size());
             if (!running) {
                 doStart();
                 for (RequestHandler h : getHandlers()) {

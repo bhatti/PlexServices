@@ -28,7 +28,7 @@ public class ProjectServices {
     }
 
     @ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "queue://{scope}-create-projects-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
-    @RequiredFields({ @Field(name = "projectId") })
+    @RequiredFields({ @Field(name = "projectCode") })
     public static class CreateProjectService extends AbstractProjectService
             implements RequestHandler {
         public CreateProjectService(ProjectRepository projectRepository,
@@ -86,7 +86,7 @@ public class ProjectServices {
     }
 
     @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Manager", endpoint = "queue://{scope}-add-project-member-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
-    @RequiredFields({ @Field(name = "assignedTo"), @Field(name = "projectId") })
+    @RequiredFields({ @Field(name = "assignedTo"), @Field(name = "id") })
     public static class AddProjectMemberService extends AbstractProjectService
             implements RequestHandler {
         public AddProjectMemberService(ProjectRepository projectRepository,
@@ -107,9 +107,8 @@ public class ProjectServices {
                             "project not found").end();
             if (projectLead) {
                 project.setProjectLead(assignedTo);
-            } else {
-                project.addMember(assignedTo);
             }
+            project.addMember(assignedTo);
             request.getResponse().setPayload(project);
         }
     }

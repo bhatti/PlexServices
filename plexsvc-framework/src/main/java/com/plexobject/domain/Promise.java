@@ -108,7 +108,7 @@ public class Promise<T> implements Future<T> {
      * 
      * @param e
      */
-    public synchronized void setError(Exception e) {
+    public synchronized void completeExceptionally(Exception e) {
         validateIfAlreadySet();
         this.exception = e;
         notifyAll();
@@ -119,7 +119,7 @@ public class Promise<T> implements Future<T> {
      * 
      * @param value
      */
-    public synchronized void setValue(T value) {
+    public synchronized void complete(T value) {
         validateIfAlreadySet();
 
         this.value = value;

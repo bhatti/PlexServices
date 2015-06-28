@@ -14,17 +14,17 @@ public class ServiceHandlerLifecycle implements ServiceHandlerLifecycleMBean {
 
     @Override
     public void start() {
-        registry.add(handler);
+        registry.addRequestHandler(handler);
     }
 
     @Override
     public void stop() {
-        registry.remove(handler);
+        registry.removeRequestHandler(handler);
     }
 
     @Override
     public boolean isRunning() {
-        return registry.exists(handler);
+        return registry.existsRequestHandler(handler);
     }
 
     @Override

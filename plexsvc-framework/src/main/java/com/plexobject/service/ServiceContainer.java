@@ -11,11 +11,11 @@ import com.plexobject.handler.RequestHandler;
  *
  */
 public interface ServiceContainer extends Lifecycle {
-    void add(RequestHandler handler);
+    void addRequestHandler(RequestHandler handler);
 
-    boolean remove(RequestHandler handler);
+    boolean removeRequestHandler(RequestHandler handler);
 
-    boolean exists(RequestHandler handler);
+    boolean existsRequestHandler(RequestHandler handler);
 
     Collection<RequestHandler> getHandlers();
 }

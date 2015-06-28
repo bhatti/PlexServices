@@ -19,7 +19,6 @@ import com.plexobject.domain.Preconditions;
  *
  */
 public class MessageReceiverThread implements Runnable {
-    private static final int DEFAULT_TIMEOUT = 150000;
     private static final Logger logger = Logger
             .getLogger(MessageReceiverThread.class);
 
@@ -65,7 +64,7 @@ public class MessageReceiverThread implements Runnable {
         return running;
     }
 
-    public void start() {
+    public void reset() {
         running = false;
         stop = false;
     }
@@ -85,31 +84,46 @@ public class MessageReceiverThread implements Runnable {
     public void run() {
         MessageConsumer consumer = null;
         try {
-            consumer = beforeRun();
+            consumer = waitForStartAndCreateConsumer();
             while (!stop) {
                 try {
                     Message msg = timeout > 0 ? consumer.receive(timeout)
-                            : consumer.receive(DEFAULT_TIMEOUT);
+                            : consumer.receive();
                     if (msg != null) {
                         messageListener.onMessage(msg);
                     } else {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("**** Waiting for JMS message on "
+                            logger.debug("PLEXSVC Waiting for JMS message on "
                                     + destination);
                         }
                     }
                 } catch (JMSException e) {
-                    logger.error("PLEXSVC Failed to receive message for " + destination, e);
-                    if (exceptionListener != null) {
-                        exceptionListener.onException(e);
+                    if (e.getCause() instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                        logger.error("PLEXSVC interrupted thread while waiting for "
+                                + destination + ", giving up...");
+                    } else {
+                        logger.error("PLEXSVC Failed to receive message for "
+                                + destination + ", notifying errors..", e);
+                        if (exceptionListener != null) {
+                            exceptionListener.onException(e);
+                        }
                     }
                     break;
                 }
             }
         } catch (JMSException e) {
-            logger.error("PLEXSVC Failed to create consumer", e);
-            if (exceptionListener != null) {
-                exceptionListener.onException(e);
+            if (e.getCause() instanceof java.io.EOFException) {
+                logger.warn("PLEXSVC Failed to create consumer in attempt to retry"
+                        + e);
+            } else if (e.getMessage().contains("channel has already failed")) {
+                logger.warn("PLEXSVC Failed to create consumer in attempt to retry"
+                        + e);
+            } else {
+                logger.error("PLEXSVC Failed to create consumer", e);
+                if (exceptionListener != null) {
+                    exceptionListener.onException(e);
+                }
             }
         } catch (NamingException e) {
             logger.error("PLEXSVC Failed to lookup destination", e);
@@ -117,11 +131,14 @@ public class MessageReceiverThread implements Runnable {
                 exceptionListener.onException(new JMSException(e.toString()));
             }
         } finally {
+            logger.info("PLEXSVC Exiting for destination " + destination
+                    + ", closing consumer");
             afterRun(consumer);
         }
     }
 
-    private MessageConsumer beforeRun() throws JMSException, NamingException {
+    private MessageConsumer waitForStartAndCreateConsumer()
+            throws JMSException, NamingException {
         runnerThread = Thread.currentThread();
         Thread.currentThread().setName(threadName);
         jmsContainer.waitUntilReady();

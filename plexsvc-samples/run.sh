@@ -3,11 +3,11 @@
 #gradle bugger
 ./gradlew jettyRun
 ./gradlew compileJava dist
-#./gradlew run -Pargs="bugger.properties http_jms_services_mapping.json" 
+#./gradlew run -Pargs="bugger.properties src/test/resources/http_jms_services_mapping.json" 
 #curl -H "Accept: application/json" http://localhost:8080/plexsvc-samples/array
 #curl http://localhost:8080/plexsvc-samples/ping?data=hello
 #curl http://localhost:8080/plexsvc-samples/reverse -d "data=hello"
 #curl -X POST http://localhost:8080/plexsvc-samples/person -d "{\"name\":\"me\"}"
-./gradlew bugger -Pargs="bugger.properties http_jms_services_mapping.json"
-./gradlew bugger -Pargs="bugger.properties http_jms_services_mapping.json"
+./gradlew bugger -Pargs="bugger.properties src/test/resources/http_jms_services_mapping.json"
+./gradlew bugger -Pargs="bugger.properties src/test/resources/http_jms_services_mapping.json"
 exit

@@ -15,8 +15,8 @@ public class Main {
         //
 
         ServiceRegistry serviceRegistry = new ServiceRegistry(config, null);
-        serviceRegistry.add(new S3SignService(config.getProperty("s3.key")));
-        serviceRegistry.add(new StaticFileServer(config.getProperty(
+        serviceRegistry.addRequestHandler(new S3SignService(config.getProperty("s3.key")));
+        serviceRegistry.addRequestHandler(new StaticFileServer(config.getProperty(
                 "static.web.folder", ".")));
         serviceRegistry.start();
         Thread.currentThread().join();

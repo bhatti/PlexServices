@@ -28,6 +28,11 @@ dependencies {
 
     compile project(':plexsvc-framework')
     testCompile 'junit:junit:4.11'
+
+    testCompile project(':plexsvc-framework').sourceSets.test.output
+    testCompile files('src/test/resources')
+    //testCompile 'com.googlecode.jmockit:jmockit:1.2'
+    //jmockitJar 'com.googlecode.jmockit:jmockit:1.2'
 }
 
 
@@ -58,7 +63,7 @@ task bugger(type:JavaExec) {
   main = 'com.plexobject.bugger.Main'
     classpath = sourceSets.main.runtimeClasspath
     //args project.args.split('\\s+')
-    args "bugger.properties,http_jms_services_mapping.json".split(",")
+    args "bugger.properties,src/test/resources/http_jms_services_mapping.json".split(",")
     systemProperties = [
     "com.sun.management.jmxremote.ssl":"false",
     "com.sun.management.jmxremote.authenticate":"false",
@@ -70,7 +75,7 @@ task quote(type:JavaExec) {
   main = 'com.plexobject.stock.QuoteServer'
     classpath = sourceSets.main.runtimeClasspath
     //args project.args.split('\\s+')
-    args "bugger.properties,http_jms_services_mapping.json".split(",")
+    args "bugger.properties,src/test/resources/http_jms_services_mapping.json".split(",")
     systemProperties = [
     "com.sun.management.jmxremote.ssl":"false",
     "com.sun.management.jmxremote.authenticate":"false",

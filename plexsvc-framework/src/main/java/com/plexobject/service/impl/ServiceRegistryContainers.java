@@ -15,7 +15,9 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.DefaultHttpRequestHandler;
 import com.plexobject.http.DefaultWebServiceContainer;
 import com.plexobject.http.WebContainerProvider;
+import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.JmsServiceContainer;
+import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Protocol;
@@ -36,6 +38,8 @@ public class ServiceRegistryContainers {
     private final ServiceRegistry serviceRegistry;
     private final WebContainerProvider webContainerProvider;
     private final Configuration config;
+    private JMSContainer jmsBridgeContainer;
+    private JMSContainer jmsContainer;
 
     private final Map<Protocol, ServiceContainer> _containers = new HashMap<>();
 
@@ -69,7 +73,8 @@ public class ServiceRegistryContainers {
      * This method starts all containers
      */
     public synchronized void start() {
-        logger.info("PLEXSVC Starting " + _containers.size() + " containers...");
+        logger.info("PLEXSVC Starting " + _containers.size() + "/"
+                + _containers.keySet() + " containers...");
         for (ServiceContainer g : new HashSet<ServiceContainer>(
                 _containers.values())) {
             if (g.getHandlers().size() > 0) {
@@ -107,10 +112,11 @@ public class ServiceRegistryContainers {
                     _containers.put(Protocol.HTTP, container);
                     _containers.put(Protocol.WEBSOCKET, container);
                 } else if (protocol == Protocol.JMS) {
-                    container = new JmsServiceContainer(config, serviceRegistry);
+                    container = new JmsServiceContainer(serviceRegistry,
+                            getJmsContainer());
                     _containers.put(Protocol.JMS, container);
                 } else if (protocol == Protocol.EVENT_BUS) {
-                    container = new EventBusServiceContainer(config, serviceRegistry);
+                    container = new EventBusServiceContainer(serviceRegistry);
                     _containers.put(Protocol.EVENT_BUS, container);
                 }
             } catch (RuntimeException e) {
@@ -128,7 +134,24 @@ public class ServiceRegistryContainers {
                 serviceRegistry, requestHandlerPathsByMethod);
         Lifecycle server = webContainerProvider.getWebContainer(config,
                 executor);
-        return new DefaultWebServiceContainer(config, serviceRegistry,
+        return new DefaultWebServiceContainer(serviceRegistry,
                 requestHandlerPathsByMethod, server);
     }
+
+    public synchronized JMSContainer getJmsBridgeContainer() {
+        if (jmsBridgeContainer == null) {
+            jmsBridgeContainer = JMSUtils.getJMSContainer(serviceRegistry
+                    .getConfiguration());
+        }
+        return jmsBridgeContainer;
+    }
+
+    public synchronized JMSContainer getJmsContainer() {
+        if (jmsContainer == null) {
+            jmsContainer = JMSUtils.getJMSContainer(serviceRegistry
+                    .getConfiguration());
+        }
+        return jmsContainer;
+    }
+
 }

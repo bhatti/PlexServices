@@ -75,7 +75,7 @@ public class RequiredFieldValidatorTest {
 
     @Test
     public void testNullObject() {
-        instance.validate(null, new HashMap<String, Object>());
+        instance.validate(null, null, new HashMap<String, Object>());
     }
 
     @Test
@@ -97,7 +97,8 @@ public class RequiredFieldValidatorTest {
 
     @Test(expected = ValidationException.class)
     public void testMapWithAnnotationsAndEmptyMap() {
-        instance.validate(new WithAnnotations(), new HashMap<String, Object>());
+        instance.validate(new WithAnnotations(), null,
+                new HashMap<String, Object>());
     }
 
     @Test(expected = ValidationException.class)
@@ -162,31 +163,31 @@ public class RequiredFieldValidatorTest {
 
     @Test
     public void testObjectWithoutAnnotations() {
-        instance.validate(new WithoutAnnotations(), new Properties());
+        instance.validate(new WithoutAnnotations(), new Properties(), null);
     }
 
     @Test
     public void testObjectWithEmptyAnnotations() {
-        instance.validate(new WithEmptyAnnotations(), new Properties());
+        instance.validate(new WithEmptyAnnotations(), new Properties(), null);
     }
 
     @Test(expected = ValidationException.class)
     public void testObjectWithAnnotationsAndEmptyMap() {
-        instance.validate(new WithAnnotations(), new Properties());
+        instance.validate(new WithAnnotations(), new Properties(), null);
     }
 
     @Test(expected = ValidationException.class)
     public void testObjectWithNullUsername() {
         Properties properties = new Properties(null, "password",
                 "bhatti@plexobject", 98059);
-        instance.validate(new WithAnnotations(), properties);
+        instance.validate(new WithAnnotations(), properties, null);
     }
 
     @Test(expected = ValidationException.class)
     public void testObjectWithEmptyUsername() {
         Properties properties = new Properties("", "password",
                 "bhatti@plexobject", 98059);
-        instance.validate(new WithAnnotations(), properties);
+        instance.validate(new WithAnnotations(), properties, null);
     }
 
     @Test(expected = ValidationException.class)
@@ -194,40 +195,40 @@ public class RequiredFieldValidatorTest {
         Properties properties = new Properties(
                 "sbhattisbhattisbhattisbhattisbhattisbhattisbhattisbhatti",
                 "password", "bhatti@plexobject", 98059);
-        instance.validate(new WithAnnotations(), properties);
+        instance.validate(new WithAnnotations(), properties, null);
     }
 
     @Test(expected = ValidationException.class)
     public void testBadEMail() {
         Properties properties = new Properties("sbhatti", "password", "bhatti",
                 98059);
-        instance.validate(new WithAnnotations(), properties);
+        instance.validate(new WithAnnotations(), properties, null);
     }
 
     @Test(expected = ValidationException.class)
     public void testBadZipcode() {
         Properties properties = new Properties("sbhatti", "password",
                 "bhatti@plexobject.com", 980);
-        instance.validate(new WithAnnotations(), properties);
+        instance.validate(new WithAnnotations(), properties, null);
     }
 
     @Test
     public void testValidObject() {
         Properties properties = new Properties("sbhatti", "password",
                 "bhatti@plexobject.com", 98059);
-        instance.validate(properties);
+        instance.validate(properties, null);
     }
 
     @Test
     public void testValidObjectWithNullHandler() {
         Properties properties = new Properties();
-        instance.validate((Object)null, properties);
+        instance.validate((Object) null, properties, null);
     }
 
     @Test
     public void testValidObjectWithAnnotations() {
         Properties properties = new Properties("sbhatti", "password",
                 "bhatti@plexobject.com", 98059);
-        instance.validate(new WithAnnotations(), properties);
+        instance.validate(new WithAnnotations(), properties, null);
     }
 }

@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plexobject.domain.Statusable;
+import com.plexobject.http.HttpResponse;
 
 public abstract class AbstractPayload {
     protected final Map<String, Object> properties;
     protected final Map<String, Object> headers;
     protected final long createdAt;
     protected Object payload;
+    protected int status = 0;
 
     AbstractPayload() {
         this.createdAt = System.currentTimeMillis();
@@ -28,6 +31,33 @@ public abstract class AbstractPayload {
 
     public void setPayload(Object obj) {
         this.payload = obj;
+        if (payload instanceof Statusable) {
+            setStatus(((Statusable) payload).getStatus());
+        }
+    }
+
+    public int getStatus() {
+        if (status > 0) {
+            return status;
+        } else {
+            Object value = properties.get(HttpResponse.STATUS);
+            if (value != null) {
+                if (value instanceof Number) {
+                    setStatus(((Number) value).intValue());
+                    return status;
+                } else if (value instanceof String) {
+                    setStatus(Integer.parseInt((String) value));
+                    return status;
+                }
+            }
+        }
+        return HttpResponse.SC_OK;
+    }
+
+    public AbstractPayload setStatus(int status) {
+        this.status = status;
+        properties.put(HttpResponse.STATUS, status);
+        return this;
     }
 
     public void setProperty(String name, Object value) {
@@ -100,6 +130,12 @@ public abstract class AbstractPayload {
         } else {
             return null;
         }
+    }
+
+    public boolean isFormRequest() {
+        String contentHeader = getStringProperty("Content-Type");
+        return contentHeader == null
+                || "application/x-www-form-urlencoded".equals(contentHeader);
     }
 
     public boolean hasProperty(String name) {

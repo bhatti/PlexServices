@@ -115,7 +115,7 @@ public class UserServices {
             request.getResponse().setPayload(users);
         }
     }
-    
+
     @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-update-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "id") })
     public static class UpdateUserService extends AbstractUserService implements

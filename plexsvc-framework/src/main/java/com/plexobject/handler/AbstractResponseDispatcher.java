@@ -54,7 +54,8 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
         Object payload = response.getPayload();
         String replyText = null;
         if (payload instanceof Exception) {
-            logger.warn("PLEXSVC Error received " + payload);
+            logger.warn("PLEXSVC " + getClass().getSimpleName()
+                    + " Error received " + payload);
             Map<String, Object> resp = ExceptionUtils
                     .toErrors((Exception) payload);
             replyText = ObjectCodecFactory.getInstance()

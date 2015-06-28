@@ -40,6 +40,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
     private final Destination destination;
     private final RequestHandler handler;
     private Closeable consumer;
+    private int errors;
 
     JmsRequestHandler(final ServiceRegistry serviceRegistry,
             JMSContainer jmsContainer, RequestHandler handler,
@@ -74,12 +75,13 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                                     .getJMSReplyTo().toString() : null)
                     .setCodecType(config.codec()).setPayload(textPayload)
                     .setResponseDispatcher(dispatcher).build();
-
-            logger.info("PLEXSVC Received " + textPayload + " for "
-                    + config.endpoint() + " "
-                    + handler.getClass().getSimpleName() + ", headers "
-                    + params);
-
+            if (logger.isDebugEnabled()) {
+                logger.debug("PLEXSVC Received " + textPayload + " for "
+                        + config.endpoint() + " "
+                        + handler.getClass().getSimpleName() + ", headers "
+                        + params);
+            }
+            errors = 0;
             // service registry will invoke handler and send back reply
             serviceRegistry.invoke(request, handler);
         } catch (JMSException e) {
@@ -89,13 +91,21 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
 
     @Override
     public void onException(JMSException ex) {
-        logger.error("PLEXSVC Found error while listening, will resubscribe",
-                ex);
-        try {
-            close();
-            registerListener();
-        } catch (Exception e) {
-            logger.error("PLEXSVC Failed to resubscribe", e);
+        errors++;
+        if (errors > 3 || ex.getCause() instanceof IllegalStateException
+                || ex.getMessage().contains("The Session is closed")) {
+            logger.error("PLEXSVC Found persistent error while listening, giving up... ("
+                    + ex + ")");
+        } else {
+            logger.warn("PLEXSVC Found error while listening, will resubscribe ("
+                    + ex + ")");
+            try {
+                Thread.sleep(100);
+                close();
+                registerListener();
+            } catch (Exception e) {
+                logger.error("PLEXSVC Failed to resubscribe", e);
+            }
         }
     }
 
@@ -105,6 +115,8 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                 desc.concurrency(), true, Session.AUTO_ACKNOWLEDGE, 0);
         consumer = jmsContainer.setMessageListener(destination, this,
                 MessageListenerConfig);
+        logger.info("PlexSVC registering " + handler.getClass().getSimpleName()
+                + " and Listening on JMS " + destination + "...");
     }
 
     void close() throws JMSException {

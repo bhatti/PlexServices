@@ -34,14 +34,17 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
+import com.plexobject.domain.Pair;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.netty.NettyWebContainerProvider;
 import com.plexobject.service.Lifecycle;
@@ -215,8 +218,26 @@ public class TestWebUtils {
         return getResponse(con);
     }
 
-    public static String post(String target, String contents, String... headers)
-            throws IOException {
+    public static Pair<String, String> postForm(String path,
+            Map<String, Object> request, String... headers) throws IOException {
+        // System.out.println("SENDING " + request);
+        StringBuilder params = new StringBuilder();
+        if (request != null) {
+            for (Map.Entry<String, Object> e : request.entrySet()) {
+                params.append(e.getKey() + "="
+                        + URLEncoder.encode(e.getValue().toString(), "UTF-8")
+                        + "&");
+            }
+        }
+        String[] newHeaders = new String[headers.length + 2];
+        System.arraycopy(headers, 0, newHeaders, 0, headers.length);
+        newHeaders[newHeaders.length - 2] = "Content-Type";
+        newHeaders[newHeaders.length - 1] = "application/x-www-form-urlencoded";
+        return post(path, params.toString(), newHeaders);
+    }
+
+    public static Pair<String, String> post(String target, String contents,
+            String... headers) throws IOException {
         URL url = new URL(target);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
@@ -229,10 +250,13 @@ public class TestWebUtils {
 
         con.setDoOutput(true);
         OutputStream out = con.getOutputStream();
-        out.write(contents.getBytes());
+        if (contents != null) {
+            out.write(contents.getBytes());
+        }
         out.flush();
         out.close();
-        return getResponse(con);
+        String cookie = con.getHeaderField("Set-Cookie");
+        return Pair.of(getResponse(con), cookie);
     }
 
     private static String getResponse(HttpURLConnection con) throws IOException {
@@ -245,6 +269,12 @@ public class TestWebUtils {
             response.append(inputLine);
         }
         in.close();
+
+        if (con.getResponseCode() != 200) {
+            throw new ServiceInvocationException("Status "
+                    + con.getResponseCode() + "-" + response.toString(),
+                    con.getResponseCode());
+        }
         return response.toString();
     }
 }

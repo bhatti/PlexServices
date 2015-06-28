@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.plexobject.domain.Configuration;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.service.ServiceConfigDesc;
@@ -15,9 +14,9 @@ import com.plexobject.service.impl.AbstractServiceContainer;
 public class EventBusServiceContainer extends AbstractServiceContainer {
     private final Map<RequestHandler, Long> handlers = new ConcurrentHashMap<>();
 
-    public EventBusServiceContainer(final Configuration config,
-            final ServiceRegistry serviceRegistry) throws Exception {
-        super(config, serviceRegistry);
+    public EventBusServiceContainer(final ServiceRegistry serviceRegistry)
+            throws Exception {
+        super(serviceRegistry);
     }
 
     public void init() {
@@ -37,7 +36,7 @@ public class EventBusServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public synchronized void add(final RequestHandler handler) {
+    public synchronized void addRequestHandler(final RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         if (config == null) {
             throw new IllegalArgumentException("service handler " + handler
@@ -64,7 +63,7 @@ public class EventBusServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public synchronized boolean remove(RequestHandler h) {
+    public synchronized boolean removeRequestHandler(RequestHandler h) {
         logger.info("PLEXSVC Removing EventBus service "
                 + h.getClass().getSimpleName() + " for " + h);
         Long subscriberId = handlers.remove(h);
@@ -77,7 +76,7 @@ public class EventBusServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public boolean exists(RequestHandler handler) {
+    public boolean existsRequestHandler(RequestHandler handler) {
         return handlers.containsKey(handler);
     }
 }

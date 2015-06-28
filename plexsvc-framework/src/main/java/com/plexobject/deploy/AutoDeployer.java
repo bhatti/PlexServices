@@ -68,7 +68,7 @@ public class AutoDeployer implements ServiceRegistryLifecycleAware {
                         .newInstance();
                 logger.info("PLEXSVC Registering " + serviceClass.getName()
                         + " for auto-deployment...");
-                serviceRegistry.add(handler);
+                serviceRegistry.addRequestHandler(handler);
             } catch (Exception e) {
                 logger.error(
                         "PLEXSVC Failed to add request handler for "

@@ -43,6 +43,9 @@
   <category name="org">
     <priority value="WARN"/>
   </category>
+  <category name="org.apache.activemq">
+    <priority value="WARN"/>
+  </category>
   <category name="com.mchange">
     <priority value="WARN" />
   </category>

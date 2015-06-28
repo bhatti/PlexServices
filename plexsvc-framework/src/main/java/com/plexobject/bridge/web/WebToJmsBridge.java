@@ -17,7 +17,6 @@ import javax.jms.Destination;
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.Handler;
@@ -26,7 +25,6 @@ import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.jms.JMSContainer;
-import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.LifecycleAware;
 import com.plexobject.service.RequestMethod;
@@ -47,10 +45,6 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     private final ServiceRegistry serviceRegistry;
     //
     private final Map<RequestMethod, RouteResolver<WebToJmsEntry>> entriesEndpointsByMethod = new ConcurrentHashMap<>();
-
-    public WebToJmsBridge(ServiceRegistry serviceRegistry, Configuration config) {
-        this(serviceRegistry, JMSUtils.getJMSContainer(config));
-    }
 
     public WebToJmsBridge(ServiceRegistry serviceRegistry,
             JMSContainer jmsContainer) {
@@ -91,8 +85,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for http
-        serviceRegistry.add(ServiceConfigDesc.builder(e).build(), this);
-        logger.info("Adding Web->JMS mapping for " + e.getShortString());
+        serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(), this);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding Web->JMS mapping for " + e.getShortString());
+        }
     }
 
     private void addWebsocket(WebToJmsEntry e) {
@@ -109,8 +105,12 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for webscoket
-        serviceRegistry.add(ServiceConfigDesc.builder(e).build(), this);
-        logger.info("Adding Websocket->JMS mapping for " + e.getShortString());
+        serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(), this);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding Websocket->JMS mapping for "
+                    + e.getShortString());
+        }
+
     }
 
     /**
@@ -121,31 +121,31 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
     public void handle(Request request) {
         final WebToJmsEntry entry = getMappingEntry(request);
 
-        // TODO we are invoking sendResponse explicitly here, verify this
         if (entry == null) {
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
             request.getResponse().setPayload(
                     "Unknown request received " + request.getPayload());
-            request.sendResponse();
             logger.warn("PLEXSVC Unknown request received "
                     + request.getPayload() + ", registered "
                     + entriesEndpointsByMethod.keySet() + ": "
                     + entriesEndpointsByMethod.values());
             return;
         }
-        logger.info("** Handling " + request + ", mapping " + entry);
         Map<String, Object> params = new HashMap<>();
         params.putAll(request.getProperties());
         params.putAll(request.getHeaders());
         try {
             Destination destination = jmsContainer.getDestination(entry
                     .getDestination());
+            logger.info("PLEXSVC Forwarding request from "
+                    + entry.getEndpoint() + " to " + destination + ", request "
+                    + request.getRequestUri() + " - " + request.getPayload());
+
             if (entry.isAsynchronous()) {
                 jmsContainer.send(destination, params,
                         (String) request.getPayload());
                 request.getResponse().setCodecType(entry.getCodecType());
                 request.getResponse().setPayload("");
-                request.sendResponse();
             } else {
                 Future<Response> respFuture = jmsContainer.sendReceive(
                         destination, params, (String) request.getPayload(),
@@ -157,9 +157,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             request.getResponse().setStatus(HttpResponse.SC_GATEWAY_TIMEOUT);
             request.getResponse().setPayload(
                     "Request timedout " + entry.getTimeoutSecs() + " secs");
-            request.sendResponse();
+            logger.warn("PLEXSVC Timed out request from " + entry.getEndpoint()
+                    + " - " + request.getPayload());
         } catch (Exception e) {
-            logger.error("Failed to send request", e);
+            logger.error("PLEXSVC Failed to send request", e);
         }
     }
 
@@ -173,7 +174,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
 
     Handler<Response> sendbackReply(final Request request,
             final WebToJmsEntry entry, final Map<String, Object> params) {
-        return new com.plexobject.handler.Handler<Response>() {
+        return new Handler<Response>() {
             @Override
             public void handle(Response reply) {
                 try {
@@ -187,9 +188,13 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     }
                     request.getResponse().setCodecType(entry.getCodecType());
                     request.getResponse().setPayload(reply.getPayload());
-                    request.sendResponse();
-                    logger.info("Replying back " + reply + ", params " + params
-                            + ", response" + ": " + request.getResponse());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Status " + reply.getStatus()
+                                + ", Replying back " + reply + ", params "
+                                + params + ", response" + ": "
+                                + request.getResponse() + ", reply params "
+                                + reply.getPropertyNames());
+                    }
                 } catch (Exception e) {
                     logger.error("Could not send back websocket " + reply, e);
                 }
@@ -223,6 +228,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
      */
     @Override
     public void onStarted() {
+        logger.info("PLEXSVC Starting JMS container for web-to-jms bridge");
+
         jmsContainer.start();
     }
 

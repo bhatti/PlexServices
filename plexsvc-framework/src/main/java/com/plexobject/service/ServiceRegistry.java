@@ -121,7 +121,7 @@ public class ServiceRegistry implements ServiceContainer,
 
     public void setRequestHandlers(Collection<RequestHandler> handlers) {
         for (RequestHandler h : handlers) {
-            add(h);
+            addRequestHandler(h);
         }
     }
 
@@ -130,11 +130,11 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public void add(RequestHandler h) {
-        add(new ServiceConfigDesc(h), h);
+    public void addRequestHandler(RequestHandler h) {
+        addRequestHandler(new ServiceConfigDesc(h), h);
     }
 
-    public synchronized void add(ServiceConfigDesc config, RequestHandler h) {
+    public synchronized void addRequestHandler(ServiceConfigDesc config, RequestHandler h) {
         Preconditions.requireNotNull(config, "service handler " + h
                 + " doesn't define ServiceConfig annotation");
         ServiceContainer container = serviceRegistryContainers
@@ -142,10 +142,10 @@ public class ServiceRegistry implements ServiceContainer,
         Preconditions.requireNotNull(container,
                 "Unsupported container for service handler " + h);
         serviceRegistryHandlers.add(h, config);
-        if (!container.exists(h)) {
+        if (!container.existsRequestHandler(h)) {
             registerMetricsJMX(h);
             registerServiceHandlerLifecycle(h);
-            container.add(h);
+            container.addRequestHandler(h);
             if (enablePingHandlers) {
                 addPingHandler(h, config, container);
             }
@@ -157,7 +157,7 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public synchronized boolean remove(RequestHandler h) {
+    public synchronized boolean removeRequestHandler(RequestHandler h) {
         ServiceConfigDesc config = getServiceConfig(h);
         Preconditions.requireNotNull(config, "config" + h
                 + " doesn't define ServiceConfig annotation");
@@ -166,7 +166,7 @@ public class ServiceRegistry implements ServiceContainer,
         if (container == null) {
             return false;
         }
-        if (container.remove(h)) {
+        if (container.removeRequestHandler(h)) {
             if (enablePingHandlers) {
                 removePingHandler(h, config, container);
             }
@@ -176,7 +176,7 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public boolean exists(RequestHandler h) {
+    public boolean existsRequestHandler(RequestHandler h) {
         ServiceConfigDesc config = getServiceConfig(h);
         Preconditions.requireNotNull(config, "config" + h
                 + " doesn't define ServiceConfig annotation");
@@ -185,7 +185,7 @@ public class ServiceRegistry implements ServiceContainer,
         if (container == null) {
             return false;
         }
-        return container.exists(h);
+        return container.existsRequestHandler(h);
     }
 
     @Override
@@ -243,7 +243,8 @@ public class ServiceRegistry implements ServiceContainer,
      */
     public synchronized void add(WebToJmsEntry e) {
         if (webToJmsBridge == null) {
-            webToJmsBridge = new WebToJmsBridge(this, config);
+            webToJmsBridge = new WebToJmsBridge(this,
+                    serviceRegistryContainers.getJmsBridgeContainer());
         }
         webToJmsBridge.add(e);
     }
@@ -406,7 +407,7 @@ public class ServiceRegistry implements ServiceContainer,
         };
         pingHandlers.put(pingEndpoint, pingHandler);
         setServiceConfig(pingHandler, pingConfig);
-        container.add(pingHandler);
+        container.addRequestHandler(pingHandler);
     }
 
     private void removePingHandler(final RequestHandler handler,
@@ -414,7 +415,7 @@ public class ServiceRegistry implements ServiceContainer,
         String pingEndpoint = config.endpoint() + ".ping";
         final RequestHandler pingHandler = pingHandlers.get(pingEndpoint);
         if (pingHandler != null) {
-            container.remove(pingHandler);
+            container.removeRequestHandler(pingHandler);
             removeServiceConfig(pingHandler);
         }
     }

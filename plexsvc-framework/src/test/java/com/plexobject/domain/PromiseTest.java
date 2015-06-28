@@ -35,7 +35,7 @@ public class PromiseTest {
         assertFalse(promise.isCancelled());
         assertFalse(promise.isTimedout());
         assertFalse(promise.isDone());
-        promise.setValue(10);
+        promise.complete(10);
         assertTrue(promise.isDone());
         assertEquals(new Integer(10), promise.get());
     }
@@ -46,8 +46,8 @@ public class PromiseTest {
         assertFalse(promise.isCancelled());
         assertFalse(promise.isTimedout());
         assertFalse(promise.isDone());
-        promise.setValue(10);
-        promise.setValue(10);
+        promise.complete(10);
+        promise.complete(10);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -56,7 +56,7 @@ public class PromiseTest {
         assertFalse(promise.isCancelled());
         assertFalse(promise.isTimedout());
         assertFalse(promise.isDone());
-        promise.setError(new IllegalArgumentException());
+        promise.completeExceptionally(new IllegalArgumentException());
         assertFalse(promise.isDone());
         promise.get();
     }
@@ -67,8 +67,8 @@ public class PromiseTest {
         assertFalse(promise.isCancelled());
         assertFalse(promise.isTimedout());
         assertFalse(promise.isDone());
-        promise.setError(new IllegalArgumentException());
-        promise.setError(new IllegalArgumentException());
+        promise.completeExceptionally(new IllegalArgumentException());
+        promise.completeExceptionally(new IllegalArgumentException());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class PromiseTest {
             public void run() {
                 try {
                     Thread.sleep(10);
-                    promise.setValue(20);
+                    promise.complete(20);
                 } catch (Exception e) {
                 }
             }

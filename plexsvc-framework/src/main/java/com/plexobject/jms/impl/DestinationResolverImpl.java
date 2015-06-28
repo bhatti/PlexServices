@@ -9,10 +9,15 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.apache.log4j.Logger;
+
 import com.plexobject.domain.Configuration;
 import com.plexobject.jms.DestinationResolver;
 
 public class DestinationResolverImpl implements DestinationResolver {
+    private static final Logger logger = Logger
+            .getLogger(DestinationResolverImpl.class);
+
     private final String QUEUE_PREFIX = "queue://";
     private final String TOPIC_PREFIX = "topic://";
     private final Map<String, Destination> destinations = new ConcurrentHashMap<>();
@@ -45,6 +50,11 @@ public class DestinationResolverImpl implements DestinationResolver {
                     destination = session.createQueue(destName);
                 }
                 destinations.put(resolvedDestName, destination);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("PLEXSVC Resolving " + rawDestName + ", pubsub "
+                        + pubsub + ", resolvedDestName " + resolvedDestName
+                        + ", destination " + destination);
             }
             return destination;
         }

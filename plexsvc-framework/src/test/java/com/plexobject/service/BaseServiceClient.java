@@ -50,7 +50,7 @@ public class BaseServiceClient {
             Class<?> responseType, Type pType) throws Exception {
         // System.out.println("SENDING " + request);
         String resp = TestWebUtils.post("http://localhost:" + DEFAULT_PORT
-                + path, request.encode(), "Accept", getAcceptHeader());
+                + path, request.encode(), "Accept", getAcceptHeader()).first;
         // System.out.println("RECEIVED " + resp);
         int colon = resp.indexOf("\":");
         String payload = resp.substring(colon + 2, resp.length() - 1);
@@ -64,7 +64,7 @@ public class BaseServiceClient {
             throws Exception {
         String jsonInput = getObjectCodec().encode(input);
         String resp = TestWebUtils.post("http://localhost:" + DEFAULT_PORT
-                + path, jsonInput, "Accept", getAcceptHeader());
+                + path, jsonInput, "Accept", getAcceptHeader()).first;
         return (T) ReflectUtils.decode(resp, responseType, null,
                 getObjectCodec());
     }

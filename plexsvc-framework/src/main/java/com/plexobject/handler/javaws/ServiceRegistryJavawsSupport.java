@@ -43,7 +43,7 @@ public class ServiceRegistryJavawsSupport {
             if (webService != null) {
                 for (Map.Entry<ServiceConfigDesc, RequestHandler> e : requestHandlerAdapterJavaws
                         .create(service, path, RequestMethod.POST).entrySet()) {
-                    serviceRegistry.add(e.getKey(), e.getValue());
+                    serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
                     handlers.put(e.getKey(), e.getValue());
                 }
             }

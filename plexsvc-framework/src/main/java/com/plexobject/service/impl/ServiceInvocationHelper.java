@@ -110,25 +110,24 @@ public class ServiceInvocationHelper {
             // Note: output interceptors are executed from
             // AbstractResponseDispatcher
 
-            // validate required fields
-            requiredFieldValidator.validate(handler,
-                    request.getPayload() == null ? request.getProperties()
-                            : request.getPayload());
-
-            // update post parameters
-            if (request.getPayload() != null
-                    && request.getProperties().size() == 0
-                    && request.getProperties().size() % 2 == 0) {
-                String[] nvArr = request.getPayload().toString().split("&");
-                for (String nvStr : nvArr) {
-                    String[] nv = nvStr.split("=");
-                    if (nv.length == 2) {
-                        request.setProperty(nv[0], nv[1]);
+            try {
+                // update post parameters
+                boolean formSubmitted = request.isFormRequest();
+                if (formSubmitted) {
+                    String[] nvArr = request.getPayload().toString().split("&");
+                    for (String nvStr : nvArr) {
+                        String[] nv = nvStr.split("=");
+                        if (nv.length == 2) {
+                            request.setProperty(nv[0], nv[1]);
+                        }
                     }
                 }
-            }
-            //
-            try {
+                //
+                // validate required fields
+                requiredFieldValidator.validate(handler, request.getPayload(),
+                        request.getProperties());
+
+                //
                 //
                 invokeWithAroundInterceptorIfNeeded(request, handler, registry,
                         started, metrics, config);

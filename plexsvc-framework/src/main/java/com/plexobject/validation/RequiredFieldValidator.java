@@ -13,24 +13,25 @@ import org.apache.commons.beanutils.BeanUtils;
  */
 public class RequiredFieldValidator implements IRequiredFieldValidator {
     @Override
-    public void validate(Object request) throws ValidationException {
-        validate(request, request);
+    public void validate(Object request, Map<String, Object> properties)
+            throws ValidationException {
+        validate(request, request, properties);
     }
 
     @Override
-    public void validate(Object handler, Object request)
-            throws ValidationException {
+    public void validate(Object handler, Object request,
+            Map<String, Object> properties) throws ValidationException {
         if (handler == null) {
             return;
         }
         RequiredFields requiredFields = handler.getClass().getAnnotation(
                 RequiredFields.class);
-        validate(requiredFields, request);
+        validate(requiredFields, request, properties);
     }
 
     @Override
-    public void validate(RequiredFields requiredFields, Object request)
-            throws ValidationException {
+    public void validate(RequiredFields requiredFields, Object request,
+            Map<String, Object> properties) throws ValidationException {
         if (requiredFields == null) {
             return;
         }
@@ -40,7 +41,7 @@ public class RequiredFieldValidator implements IRequiredFieldValidator {
                 .builder();
         for (Field f : requiredFieldsValue) {
             try {
-                String val = getProperty(request, f.name());
+                String val = getProperty(request, properties, f.name());
                 if (val == null) {
                     validationExceptionBuilder.addError(
                             "undefined_" + f.name(), f.name(), f.name()
@@ -76,19 +77,25 @@ public class RequiredFieldValidator implements IRequiredFieldValidator {
         validationExceptionBuilder.end();
     }
 
-    private static String getProperty(Object request, String name)
+    @SuppressWarnings("unchecked")
+    private static String getProperty(Object request,
+            Map<String, Object> properties, String name)
             throws IllegalAccessException, InvocationTargetException,
             NoSuchMethodException {
-        if (request instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Object val = ((Map<String, Object>) request).get(name);
-            if (val == null) {
-                return null;
-            }
-            return val instanceof String ? (String) val : val.toString();
-        } else {
-            return BeanUtils.getProperty(request, name);
+        Object value = null;
+        if (properties != null) {
+            value = properties.get(name);
         }
+        if (value == null && request != null) {
+            if (request instanceof Map) {
+                value = ((Map<String, Object>) request).get(name);
+            } else {
+                value = BeanUtils.getProperty(request, name);
+            }
+        }
+        if (value == null) {
+            return null;
+        }
+        return value instanceof String ? (String) value : value.toString();
     }
-
 }

@@ -32,8 +32,7 @@ public class BugReportServices {
     }
 
     @ServiceConfig(protocol = Protocol.JMS, rolesAllowed = "Employee", endpoint = "queue://{scope}-assign-bugreport-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
-    @RequiredFields({ @Field(name = "projectId"), @Field(name = "bugReportId"),
-            @Field(name = "assignedTo") })
+    @RequiredFields({ @Field(name = "id"), @Field(name = "assignedTo") })
     public static class AssignBugReportService extends AbstractBugReportService
             implements RequestHandler {
         public AssignBugReportService(BugReportRepository bugReportRepository,
@@ -61,7 +60,7 @@ public class BugReportServices {
     }
 
     @ServiceConfig(protocol = Protocol.JMS, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
-    @RequiredFields({ @Field(name = "bugId"), @Field(name = "projectId") })
+    @RequiredFields({ @Field(name = "bugNumber"), @Field(name = "projectId") })
     public static class CreateBugReportService extends AbstractBugReportService
             implements RequestHandler {
         public CreateBugReportService(BugReportRepository bugReportRepository,

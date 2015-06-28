@@ -31,7 +31,6 @@ import com.plexobject.domain.Constants;
 import com.plexobject.handler.Function;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
-import com.plexobject.jms.MessageListenerConfig;
 import com.plexobject.jms.impl.BaseJMSContainer;
 import com.plexobject.jms.impl.JMSUtils;
 
@@ -59,6 +58,8 @@ public class SpringJMSContainer extends BaseJMSContainer {
 
     @Override
     public synchronized void start() {
+        logger.info("PLEXSVC Starting listener containers "
+                + listenerContainers.size());
         for (MessageListenerContainer c : listenerContainers) {
             c.start();
         }
@@ -67,6 +68,7 @@ public class SpringJMSContainer extends BaseJMSContainer {
 
     @Override
     public synchronized void stop() {
+        logger.info("PLEXSVC Stopping listener containers");
         for (MessageListenerContainer c : listenerContainers) {
             c.stop();
         }
@@ -107,6 +109,10 @@ public class SpringJMSContainer extends BaseJMSContainer {
             final MessageListener l,
             final MessageListenerConfig messageListenerConfig)
             throws JMSException, NamingException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("PLEXSVC JMS Listening on " + destination);
+        }
+
         final DefaultMessageListenerContainer messageListenerContainer = newMessageListenerContainer();
         messageListenerContainer.setConcurrentConsumers(messageListenerConfig
                 .getConcurrency());
@@ -181,6 +187,11 @@ public class SpringJMSContainer extends BaseJMSContainer {
         if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
             headers.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("PLEXSVC Sending JMS message to " + destination
+                    + ", payload " + reqPayload);
+        }
+
         //
         JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
         jmsTemplate.setDefaultDestination(destination);

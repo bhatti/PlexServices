@@ -16,7 +16,6 @@ public class Response extends AbstractPayload {
     public static final String[] HEADER_PROPERTIES = new String[] {
             HttpResponse.STATUS, HttpResponse.LOCATION, Constants.SESSION_ID };
     private CodecType codecType;
-    private int status = HttpResponse.SC_OK;
     private final Request request;
 
     public Response(final Request request,
@@ -30,10 +29,6 @@ public class Response extends AbstractPayload {
 
     public Request getRequest() {
         return request;
-    }
-    public Response setStatus(int status) {
-        this.status = status;
-        return this;
     }
 
     public Response setCodecType(CodecType type) {
@@ -49,22 +44,6 @@ public class Response extends AbstractPayload {
     public Response addSessionId(String value) {
         properties.put(Constants.SESSION_ID, value);
         return this;
-    }
-
-    public int getStatus() {
-        if (status > 0) {
-            return status;
-        } else {
-            Object status = properties.get(HttpResponse.STATUS);
-            if (status != null) {
-                if (status instanceof Number) {
-                    return ((Number) status).intValue();
-                } else if (status instanceof String) {
-                    return Integer.parseInt((String) status);
-                }
-            }
-        }
-        return status;
     }
 
     @Override

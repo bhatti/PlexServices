@@ -87,7 +87,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     @Test
     public void testGetWhileNotRunning() throws Exception {
         init(true);
-        serviceRegistry.add(new WebService());
+        serviceRegistry.addRequestHandler(new WebService());
         serviceRegistry.stop();
         StubHttpServletRequest request = new StubHttpServletRequest("/path",
                 "{}");
@@ -99,7 +99,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     @Test
     public void testGet() throws Exception {
         init(true);
-        serviceRegistry.add(new WebService());
+        serviceRegistry.addRequestHandler(new WebService());
         StubHttpServletRequest request = new StubHttpServletRequest("/path",
                 "{}");
         StubHttpServletResponse response = new StubHttpServletResponse();
@@ -113,7 +113,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(RequestMethod.HEAD).build();
-        serviceRegistry.add(desc, handler);
+        serviceRegistry.addRequestHandler(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         StubHttpServletResponse response = new StubHttpServletResponse();
@@ -127,7 +127,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(RequestMethod.POST).build();
-        serviceRegistry.add(desc, handler);
+        serviceRegistry.addRequestHandler(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         request.parameters.put("p1", "v1");
@@ -144,7 +144,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(RequestMethod.PUT).build();
-        serviceRegistry.add(desc, handler);
+        serviceRegistry.addRequestHandler(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         request.parameters.put("p1", "v1");
@@ -159,7 +159,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
         WebService handler = new WebService();
         ServiceConfigDesc desc = new ServiceConfigDesc.Builder(handler)
                 .setMethod(RequestMethod.DELETE).build();
-        serviceRegistry.add(desc, handler);
+        serviceRegistry.addRequestHandler(desc, handler);
         StubHttpServletRequest request = new StubHttpServletRequest(
                 "/path?n=v", "{}");
         request.parameters.put("p1", "v1");
@@ -171,7 +171,7 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     @Test
     public void testPostWithInvalidMethod() throws Exception {
         init(true);
-        serviceRegistry.add(new WebService());
+        serviceRegistry.addRequestHandler(new WebService());
         StubHttpServletRequest request = new StubHttpServletRequest("/path",
                 "{}");
         StubHttpServletResponse response = new StubHttpServletResponse();

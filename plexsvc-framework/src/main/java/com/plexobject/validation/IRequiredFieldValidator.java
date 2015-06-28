@@ -1,5 +1,7 @@
 package com.plexobject.validation;
 
+import java.util.Map;
+
 /**
  * This interface validates given fields against required field annotations
  * 
@@ -15,9 +17,12 @@ public interface IRequiredFieldValidator {
      *            - object that defines RequiredFields annotations
      * @param request
      *            - incoming request
+     * @param properties
+     *            - optional properties
      * @throws ValidationException
      */
-    void validate(Object handler, Object request) throws ValidationException;
+    void validate(Object handler, Object request, Map<String, Object> properties)
+            throws ValidationException;
 
     /**
      * This method validates request object against required fields
@@ -26,18 +31,23 @@ public interface IRequiredFieldValidator {
      *            - annotations that define required fields
      * @param request
      *            - incoming request
+     * @param properties
+     *            - optional properties
      * @throws ValidationException
      */
-    void validate(RequiredFields requiredFields, Object request)
-            throws ValidationException;
+    void validate(RequiredFields requiredFields, Object request,
+            Map<String, Object> properties) throws ValidationException;
 
     /**
      * This method checks if request object implements RequiredFields and if so
      * then it validates the object against annotation rules
      * 
      * @param request
+     * @param properties
+     *            - optional properties
      * @throws ValidationException
      */
-    void validate(Object request) throws ValidationException;
+    void validate(Object request, Map<String, Object> properties)
+            throws ValidationException;
 
 }

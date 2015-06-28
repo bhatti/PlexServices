@@ -1,7 +1,6 @@
 package com.plexobject.bugger;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.activemq.broker.BrokerService;
@@ -25,14 +24,10 @@ import com.plexobject.bugger.service.BugReportServices;
 import com.plexobject.bugger.service.ProjectServices;
 import com.plexobject.bugger.service.UserServices;
 import com.plexobject.domain.Configuration;
-import com.plexobject.encode.CodecType;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceRegistry;
 
 public class Main {
     private static final Logger log = Logger.getLogger(Main.class);
-    private static final int DEFAULT_TIMEOUT_SECS = 5;
-    private static final CodecType DEFAULT_CODEC = CodecType.JSON;
 
     private final CommentRepository commentRepository = new CommentRepository();
     private final UserRepository userRepository = new UserRepository();
@@ -69,35 +64,35 @@ public class Main {
     }
 
     private void addServices(ServiceRegistry serviceRegistry) {
-        serviceRegistry.add(new UserServices.CreateUserService(userRepository));
-        serviceRegistry.add(new UserServices.UpdateUserService(userRepository));
-        serviceRegistry.add(new UserServices.QueryUserService(userRepository));
-        serviceRegistry.add(new UserServices.DeleteUserService(userRepository));
-        serviceRegistry.add(new UserServices.LoginService(userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.CreateUserService(userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.UpdateUserService(userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.QueryUserService(userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.DeleteUserService(userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.LoginService(userRepository));
 
         //
-        serviceRegistry.add(new ProjectServices.CreateProjectService(projectRepository,
-                userRepository));
-        serviceRegistry.add(new ProjectServices.UpdateProjectService(projectRepository,
-                userRepository));
-        serviceRegistry.add(new ProjectServices.QueryProjectService(projectRepository,
-                userRepository));
-        serviceRegistry.add(new ProjectServices.AddProjectMemberService(projectRepository,
-                userRepository));
-        serviceRegistry.add(new ProjectServices.RemoveProjectMemberService(projectRepository,
-                userRepository));
+        serviceRegistry.addRequestHandler(new ProjectServices.CreateProjectService(
+                projectRepository, userRepository));
+        serviceRegistry.addRequestHandler(new ProjectServices.UpdateProjectService(
+                projectRepository, userRepository));
+        serviceRegistry.addRequestHandler(new ProjectServices.QueryProjectService(
+                projectRepository, userRepository));
+        serviceRegistry.addRequestHandler(new ProjectServices.AddProjectMemberService(
+                projectRepository, userRepository));
+        serviceRegistry.addRequestHandler(new ProjectServices.RemoveProjectMemberService(
+                projectRepository, userRepository));
         //
-        serviceRegistry.add(new BugReportServices.CreateBugReportService(bugreportRepository,
-                userRepository));
-        serviceRegistry.add(new BugReportServices.UpdateBugReportService(bugreportRepository,
-                userRepository));
-        serviceRegistry.add(new BugReportServices.QueryBugReportService(bugreportRepository,
-                userRepository));
-        serviceRegistry.add(new BugReportServices.QueryProjectBugReportService(
+        serviceRegistry.addRequestHandler(new BugReportServices.CreateBugReportService(
+                bugreportRepository, userRepository));
+        serviceRegistry.addRequestHandler(new BugReportServices.UpdateBugReportService(
+                bugreportRepository, userRepository));
+        serviceRegistry.addRequestHandler(new BugReportServices.QueryBugReportService(
+                bugreportRepository, userRepository));
+        serviceRegistry.addRequestHandler(new BugReportServices.QueryProjectBugReportService(
                 bugreportRepository, userRepository));
 
-        serviceRegistry.add(new BugReportServices.AssignBugReportService(bugreportRepository,
-                userRepository));
+        serviceRegistry.addRequestHandler(new BugReportServices.AssignBugReportService(
+                bugreportRepository, userRepository));
     }
 
     private void populateTestData() {
@@ -129,51 +124,6 @@ public class Main {
                 "This is a great story."));
         comment.setBugId(bugReport.getId());
         bugReport.addComment(comment);
-    }
-
-    static Collection<WebToJmsEntry> getJmsToJmsEntries() {
-        return Arrays.asList(new WebToJmsEntry(DEFAULT_CODEC,
-                "/projects/{projectId}/bugreports/{id}/assign", RequestMethod.POST,
-                "queue://{scope}-assign-bugreport-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects/{projectId}/bugreports", RequestMethod.GET,
-                "queue://{scope}-query-project-bugreport-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/users", RequestMethod.GET,
-                "queue://{scope}-query-user-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects", RequestMethod.GET,
-                "queue://{scope}-query-projects-service", DEFAULT_TIMEOUT_SECS,
-                false, 1), new WebToJmsEntry(DEFAULT_CODEC, "/bugreports",
-                RequestMethod.GET, "queue://{scope}-bugreports-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects/{id}/membership/add", RequestMethod.POST,
-                "queue://{scope}-add-project-member-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects/{id}/membership/remove", RequestMethod.POST,
-                "queue://{scope}-remove-project-member-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects/{projectId}/bugreports", RequestMethod.POST,
-                "queue://{scope}-create-bugreport-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/users", RequestMethod.POST,
-                "queue://{scope}-create-user-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects", RequestMethod.POST,
-                "queue://{scope}-create-projects-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/users/{id}", RequestMethod.POST,
-                "queue://{scope}-update-user-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/users/{id}/delete", RequestMethod.POST,
-                "queue://{scope}-delete-user-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects/{id}", RequestMethod.POST,
-                "queue://{scope}-update-project-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1), new WebToJmsEntry(
-                DEFAULT_CODEC, "/projects/{projectId}/bugreports/{id}",
-                RequestMethod.POST, "queue://{scope}-update-bugreport-service-queue",
-                DEFAULT_TIMEOUT_SECS, false, 1));
     }
 
     public static void main(String[] args) throws Exception {

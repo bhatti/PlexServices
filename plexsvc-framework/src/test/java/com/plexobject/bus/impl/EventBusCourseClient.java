@@ -30,7 +30,7 @@ public class EventBusCourseClient {
             @Override
             public void handle(Request request) {
                 Course saved = request.getPayload();
-                promise.setValue(saved);
+                promise.complete(saved);
             }
         }, null);
         eventBus.publish(EventBusCourseService.COURSES_SAVE,
@@ -48,7 +48,7 @@ public class EventBusCourseClient {
             @Override
             public void handle(Request request) {
                 List<Course> result = request.getPayload();
-                promise.setValue(result);
+                promise.complete(result);
             }
         }, null);
         eventBus.publish(EventBusCourseService.COURSES_ENROLL,
@@ -66,7 +66,7 @@ public class EventBusCourseClient {
             @Override
             public void handle(Request request) {
                 List<Course> result = request.getPayload();
-                promise.setValue(result);
+                promise.complete(result);
             }
         }, null);
         eventBus.publish(EventBusCourseService.GET_COURSES_FOR_STUDENT_ID,
@@ -84,7 +84,7 @@ public class EventBusCourseClient {
             @Override
             public void handle(Request request) {
                 Course saved = request.getPayload();
-                promise.setValue(saved);
+                promise.complete(saved);
             }
         }, null);
         eventBus.publish(EventBusCourseService.GET_COURSE,
@@ -102,12 +102,12 @@ public class EventBusCourseClient {
             public void handle(Request request) {
                 if (request.getPayload() instanceof String) {
                     String result = request.getPayload();
-                    promise.setValue(result);
+                    promise.complete(result);
                 } else if (request.getPayload() instanceof Exception) {
                     Exception result = request.getPayload();
-                    promise.setError(result);
+                    promise.completeExceptionally(result);
                 } else {
-                    promise.setError(new IllegalArgumentException(
+                    promise.completeExceptionally(new IllegalArgumentException(
                             "Unexpected type " + request.getPayload()));
                 }
             }

@@ -8,7 +8,6 @@ import javax.jms.JMSException;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.jms.DestinationResolver;
@@ -41,7 +40,7 @@ public abstract class BaseJMSContainer implements JMSContainer,
 
     @Override
     public void onException(JMSException e) {
-        logger.error("PLEXSVC JMS Error\n\n\n", e);
+        logger.error("PLEXSVC JMS Error " + e);
         final List<ExceptionListener> copyExceptionListeners = new ArrayList<>();
 
         synchronized (exceptionListeners) {

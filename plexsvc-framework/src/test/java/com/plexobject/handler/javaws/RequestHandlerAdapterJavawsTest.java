@@ -72,7 +72,7 @@ public class RequestHandlerAdapterJavawsTest {
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             logger.info("Adding " + e.getKey() + "==>" + e.getValue());
-            serviceRegistry.add(e.getKey(), e.getValue());
+            serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
         }
         serviceRegistry.addInputInterceptor(new Interceptor<String>() {
             @Override

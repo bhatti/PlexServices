@@ -9,9 +9,7 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
-import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.service.impl.AbstractServiceContainer;
@@ -26,10 +24,10 @@ public class JmsServiceContainer extends AbstractServiceContainer {
     private final JMSContainer jmsContainer;
     private final Map<RequestHandler, JmsRequestHandler> jmsHandlersByRequestHandler = new ConcurrentHashMap<>();
 
-    public JmsServiceContainer(final Configuration config,
-            final ServiceRegistry serviceRegistry) throws Exception {
-        super(config, serviceRegistry);
-        this.jmsContainer = JMSUtils.getJMSContainer(config);
+    public JmsServiceContainer(final ServiceRegistry serviceRegistry,
+            JMSContainer jmsContainer) throws Exception {
+        super(serviceRegistry);
+        this.jmsContainer = jmsContainer;
     }
 
     public void init() {
@@ -52,7 +50,7 @@ public class JmsServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public synchronized void add(RequestHandler h) {
+    public synchronized void addRequestHandler(RequestHandler h) {
         JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.get(h);
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(h);
         if (config == null) {
@@ -74,8 +72,11 @@ public class JmsServiceContainer extends AbstractServiceContainer {
             jmsHandler = new JmsRequestHandler(serviceRegistry, jmsContainer,
                     h, destination);
             jmsHandlersByRequestHandler.put(h, jmsHandler);
-            logger.info("PLEXSVC Adding JMS service " + h.getClass().getSimpleName()
-                    + " for " + h + ", codec " + config.codec());
+            if (logger.isDebugEnabled()) {
+                logger.debug("PLEXSVC Adding JMS service "
+                        + h.getClass().getSimpleName() + ", codec "
+                        + config.codec());
+            }
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -84,15 +85,16 @@ public class JmsServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public synchronized boolean remove(RequestHandler h) {
+    public synchronized boolean removeRequestHandler(RequestHandler h) {
         JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.remove(h);
 
         try {
             if (jmsHandler != null) {
                 jmsHandler.close();
                 ServiceConfigDesc config = serviceRegistry.getServiceConfig(h);
-                logger.info("PLEXSVC Removing service " + h.getClass().getSimpleName()
-                        + " for " + config.endpoint());
+                logger.info("PLEXSVC Removing service "
+                        + h.getClass().getSimpleName() + " for "
+                        + config.endpoint());
                 return true;
             }
         } catch (Exception e) {
@@ -103,7 +105,7 @@ public class JmsServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public boolean exists(RequestHandler handler) {
+    public boolean existsRequestHandler(RequestHandler handler) {
         JmsRequestHandler jmsHandler = jmsHandlersByRequestHandler.get(handler);
         return jmsHandler != null;
     }

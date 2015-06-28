@@ -122,9 +122,9 @@ public class ServiceRegistryTest {
 
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
-        registry.add(new WebsocketService());
-        registry.add(new WebService());
-        registry.add(new JmsService());
+        registry.addRequestHandler(new WebsocketService());
+        registry.addRequestHandler(new WebService());
+        registry.addRequestHandler(new JmsService());
         assertEquals(3, registry.getHandlers().size());
         assertNotNull(registry.getServiceMetricsRegistry());
         assertEquals(3, registry.getServiceConfigurations().size());
@@ -138,7 +138,7 @@ public class ServiceRegistryTest {
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
-        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
+        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61619");
 
         final Configuration config = new Configuration(properties);
         return config;
@@ -175,7 +175,7 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
-        registry.add(h);
+        registry.addRequestHandler(h);
         registry.addRequestInterceptor(interceptor1);
         registry.addRequestInterceptor(interceptor2);
 
@@ -190,16 +190,16 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
-        assertFalse(registry.exists(h));
-        registry.add(h);
-        assertTrue(registry.exists(h));
-        registry.add(h);
+        assertFalse(registry.existsRequestHandler(h));
+        registry.addRequestHandler(h);
+        assertTrue(registry.existsRequestHandler(h));
+        registry.addRequestHandler(h);
         assertEquals(1, registry.getHandlers().size());
-        registry.remove(h);
+        registry.removeRequestHandler(h);
         assertEquals(0, registry.getHandlers().size());
-        registry.remove(h);
+        registry.removeRequestHandler(h);
         assertEquals(0, registry.getHandlers().size());
-        assertFalse(registry.exists(h));
+        assertFalse(registry.existsRequestHandler(h));
     }
 
     @Test
@@ -213,7 +213,7 @@ public class ServiceRegistryTest {
                 1), new WebToJmsEntry(CodecType.JSON, "/ws", RequestMethod.GET,
                 "queue://w", 5, false, 1));
         RequestHandler h = new WebService();
-        registry.add(h);
+        registry.addRequestHandler(h);
         registry.setWebToJmsEntries(entries);
         assertEquals(4, registry.getHandlers().size()); // double because of
                                                         // ping handlers
@@ -229,7 +229,7 @@ public class ServiceRegistryTest {
                 1), new WebToJmsEntry(CodecType.JSON, "/ws", RequestMethod.GET,
                 "queue://w", 5, false, 1));
         RequestHandler h = new WebService();
-        registry.add(h);
+        registry.addRequestHandler(h);
         registry.setWebToJmsEntries(entries);
         assertEquals(2, registry.getHandlers().size());
     }
@@ -240,7 +240,7 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
-        registry.remove(h);
+        registry.removeRequestHandler(h);
         assertEquals(0, registry.getHandlers().size());
     }
 
@@ -253,7 +253,7 @@ public class ServiceRegistryTest {
         ServiceRegistry registry = new ServiceRegistry(config);
         registry.setSecurityAuthorizer(authorizer);
         RequestHandler h = new WebService();
-        registry.add(h);
+        registry.addRequestHandler(h);
         assertFalse(registry.isRunning());
         registry.start();
         assertTrue(registry.isRunning());
@@ -281,7 +281,7 @@ public class ServiceRegistryTest {
         });
 
         RequestHandler h = new WebService();
-        registry.add(h);
+        registry.addRequestHandler(h);
         assertFalse(registry.isRunning());
         registry.start();
         assertTrue(registry.isRunning());

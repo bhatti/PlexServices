@@ -359,20 +359,20 @@ And then at runtime, override configuration, e.g.
 ...
     ServiceRegistry serviceRegistry = new ServiceRegistry(config);
     PingService pingService = new PingService();
-    serviceRegistry.add(
+    serviceRegistry.addRequestHandler(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.MESSAGE)
                             .setEndpoint("queue://ping")
                             .setProtocol(Protocol.JMS)
                             .build());
-    serviceRegistry.add(
+    serviceRegistry.addRequestHandler(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.MESSAGE)
                             .setProtocol(Protocol.WEBSOCKET)
                             .build());
-    serviceRegistry.add(pingService,
+    serviceRegistry.addRequestHandler(pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.GET).setProtocol(Protocol.HTTP)
                             .build());
@@ -464,7 +464,7 @@ public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
 You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.
 
 ```java  
-serviceRegistry.addInputInterceptor(new Interceptor<String>() {
+serviceRegistry.addRequestHandlerInputInterceptor(new Interceptor<String>() {
   @Override
   public String intercept(String input) {
       logger.info("INPUT: " + input);
@@ -472,7 +472,7 @@ serviceRegistry.addInputInterceptor(new Interceptor<String>() {
   }
 });
 
-serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
+serviceRegistry.addRequestHandlerOutputInterceptor(new Interceptor<String>() {
   @Override
   public String intercept(String output) {
       logger.info("OUTPUT: " + output);
@@ -480,7 +480,7 @@ serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
   }
 });
 
-serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
+serviceRegistry.addRequestHandlerRequestInterceptor(new Interceptor<Request>() {
   @Override
   public Request intercept(Request input) {
       logger.info("INPUT PAYLOAD: " + input);
@@ -488,7 +488,7 @@ serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
   }
 });
 
-serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
+serviceRegistry.addRequestHandlerResponseInterceptor(new Interceptor<Response>() {
   @Override
   public Response intercept(Response output) {
       logger.info("OUTPUT PAYLOAD: " + output);
@@ -698,7 +698,7 @@ RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdap
 Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
                 .createFromPackages("com.plexobject.handler.javaws");
 for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers.entrySet()) {
-  serviceRegistry.add(e.getKey(), e.getValue());
+  serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
 }
 serviceRegistry.start();
 ```
@@ -751,21 +751,21 @@ a container and start the container using service-registry, e.g.
 Configuration config = new Configuration(args[0]);
 serviceRegistry = new ServiceRegistry(config);
 serviceRegistry.setSecurityAuthorizer(new BuggerSecurityAuthorizer(userRepository));
-serviceRegistry.add(new CreateUserService(userRepository));
-serviceRegistry.add(new UpdateUserService(userRepository));
-serviceRegistry.add(new QueryUserService(userRepository));
-serviceRegistry.add(new DeleteUserService(userRepository));
-serviceRegistry.add(new LoginService(userRepository));
-serviceRegistry.add(new CreateProjectService(projectRepository, userRepository));
-serviceRegistry.add(new UpdateProjectService(projectRepository, userRepository));
-serviceRegistry.add(new QueryProjectService(projectRepository, userRepository));
-serviceRegistry.add(new AddProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(new RemoveProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(new CreateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new UpdateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new QueryBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new AssignBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new CreateUserService(userRepository));
+serviceRegistry.addRequestHandler(new UpdateUserService(userRepository));
+serviceRegistry.addRequestHandler(new QueryUserService(userRepository));
+serviceRegistry.addRequestHandler(new DeleteUserService(userRepository));
+serviceRegistry.addRequestHandler(new LoginService(userRepository));
+serviceRegistry.addRequestHandler(new CreateProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new UpdateProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new QueryProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new AddProjectMemberService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new RemoveProjectMemberService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new CreateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new UpdateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new QueryBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new QueryProjectBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new AssignBugReportService(bugreportRepository, userRepository));
 serviceRegistry.start();
 
 ```
@@ -783,9 +783,9 @@ public class Deployer implements ServiceRegistryLifecycleAware {
         PingService pingService = new PingService();
         ReverseService reverseService = new ReverseService();
         SimpleService simpleService = new SimpleService();
-        serviceRegistry.add(pingService);
-        serviceRegistry.add(reverseService);
-        serviceRegistry.add(simpleService);
+        serviceRegistry.addRequestHandler(pingService);
+        serviceRegistry.addRequestHandler(reverseService);
+        serviceRegistry.addRequestHandler(simpleService);
     }
     @Override
     public void onStopped(ServiceRegistry serviceRegistry) {
@@ -878,9 +878,9 @@ public class QuoteServer implements RequestHandler {
         String actionVal = request.getProperty("action");
         Action action = Action.valueOf(actionVal.toUpperCase());
         if (action == Action.SUBSCRIBE) {
-            quoteStreamer.add(symbol, request.getResponseDispatcher());
+            quoteStreamer.add(symbol, request);
         } else {
-            quoteStreamer.remove(symbol, request.getResponseDispatcher());
+            quoteStreamer.remove(symbol, request);
         }
     }
 
@@ -896,7 +896,7 @@ Here is the streaming server that pushes the updates to web clients:
 ```java 
 public class QuoteStreamer extends TimerTask {
     private int delay = 1000;
-    private Map<String, Collection<ResponseDispatcher>> subscribers = 
+    private Map<String, Collection<Request>> subscribers = 
       new ConcurrentHashMap<>();
     private QuoteCache quoteCache = new QuoteCache();
     private final Timer timer = new Timer(true);
@@ -905,40 +905,41 @@ public class QuoteStreamer extends TimerTask {
         timer.schedule(this, delay, delay);
     }
 
-    public void add(String symbol, ResponseDispatcher dispatcher) {
+    public void add(String symbol, Request request) {
         symbol = symbol.toUpperCase();
         synchronized (symbol.intern()) {
-            Collection<ResponseDispatcher> dispatchers = subscribers
+            Collection<Request> requests = subscribers
                     .get(symbol);
-            if (dispatchers == null) {
-                dispatchers = new HashSet<ResponseDispatcher>();
-                subscribers.put(symbol, dispatchers);
+            if (requests == null) {
+                requests = new HashSet<Request>();
+                subscribers.put(symbol, requests);
             }
-            dispatchers.add(dispatcher);
+            requests.add(request);
         }
     }
 
-    public void remove(String symbol, ResponseDispatcher dispatcher) {
+    public void remove(String symbol, Request request) {
         symbol = symbol.toUpperCase();
         synchronized (symbol.intern()) {
-            Collection<ResponseDispatcher> dispatchers = subscribers
+            Collection<Request> requests = subscribers
                     .get(symbol);
-            if (dispatchers != null) {
-                dispatchers.remove(dispatcher);
+            if (requests != null) {
+                requests.remove(request);
             }
         }
     }
 
     @Override
     public void run() {
-        for (Map.Entry<String, Collection<ResponseDispatcher>> e : subscribers
+        for (Map.Entry<String, Collection<Request>> e : subscribers
                 .entrySet()) {
             Quote q = quoteCache.getLatestQuote(e.getKey());
-            Collection<ResponseDispatcher> dispatchers = new ArrayList<>(
+            Collection<Request> requests = new ArrayList<>(
                     e.getValue());
-            for (ResponseDispatcher d : dispatchers) {
+            for (Request r : requests) {
                 try {
-                    d.send(q);
+                    r.getResponse().setPayload(q);
+                    r.sendResponse();
                 } catch (Exception ex) {
                     remove(e.getKey(), d);
                 }

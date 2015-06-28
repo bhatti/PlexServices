@@ -86,7 +86,7 @@ public class DefaultJMSContainerTest {
         properties.put(JMSUtils.JMS_CONTEXT_FACTORY, "xxxx");
         properties.put(JMSUtils.JMS_CONNECTION_FACTORY_LOOKUP,
                 "ConnectionFactory");
-        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61616");
+        properties.put(JMSUtils.JMS_PROVIDER_URL, "tcp://localhost:61619");
         final Configuration config = new Configuration(properties);
         JMSUtils.getJMSContainer(config);
     }
@@ -145,14 +145,14 @@ public class DefaultJMSContainerTest {
         broker.stop();
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testStopWhenBrokerIsDown() throws Exception {
         BrokerService broker = JMSTestUtils.startBroker(properties);
         final Configuration config = new Configuration(properties);
         JMSContainer client = JMSUtils.getJMSContainer(config);
         client.start();
         broker.stop();
-        client.stop();
+        client.stop(); // client won't throw any exception
     }
 
     @Test

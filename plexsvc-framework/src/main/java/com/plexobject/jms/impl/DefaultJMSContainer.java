@@ -1,6 +1,7 @@
 package com.plexobject.jms.impl;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +55,10 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
     public DefaultJMSContainer(Configuration config,
             DestinationResolver destinationResolver) {
         super(config, destinationResolver);
+        createConnection();
+    }
+
+    private void createConnection() {
         try {
             ConnectionFactory connectionFactory = JMSUtils
                     .getConnectionFactory(config);
@@ -83,16 +88,17 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
         }
         try {
             connection.start();
-            logger.info("PLEXSVC Starting ...");
+            running = true;
             synchronized (receivers) {
                 for (MessageReceiverThread t : receivers) {
                     if (!t.isRunning()) {
-                        t.start();
+                        t.reset();
                         executorService.submit(t);
                     }
                 }
             }
-            running = true;
+            logger.info("PLEXSVC Started JMS connection and JMS Threads...");
+
             notifyAll();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -121,11 +127,18 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
             } catch (InterruptedException e) {
                 Thread.interrupted();
             }
-            connection.stop();
+            try {
+                connection.stop();
+            } catch (JMSException e) {
+            }
             running = false;
+
             notifyAll();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            if (e.getCause() instanceof EOFException) {
+            } else {
+                logger.error("Failed to shutdown connection " + e);
+            }
         }
     }
 
@@ -156,7 +169,8 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
                     try {
                         consumer.close();
                     } catch (Exception e) {
-                        logger.error("PLEXSVC Failed to close consumer for " + destination);
+                        logger.error("PLEXSVC Failed to close consumer for "
+                                + destination);
                     }
                 }
             };
@@ -238,6 +252,10 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
 
         Future<Response> promise = JMSUtils.configureReplier(
                 currentJmsSession(), reqMsg, handler, this);
+        if (logger.isDebugEnabled()) {
+            logger.debug("PLEXSVC Sending JMS message to " + destination
+                    + ", payload " + reqPayload + ", and waiting for reply...");
+        }
         createProducer(destination).send(reqMsg);
         return promise;
     }
@@ -262,6 +280,10 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
         JMSUtils.setHeaders(headers, m);
 
         MessageProducer msgProducer = createProducer(destination);
+        if (logger.isDebugEnabled()) {
+            logger.debug("PLEXSVC Sending JMS message to " + destination
+                    + ", payload " + payload + ", headers " + headers);
+        }
         msgProducer.send(m);
         if (destination instanceof TemporaryQueue) {
             try {
@@ -301,8 +323,23 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
 
     private Session currentJmsSession() throws JMSException, NamingException {
         if (currentSession.get() == null) {
-            currentSession.set(connection.createSession(transactedSession,
-                    Session.AUTO_ACKNOWLEDGE));
+            try {
+                currentSession.set(connection.createSession(transactedSession,
+                        Session.AUTO_ACKNOWLEDGE));
+            } catch (JMSException e) {
+                if (e.getCause() instanceof EOFException) {
+                    logger.error(
+                            "PLEXSVC re-establishing connection before creating session...",
+                            e);
+                    stop();
+                    createConnection();
+                    start();
+                    currentSession.set(connection.createSession(
+                            transactedSession, Session.AUTO_ACKNOWLEDGE));
+                } else {
+                    throw e;
+                }
+            }
         }
         return currentSession.get();
     }

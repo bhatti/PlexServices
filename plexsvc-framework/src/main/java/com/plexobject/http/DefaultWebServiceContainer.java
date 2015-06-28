@@ -1,11 +1,10 @@
 package com.plexobject.http;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
-import com.plexobject.domain.Configuration;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.route.RouteResolver;
 import com.plexobject.service.Lifecycle;
@@ -26,18 +25,17 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
     private final Lifecycle server;
 
     public DefaultWebServiceContainer(
-            final Configuration config,
             final ServiceRegistry serviceRegistry,
             final Map<RequestMethod, RouteResolver<RequestHandler>> requestHandlerEndpointsByMethod,
             final Lifecycle server) {
-        super(config, serviceRegistry);
+        super(serviceRegistry);
         this.requestHandlerEndpointsByMethod = requestHandlerEndpointsByMethod;
         this.server = server;
     }
 
     @Override
     public Collection<RequestHandler> getHandlers() {
-        Collection<RequestHandler> handlers = new ArrayList<>();
+        Collection<RequestHandler> handlers = new HashSet<>();
         for (RouteResolver<RequestHandler> rhp : requestHandlerEndpointsByMethod
                 .values()) {
             handlers.addAll(rhp.getObjects());
@@ -56,11 +54,11 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public synchronized void add(final RequestHandler handler) {
+    public synchronized void addRequestHandler(final RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
 
         String endpoint = getEndpoint(handler, config);
-        if (exists(handler)) {
+        if (existsRequestHandler(handler)) {
             throw new IllegalStateException(
                     "RequestHandler is already registered for " + endpoint);
         }
@@ -89,7 +87,7 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public synchronized boolean remove(RequestHandler handler) {
+    public synchronized boolean removeRequestHandler(RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
                 .get(config.method());
@@ -107,7 +105,7 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
     }
 
     @Override
-    public boolean exists(RequestHandler handler) {
+    public boolean existsRequestHandler(RequestHandler handler) {
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         RouteResolver<RequestHandler> requestHandlerEndpoints = requestHandlerEndpointsByMethod
                 .get(config.method());
