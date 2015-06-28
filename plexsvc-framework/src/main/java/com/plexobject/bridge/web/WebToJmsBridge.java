@@ -85,7 +85,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for http
-        serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(), this);
+        serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(),
+                this);
         if (logger.isDebugEnabled()) {
             logger.debug("Adding Web->JMS mapping for " + e.getShortString());
         }
@@ -105,7 +106,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         }
         entryEndpoints.put(e.getEndpoint(), e);
         // adding mapping for webscoket
-        serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(), this);
+        serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(),
+                this);
         if (logger.isDebugEnabled()) {
             logger.debug("Adding Websocket->JMS mapping for "
                     + e.getShortString());
@@ -137,9 +139,12 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         try {
             Destination destination = jmsContainer.getDestination(entry
                     .getDestination());
-            logger.info("PLEXSVC Forwarding request from "
-                    + entry.getEndpoint() + " to " + destination + ", request "
-                    + request.getRequestUri() + " - " + request.getPayload());
+            if (logger.isDebugEnabled()) {
+                logger.debug("PLEXSVC Forwarding request from "
+                        + entry.getEndpoint() + " to " + destination
+                        + ", request " + request.getRequestUri() + " - "
+                        + request.getPayload());
+            }
 
             if (entry.isAsynchronous()) {
                 jmsContainer.send(destination, params,

@@ -39,7 +39,7 @@ public class ServiceRegistryContainers {
     private final WebContainerProvider webContainerProvider;
     private final Configuration config;
     private JMSContainer jmsBridgeContainer;
-    private JMSContainer jmsContainer;
+    private JMSContainer jmsServicesContainer;
 
     private final Map<Protocol, ServiceContainer> _containers = new HashMap<>();
 
@@ -113,7 +113,7 @@ public class ServiceRegistryContainers {
                     _containers.put(Protocol.WEBSOCKET, container);
                 } else if (protocol == Protocol.JMS) {
                     container = new JmsServiceContainer(serviceRegistry,
-                            getJmsContainer());
+                            getJmsServicesContainer());
                     _containers.put(Protocol.JMS, container);
                 } else if (protocol == Protocol.EVENT_BUS) {
                     container = new EventBusServiceContainer(serviceRegistry);
@@ -146,12 +146,12 @@ public class ServiceRegistryContainers {
         return jmsBridgeContainer;
     }
 
-    public synchronized JMSContainer getJmsContainer() {
-        if (jmsContainer == null) {
-            jmsContainer = JMSUtils.getJMSContainer(serviceRegistry
+    public synchronized JMSContainer getJmsServicesContainer() {
+        if (jmsServicesContainer == null) {
+            jmsServicesContainer = JMSUtils.getJMSContainer(serviceRegistry
                     .getConfiguration());
         }
-        return jmsContainer;
+        return jmsServicesContainer;
     }
 
 }

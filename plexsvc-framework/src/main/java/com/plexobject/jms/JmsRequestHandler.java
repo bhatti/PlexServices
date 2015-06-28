@@ -100,7 +100,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
             logger.warn("PLEXSVC Found error while listening, will resubscribe ("
                     + ex + ")");
             try {
-                Thread.sleep(100);
+                Thread.sleep(100 * errors);
                 close();
                 registerListener();
             } catch (Exception e) {
