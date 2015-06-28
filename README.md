@@ -464,7 +464,7 @@ public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
 You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.
 
 ```java  
-serviceRegistry.addRequestHandlerInputInterceptor(new Interceptor<String>() {
+serviceRegistry.addInputInterceptor(new Interceptor<String>() {
   @Override
   public String intercept(String input) {
       logger.info("INPUT: " + input);
@@ -472,7 +472,7 @@ serviceRegistry.addRequestHandlerInputInterceptor(new Interceptor<String>() {
   }
 });
 
-serviceRegistry.addRequestHandlerOutputInterceptor(new Interceptor<String>() {
+serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
   @Override
   public String intercept(String output) {
       logger.info("OUTPUT: " + output);
@@ -480,7 +480,7 @@ serviceRegistry.addRequestHandlerOutputInterceptor(new Interceptor<String>() {
   }
 });
 
-serviceRegistry.addRequestHandlerRequestInterceptor(new Interceptor<Request>() {
+serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
   @Override
   public Request intercept(Request input) {
       logger.info("INPUT PAYLOAD: " + input);
@@ -488,7 +488,7 @@ serviceRegistry.addRequestHandlerRequestInterceptor(new Interceptor<Request>() {
   }
 });
 
-serviceRegistry.addRequestHandlerResponseInterceptor(new Interceptor<Response>() {
+serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
   @Override
   public Response intercept(Response output) {
       logger.info("OUTPUT PAYLOAD: " + output);
