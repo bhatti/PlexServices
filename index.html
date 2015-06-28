@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><title>Untitled Document.md</title><style></style></head><body>
-<h1 id="plexservices-light-weight-micro-service-framework-for-building-high-performance-and-secured-applications">PlexServices - Light-weight Micro-Service Framework for building high performance and secured applications</h1>
+<h1 id="plexservices-micro-framework-for-building-high-performance-and-secured-services">PlexServices - Micro Framework for building high performance and secured services</h1>
 <h2 id="overview">Overview</h2>
 <p>PlexServices is a light-weight Java framework for defining secured micro-services, which can be accessed by HTTP, Websockets or JMS interfaces. </p>
 <h2 id="design-principles">Design Principles</h2>
@@ -314,20 +314,20 @@ And then at runtime, override configuration, e.g.
 ...
     ServiceRegistry serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config);
     PingService pingService = <span class="hljs-keyword">new</span> PingService();
-    serviceRegistry.add(
+    serviceRegistry.addRequestHandler(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.MESSAGE)
                             .setEndpoint(<span class="hljs-string">"queue://ping"</span>)
                             .setProtocol(Protocol.JMS)
                             .build());
-    serviceRegistry.add(
+    serviceRegistry.addRequestHandler(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.MESSAGE)
                             .setProtocol(Protocol.WEBSOCKET)
                             .build());
-    serviceRegistry.add(pingService,
+    serviceRegistry.addRequestHandler(pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.GET).setProtocol(Protocol.HTTP)
                             .build());
@@ -562,15 +562,45 @@ EventBusToJmsBridge.run(config, entries);
 <h3 id="javaws-support">JavaWS support</h3>
 <p>PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let&#39;s assume you have an existing service such as:</p>
 <pre><code class="lang-java"><span class="hljs-keyword">import</span> javax.jws.WebService;
+<span class="hljs-keyword">import</span> javax.ws.rs.FormParam;
+<span class="hljs-keyword">import</span> javax.ws.rs.GET;
+<span class="hljs-keyword">import</span> javax.ws.rs.POST;
+<span class="hljs-keyword">import</span> javax.ws.rs.Path;
+<span class="hljs-keyword">import</span> javax.ws.rs.QueryParam;
+
 
 <span class="hljs-annotation">@WebService</span>
-<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">StudentService</span> </span>{
-    <span class="hljs-function">Student <span class="hljs-title">save</span><span class="hljs-params">(Student student)</span></span>;
-    <span class="hljs-function">List&lt;Student&gt; <span class="hljs-title">query</span><span class="hljs-params">(Map&lt;String, Object&gt; criteria)</span></span>;
-    <span class="hljs-function">Student <span class="hljs-title">get</span><span class="hljs-params">(Long id)</span></span>;
+<span class="hljs-annotation">@Path</span>(<span class="hljs-string">"/courses"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CourseServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CourseService</span> </span>{
+    <span class="hljs-keyword">private</span> Map&lt;String, Course&gt; courses = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-annotation">@POST</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Course <span class="hljs-title">save</span><span class="hljs-params">(Course course)</span> </span>{
+        courses.put(course.getId(), course);
+        <span class="hljs-keyword">return</span> course;
+    }
+
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-annotation">@GET</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Course <span class="hljs-title">get</span><span class="hljs-params">(@QueryParam(<span class="hljs-string">"courseId"</span>)</span> Long courseId) </span>{
+        Course c = courses.get(String.valueOf(courseId));
+        <span class="hljs-keyword">if</span> (c == <span class="hljs-keyword">null</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"course not found for "</span>
+                    + courseId + <span class="hljs-string">", local "</span> + courses.keySet());
+        }
+        <span class="hljs-keyword">return</span> c;
+    }
+    <span class="hljs-annotation">@Override</span>
+    <span class="hljs-annotation">@GET</span>
+    <span class="hljs-annotation">@Path</span>(<span class="hljs-string">"/courses/query"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> List&lt;Course&gt; <span class="hljs-title">query</span><span class="hljs-params">(Map&lt;String, Object&gt; criteria)</span> </span>{
+        . . .
+        <span class="hljs-keyword">return</span> list;
+    }
 }
 </code></pre>
-<p>You can convert the implementing service into RequestHandler as follows:</p>
+<p>You can also use JaxRS&#39;s annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JavaWS service into RequestHandler as follows:</p>
 <pre><code class="lang-java">Configuration config = ...
 SecurityAuthorizer securityAuthorizer = ...
 serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config);
@@ -579,7 +609,7 @@ RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = <span class="hljs-keyw
 Map&lt;ServiceConfigDesc, RequestHandler&gt; handlers = requestHandlerAdapterJavaws
                 .createFromPackages(<span class="hljs-string">"com.plexobject.handler.javaws"</span>);
 <span class="hljs-keyword">for</span> (Map.Entry&lt;ServiceConfigDesc, RequestHandler&gt; e : handlers.entrySet()) {
-  serviceRegistry.add(e.getKey(), e.getValue());
+  serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
 }
 serviceRegistry.start();
 </code></pre>
@@ -622,21 +652,21 @@ a container and start the container using service-registry, e.g.</p>
 <pre><code class="lang-java">Configuration config = <span class="hljs-keyword">new</span> Configuration(args[<span class="hljs-number">0</span>]);
 serviceRegistry = <span class="hljs-keyword">new</span> ServiceRegistry(config);
 serviceRegistry.setSecurityAuthorizer(<span class="hljs-keyword">new</span> BuggerSecurityAuthorizer(userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> CreateUserService(userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> UpdateUserService(userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> QueryUserService(userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> DeleteUserService(userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> LoginService(userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> CreateProjectService(projectRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> UpdateProjectService(projectRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> QueryProjectService(projectRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> AddProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> RemoveProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> CreateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> UpdateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> QueryBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> QueryProjectBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(<span class="hljs-keyword">new</span> AssignBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> CreateUserService(userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> UpdateUserService(userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> QueryUserService(userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> DeleteUserService(userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> LoginService(userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> CreateProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> UpdateProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> QueryProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> AddProjectMemberService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> RemoveProjectMemberService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> CreateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> UpdateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> QueryBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> QueryProjectBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(<span class="hljs-keyword">new</span> AssignBugReportService(bugreportRepository, userRepository));
 serviceRegistry.start();
 </code></pre>
 <p>You will be able to view all of the services in JMX console at runtime.</p>
@@ -649,9 +679,9 @@ serviceRegistry.start();
         PingService pingService = <span class="hljs-keyword">new</span> PingService();
         ReverseService reverseService = <span class="hljs-keyword">new</span> ReverseService();
         SimpleService simpleService = <span class="hljs-keyword">new</span> SimpleService();
-        serviceRegistry.add(pingService);
-        serviceRegistry.add(reverseService);
-        serviceRegistry.add(simpleService);
+        serviceRegistry.addRequestHandler(pingService);
+        serviceRegistry.addRequestHandler(reverseService);
+        serviceRegistry.addRequestHandler(simpleService);
     }
     <span class="hljs-annotation">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onStopped</span><span class="hljs-params">(ServiceRegistry serviceRegistry)</span> </span>{
@@ -725,9 +755,9 @@ quote quotes over the websockets.</p>
         String actionVal = request.getProperty(<span class="hljs-string">"action"</span>);
         Action action = Action.valueOf(actionVal.toUpperCase());
         <span class="hljs-keyword">if</span> (action == Action.SUBSCRIBE) {
-            quoteStreamer.add(symbol, request.getResponseDispatcher());
+            quoteStreamer.add(symbol, request);
         } <span class="hljs-keyword">else</span> {
-            quoteStreamer.remove(symbol, request.getResponseDispatcher());
+            quoteStreamer.remove(symbol, request);
         }
     }
 
@@ -740,7 +770,7 @@ quote quotes over the websockets.</p>
 <p>Here is the streaming server that pushes the updates to web clients:</p>
 <pre><code class="lang-java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QuoteStreamer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TimerTask</span> </span>{
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> delay = <span class="hljs-number">1000</span>;
-    <span class="hljs-keyword">private</span> Map&lt;String, Collection&lt;ResponseDispatcher&gt;&gt; subscribers = 
+    <span class="hljs-keyword">private</span> Map&lt;String, Collection&lt;Request&gt;&gt; subscribers = 
       <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;&gt;();
     <span class="hljs-keyword">private</span> QuoteCache quoteCache = <span class="hljs-keyword">new</span> QuoteCache();
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Timer timer = <span class="hljs-keyword">new</span> Timer(<span class="hljs-keyword">true</span>);
@@ -749,40 +779,41 @@ quote quotes over the websockets.</p>
         timer.schedule(<span class="hljs-keyword">this</span>, delay, delay);
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">add</span><span class="hljs-params">(String symbol, ResponseDispatcher dispatcher)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">add</span><span class="hljs-params">(String symbol, Request request)</span> </span>{
         symbol = symbol.toUpperCase();
         <span class="hljs-keyword">synchronized</span> (symbol.intern()) {
-            Collection&lt;ResponseDispatcher&gt; dispatchers = subscribers
+            Collection&lt;Request&gt; requests = subscribers
                     .get(symbol);
-            <span class="hljs-keyword">if</span> (dispatchers == <span class="hljs-keyword">null</span>) {
-                dispatchers = <span class="hljs-keyword">new</span> HashSet&lt;ResponseDispatcher&gt;();
-                subscribers.put(symbol, dispatchers);
+            <span class="hljs-keyword">if</span> (requests == <span class="hljs-keyword">null</span>) {
+                requests = <span class="hljs-keyword">new</span> HashSet&lt;Request&gt;();
+                subscribers.put(symbol, requests);
             }
-            dispatchers.add(dispatcher);
+            requests.add(request);
         }
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">remove</span><span class="hljs-params">(String symbol, ResponseDispatcher dispatcher)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">remove</span><span class="hljs-params">(String symbol, Request request)</span> </span>{
         symbol = symbol.toUpperCase();
         <span class="hljs-keyword">synchronized</span> (symbol.intern()) {
-            Collection&lt;ResponseDispatcher&gt; dispatchers = subscribers
+            Collection&lt;Request&gt; requests = subscribers
                     .get(symbol);
-            <span class="hljs-keyword">if</span> (dispatchers != <span class="hljs-keyword">null</span>) {
-                dispatchers.remove(dispatcher);
+            <span class="hljs-keyword">if</span> (requests != <span class="hljs-keyword">null</span>) {
+                requests.remove(request);
             }
         }
     }
 
     <span class="hljs-annotation">@Override</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">for</span> (Map.Entry&lt;String, Collection&lt;ResponseDispatcher&gt;&gt; e : subscribers
+        <span class="hljs-keyword">for</span> (Map.Entry&lt;String, Collection&lt;Request&gt;&gt; e : subscribers
                 .entrySet()) {
             Quote q = quoteCache.getLatestQuote(e.getKey());
-            Collection&lt;ResponseDispatcher&gt; dispatchers = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(
+            Collection&lt;Request&gt; requests = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(
                     e.getValue());
-            <span class="hljs-keyword">for</span> (ResponseDispatcher d : dispatchers) {
+            <span class="hljs-keyword">for</span> (Request r : requests) {
                 <span class="hljs-keyword">try</span> {
-                    d.send(q);
+                    r.getResponse().setPayload(q);
+                    r.sendResponse();
                 } <span class="hljs-keyword">catch</span> (Exception ex) {
                     remove(e.getKey(), d);
                 }

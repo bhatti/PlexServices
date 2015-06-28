@@ -1,4 +1,4 @@
-#PlexServices - Light-weight Micro-Service Framework for building high performance and secured applications 
+#PlexServices - Micro Framework for building high performance and secured services 
 
 ##Overview
 
@@ -62,6 +62,7 @@ cd plexsvc-framework
 ```
 
 - Copy and add jar file (build/libs/plexsvc-framework-1.0-SNAPSHOT.jar) manually in your application.
+
 
 
 ##Dependencies
@@ -358,20 +359,20 @@ And then at runtime, override configuration, e.g.
 ...
     ServiceRegistry serviceRegistry = new ServiceRegistry(config);
     PingService pingService = new PingService();
-    serviceRegistry.add(
+    serviceRegistry.addRequestHandler(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.MESSAGE)
                             .setEndpoint("queue://ping")
                             .setProtocol(Protocol.JMS)
                             .build());
-    serviceRegistry.add(
+    serviceRegistry.addRequestHandler(
                     pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.MESSAGE)
                             .setProtocol(Protocol.WEBSOCKET)
                             .build());
-    serviceRegistry.add(pingService,
+    serviceRegistry.addRequestHandler(pingService,
                     ServiceConfigDesc.builder(pingService)
                             .setMethod(RequestMethod.GET).setProtocol(Protocol.HTTP)
                             .build());
@@ -647,16 +648,46 @@ Here is a sample json file that describes mapping:
 PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
 ```java 
 import javax.jws.WebService;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
 
 @WebService
-public interface StudentService {
-    Student save(Student student);
-    List<Student> query(Map<String, Object> criteria);
-    Student get(Long id);
-}
-```
+@Path("/courses")
+public class CourseServiceImpl implements CourseService {
+    private Map<String, Course> courses = new HashMap<>();
 
-You can convert the implementing service into RequestHandler as follows:
+    @Override
+    @POST
+    public Course save(Course course) {
+        courses.put(course.getId(), course);
+        return course;
+    }
+
+    @Override
+    @GET
+    public Course get(@QueryParam("courseId") Long courseId) {
+        Course c = courses.get(String.valueOf(courseId));
+        if (c == null) {
+            throw new IllegalArgumentException("course not found for "
+                    + courseId + ", local " + courses.keySet());
+        }
+        return c;
+    }
+    @Override
+    @GET
+    @Path("/courses/query")
+    public List<Course> query(Map<String, Object> criteria) {
+        . . .
+        return list;
+    }
+}
+
+```
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JavaWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
@@ -667,7 +698,7 @@ RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdap
 Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
                 .createFromPackages("com.plexobject.handler.javaws");
 for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers.entrySet()) {
-  serviceRegistry.add(e.getKey(), e.getValue());
+  serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
 }
 serviceRegistry.start();
 ```
@@ -720,21 +751,21 @@ a container and start the container using service-registry, e.g.
 Configuration config = new Configuration(args[0]);
 serviceRegistry = new ServiceRegistry(config);
 serviceRegistry.setSecurityAuthorizer(new BuggerSecurityAuthorizer(userRepository));
-serviceRegistry.add(new CreateUserService(userRepository));
-serviceRegistry.add(new UpdateUserService(userRepository));
-serviceRegistry.add(new QueryUserService(userRepository));
-serviceRegistry.add(new DeleteUserService(userRepository));
-serviceRegistry.add(new LoginService(userRepository));
-serviceRegistry.add(new CreateProjectService(projectRepository, userRepository));
-serviceRegistry.add(new UpdateProjectService(projectRepository, userRepository));
-serviceRegistry.add(new QueryProjectService(projectRepository, userRepository));
-serviceRegistry.add(new AddProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(new RemoveProjectMemberService(projectRepository, userRepository));
-serviceRegistry.add(new CreateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new UpdateBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new QueryBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new QueryProjectBugReportService(bugreportRepository, userRepository));
-serviceRegistry.add(new AssignBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new CreateUserService(userRepository));
+serviceRegistry.addRequestHandler(new UpdateUserService(userRepository));
+serviceRegistry.addRequestHandler(new QueryUserService(userRepository));
+serviceRegistry.addRequestHandler(new DeleteUserService(userRepository));
+serviceRegistry.addRequestHandler(new LoginService(userRepository));
+serviceRegistry.addRequestHandler(new CreateProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new UpdateProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new QueryProjectService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new AddProjectMemberService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new RemoveProjectMemberService(projectRepository, userRepository));
+serviceRegistry.addRequestHandler(new CreateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new UpdateBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new QueryBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new QueryProjectBugReportService(bugreportRepository, userRepository));
+serviceRegistry.addRequestHandler(new AssignBugReportService(bugreportRepository, userRepository));
 serviceRegistry.start();
 
 ```
@@ -752,9 +783,9 @@ public class Deployer implements ServiceRegistryLifecycleAware {
         PingService pingService = new PingService();
         ReverseService reverseService = new ReverseService();
         SimpleService simpleService = new SimpleService();
-        serviceRegistry.add(pingService);
-        serviceRegistry.add(reverseService);
-        serviceRegistry.add(simpleService);
+        serviceRegistry.addRequestHandler(pingService);
+        serviceRegistry.addRequestHandler(reverseService);
+        serviceRegistry.addRequestHandler(simpleService);
     }
     @Override
     public void onStopped(ServiceRegistry serviceRegistry) {
@@ -847,9 +878,9 @@ public class QuoteServer implements RequestHandler {
         String actionVal = request.getProperty("action");
         Action action = Action.valueOf(actionVal.toUpperCase());
         if (action == Action.SUBSCRIBE) {
-            quoteStreamer.add(symbol, request.getResponseDispatcher());
+            quoteStreamer.add(symbol, request);
         } else {
-            quoteStreamer.remove(symbol, request.getResponseDispatcher());
+            quoteStreamer.remove(symbol, request);
         }
     }
 
@@ -865,7 +896,7 @@ Here is the streaming server that pushes the updates to web clients:
 ```java 
 public class QuoteStreamer extends TimerTask {
     private int delay = 1000;
-    private Map<String, Collection<ResponseDispatcher>> subscribers = 
+    private Map<String, Collection<Request>> subscribers = 
       new ConcurrentHashMap<>();
     private QuoteCache quoteCache = new QuoteCache();
     private final Timer timer = new Timer(true);
@@ -874,40 +905,41 @@ public class QuoteStreamer extends TimerTask {
         timer.schedule(this, delay, delay);
     }
 
-    public void add(String symbol, ResponseDispatcher dispatcher) {
+    public void add(String symbol, Request request) {
         symbol = symbol.toUpperCase();
         synchronized (symbol.intern()) {
-            Collection<ResponseDispatcher> dispatchers = subscribers
+            Collection<Request> requests = subscribers
                     .get(symbol);
-            if (dispatchers == null) {
-                dispatchers = new HashSet<ResponseDispatcher>();
-                subscribers.put(symbol, dispatchers);
+            if (requests == null) {
+                requests = new HashSet<Request>();
+                subscribers.put(symbol, requests);
             }
-            dispatchers.add(dispatcher);
+            requests.add(request);
         }
     }
 
-    public void remove(String symbol, ResponseDispatcher dispatcher) {
+    public void remove(String symbol, Request request) {
         symbol = symbol.toUpperCase();
         synchronized (symbol.intern()) {
-            Collection<ResponseDispatcher> dispatchers = subscribers
+            Collection<Request> requests = subscribers
                     .get(symbol);
-            if (dispatchers != null) {
-                dispatchers.remove(dispatcher);
+            if (requests != null) {
+                requests.remove(request);
             }
         }
     }
 
     @Override
     public void run() {
-        for (Map.Entry<String, Collection<ResponseDispatcher>> e : subscribers
+        for (Map.Entry<String, Collection<Request>> e : subscribers
                 .entrySet()) {
             Quote q = quoteCache.getLatestQuote(e.getKey());
-            Collection<ResponseDispatcher> dispatchers = new ArrayList<>(
+            Collection<Request> requests = new ArrayList<>(
                     e.getValue());
-            for (ResponseDispatcher d : dispatchers) {
+            for (Request r : requests) {
                 try {
-                    d.send(q);
+                    r.getResponse().setPayload(q);
+                    r.sendResponse();
                 } catch (Exception ex) {
                     remove(e.getKey(), d);
                 }
