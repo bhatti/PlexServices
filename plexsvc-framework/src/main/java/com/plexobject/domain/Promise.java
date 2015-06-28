@@ -74,7 +74,8 @@ public class Promise<T> implements Future<T> {
     @Override
     public synchronized T get(long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
-        long started = System.nanoTime();
+        long started = System.currentTimeMillis();
+        // TODO should we keep track of remaining time for wait
         while (value == null) {
             if (exception != null) {
                 if (exception instanceof ExecutionException) {
@@ -89,8 +90,8 @@ public class Promise<T> implements Future<T> {
             }
             wait(unit.toMillis(timeout));
             if (timeout > 0) {
-                long elapsed = System.nanoTime() - started;
-                if (elapsed > unit.toNanos(timeout)) {
+                long elapsed = System.currentTimeMillis() - started;
+                if (elapsed > unit.toMillis(timeout)) {
                     timedout = true;
                     if (timedoutHandler != null) {
                         timedoutHandler.handle(this);
