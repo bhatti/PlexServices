@@ -9,6 +9,8 @@ import com.plexobject.domain.Statusable;
 import com.plexobject.http.HttpResponse;
 
 public abstract class AbstractPayload {
+    private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
+    private static final String CONTENT_TYPE = "Content-Type";
     protected final Map<String, Object> properties;
     protected final Map<String, Object> headers;
     protected final long createdAt;
@@ -133,9 +135,9 @@ public abstract class AbstractPayload {
     }
 
     public boolean isFormRequest() {
-        String contentHeader = getStringProperty("Content-Type");
+        String contentHeader = getStringProperty(CONTENT_TYPE);
         return contentHeader == null
-                || "application/x-www-form-urlencoded".equals(contentHeader);
+ || FORM_CONTENT_TYPE.equals(contentHeader);
     }
 
     public boolean hasProperty(String name) {

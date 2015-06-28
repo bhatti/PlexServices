@@ -9,6 +9,8 @@ PlexServices is designed on following design principles:
 
 - Micro framework - PlexServices is only meant for writing web and messaging services and it's not general purpose MVC framework.
 
+- Uniform interface - PlexServices uses uniform interfaces for defining services, which can be configured to be deployed via REST, websocket, JMS or intra-process events.
+
 - Minimal Dependencies: PlexServices depends only on a small number of external libraries for XML/JSON serialization.
 
 - Easily Configurable: PlexServices uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.
@@ -607,7 +609,23 @@ version of Spring with PlexServices.
 
 
 ### EventBus for intra-process communication
-Here is an example of using EventBus publishing or subscribing messages within the same process:
+PlexServices uses EventBus for publishing or subscribing messages within the same process. You can define services with protocol of Protocol.EVENT_BUS and add it to service-registry similar to other services, e.g.
+
+```java 
+@ServiceConfig(protocol = Protocol.EVENT_BUS, payloadClass = Course.class, endpoint = "courses", method = RequestMethod.MESSAGE)
+public static class SaveHandler implements RequestHandler {
+    @Override
+    public void handle(Request request) {
+        Course course = request.getPayload();
+        courses.put(course.getId(), course);
+        request.getResponse().setPayload(course);
+    }
+}
+...
+serviceRegistry.addRequestHandler(new SaveHandler());
+...
+```
+You can also use EventBus directly without service registry, e.g.
 ```java 
 EventBus eb = new EventBusImpl();
 // publishing a request

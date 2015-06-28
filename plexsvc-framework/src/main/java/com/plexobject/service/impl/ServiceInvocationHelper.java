@@ -23,6 +23,7 @@ import com.plexobject.validation.IRequiredFieldValidator;
 import com.plexobject.validation.RequiredFieldValidator;
 
 public class ServiceInvocationHelper {
+    private static final String HANDLE = "handle";
     private static final Logger logger = Logger
             .getLogger(ServiceInvocationHelper.class);
     private IRequiredFieldValidator requiredFieldValidator = new RequiredFieldValidator();
@@ -78,27 +79,7 @@ public class ServiceInvocationHelper {
             // interceptors
             if (codecType != CodecType.NONE
                     && request.getPayload() instanceof String) {
-                String textPayload = request.getPayload();
-                // apply input interceptors
-                if (registry.hasInputInterceptors()) {
-                    for (Interceptor<String> interceptor : registry
-                            .getInputInterceptors()) {
-                        textPayload = interceptor.intercept(textPayload);
-                    }
-                    request.setPayload(textPayload);
-                }
-
-                // decode text input into object
-                if (config.payloadClass() != null
-                        && config.payloadClass() != Void.class
-                        && (request.getPayload() instanceof String || request
-                                .getPayload() == null)) {
-                    request.setPayload(ObjectCodecFactory
-                            .getInstance()
-                            .getObjectCodec(codecType)
-                            .decode(textPayload, config.payloadClass(),
-                                    request.getProperties()));
-                }
+                deserializePayload(request, config, codecType);
             }
             // Invoking request interceptors
             if (registry.hasRequestInterceptors()) {
@@ -112,15 +93,8 @@ public class ServiceInvocationHelper {
 
             try {
                 // update post parameters
-                boolean formSubmitted = request.isFormRequest();
-                if (formSubmitted) {
-                    String[] nvArr = request.getPayload().toString().split("&");
-                    for (String nvStr : nvArr) {
-                        String[] nv = nvStr.split("=");
-                        if (nv.length == 2) {
-                            request.setProperty(nv[0], nv[1]);
-                        }
-                    }
+                if (request.isFormRequest()) {
+                    addFormPropertiesFromPayload(request);
                 }
                 //
                 // validate required fields
@@ -161,6 +135,41 @@ public class ServiceInvocationHelper {
         }
     }
 
+    private static void addFormPropertiesFromPayload(Request request) {
+        String[] nvArr = request.getPayload().toString().split("&");
+        for (String nvStr : nvArr) {
+            String[] nv = nvStr.split("=");
+            if (nv.length == 2) {
+                request.setProperty(nv[0], nv[1]);
+            }
+        }
+    }
+
+    private void deserializePayload(Request request, ServiceConfigDesc config,
+            CodecType codecType) {
+        String textPayload = request.getPayload();
+        // apply input interceptors
+        if (serviceRegistry.hasInputInterceptors()) {
+            for (Interceptor<String> interceptor : serviceRegistry
+                    .getInputInterceptors()) {
+                textPayload = interceptor.intercept(textPayload);
+            }
+            request.setPayload(textPayload);
+        }
+
+        // decode text input into object
+        if (config.payloadClass() != null
+                && config.payloadClass() != Void.class
+                && (request.getPayload() instanceof String || request
+                        .getPayload() == null)) {
+            request.setPayload(ObjectCodecFactory
+                    .getInstance()
+                    .getObjectCodec(codecType)
+                    .decode(textPayload, config.payloadClass(),
+                            request.getProperties()));
+        }
+    }
+
     private void invokeWithAroundInterceptorIfNeeded(final Request request,
             final RequestHandler handler, final ServiceRegistry registry,
             final long started, final ServiceMetrics metrics,
@@ -171,7 +180,12 @@ public class ServiceInvocationHelper {
             invoke(request, handler, started, metrics, config);
 
         } else {
-            authorizeIfNeeded(request, config);
+            //
+            if (serviceRegistry.getSecurityAuthorizer() != null) {
+                serviceRegistry.getSecurityAuthorizer().authorize(request,
+                        config.rolesAllowed());
+            }
+
             if (registry.getAroundInterceptor() != null) {
                 Callable<Object> callable = new Callable<Object>() {
                     @Override
@@ -180,7 +194,7 @@ public class ServiceInvocationHelper {
                         return null;
                     }
                 };
-                registry.getAroundInterceptor().proceed(handler, "handle",
+                registry.getAroundInterceptor().proceed(handler, HANDLE,
                         callable);
             } else {
                 invoke(request, handler, started, metrics, config);
@@ -188,7 +202,7 @@ public class ServiceInvocationHelper {
         }
     }
 
-    private void invoke(Request request, RequestHandler handler,
+    private static void invoke(Request request, RequestHandler handler,
             final long started, ServiceMetrics metrics, ServiceConfigDesc config) {
         // invoke authorizer if set
         handler.handle(request);
@@ -196,14 +210,6 @@ public class ServiceInvocationHelper {
         // send back the reply
         if (request.getResponse().getPayload() != null) {
             request.sendResponse();
-        }
-    }
-
-    private void authorizeIfNeeded(Request request, ServiceConfigDesc config)
-            throws Exception {
-        if (serviceRegistry.getSecurityAuthorizer() != null) {
-            serviceRegistry.getSecurityAuthorizer().authorize(request,
-                    config.rolesAllowed());
         }
     }
 
