@@ -171,16 +171,16 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                     }
                 }, req, resp);
 
-        Request handlerReq = Request.builder()
-                .setProtocol(Protocol.HTTP).setMethod(method)
-                .setRemoteAddress(req.getRemoteAddr()).setEndpoint(uri)
-                .setRequestUri(req.getRequestURI()).setProperties(params)
-                .setHeaders(headers).setCodecType(codecType)
-                .setPayload(textPayload)
+        Request handlerReq = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(method).setRemoteAddress(req.getRemoteAddr())
+                .setEndpoint(uri).setRequestUri(req.getRequestURI())
+                .setProperties(params).setHeaders(headers)
+                .setCodecType(codecType).setPayload(textPayload)
                 .setResponseDispatcher(dispatcher).build();
 
         logger.info("PLEXSVC HTTP Received URI '" + uri + "', request "
-                + handlerReq);
+                + handlerReq.getPayload() + ", params "
+                + handlerReq.getProperties());
         defaultExecutor.handle(handlerReq);
     }
 

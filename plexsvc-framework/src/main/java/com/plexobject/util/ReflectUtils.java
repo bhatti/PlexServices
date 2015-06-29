@@ -152,7 +152,8 @@ public class ReflectUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getMethodParameterAnnotation(final Method iMethod, Class<?> type) {
+    public static <T> T getMethodParameterAnnotation(final Method iMethod,
+            Class<?> type) {
         for (Annotation[] annotations : iMethod.getParameterAnnotations()) {
             for (Annotation a : annotations) {
                 if (type.isAssignableFrom(a.getClass())) {

@@ -1,6 +1,7 @@
 package com.plexobject.handler.javaws;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -75,8 +76,7 @@ public class JavawsDelegateHandler implements RequestHandler {
         }
     }
 
-    private void invokeWithAroundInterceptorIfNeeded(
-            final Request request,
+    private void invokeWithAroundInterceptorIfNeeded(final Request request,
             final JavawsServiceMethod methodInfo, final String responseTag,
             final Object[] args) throws Exception {
         if (serviceRegistry.getAroundInterceptor() != null) {
@@ -94,15 +94,19 @@ public class JavawsDelegateHandler implements RequestHandler {
         }
     }
 
-    private void invoke(Request request,
-            final JavawsServiceMethod methodInfo, String responseTag,
-            Object[] args) throws Exception {
+    private void invoke(Request request, final JavawsServiceMethod methodInfo,
+            String responseTag, Object[] args) throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request, null);
         }
         try {
             Map<String, Object> response = new HashMap<>();
             Object result = methodInfo.implMethod.invoke(delegate, args);
+            if (logger.isDebugEnabled()) {
+                logger.debug("****PLEXSVC MLN Invoking "
+                        + methodInfo.iMethod.getName() + " with "
+                        + Arrays.toString(args) + ", result " + result);
+            }
             if (result != null) {
                 response.put(responseTag, result);
             } else {
@@ -120,15 +124,13 @@ public class JavawsDelegateHandler implements RequestHandler {
         }
     }
 
-    // hard coding to handle JSON messages
-    // TODO handle XML messages
     private Pair<String, String> getMethodNameAndPayload(Request request) {
         String text = request.getPayload();
         if (text == null || text.length() == 0 || text.charAt(0) != '{') {
             String method = request.getStringProperty("methodName");
             if (method == null) {
                 if (methodsByName.size() == 1) {
-                    return Pair.of(defaultMethodInfo.iMethod.getName(), null);
+                    return Pair.of(defaultMethodInfo.iMethod.getName(), text);
                 }
                 //
                 throw new IllegalArgumentException("Unsupported request "
@@ -137,12 +139,23 @@ public class JavawsDelegateHandler implements RequestHandler {
             //
             return Pair.of(method, null);
         }
+        // hard coding to handle JSON messages
+        // ugly hack because I don't want to run complete JSON parser
         int colon = text.indexOf(':');
+        if (colon == -1) {
+            throw new IllegalArgumentException("Unsupported request "
+                    + request.getProperties());
+        }
         String method = text.substring(1, colon);
         if (method.charAt(0) == '"') {
             method = method.substring(1, method.length() - 1);
         }
-        String payload = text.substring(colon + 1, text.length() - 1);
+        int subtract = 1;
+        if (text.charAt(colon + 1) == '\'' || text.charAt(colon + 1) == '"') {
+            subtract++;
+        }
+        String payload = text.substring(colon + subtract, text.length()
+                - subtract);
         return Pair.of(method, payload);
     }
 }
