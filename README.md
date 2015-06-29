@@ -9,7 +9,7 @@ PlexServices is designed on following design principles:
 
 - Micro framework - PlexServices is only meant for writing web and messaging services and it's not general purpose MVC framework.
 
-- Uniform interface - PlexServices uses uniform interfaces for defining services, which can be configured to be deployed via REST, websocket, JMS or intra-process events.
+- Uniform interface - PlexServices uses uniform interfaces for defining services, which can be configured to be deployed via REST, websocket, JMS or intra-process event bus.
 
 - Minimal Dependencies: PlexServices depends only on a small number of external libraries for XML/JSON serialization.
 
@@ -42,7 +42,7 @@ PlexServices is designed on following design principles:
 
 - PlexServices also supports reactive messaging services using JMS APIs and support a number of messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
-- PlexServices allows you to import existing JavaWS based services and expose them as REST or POX services. 
+- PlexServices allows you to import existing JavaWS/JaxRS annotations based services and expose them as REST or POX services. 
 
 - PlexServices allows you to auto-deploy services by specifying package names of services, it deploys all services automatically that implement ServiceConfig annotation.
 
@@ -621,9 +621,11 @@ public static class SaveHandler implements RequestHandler {
         request.getResponse().setPayload(course);
     }
 }
+
 ...
 serviceRegistry.addRequestHandler(new SaveHandler());
 ...
+
 ```
 You can also use EventBus directly without service registry, e.g.
 ```java 
@@ -662,7 +664,7 @@ Here is a sample json file that describes mapping:
 "com.plexobject.bugger.model.User"}]
 ```
 
-### JavaWS support
+### JavaWS/JaxRS annotations support
 PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
 ```java 
 import javax.jws.WebService;
@@ -1060,7 +1062,7 @@ Here is the html form that displays quotes:
 
 
 ## Sample Applications
-      You can view a full-fledged sample application under plexsvc-sample folder for detailed examples of services and various configurations.
+      You can view sample applications under plexsvc-sample folder for detailed examples of services and various configurations.
 
 ## Support or Contact
       Email bhatti AT plexobject DOT com for any questions or suggestions.
