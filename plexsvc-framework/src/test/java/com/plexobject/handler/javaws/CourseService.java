@@ -30,7 +30,7 @@ public interface CourseService {
 
     List<Course> query(Map<String, Object> criteria);
 
-    Course get(Long courseId);
+    Course get(String courseId);
 
     boolean exists(Course c, Student s);
 

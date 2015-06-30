@@ -135,7 +135,7 @@ public class CourseServiceClient extends BaseServiceClient implements
 
     @WebMethod(exclude = true)
     @Override
-    public Course get(Long courseId) {
+    public Course get(String courseId) {
         try {
             return getWithReturnType("methodName=get&courseId=" + courseId,
                     Course.class);

@@ -26,8 +26,9 @@ class JavawsServiceMethod {
                 && paramNames.length == iMethod.getParameterTypes().length;
     }
 
-    boolean useMapProperties() {
-        return iMethod.getParameterTypes().length == 1
+    boolean useMapProperties(String payload) {
+        return (payload == null || payload.length() == 0)
+                && iMethod.getParameterTypes().length == 1
                 && Map.class == iMethod.getParameterTypes()[0];
     }
 }

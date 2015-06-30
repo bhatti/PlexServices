@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.plexobject.domain.Pair;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -62,11 +63,11 @@ public class JavawsDelegateHandler implements RequestHandler {
             final Object[] args = methodInfo.useNameParams() ? ReflectUtils
                     .decode(methodInfo.iMethod, methodInfo.paramNames,
                             request.getProperties())
-                    : methodAndPayload.second == null
-                            && methodInfo.useMapProperties() ? new Object[] { request
+                    : methodInfo.useMapProperties(methodAndPayload.second) ? new Object[] { request
                             .getProperties() } : ReflectUtils.decode(
                             methodAndPayload.second, methodInfo.iMethod,
                             request.getCodec());
+
             invokeWithAroundInterceptorIfNeeded(request, methodInfo,
                     responseTag, args);
         } catch (Exception e) {
@@ -124,38 +125,55 @@ public class JavawsDelegateHandler implements RequestHandler {
         }
     }
 
-    private Pair<String, String> getMethodNameAndPayload(Request request) {
+    private static int incrWhileSkipWhitespacesAndQuotes(String text, int start) {
+        while (Character.isWhitespace(text.charAt(start))
+                || text.charAt(start) == '\'' || text.charAt(start) == '"') {
+            start++;
+        }
+        return start;
+    }
+
+    private static int decrWhileSkipWhitespacesAndQuotes(String text, int end) {
+        while (Character.isWhitespace(text.charAt(end))
+                || text.charAt(end) == '\'' || text.charAt(end) == '"') {
+            end--;
+        }
+        return end;
+    }
+
+    @VisibleForTesting
+    Pair<String, String> getMethodNameAndPayload(Request request) {
         String text = request.getPayload();
-        if (text == null || text.length() == 0 || text.charAt(0) != '{') {
+        // hard coding to handle JSON messages
+        // manual parsing because I don't want to run complete JSON parser
+        int startObject = text != null ? text.indexOf('{') : -1;
+        int endObject = text != null ? text.lastIndexOf('}') : -1;
+        int colonPos = text.indexOf(':');
+
+        if (text == null || startObject == -1 || endObject == -1
+                || colonPos == -1) {
             String method = request.getStringProperty("methodName");
             if (method == null) {
                 if (methodsByName.size() == 1) {
-                    return Pair.of(defaultMethodInfo.iMethod.getName(), text);
+                    method = defaultMethodInfo.iMethod.getName();
+                } else {
+                    throw new IllegalArgumentException("Unsupported request "
+                            + request.getProperties());
                 }
-                //
-                throw new IllegalArgumentException("Unsupported request "
-                        + request.getProperties());
             }
             //
-            return Pair.of(method, null);
+            return Pair.of(method, text == null ? text : text.trim());
         }
-        // hard coding to handle JSON messages
-        // ugly hack because I don't want to run complete JSON parser
-        int colon = text.indexOf(':');
-        if (colon == -1) {
-            throw new IllegalArgumentException("Unsupported request "
-                    + request.getProperties());
-        }
-        String method = text.substring(1, colon);
-        if (method.charAt(0) == '"') {
-            method = method.substring(1, method.length() - 1);
-        }
-        int subtract = 1;
-        if (text.charAt(colon + 1) == '\'' || text.charAt(colon + 1) == '"') {
-            subtract++;
-        }
-        String payload = text.substring(colon + subtract, text.length()
-                - subtract);
+        //
+        int methodStart = incrWhileSkipWhitespacesAndQuotes(text,
+                startObject + 1);
+        int methodEnd = decrWhileSkipWhitespacesAndQuotes(text, colonPos - 1);
+        String method = text.substring(methodStart, methodEnd + 1);
+        //
+        int payloadStart = incrWhileSkipWhitespacesAndQuotes(text, colonPos + 1);
+        int payloadEnd = decrWhileSkipWhitespacesAndQuotes(text, endObject - 1);
+        String payload = payloadStart <= payloadEnd ? text.substring(
+                payloadStart, payloadEnd + 1).trim() : "";
         return Pair.of(method, payload);
     }
 }

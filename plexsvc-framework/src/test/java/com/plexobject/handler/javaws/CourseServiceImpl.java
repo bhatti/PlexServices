@@ -83,8 +83,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @GET
-    public Course get(@QueryParam("courseId") Long courseId) {
-        Course c = courses.get(String.valueOf(courseId));
+    public Course get(@QueryParam("courseId") String courseId) {
+        Course c = courses.get(courseId);
         if (c == null) {
             throw new IllegalArgumentException("course not found for "
                     + courseId + ", local " + courses.keySet());
