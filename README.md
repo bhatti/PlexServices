@@ -704,10 +704,22 @@ public class CourseServiceImpl implements CourseService {
         . . .
         return list;
     }
+
+    @Override
+    @GET
+    public void find(@FormParam("id") Long id, @DefaultValue("all") @FormParam("type") String type) {
+        . . .
+    }
+
+    @Override
+    @Path("/courses/path/{id}")
+    @GET
+    public Course getWithId(@PathParam("id") String id) {
+    }
 }
 
 ```
-You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JaxWS service into RequestHandler as follows:
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JaxWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
