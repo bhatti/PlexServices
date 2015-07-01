@@ -24,15 +24,15 @@ public class JaxwsDelegateHandler implements RequestHandler {
 
     private final Object delegate;
     private final ServiceRegistry serviceRegistry;
-    private final Map<String, JavawsServiceMethod> methodsByName = new HashMap<>();
-    private JavawsServiceMethod defaultMethodInfo;
+    private final Map<String, JaxwsServiceMethod> methodsByName = new HashMap<>();
+    private JaxwsServiceMethod defaultMethodInfo;
 
     public JaxwsDelegateHandler(Object delegate, ServiceRegistry registry) {
         this.delegate = delegate;
         this.serviceRegistry = registry;
     }
 
-    public void addMethod(JavawsServiceMethod info) {
+    public void addMethod(JaxwsServiceMethod info) {
         methodsByName.put(info.iMethod.getName(), info);
         defaultMethodInfo = info;
     }
@@ -41,7 +41,7 @@ public class JaxwsDelegateHandler implements RequestHandler {
     public void handle(final Request request) {
         Pair<String, String> methodAndPayload = getMethodNameAndPayload(request);
 
-        final JavawsServiceMethod methodInfo = methodsByName
+        final JaxwsServiceMethod methodInfo = methodsByName
                 .get(methodAndPayload.first);
         if (methodInfo == null) {
             throw new ServiceInvocationException("Unknown method "
@@ -78,7 +78,7 @@ public class JaxwsDelegateHandler implements RequestHandler {
     }
 
     private void invokeWithAroundInterceptorIfNeeded(final Request request,
-            final JavawsServiceMethod methodInfo, final String responseTag,
+            final JaxwsServiceMethod methodInfo, final String responseTag,
             final Object[] args) throws Exception {
         if (serviceRegistry.getAroundInterceptor() != null) {
             Callable<Object> callable = new Callable<Object>() {
@@ -95,7 +95,7 @@ public class JaxwsDelegateHandler implements RequestHandler {
         }
     }
 
-    private void invoke(Request request, final JavawsServiceMethod methodInfo,
+    private void invoke(Request request, final JaxwsServiceMethod methodInfo,
             String responseTag, Object[] args) throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request, null);

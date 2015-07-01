@@ -7,14 +7,14 @@ import java.util.Map;
 import com.plexobject.domain.Pair;
 import com.plexobject.service.RequestMethod;
 
-class JavawsServiceMethod {
+class JaxwsServiceMethod {
     final Method iMethod;
     final Method implMethod;
     final RequestMethod requestMethod;
     final Pair<String, String>[] paramNamesAndDefaults;
     final String methodPath;
 
-    JavawsServiceMethod(Method iMethod, Method implMethod,
+    JaxwsServiceMethod(Method iMethod, Method implMethod,
             RequestMethod requestMethod,
             Pair<String, String>[] paramNamesAndDefaults, String methodPath) {
         this.iMethod = iMethod;

@@ -131,7 +131,7 @@ public class JaxwsRequestHandlerAdapter implements RequestHandlerAdapter {
                 }
                 //
                 ((JaxwsDelegateHandler) handler)
-                        .addMethod(new JavawsServiceMethod(iMethod, implMethod,
+                        .addMethod(new JaxwsServiceMethod(iMethod, implMethod,
                                 requestMethod, paramNamesAndDefaults,
                                 methodPath));
                 if (logger.isDebugEnabled()) {
