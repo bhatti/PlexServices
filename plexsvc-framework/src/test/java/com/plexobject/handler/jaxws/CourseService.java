@@ -1,6 +1,5 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.handler.jaxws;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,25 @@ public interface CourseService {
 
     boolean exists(Course c, Student s);
 
-    Collection<Customer> getCustomers(Long id1, String id2);
+    List<Customer> getCustomers(Long id1, String id2);
 
     void exceptionExample(boolean rt) throws Exception;
+
+    String pathExample(String param);
+
+    String headerExample(String param);
+
+    void nullVoid();
+
+    String nullString();
+
+    String[] nullArray();
+
+    List<?> nullList();
+
+    Boolean nullbool();
+
+    Integer nullInteger();
+
+    Course nullCourse();
 }

@@ -93,4 +93,15 @@ public class BaseServiceClient {
         return (T) ReflectUtils.decode(resp, responseType, null,
                 getObjectCodec());
     }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> T getWithHeader(String path, Class<?> responseType,
+            String headerKey, String headerValue) throws Exception {
+        // System.out.println("SENDING " + request);
+        String resp = TestWebUtils.get("http://localhost:" + DEFAULT_PORT
+                + path, "Accept", getAcceptHeader(), headerKey, headerValue);
+        // System.out.println("RECEIVED " + resp);
+        return (T) ReflectUtils.decode(resp, responseType, null,
+                getObjectCodec());
+    }
 }

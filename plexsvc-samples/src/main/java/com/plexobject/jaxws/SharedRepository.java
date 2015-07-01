@@ -1,4 +1,4 @@
-package com.plexobject.javaws;
+package com.plexobject.jaxws;
 
 import com.plexobject.bugger.repository.BugReportRepository;
 import com.plexobject.bugger.repository.ProjectRepository;

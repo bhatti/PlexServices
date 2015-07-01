@@ -13,7 +13,7 @@ import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.handler.javaws.JavawsDelegateHandler;
+import com.plexobject.handler.jaxws.JaxwsDelegateHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.metrics.ServiceMetrics;
 import com.plexobject.service.Interceptor;
@@ -174,7 +174,7 @@ public class ServiceInvocationHelper {
             final RequestHandler handler, final ServiceRegistry registry,
             final long started, final ServiceMetrics metrics,
             final ServiceConfigDesc config) throws Exception {
-        if (handler instanceof JavawsDelegateHandler) {
+        if (handler instanceof JaxwsDelegateHandler) {
             // skip authorization and around interceptor for JavaWS because we
             // need additional info for method names
             invoke(request, handler, started, metrics, config);

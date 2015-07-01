@@ -33,23 +33,29 @@ public class ReflectUtils {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static Object[] decode(Method m, String[] paramNames,
+    public static Object[] decode(Method m,
+            Pair<String, String>[] paramNamesAndDefaults,
             Map<String, Object> props) throws Exception {
         Pair<Class, Type>[] pairs = new Pair[m.getParameterTypes().length];
         for (int i = 0; i < m.getParameterTypes().length; i++) {
             pairs[i] = Pair.of((Class) m.getParameterTypes()[i],
                     m.getGenericParameterTypes()[i]);
         }
-        return decode(pairs, paramNames, props);
+        return decode(pairs, paramNamesAndDefaults, props);
     }
 
     @SuppressWarnings("rawtypes")
     public static Object[] decode(Pair<Class, Type>[] types,
-            String[] paramNames, Map<String, Object> props) throws Exception {
+            Pair<String, String>[] paramNamesAndDefaults,
+            Map<String, Object> props) throws Exception {
         Object[] args = new Object[types.length];
         for (int i = 0; i < types.length; i++) {
             Class<?> klass = types[i].first;
-            args[i] = decodePrimitive(props.get(paramNames[i]), klass);
+            Object value = props.get(paramNamesAndDefaults[i].first);
+            if (value == null) {
+                value = paramNamesAndDefaults[i].second;
+            }
+            args[i] = decodePrimitive(value, klass);
         }
         return args;
     }
@@ -79,6 +85,9 @@ public class ReflectUtils {
 
     public static Object decode(String payload, Class<?> klass, Type pKlass,
             ObjectCodec codec) throws Exception {
+        if ("null".equals(payload)) {
+            return null;
+        }
         if (klass == Void.class) {
             return null;
         } else if (klass.isPrimitive()) {

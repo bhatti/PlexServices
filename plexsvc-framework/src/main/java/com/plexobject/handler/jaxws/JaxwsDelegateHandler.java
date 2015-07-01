@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.handler.jaxws;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -17,18 +17,17 @@ import com.plexobject.http.ServiceInvocationException;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
-public class JavawsDelegateHandler implements RequestHandler {
+public class JaxwsDelegateHandler implements RequestHandler {
     private static final Logger logger = Logger
-            .getLogger(JavawsDelegateHandler.class);
+            .getLogger(JaxwsDelegateHandler.class);
     private static final String RESPONSE_SUFFIX = "Response";
-    private static final Map<String, Object> EMPTY_MAP = new HashMap<>();
 
     private final Object delegate;
     private final ServiceRegistry serviceRegistry;
     private final Map<String, JavawsServiceMethod> methodsByName = new HashMap<>();
     private JavawsServiceMethod defaultMethodInfo;
 
-    public JavawsDelegateHandler(Object delegate, ServiceRegistry registry) {
+    public JaxwsDelegateHandler(Object delegate, ServiceRegistry registry) {
         this.delegate = delegate;
         this.serviceRegistry = registry;
     }
@@ -61,10 +60,11 @@ public class JavawsDelegateHandler implements RequestHandler {
             // parameters or method simply takes Map so we just pass all request
             // properties
             final Object[] args = methodInfo.useNameParams() ? ReflectUtils
-                    .decode(methodInfo.iMethod, methodInfo.paramNames,
-                            request.getProperties())
+                    .decode(methodInfo.iMethod,
+                            methodInfo.paramNamesAndDefaults,
+                            request.getPropertiesAndHeaders())
                     : methodInfo.useMapProperties(methodAndPayload.second) ? new Object[] { request
-                            .getProperties() } : ReflectUtils.decode(
+                            .getPropertiesAndHeaders() } : ReflectUtils.decode(
                             methodAndPayload.second, methodInfo.iMethod,
                             request.getCodec());
 
@@ -111,7 +111,7 @@ public class JavawsDelegateHandler implements RequestHandler {
             if (result != null) {
                 response.put(responseTag, result);
             } else {
-                response.put(responseTag, EMPTY_MAP);
+                response.put(responseTag, null);
             }
             request.getResponse().setPayload(response);
         } catch (InvocationTargetException e) {

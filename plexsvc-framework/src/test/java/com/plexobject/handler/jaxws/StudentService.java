@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.handler.jaxws;
 
 import java.util.Collection;
 import java.util.List;

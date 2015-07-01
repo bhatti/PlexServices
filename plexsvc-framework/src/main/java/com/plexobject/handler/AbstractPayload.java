@@ -74,6 +74,13 @@ public abstract class AbstractPayload {
         return headers;
     }
 
+    @JsonIgnore
+    public Map<String, Object> getPropertiesAndHeaders() {
+        Map<String, Object> propsAndHeaders = new HashMap<>(getHeaders());
+        propsAndHeaders.putAll(getProperties());
+        return propsAndHeaders;
+    }
+
     @SuppressWarnings("unchecked")
     public <V> V getProperty(String name) {
         return (V) properties.get(name);
@@ -136,8 +143,7 @@ public abstract class AbstractPayload {
 
     public boolean isFormRequest() {
         String contentHeader = getStringProperty(CONTENT_TYPE);
-        return contentHeader == null
- || FORM_CONTENT_TYPE.equals(contentHeader);
+        return contentHeader == null || FORM_CONTENT_TYPE.equals(contentHeader);
     }
 
     public boolean hasProperty(String name) {

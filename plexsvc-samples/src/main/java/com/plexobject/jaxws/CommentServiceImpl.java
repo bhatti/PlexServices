@@ -1,4 +1,4 @@
-package com.plexobject.javaws;
+package com.plexobject.jaxws;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,17 +1,19 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.handler.jaxws;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.jws.WebService;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import com.plexobject.school.Course;
@@ -134,8 +136,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @GET
-    public Collection<Customer> getCustomers(@FormParam("id1") Long id1,
-            @FormParam("id2") String id2) {
+    public List<Customer> getCustomers(@FormParam("id1") Long id1,
+            @DefaultValue("2") @FormParam("id2") String id2) {
         Customer c1 = new Customer(id1.toString(), true);
         Customer c2 = new Customer(id2, false);
         return Arrays.asList(c1, c2);
@@ -150,5 +152,55 @@ public class CourseServiceImpl implements CourseService {
                     .addError("402", "email", "email not defined").build();
         else
             throw new TestException("my error");
+    }
+
+    @Override
+    @Path("/courses/path/{id}")
+    @GET
+    public String pathExample(@PathParam("id") String param) {
+        return param;
+    }
+
+    @Override
+    @GET
+    @Path("/courses/header")
+    public String headerExample(@HeaderParam("header") String param) {
+        return param;
+    }
+
+
+
+    @Override
+    public void nullVoid() {        
+    }
+
+    @Override
+    public String nullString() {
+        return null;
+    }
+
+    @Override
+    public String[] nullArray() {
+        return null;
+    }
+
+    @Override
+    public List<?> nullList() {
+        return null;
+    }
+
+    @Override
+    public Boolean nullbool() {
+        return null;
+    }
+
+    @Override
+    public Integer nullInteger() {
+        return null;
+    }
+
+    @Override
+    public Course nullCourse() {
+        return null;
     }
 }

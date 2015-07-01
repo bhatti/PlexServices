@@ -42,7 +42,7 @@ PlexServices is designed on following design principles:
 
 - PlexServices also supports reactive messaging services using JMS APIs and support a number of messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
-- PlexServices allows you to import existing JavaWS/JaxRS annotations based services and expose them as REST or POX services. 
+- PlexServices allows you to import existing JaxWS/JaxRS annotations based services and expose them as REST or POX services. 
 
 - PlexServices allows you to auto-deploy services by specifying package names of services, it deploys all services automatically that implement ServiceConfig annotation.
 
@@ -664,8 +664,8 @@ Here is a sample json file that describes mapping:
 "com.plexobject.bugger.model.User"}]
 ```
 
-### JavaWS/JaxRS annotations support
-PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
+### JaxWS/JaxRS annotations support
+PlexServices allows you to import existing JaxWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
 ```java 
 import javax.jws.WebService;
 import javax.ws.rs.FormParam;
@@ -707,16 +707,16 @@ public class CourseServiceImpl implements CourseService {
 }
 
 ```
-You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JavaWS service into RequestHandler as follows:
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JaxWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
 SecurityAuthorizer securityAuthorizer = ...
 serviceRegistry = new ServiceRegistry(config);
 serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
-RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(config);
-Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
-                .createFromPackages("com.plexobject.handler.javaws");
+JaxwsRequestHandlerAdapter requestHandlerAdapter = new JaxwsRequestHandlerAdapter(config);
+Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
+                .createFromPackages("com.plexobject.handler.jaxws");
 for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers.entrySet()) {
   serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
 }

@@ -1,4 +1,4 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.handler.jaxws;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -10,17 +10,22 @@ import java.util.Map;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.apache.log4j.Logger;
 
+import com.plexobject.domain.Pair;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.RequestHandlerAdapter;
 import com.plexobject.service.Protocol;
@@ -29,14 +34,14 @@ import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
-public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
+public class JaxwsRequestHandlerAdapter implements RequestHandlerAdapter {
     private static final Logger logger = Logger
-            .getLogger(RequestHandlerAdapterJavaws.class);
+            .getLogger(JaxwsRequestHandlerAdapter.class);
     private static final String DEFAULT_VERSION = "1.0";
     private static final String[] DEFAULT_ROLES = new String[0];
     private final ServiceRegistry registry;
 
-    public RequestHandlerAdapterJavaws(final ServiceRegistry registry) {
+    public JaxwsRequestHandlerAdapter(final ServiceRegistry registry) {
         this.registry = registry;
     }
 
@@ -107,9 +112,10 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
                 if (methodPath == null) {
                     methodPath = defaultServiceConfig.endpoint();
                 }
-                String[] paramNames = getParams(implMethod);
+                Pair<String, String>[] paramNamesAndDefaults = getParamsAndDefaults(implMethod);
                 if (implMethod.getParameterTypes().length > 1
-                        && paramNames.length != implMethod.getParameterTypes().length) {
+                        && paramNamesAndDefaults.length != implMethod
+                                .getParameterTypes().length) {
                     continue; // skip methods that take more than one parameter
                               // and does not defined form or query parameters
                 }
@@ -120,13 +126,14 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
                         .setEndpoint(methodPath).build();
                 RequestHandler handler = handlers.get(serviceConfig);
                 if (handler == null) {
-                    handler = new JavawsDelegateHandler(service, registry);
+                    handler = new JaxwsDelegateHandler(service, registry);
                     handlers.put(serviceConfig, handler);
                 }
                 //
-                ((JavawsDelegateHandler) handler)
+                ((JaxwsDelegateHandler) handler)
                         .addMethod(new JavawsServiceMethod(iMethod, implMethod,
-                                requestMethod, paramNames, methodPath));
+                                requestMethod, paramNamesAndDefaults,
+                                methodPath));
                 if (logger.isDebugEnabled()) {
                     logger.debug("Added handler "
                             + handler.getClass().getSimpleName() + " for "
@@ -147,18 +154,34 @@ public class RequestHandlerAdapterJavaws implements RequestHandlerAdapter {
         return path == null ? null : path.value();
     }
 
-    private String[] getParams(final Method implMethod) {
-        List<String> params = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    private Pair<String, String>[] getParamsAndDefaults(final Method implMethod) {
+        List<Pair<String, String>> paramsAndDefaults = new ArrayList<>();
         for (Annotation[] annotations : implMethod.getParameterAnnotations()) {
+            String param = null;
+            String defValue = null;
             for (Annotation a : annotations) {
                 if (a instanceof QueryParam) {
-                    params.add(((QueryParam) a).value());
+                    param = ((QueryParam) a).value();
                 } else if (a instanceof FormParam) {
-                    params.add(((FormParam) a).value());
+                    param = ((FormParam) a).value();
+                } else if (a instanceof PathParam) {
+                    param = ((PathParam) a).value();
+                } else if (a instanceof HeaderParam) {
+                    param = ((HeaderParam) a).value();
+                } else if (a instanceof CookieParam) {
+                    param = ((CookieParam) a).value();
+                } else if (a instanceof FormParam) {
+                    param = ((FormParam) a).value();
+                } else if (a instanceof DefaultValue) {
+                    defValue = ((DefaultValue) a).value();
                 }
             }
+            if (param != null) {
+                paramsAndDefaults.add(Pair.of(param, defValue));
+            }
         }
-        return params.toArray(new String[params.size()]);
+        return paramsAndDefaults.toArray(new Pair[paramsAndDefaults.size()]);
     }
 
     private static String getEndpoint(Class<?> serviceClass, Class<?> webService) {

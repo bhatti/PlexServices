@@ -1,7 +1,8 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.handler.jaxws;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +30,8 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
+import com.plexobject.handler.jaxws.JaxwsDelegateHandler;
+import com.plexobject.handler.jaxws.JaxwsRequestHandlerAdapter;
 import com.plexobject.school.Address;
 import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
@@ -43,9 +46,9 @@ import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
-public class RequestHandlerAdapterJavawsTest {
+public class RequestHandlerAdapterJaxwsTest {
     private static ServiceRegistry serviceRegistry;
-    private static RequestHandlerAdapterJavaws requestHandlerAdapterJavaws;
+    private static JaxwsRequestHandlerAdapter requestHandlerAdapter;
     private StudentServiceClient studentService = new StudentServiceClient();
     private CourseServiceClient courseService = new CourseServiceClient();
 
@@ -74,7 +77,7 @@ public class RequestHandlerAdapterJavawsTest {
         Properties props = new Properties();
         props.setProperty(Constants.HTTP_PORT,
                 String.valueOf(BaseServiceClient.DEFAULT_PORT));
-        props.setProperty(Constants.JAVAWS_NAMESPACE, "");
+        props.setProperty(Constants.JAXWS_NAMESPACE, "");
         Configuration config = new Configuration(props);
         if (config.getBoolean("logTest")) {
             BasicConfigurator.configure();
@@ -89,10 +92,10 @@ public class RequestHandlerAdapterJavawsTest {
         };
         serviceRegistry = new ServiceRegistry(config);
         serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
-        requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(
+        requestHandlerAdapter = new JaxwsRequestHandlerAdapter(
                 serviceRegistry);
-        Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
-                .createFromPackages("com.plexobject.handler.javaws");
+        Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
+                .createFromPackages("com.plexobject.handler.jaxws");
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
@@ -100,14 +103,14 @@ public class RequestHandlerAdapterJavawsTest {
         serviceRegistry.addInputInterceptor(new Interceptor<String>() {
             @Override
             public String intercept(String input) {
-                // System.out.println("INPUT: " + input);
+                System.out.println("INPUT: " + input);
                 return input;
             }
         });
         serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
             @Override
             public String intercept(String output) {
-                // System.out.println("OUTPUT: " + output);
+                System.out.println("OUTPUT: " + output);
                 return output;
             }
         });
@@ -254,16 +257,55 @@ public class RequestHandlerAdapterJavawsTest {
     }
 
     @Test
-    public void testGetCustomers() throws Exception {
-        Collection<Customer> result = courseService.getCustomers(1L, "2");
+    public void testGetCustomersWithDefaults() throws Exception {
+        List<Customer> result = courseService.getCustomers(1L, null);
         assertEquals(2, result.size());
+        assertEquals("1", result.get(0).getAccountNumber());
+        assertEquals("2", result.get(1).getAccountNumber());
+    }
+
+    @Test
+    public void testGetCustomers() throws Exception {
+        List<Customer> result = courseService.getCustomers(1L, "3");
+        assertEquals(2, result.size());
+        assertEquals("1", result.get(0).getAccountNumber());
+        assertEquals("3", result.get(1).getAccountNumber());
+    }
+
+    @Test
+    public void testPath() throws Exception {
+        String result = courseService.pathExample("mypath");
+        assertEquals("mypath", result);
+    }
+
+    @Test
+    public void testHeader() throws Exception {
+        String result = courseService.headerExample("myheader");
+        assertEquals("myheader", result);
+    }
+
+    @Test
+    public void testNull() throws Exception {
+        courseService.nullVoid();
+        Object result = courseService.nullString();
+        assertNull(result);
+        result = courseService.nullArray();
+        assertNull(result);
+        result = courseService.nullList();
+        assertNull(result);
+        result = courseService.nullbool();
+        assertNull(result);
+        result = courseService.nullInteger();
+        assertNull(result);
+        result = courseService.nullCourse();
+        assertNull(result);
     }
 
     @Test
     public void testGetMethodNameAndPayload() throws Exception {
-        Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
+        Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
                 .create(new TestServiceImpl(), "/test", RequestMethod.POST);
-        JavawsDelegateHandler handler = (JavawsDelegateHandler) handlers
+        JaxwsDelegateHandler handler = (JaxwsDelegateHandler) handlers
                 .values().iterator().next();
         String[] stringPayloads = { "{get:'   '}", "{get:  { }  }",
                 "{'get':'myid'}", "{  \"get\"\n\t:'myid  \n' \t}",
@@ -279,28 +321,28 @@ public class RequestHandlerAdapterJavawsTest {
         String[] badResult = { "my text", "345" };
         Map<String, Object> properties = new HashMap<>();
         for (int i = 0; i < stringPayloads.length; i++) {
-            Request request = newJavawsRequest(stringPayloads[i], properties);
+            Request request = newRequest(stringPayloads[i], properties);
             Pair<String, String> resp = handler
                     .getMethodNameAndPayload(request);
             assertEquals("get", resp.first);
             assertEquals(stringResult[i], resp.second);
         }
         for (int i = 0; i < intPayloads.length; i++) {
-            Request request = newJavawsRequest(intPayloads[i], properties);
+            Request request = newRequest(intPayloads[i], properties);
             Pair<String, String> resp = handler
                     .getMethodNameAndPayload(request);
             assertEquals("get", resp.first);
             assertEquals(intResult[i], resp.second);
         }
         for (int i = 0; i < objPayloads.length; i++) {
-            Request request = newJavawsRequest(objPayloads[i], properties);
+            Request request = newRequest(objPayloads[i], properties);
             Pair<String, String> resp = handler
                     .getMethodNameAndPayload(request);
             assertEquals("get", resp.first);
             assertEquals(objResults[i], resp.second);
         }
         for (int i = 0; i < badPayloads.length; i++) {
-            Request request = newJavawsRequest(badPayloads[i], properties);
+            Request request = newRequest(badPayloads[i], properties);
             try {
                 Pair<String, String> resp = handler
                         .getMethodNameAndPayload(request);
@@ -312,7 +354,7 @@ public class RequestHandlerAdapterJavawsTest {
         //
         properties.put("methodName", "get");
         for (int i = 0; i < badPayloads.length; i++) {
-            Request request = newJavawsRequest(badPayloads[i], properties);
+            Request request = newRequest(badPayloads[i], properties);
             Pair<String, String> resp = handler
                     .getMethodNameAndPayload(request);
             assertEquals("get", resp.first);
@@ -321,7 +363,7 @@ public class RequestHandlerAdapterJavawsTest {
 
     }
 
-    private static Request newJavawsRequest(String payload,
+    private static Request newRequest(String payload,
             Map<String, Object> properties) {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")

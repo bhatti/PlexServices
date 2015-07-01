@@ -1,8 +1,7 @@
-package com.plexobject.handler.javaws;
+package com.plexobject.handler.jaxws;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -169,10 +168,16 @@ public class CourseServiceClient extends BaseServiceClient implements
 
     @WebMethod(exclude = true)
     @Override
-    public Collection<Customer> getCustomers(Long id1, String id2) {
+    public List<Customer> getCustomers(Long id1, String id2) {
         try {
-            return getCustomers("methodName=getCustomers&id1=" + id1 + "&id2="
-                    + id2);
+            StringBuilder q = new StringBuilder("methodName=getCustomers");
+            if (id1 != null) {
+                q.append("&id1=" + id1);
+            }
+            if (id2 != null) {
+                q.append("&id2=" + id2);
+            }
+            return getCustomers(q.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -189,4 +194,104 @@ public class CourseServiceClient extends BaseServiceClient implements
         }
     }
 
+    @Override
+    @WebMethod(exclude = true)
+    public String pathExample(String param) {
+        try {
+            Map<String, Object> result = get(COURSE_SERVICE + "/path/" + param,
+                    Map.class);
+            return (String) result.get("pathExampleResponse");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public String headerExample(String param) {
+        try {
+            Map<String, Object> result = getWithHeader(COURSE_SERVICE
+                    + "/header", Map.class, "header", param);
+            return (String) result.get("headerExampleResponse");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public void nullVoid() {
+        RequestBuilder request = new RequestBuilder("nullVoid", "");
+        try {
+            post(COURSE_SERVICE, request, Void.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public String nullString() {
+        RequestBuilder request = new RequestBuilder("nullString", "");
+        try {
+            return post(COURSE_SERVICE, request, String.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public String[] nullArray() {
+        RequestBuilder request = new RequestBuilder("nullArray", "");
+        try {
+            return post(COURSE_SERVICE, request, String[].class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public List<?> nullList() {
+        RequestBuilder request = new RequestBuilder("nullList", "");
+        try {
+            return post(COURSE_SERVICE, request, List.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public Boolean nullbool() {
+        RequestBuilder request = new RequestBuilder("nullbool", "");
+        try {
+            return post(COURSE_SERVICE, request, Boolean.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public Integer nullInteger() {
+        RequestBuilder request = new RequestBuilder("nullInteger", "");
+        try {
+            return post(COURSE_SERVICE, request, Integer.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public Course nullCourse() {
+        RequestBuilder request = new RequestBuilder("nullCourse", "");
+        try {
+            return post(COURSE_SERVICE, request, Course.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
