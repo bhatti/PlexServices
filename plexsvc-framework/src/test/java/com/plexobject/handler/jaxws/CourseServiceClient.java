@@ -196,10 +196,10 @@ public class CourseServiceClient extends BaseServiceClient implements
 
     @Override
     @WebMethod(exclude = true)
-    public String pathExample(String param) {
+    public String pathExample(String param1, String param2) {
         try {
-            Map<String, Object> result = get(COURSE_SERVICE + "/path/" + param,
-                    Map.class);
+            Map<String, Object> result = get(COURSE_SERVICE + "/path/" + param1
+                    + "/" + param2, Map.class);
             return (String) result.get("pathExampleResponse");
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -274,8 +274,8 @@ public class RequestHandlerAdapterJaxwsTest {
 
     @Test
     public void testPath() throws Exception {
-        String result = courseService.pathExample("mypath");
-        assertEquals("mypath", result);
+        String result = courseService.pathExample("mypath1", "mypath2");
+        assertEquals("mypath1:mypath2", result);
     }
 
     @Test

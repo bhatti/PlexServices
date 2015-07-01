@@ -155,10 +155,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    @Path("/courses/path/{id}")
+    @Path("/courses/path/{p1}/{p2}")
     @GET
-    public String pathExample(@PathParam("id") String param) {
-        return param;
+    public String pathExample(@PathParam("p1") String param1,
+            @PathParam("p2") String param2) {
+        return param1 + ":" + param2;
     }
 
     @Override
@@ -168,10 +169,8 @@ public class CourseServiceImpl implements CourseService {
         return param;
     }
 
-
-
     @Override
-    public void nullVoid() {        
+    public void nullVoid() {
     }
 
     @Override

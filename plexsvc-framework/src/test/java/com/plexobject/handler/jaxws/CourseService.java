@@ -37,7 +37,7 @@ public interface CourseService {
 
     void exceptionExample(boolean rt) throws Exception;
 
-    String pathExample(String param);
+    String pathExample(String param1, String param2);
 
     String headerExample(String param);
 

@@ -712,10 +712,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    @Path("/courses/path/{id}")
+    @Path("/courses/path/{path1}/{path2}")
     @GET
-    public Course getWithId(@PathParam("id") String id) {
+    public Course getWithId(@PathParam("path1"), String @PathParam("path2")) {
     }
+
 }
 
 ```
