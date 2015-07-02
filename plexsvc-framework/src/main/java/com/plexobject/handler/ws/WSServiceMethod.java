@@ -1,4 +1,4 @@
-package com.plexobject.handler.jaxws;
+package com.plexobject.handler.ws;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -7,14 +7,14 @@ import java.util.Map;
 import com.plexobject.domain.Pair;
 import com.plexobject.service.RequestMethod;
 
-class JaxwsServiceMethod {
+class WSServiceMethod {
     final Method iMethod;
     final Method implMethod;
     final RequestMethod requestMethod;
     final Pair<String, String>[] paramNamesAndDefaults;
     final String methodPath;
 
-    JaxwsServiceMethod(Method iMethod, Method implMethod,
+    WSServiceMethod(Method iMethod, Method implMethod,
             RequestMethod requestMethod,
             Pair<String, String>[] paramNamesAndDefaults, String methodPath) {
         this.iMethod = iMethod;

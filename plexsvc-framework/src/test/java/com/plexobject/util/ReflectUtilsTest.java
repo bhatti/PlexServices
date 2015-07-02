@@ -92,7 +92,7 @@ public class ReflectUtilsTest {
     @Test
     public void testGetAnnotatedClasses() {
         Collection<Class<?>> classes = ReflectUtils.getAnnotatedClasses(
-                WebService.class, "com.plexobject.handler.jaxws", " ");
+                WebService.class, "com.plexobject.handler.ws", " ");
         assertTrue(classes.size() > 0);
     }
 

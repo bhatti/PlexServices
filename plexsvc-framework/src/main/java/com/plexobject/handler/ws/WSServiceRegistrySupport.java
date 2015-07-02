@@ -1,4 +1,4 @@
-package com.plexobject.handler.jaxws;
+package com.plexobject.handler.ws;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,9 +17,9 @@ import com.plexobject.util.ReflectUtils;
  * @author shahzad bhatti
  *
  */
-public class JaxwsServiceRegistrySupport {
+public class WSServiceRegistrySupport {
     private static final Logger logger = Logger
-            .getLogger(JaxwsServiceRegistrySupport.class);
+            .getLogger(WSServiceRegistrySupport.class);
 
     public static Map<ServiceConfigDesc, RequestHandler> addHandlers(
             ServiceRegistry serviceRegistry, Map<String, Object> services) {
@@ -33,7 +33,7 @@ public class JaxwsServiceRegistrySupport {
 
     public static Map<ServiceConfigDesc, RequestHandler> addHandlers(
             ServiceRegistry serviceRegistry, String path, Object service) {
-        final JaxwsRequestHandlerAdapter requestHandlerAdapterJavaws = new JaxwsRequestHandlerAdapter(
+        final WSRequestHandlerAdapter requestHandlerAdapterJavaws = new WSRequestHandlerAdapter(
                 serviceRegistry);
         Class<?> webService = ReflectUtils.getWebServiceInterface(service
                 .getClass());

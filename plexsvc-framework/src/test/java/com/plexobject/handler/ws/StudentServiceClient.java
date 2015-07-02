@@ -1,4 +1,4 @@
-package com.plexobject.handler.jaxws;
+package com.plexobject.handler.ws;
 
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;

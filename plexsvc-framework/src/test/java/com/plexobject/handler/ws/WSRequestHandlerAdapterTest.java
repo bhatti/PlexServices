@@ -1,4 +1,4 @@
-package com.plexobject.handler.jaxws;
+package com.plexobject.handler.ws;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,8 +30,8 @@ import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
-import com.plexobject.handler.jaxws.JaxwsDelegateHandler;
-import com.plexobject.handler.jaxws.JaxwsRequestHandlerAdapter;
+import com.plexobject.handler.ws.WSDelegateHandler;
+import com.plexobject.handler.ws.WSRequestHandlerAdapter;
 import com.plexobject.school.Address;
 import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
@@ -46,9 +46,9 @@ import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
-public class RequestHandlerAdapterJaxwsTest {
+public class WSRequestHandlerAdapterTest {
     private static ServiceRegistry serviceRegistry;
-    private static JaxwsRequestHandlerAdapter requestHandlerAdapter;
+    private static WSRequestHandlerAdapter requestHandlerAdapter;
     private StudentServiceClient studentService = new StudentServiceClient();
     private CourseServiceClient courseService = new CourseServiceClient();
 
@@ -92,10 +92,10 @@ public class RequestHandlerAdapterJaxwsTest {
         };
         serviceRegistry = new ServiceRegistry(config);
         serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
-        requestHandlerAdapter = new JaxwsRequestHandlerAdapter(
+        requestHandlerAdapter = new WSRequestHandlerAdapter(
                 serviceRegistry);
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
-                .createFromPackages("com.plexobject.handler.jaxws");
+                .createFromPackages("com.plexobject.handler.ws");
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
@@ -305,7 +305,7 @@ public class RequestHandlerAdapterJaxwsTest {
     public void testGetMethodNameAndPayload() throws Exception {
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
                 .create(new TestServiceImpl(), "/test", RequestMethod.POST);
-        JaxwsDelegateHandler handler = (JaxwsDelegateHandler) handlers
+        WSDelegateHandler handler = (WSDelegateHandler) handlers
                 .values().iterator().next();
         String[] stringPayloads = { "{get:'   '}", "{get:  { }  }",
                 "{'get':'myid'}", "{  \"get\"\n\t:'myid  \n' \t}",

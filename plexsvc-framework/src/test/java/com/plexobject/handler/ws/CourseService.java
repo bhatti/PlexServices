@@ -1,4 +1,4 @@
-package com.plexobject.handler.jaxws;
+package com.plexobject.handler.ws;
 
 import java.util.List;
 import java.util.Map;

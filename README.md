@@ -727,9 +727,9 @@ Configuration config = ...
 SecurityAuthorizer securityAuthorizer = ...
 serviceRegistry = new ServiceRegistry(config);
 serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
-JaxwsRequestHandlerAdapter requestHandlerAdapter = new JaxwsRequestHandlerAdapter(config);
+WSRequestHandlerAdapter requestHandlerAdapter = new WSRequestHandlerAdapter(config);
 Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
-                .createFromPackages("com.plexobject.handler.jaxws");
+                .createFromPackages("com.plexobject.handler.ws");
 for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers.entrySet()) {
   serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
 }

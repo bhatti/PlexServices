@@ -1,4 +1,4 @@
-package com.plexobject.handler.jaxws;
+package com.plexobject.handler.ws;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -34,14 +34,14 @@ import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
-public class JaxwsRequestHandlerAdapter implements RequestHandlerAdapter {
+public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
     private static final Logger logger = Logger
-            .getLogger(JaxwsRequestHandlerAdapter.class);
+            .getLogger(WSRequestHandlerAdapter.class);
     private static final String DEFAULT_VERSION = "1.0";
     private static final String[] DEFAULT_ROLES = new String[0];
     private final ServiceRegistry registry;
 
-    public JaxwsRequestHandlerAdapter(final ServiceRegistry registry) {
+    public WSRequestHandlerAdapter(final ServiceRegistry registry) {
         this.registry = registry;
     }
 
@@ -126,12 +126,12 @@ public class JaxwsRequestHandlerAdapter implements RequestHandlerAdapter {
                         .setEndpoint(methodPath).build();
                 RequestHandler handler = handlers.get(serviceConfig);
                 if (handler == null) {
-                    handler = new JaxwsDelegateHandler(service, registry);
+                    handler = new WSDelegateHandler(service, registry);
                     handlers.put(serviceConfig, handler);
                 }
                 //
-                ((JaxwsDelegateHandler) handler)
-                        .addMethod(new JaxwsServiceMethod(iMethod, implMethod,
+                ((WSDelegateHandler) handler)
+                        .addMethod(new WSServiceMethod(iMethod, implMethod,
                                 requestMethod, paramNamesAndDefaults,
                                 methodPath));
                 if (logger.isDebugEnabled()) {

@@ -1,4 +1,4 @@
-package com.plexobject.handler.jaxws;
+package com.plexobject.handler.ws;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -17,22 +17,22 @@ import com.plexobject.http.ServiceInvocationException;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
-public class JaxwsDelegateHandler implements RequestHandler {
+public class WSDelegateHandler implements RequestHandler {
     private static final Logger logger = Logger
-            .getLogger(JaxwsDelegateHandler.class);
+            .getLogger(WSDelegateHandler.class);
     private static final String RESPONSE_SUFFIX = "Response";
 
     private final Object delegate;
     private final ServiceRegistry serviceRegistry;
-    private final Map<String, JaxwsServiceMethod> methodsByName = new HashMap<>();
-    private JaxwsServiceMethod defaultMethodInfo;
+    private final Map<String, WSServiceMethod> methodsByName = new HashMap<>();
+    private WSServiceMethod defaultMethodInfo;
 
-    public JaxwsDelegateHandler(Object delegate, ServiceRegistry registry) {
+    public WSDelegateHandler(Object delegate, ServiceRegistry registry) {
         this.delegate = delegate;
         this.serviceRegistry = registry;
     }
 
-    public void addMethod(JaxwsServiceMethod info) {
+    public void addMethod(WSServiceMethod info) {
         methodsByName.put(info.iMethod.getName(), info);
         defaultMethodInfo = info;
     }
@@ -41,7 +41,7 @@ public class JaxwsDelegateHandler implements RequestHandler {
     public void handle(final Request request) {
         Pair<String, String> methodAndPayload = getMethodNameAndPayload(request);
 
-        final JaxwsServiceMethod methodInfo = methodsByName
+        final WSServiceMethod methodInfo = methodsByName
                 .get(methodAndPayload.first);
         if (methodInfo == null) {
             throw new ServiceInvocationException("Unknown method "
@@ -78,7 +78,7 @@ public class JaxwsDelegateHandler implements RequestHandler {
     }
 
     private void invokeWithAroundInterceptorIfNeeded(final Request request,
-            final JaxwsServiceMethod methodInfo, final String responseTag,
+            final WSServiceMethod methodInfo, final String responseTag,
             final Object[] args) throws Exception {
         if (serviceRegistry.getAroundInterceptor() != null) {
             Callable<Object> callable = new Callable<Object>() {
@@ -95,7 +95,7 @@ public class JaxwsDelegateHandler implements RequestHandler {
         }
     }
 
-    private void invoke(Request request, final JaxwsServiceMethod methodInfo,
+    private void invoke(Request request, final WSServiceMethod methodInfo,
             String responseTag, Object[] args) throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request, null);
