@@ -36,7 +36,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @POST
-    @Path("/courses/enroll")
+    @Path("/enroll")
     public List<Course> enroll(List<Student> students) {
         List<Course> list = new ArrayList<>();
         for (Student student : students) {
@@ -66,7 +66,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @GET
-    @Path("/courses/query")
+    @Path("/query")
     public List<Course> query(Map<String, Object> criteria) {
         String studentId = (String) criteria.get("studentId");
         String courseId = (String) criteria.get("courseId");
@@ -126,7 +126,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @POST
-    @Path("/courses/create")
+    @Path("/create")
     public List<Course> create(List<Course> list) {
         for (Course c : list) {
             save(c);
@@ -155,7 +155,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    @Path("/courses/path/{p1}/{p2}")
+    @Path("/path/{p1}/{p2}")
     @GET
     public String pathExample(@PathParam("p1") String param1,
             @PathParam("p2") String param2) {
@@ -164,7 +164,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @GET
-    @Path("/courses/header")
+    @Path("/header")
     public String headerExample(@HeaderParam("header") String param) {
         return param;
     }

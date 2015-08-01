@@ -77,6 +77,11 @@ public class WSDelegateHandler implements RequestHandler {
         }
     }
 
+    @Override
+    public String toString() {
+        return "WSDelegateHandler [delegate=" + delegate + "]";
+    }
+
     private void invokeWithAroundInterceptorIfNeeded(final Request request,
             final WSServiceMethod methodInfo, final String responseTag,
             final Object[] args) throws Exception {

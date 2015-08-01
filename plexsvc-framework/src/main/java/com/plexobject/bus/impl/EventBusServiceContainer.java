@@ -57,15 +57,13 @@ public class EventBusServiceContainer extends AbstractServiceContainer {
                     }
                 }, null);
         handlers.put(handler, subscriberId);
-        logger.info("PLEXSVC Adding EventBus service "
-                + handler.getClass().getSimpleName() + " for " + handler
-                + ", codec " + config.codec());
+        logger.info("PLEXSVC Adding EventBus service " + handler + " for "
+                + handler + ", codec " + config.codec());
     }
 
     @Override
     public synchronized boolean removeRequestHandler(RequestHandler h) {
-        logger.info("PLEXSVC Removing EventBus service "
-                + h.getClass().getSimpleName() + " for " + h);
+        logger.info("PLEXSVC Removing EventBus service " + h);
         Long subscriberId = handlers.remove(h);
         if (subscriberId != null) {
             serviceRegistry.getEventBus().unsubscribe(subscriberId);

@@ -699,7 +699,7 @@ public class CourseServiceImpl implements CourseService {
     }
     @Override
     @GET
-    @Path("/courses/query")
+    @Path("/query")
     public List<Course> query(Map<String, Object> criteria) {
         . . .
         return list;
@@ -712,7 +712,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    @Path("/courses/path/{path1}/{path2}")
+    @Path("/path/{path1}/{path2}")
     @GET
     public Course getWithId(@PathParam("path1"), String @PathParam("path2")) {
     }
@@ -720,7 +720,7 @@ public class CourseServiceImpl implements CourseService {
 }
 
 ```
-You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JaxWS service into RequestHandler as follows:
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. If Path annotations are defined at method level, it will add class-level path, e.g. if in above example "/courses" is defined at class level and "/query" is defined at method level for query so when you call query API, you would use "/courses/query" when invoking to the API. You can convert the JaxWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...

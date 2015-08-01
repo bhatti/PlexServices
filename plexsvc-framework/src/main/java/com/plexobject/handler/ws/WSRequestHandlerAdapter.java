@@ -108,7 +108,8 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
         for (final Method implMethod : serviceClass.getMethods()) {
             Method iMethod = getExported(webService, implMethod);
             if (iMethod != null) {
-                String methodPath = getMethodPath(iMethod, implMethod);
+                String methodPath = getMethodPath(
+                        defaultServiceConfig.endpoint(), iMethod, implMethod);
                 if (methodPath == null) {
                     methodPath = defaultServiceConfig.endpoint();
                 }
@@ -130,10 +131,9 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
                     handlers.put(serviceConfig, handler);
                 }
                 //
-                ((WSDelegateHandler) handler)
-                        .addMethod(new WSServiceMethod(iMethod, implMethod,
-                                requestMethod, paramNamesAndDefaults,
-                                methodPath));
+                ((WSDelegateHandler) handler).addMethod(new WSServiceMethod(
+                        iMethod, implMethod, requestMethod,
+                        paramNamesAndDefaults, methodPath));
                 if (logger.isDebugEnabled()) {
                     logger.debug("Added handler "
                             + handler.getClass().getSimpleName() + " for "
@@ -146,12 +146,14 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
         return handlers;
     }
 
-    private String getMethodPath(final Method iMethod, final Method implMethod) {
+    private String getMethodPath(String prefix, final Method iMethod,
+            final Method implMethod) {
         Path path = iMethod.getAnnotation(Path.class);
         if (path == null) {
             path = implMethod.getAnnotation(Path.class);
         }
-        return path == null ? null : path.value();
+        return path == null ? null : (prefix != null ? prefix : "")
+                + path.value();
     }
 
     @SuppressWarnings("unchecked")

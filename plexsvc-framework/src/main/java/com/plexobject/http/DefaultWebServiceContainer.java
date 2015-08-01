@@ -69,8 +69,7 @@ public class DefaultWebServiceContainer extends AbstractServiceContainer {
         if (handler instanceof LifecycleAware) {
             ((LifecycleAware) handler).onCreated();
         }
-        logger.info("PLEXSVC Adding Web service handler "
-                + handler.getClass().getSimpleName() + " for "
+        logger.info("PLEXSVC Adding Web service handler " + handler + " for "
                 + config.protocol() + ":" + config.method() + " : "
                 + config.endpoint() + ", codec " + config.codec());
     }

@@ -164,9 +164,7 @@ public class RouteResolver<T> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("\n");
-        root.toString(sb);
-        return sb.toString();
+        return servicesByPath.toString();
     }
 
     private Node<T> getNode(String path, Map<String, Object> parameters) {
