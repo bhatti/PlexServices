@@ -873,7 +873,6 @@ cd plexsvc-samples
 ./gradlew jettyRun
 ```
 
-
 ### Auto-Deploying
 In addition to specifying services manually for deployment, PlexServices provides support to scan all services 
 in your application package that implement ServiceConfig annotation and deploy them, e.g.
