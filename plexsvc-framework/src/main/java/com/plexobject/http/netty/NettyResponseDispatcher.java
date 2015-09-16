@@ -3,6 +3,7 @@ package com.plexobject.http.netty;
 import static io.netty.handler.codec.http.HttpHeaders.Names.SET_COOKIE;
 import static io.netty.handler.codec.http.HttpResponseStatus.FOUND;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -77,13 +78,22 @@ public class NettyResponseDispatcher extends HttpResponseDispatcher {
             }
 
             @Override
-            public void send(String contents) throws IOException {
+            public void send(Object contents) throws IOException {
                 if (location != null || errorMessage != null) {
                     return;
                 }
+                ByteBuf buffer = null;
+                if (contents instanceof String) {
+                    buffer = Unpooled.copiedBuffer((String) contents,
+                            CharsetUtil.UTF_8);
+                } else if (contents instanceof byte[]) {
+                    buffer = Unpooled.copiedBuffer((byte[]) contents);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unknown encoded payload for response " + contents);
+                }
                 FullHttpResponse response = new DefaultFullHttpResponse(
-                        HTTP_1_1, HttpResponseStatus.valueOf(status),
-                        Unpooled.copiedBuffer(contents, CharsetUtil.UTF_8));
+                        HTTP_1_1, HttpResponseStatus.valueOf(status), buffer);
                 response.headers().set(CONTENT_LENGTH,
                         response.content().readableBytes());
                 for (Map.Entry<String, String> e : headers.entrySet()) {

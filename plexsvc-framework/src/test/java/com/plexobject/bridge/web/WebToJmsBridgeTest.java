@@ -63,15 +63,10 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setEndpoint("/w")
+                .setProperties(properties).setHeaders(headers)
+                .setContents(payload).setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -82,23 +77,18 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleAsynchronous() throws Exception {
         WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                RequestMethod.GET, "queue://{scope}-assign-bugreport-service-queue",
-                5, false, 1);
+                RequestMethod.GET,
+                "queue://{scope}-assign-bugreport-service-queue", 5, false, 1);
         entry.setAsynchronous(true);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setEndpoint("/w")
+                .setProperties(properties).setHeaders(headers)
+                .setContents(payload).setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -116,23 +106,18 @@ public class WebToJmsBridgeTest {
     @Test
     public void testHandleSynchronous() throws Exception {
         final WebToJmsEntry entry = new WebToJmsEntry(CodecType.JSON, "/w",
-                RequestMethod.GET, "queue://{scope}-assign-bugreport-service-queue",
-                5, false, 1);
+                RequestMethod.GET,
+                "queue://{scope}-assign-bugreport-service-queue", 5, false, 1);
         entry.setAsynchronous(false);
         bridge.add(entry);
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        final Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
+        final Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setEndpoint("/w")
+                .setProperties(properties).setHeaders(headers)
+                .setContents(payload).setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -141,7 +126,8 @@ public class WebToJmsBridgeTest {
                 Destination dest = jmsContainer.getDestination(entry
                         .getDestination());
                 jmsContainer.sendReceive(dest, (Map<String, Object>) any,
-                        (String) request.getPayload(), (Handler<Response>) any);
+                        (String) request.getContentsAs(),
+                        (Handler<Response>) any);
             }
         };
         bridge.handle(request);

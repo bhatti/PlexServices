@@ -2,6 +2,7 @@ package com.plexobject.service;
 
 import java.util.Collection;
 
+import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 
 /**
@@ -18,7 +19,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    void addInputInterceptor(Interceptor<String> interceptor);
+    void addInputInterceptor(Interceptor<BasePayload<String>> interceptor);
 
     /**
      * This method remove interceptor for raw JSON/XML input before it's decoded
@@ -26,7 +27,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    boolean removeInputInterceptor(Interceptor<String> interceptor);
+    boolean removeInputInterceptor(Interceptor<BasePayload<String>> interceptor);
 
     /**
      * This method returns interceptors for raw JSON/XML input before it's
@@ -34,7 +35,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @return
      */
-    Collection<Interceptor<String>> getInputInterceptors();
+    Collection<Interceptor<BasePayload<String>>> getInputInterceptors();
 
     /**
      * This method returns true if input interceptors exist

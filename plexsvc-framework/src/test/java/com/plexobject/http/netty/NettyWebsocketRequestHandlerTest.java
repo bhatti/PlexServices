@@ -34,7 +34,7 @@ public class NettyWebsocketRequestHandlerTest {
             requests.add(request);
             request.getResponse().setCodecType(CodecType.JSON);
 
-            request.getResponse().setPayload(PONG);
+            request.getResponse().setContents(PONG);
             request.sendResponse();
         }
     };
@@ -57,7 +57,7 @@ public class NettyWebsocketRequestHandlerTest {
     public void testWebHandler() throws Exception {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/ping")
-                .setCodecType(CodecType.JSON).setPayload(PING)
+                .setCodecType(CodecType.JSON).setContents(PING)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         String jsonRequest = ObjectCodecFactory.getInstance()
@@ -65,12 +65,12 @@ public class NettyWebsocketRequestHandlerTest {
         String jsonResponse = TestWebUtils.sendReceiveWebsocketRequest(
                 HTTP_PORT, jsonRequest);
         assertEquals(1, requests.size());
-        assertEquals(PING, requests.get(0).getPayload());
+        assertEquals(PING, requests.get(0).getContentsAs());
         Request reply = ObjectCodecFactory
                 .getInstance()
                 .getObjectCodec(CodecType.JSON)
                 .decode(jsonResponse, Request.class,
                         new HashMap<String, Object>());
-        assertEquals(PONG, reply.getPayload());
+        assertEquals(PONG, reply.getContentsAs());
     }
 }

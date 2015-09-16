@@ -28,7 +28,7 @@ public class NettyHttpServerTest {
         @Override
         public void handle(Request request) {
             requests.add(request);
-            request.getResponse().setPayload(PONG);
+            request.getResponse().setContents(PONG);
             request.sendResponse();
             latch.countDown();
         }
@@ -61,7 +61,7 @@ public class NettyHttpServerTest {
         String response = TestWebUtils.sendReceivePostRequest(HTTP_PORT, PING);
         latch.await(1000, TimeUnit.MILLISECONDS);
         assertEquals(1, requests.size());
-        assertEquals(PING, requests.get(0).getPayload());
+        assertEquals(PING, requests.get(0).getContents());
         assertEquals(PONG, response);
     }
 }

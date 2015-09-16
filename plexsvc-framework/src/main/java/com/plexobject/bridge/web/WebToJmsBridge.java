@@ -125,10 +125,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
 
         if (entry == null) {
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponse().setPayload(
-                    "Unknown request received " + request.getPayload());
+            request.getResponse().setContents(
+                    "Unknown request received " + request.getContents());
             logger.warn("PLEXSVC Unknown request received "
-                    + request.getPayload() + ", registered "
+                    + request.getContents() + ", registered "
                     + entriesEndpointsByMethod.keySet() + ": "
                     + entriesEndpointsByMethod.values());
             return;
@@ -143,27 +143,27 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                 logger.debug("PLEXSVC Forwarding request from "
                         + entry.getEndpoint() + " to " + destination
                         + ", request " + request.getRequestUri() + " - "
-                        + request.getPayload());
+                        + request.getContents());
             }
 
             if (entry.isAsynchronous()) {
                 jmsContainer.send(destination, params,
-                        (String) request.getPayload());
+                        (String) request.getContentsAs());
                 request.getResponse().setCodecType(entry.getCodecType());
-                request.getResponse().setPayload("");
+                request.getResponse().setContents("");
             } else {
                 Future<Response> respFuture = jmsContainer.sendReceive(
-                        destination, params, (String) request.getPayload(),
+                        destination, params, (String) request.getContentsAs(),
                         sendbackReply(request, entry, params));
                 respFuture.get(entry.getTimeoutSecs(), TimeUnit.SECONDS);
             }
         } catch (TimeoutException e) {
             request.getResponse().setCodecType(CodecType.TEXT);
             request.getResponse().setStatus(HttpResponse.SC_GATEWAY_TIMEOUT);
-            request.getResponse().setPayload(
+            request.getResponse().setContents(
                     "Request timedout " + entry.getTimeoutSecs() + " secs");
             logger.warn("PLEXSVC Timed out request from " + entry.getEndpoint()
-                    + " - " + request.getPayload());
+                    + " - " + request.getContents());
         } catch (Exception e) {
             logger.error("PLEXSVC Failed to send request", e);
         }
@@ -192,7 +192,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                                 reply.getProperty(name));
                     }
                     request.getResponse().setCodecType(entry.getCodecType());
-                    request.getResponse().setPayload(reply.getPayload());
+                    request.getResponse().setContents(reply.getContents());
                     if (logger.isDebugEnabled()) {
                         logger.debug("Status " + reply.getStatus()
                                 + ", Replying back " + reply + ", params "

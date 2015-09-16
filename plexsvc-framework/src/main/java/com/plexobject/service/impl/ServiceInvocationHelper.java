@@ -11,6 +11,7 @@ import com.plexobject.domain.Statusable;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.ws.WSDelegateHandler;
@@ -56,14 +57,14 @@ public class ServiceInvocationHelper {
             }
 
             // check if payload is required
-            if (config.payloadClass() != null
-                    && config.payloadClass() != Void.class
-                    && request.getPayload() == null
+            if (config.contentsClass() != null
+                    && config.contentsClass() != Void.class
+                    && request.getContents() == null
                     && request.getProperties().size() == 0) {
                 request.getResponse().setStatus(HttpResponse.SC_FORBIDDEN);
-                request.getResponse().setPayload(
+                request.getResponse().setContents(
                         "Expected payload of type "
-                                + config.payloadClass().getName()
+                                + config.contentsClass().getName()
                                 + ", but payload was: " + request);
                 request.sendResponse();
                 return;
@@ -77,10 +78,13 @@ public class ServiceInvocationHelper {
 
             // We assume incoming payload is text so we will run through input
             // interceptors
-            if (codecType != CodecType.NONE
-                    && request.getPayload() instanceof String) {
+            runInputInterceptors(request);
+            //
+            if (codecType != CodecType.SERVICE_SPECIFIC
+                    && request.getContents() instanceof String) {
                 deserializePayload(request, config, codecType);
             }
+            //
             // Invoking request interceptors
             if (registry.hasRequestInterceptors()) {
                 for (Interceptor<Request> interceptor : registry
@@ -98,7 +102,7 @@ public class ServiceInvocationHelper {
                 }
                 //
                 // validate required fields
-                requiredFieldValidator.validate(handler, request.getPayload(),
+                requiredFieldValidator.validate(handler, request.getContents(),
                         request.getProperties());
 
                 //
@@ -121,22 +125,22 @@ public class ServiceInvocationHelper {
                     request.getResponse().setStatus(
                             HttpResponse.SC_INTERNAL_SERVER_ERROR);
                 }
-                request.getResponse().setPayload(e);
+                request.getResponse().setContents(e);
                 request.sendResponse();
             }
         } else {
             logger.warn("PLEXSVC Received Unknown request params "
                     + request.getProperties() + ", payload "
-                    + request.getPayload());
+                    + request.getContents());
             request.getResponse().setCodecType(CodecType.TEXT);
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponse().setPayload("page not found");
+            request.getResponse().setContents("page not found");
             request.sendResponse();
         }
     }
 
     private static void addFormPropertiesFromPayload(Request request) {
-        String[] nvArr = request.getPayload().toString().split("&");
+        String[] nvArr = request.getContents().toString().split("&");
         for (String nvStr : nvArr) {
             String[] nv = nvStr.split("=");
             if (nv.length == 2) {
@@ -145,27 +149,30 @@ public class ServiceInvocationHelper {
         }
     }
 
-    private void deserializePayload(Request request, ServiceConfigDesc config,
-            CodecType codecType) {
-        String textPayload = request.getPayload();
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void runInputInterceptors(Request request) {
         // apply input interceptors
         if (serviceRegistry.hasInputInterceptors()) {
-            for (Interceptor<String> interceptor : serviceRegistry
+            BasePayload payload = request;
+            for (Interceptor<BasePayload<String>> interceptor : serviceRegistry
                     .getInputInterceptors()) {
-                textPayload = interceptor.intercept(textPayload);
+                payload = interceptor.intercept(payload);
             }
-            request.setPayload(textPayload);
         }
+    }
 
+    private void deserializePayload(Request request, ServiceConfigDesc config,
+            CodecType codecType) {
+        String textPayload = request.getContentsAs();
         // decode text input into object
-        if (config.payloadClass() != null
-                && config.payloadClass() != Void.class
-                && (request.getPayload() instanceof String || request
-                        .getPayload() == null)) {
-            request.setPayload(ObjectCodecFactory
+        if (config.contentsClass() != null
+                && config.contentsClass() != Void.class
+                && (request.getContents() instanceof String || request
+                        .getContents() == null)) {
+            request.setContents(ObjectCodecFactory
                     .getInstance()
                     .getObjectCodec(codecType)
-                    .decode(textPayload, config.payloadClass(),
+                    .decode(textPayload, config.contentsClass(),
                             request.getProperties()));
         }
     }
@@ -208,7 +215,7 @@ public class ServiceInvocationHelper {
         handler.handle(request);
         metrics.addResponseTime(System.currentTimeMillis() - started);
         // send back the reply
-        if (request.getResponse().getPayload() != null) {
+        if (request.getResponse().getContents() != null) {
             request.sendResponse();
         }
     }

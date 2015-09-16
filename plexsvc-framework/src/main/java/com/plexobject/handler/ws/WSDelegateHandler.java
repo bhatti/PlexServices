@@ -47,7 +47,7 @@ public class WSDelegateHandler implements RequestHandler {
             throw new ServiceInvocationException("Unknown method "
                     + methodAndPayload.first + ", available "
                     + methodsByName.keySet() + ", request "
-                    + request.getPayload(), HttpResponse.SC_NOT_FOUND);
+                    + request.getContents(), HttpResponse.SC_NOT_FOUND);
         }
         // set method name
         request.setMethodName(methodInfo.iMethod.getName());
@@ -73,7 +73,7 @@ public class WSDelegateHandler implements RequestHandler {
         } catch (Exception e) {
             logger.error("PLEXSVC Failed to invoke " + methodInfo.iMethod
                     + ", for request " + request, e);
-            request.getResponse().setPayload(e);
+            request.getResponse().setContents(e);
         }
     }
 
@@ -118,7 +118,7 @@ public class WSDelegateHandler implements RequestHandler {
             } else {
                 response.put(responseTag, null);
             }
-            request.getResponse().setPayload(response);
+            request.getResponse().setContents(response);
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof Exception) {
                 throw (Exception) e.getCause();
@@ -148,7 +148,7 @@ public class WSDelegateHandler implements RequestHandler {
 
     @VisibleForTesting
     Pair<String, String> getMethodNameAndPayload(Request request) {
-        String text = request.getPayload();
+        String text = request.getContentsAs();
         // hard coding to handle JSON messages
         // manual parsing because I don't want to run complete JSON parser
         int startObject = text != null ? text.indexOf('{') : -1;

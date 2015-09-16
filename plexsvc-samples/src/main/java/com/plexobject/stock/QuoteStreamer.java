@@ -61,7 +61,7 @@ public class QuoteStreamer extends TimerTask {
                 int n = 0;
                 for (Request req : requests) {
                     try {
-                        req.getResponse().setPayload(q);
+                        req.getResponse().setContents(q);
                         req.sendResponse();
                         log.info(n + "/" + requests.size() + ": Sending " + q);
                         n++;

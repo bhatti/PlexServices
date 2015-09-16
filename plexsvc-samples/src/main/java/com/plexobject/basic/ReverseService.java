@@ -24,7 +24,7 @@ public class ReverseService implements RequestHandler {
             data = "";
         }
         log.info("Received " + data);
-        request.getResponse().setPayload(
+        request.getResponse().setContents(
                 new StringBuilder(data).reverse().toString());
     }
 }

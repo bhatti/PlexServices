@@ -24,7 +24,7 @@ public class UserServices {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "username") })
     public static class CreateUserService extends AbstractUserService implements
             RequestHandler {
@@ -34,9 +34,9 @@ public class UserServices {
 
         @Override
         public void handle(Request request) {
-            User user = request.getPayload();
+            User user = request.getContentsAs();
             User saved = userRepository.save(user);
-            request.getResponse().setPayload(saved);
+            request.getResponse().setContents(saved);
         }
 
     }
@@ -60,7 +60,7 @@ public class UserServices {
                     put("deleted", deleted);
                 }
             };
-            request.getResponse().setPayload(response);
+            request.getResponse().setContents(response);
         }
     }
 
@@ -74,7 +74,7 @@ public class UserServices {
 
         @Override
         public void handle(Request request) {
-            log.info("PAYLOAD " + request.getPayload());
+            log.info("PAYLOAD " + request.getContentsAs());
             String username = request.getStringProperty("username");
             String password = request.getStringProperty("password");
 
@@ -84,12 +84,12 @@ public class UserServices {
             } else {
                 request.getResponse().addSessionId(
                         userRepository.getSessionId(user));
-                request.getResponse().setPayload(user);
+                request.getResponse().setContents(user);
             }
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     public static class QueryUserService extends AbstractUserService implements
             RequestHandler {
         public QueryUserService(UserRepository userRepository) {
@@ -112,11 +112,11 @@ public class UserServices {
                             return true;
                         }
                     });
-            request.getResponse().setPayload(users);
+            request.getResponse().setContents(users);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-update-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = User.class, rolesAllowed = "Administrator", endpoint = "queue://{scope}-update-user-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "id") })
     public static class UpdateUserService extends AbstractUserService implements
             RequestHandler {
@@ -126,10 +126,10 @@ public class UserServices {
 
         @Override
         public void handle(Request request) {
-            User user = request.getPayload();
+            User user = request.getContentsAs();
 
             User saved = userRepository.save(user);
-            request.getResponse().setPayload(saved);
+            request.getResponse().setContents(saved);
         }
     }
 }

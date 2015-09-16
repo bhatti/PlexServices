@@ -240,7 +240,7 @@ public class DefaultJMSContainerTest {
                 "ping", new Handler<Response>() {
                     @Override
                     public void handle(Response request) {
-                        payload.append((String) request.getPayload());
+                        payload.append((String) request.getContentsAs());
                     }
                 });
         Thread.sleep(1000);

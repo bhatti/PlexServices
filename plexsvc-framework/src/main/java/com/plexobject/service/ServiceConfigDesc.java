@@ -8,7 +8,7 @@ import com.plexobject.handler.RequestHandler;
 
 public class ServiceConfigDesc extends ServiceTypeDesc {
     private static final long serialVersionUID = 1L;
-    private final Class<?> payloadClass;
+    private final Class<?> contentsClass;
     private final CodecType codecType;
     private final boolean recordStatsdMetrics;
     private final String[] rolesAllowed;
@@ -17,7 +17,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
     public static class Builder {
         private RequestMethod method;
         private Protocol protocol;
-        private Class<?> payloadClass = Void.class;
+        private Class<?> contentsClass = Void.class;
         private CodecType codecType;
         private String version;
         private String endpoint;
@@ -30,7 +30,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
                 this.method = e.getMethod();
                 this.protocol = e.getMethod() == RequestMethod.MESSAGE ? Protocol.WEBSOCKET
                         : Protocol.HTTP;
-                this.payloadClass = Void.class;
+                this.contentsClass = Void.class;
                 this.codecType = e.getCodecType();
                 this.version = "";
                 this.endpoint = e.getEndpoint();
@@ -52,7 +52,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
             if (config != null) {
                 this.method = config.method();
                 this.protocol = config.protocol();
-                this.payloadClass = config.payloadClass();
+                this.contentsClass = config.contentsClass();
                 this.codecType = config.codec();
                 this.version = config.version();
                 this.endpoint = config.endpoint();
@@ -66,7 +66,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
             if (config != null) {
                 this.method = config.method();
                 this.protocol = config.protocol();
-                this.payloadClass = config.payloadClass();
+                this.contentsClass = config.contentsClass();
                 this.codecType = config.codec();
                 this.version = config.version();
                 this.endpoint = config.endpoint();
@@ -86,8 +86,8 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
             return this;
         }
 
-        public Builder setPayloadClass(Class<?> payloadClass) {
-            this.payloadClass = payloadClass;
+        public Builder setContentsClass(Class<?> contentsClass) {
+            this.contentsClass = contentsClass;
             return this;
         }
 
@@ -122,7 +122,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
         }
 
         public ServiceConfigDesc build() {
-            return new ServiceConfigDesc(protocol, method, payloadClass,
+            return new ServiceConfigDesc(protocol, method, contentsClass,
                     codecType, version, endpoint, recordStatsdMetrics,
                     rolesAllowed, concurrency);
         }
@@ -137,26 +137,26 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
     }
 
     public ServiceConfigDesc(ServiceConfig config) {
-        this(config.protocol(), config.method(), config.payloadClass(), config
+        this(config.protocol(), config.method(), config.contentsClass(), config
                 .codec(), config.version(), config.endpoint(), config
                 .recordStatsdMetrics(), config.rolesAllowed(), config
                 .concurrency());
     }
 
     public ServiceConfigDesc(Protocol protocol, RequestMethod method,
-            Class<?> payloadClass, CodecType codecType, String version,
+            Class<?> contentsClass, CodecType codecType, String version,
             String endpoint, boolean recordStatsdMetrics,
             String[] rolesAllowed, int concurrency) {
         super(protocol, method, version, endpoint);
-        this.payloadClass = payloadClass;
+        this.contentsClass = contentsClass;
         this.codecType = codecType;
         this.recordStatsdMetrics = recordStatsdMetrics;
         this.rolesAllowed = rolesAllowed;
         this.concurrency = concurrency;
     }
 
-    public Class<?> payloadClass() {
-        return payloadClass;
+    public Class<?> contentsClass() {
+        return contentsClass;
     }
 
     public CodecType codec() {
@@ -190,7 +190,7 @@ public class ServiceConfigDesc extends ServiceTypeDesc {
     @Override
     public String toString() {
         return "ServiceConfigDesc [method=" + method() + ", protocol="
-                + protocol() + ", payloadClass=" + payloadClass
+                + protocol() + ", contentsClass=" + contentsClass
                 + ", codecType=" + codecType + ", version=" + version()
                 + ", endpoint=" + endpoint() + ", recordStatsdMetrics="
                 + recordStatsdMetrics + ", rolesALlowed="

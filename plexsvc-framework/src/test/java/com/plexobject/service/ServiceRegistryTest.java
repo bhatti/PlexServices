@@ -75,12 +75,12 @@ public class ServiceRegistryTest {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/w", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = TestUser.class, endpoint = "/w", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request request) {
             requests.add(request);
-            request.getResponse().setPayload(request.getPayload());
+            request.getResponse().setContents(request.getContentsAs());
         }
     }
 
@@ -301,12 +301,12 @@ public class ServiceRegistryTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
         registry.invoke(request, null);
-        assertEquals(payload, request.getPayload());
+        assertEquals(payload, request.getContents());
     }
 
     @Test
@@ -321,12 +321,12 @@ public class ServiceRegistryTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         RequestHandler h = new WebsocketService();
         registry.invoke(request, h);
-        assertEquals("test", request.getPayload());
+        assertEquals("test", request.getContents());
     }
 
     @Test
@@ -340,14 +340,14 @@ public class ServiceRegistryTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         RequestHandler h = new WebService();
         registry.invoke(request, h);
-        TestUser user1 = request.getPayload();
+        TestUser user1 = request.getContentsAs();
         assertEquals("john", user1.getUsername());
-        TestUser user2 = request.getResponse().getPayload();
+        TestUser user2 = request.getResponse().getContentsAs();
         assertEquals("john", user2.getUsername());
     }
 
@@ -363,11 +363,11 @@ public class ServiceRegistryTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                     @Override
-                    protected void doSend(Response r, String text) {
-                        out.append(text);
+                    protected void doSend(Response r, Object encodedPayload) {
+                        out.append(encodedPayload.toString());
                     }
                 }).build();
         RequestHandler h = new WebService();
@@ -388,11 +388,11 @@ public class ServiceRegistryTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                     @Override
-                    protected void doSend(Response r, String text) {
-                        out.append(text);
+                    protected void doSend(Response r, Object encodedPayload) {
+                        out.append(encodedPayload.toString());
                     }
                 }).build();
 
@@ -414,11 +414,11 @@ public class ServiceRegistryTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                     @Override
-                    protected void doSend(Response r, String text) {
-                        out.append(text);
+                    protected void doSend(Response r, Object encodedPayload) {
+                        out.append(encodedPayload.toString());
                     }
                 }).build();
         RequestHandler h = new WebService();
@@ -440,11 +440,11 @@ public class ServiceRegistryTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                     @Override
-                    protected void doSend(Response r, String text) {
-                        out.append(text);
+                    protected void doSend(Response r, Object encodedPayload) {
+                        out.append(encodedPayload.toString());
                     }
                 }).build();
         RequestHandler h = new WebService();

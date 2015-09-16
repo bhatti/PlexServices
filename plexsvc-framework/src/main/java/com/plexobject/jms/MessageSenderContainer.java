@@ -24,7 +24,7 @@ public interface MessageSenderContainer {
      * @throws NamingException
      */
     Future<Response> sendReceive(Destination destination,
-            Map<String, Object> headers, String reqPayload,
+            Map<String, Object> headers, Object reqPayload,
             Handler<Response> handler) throws JMSException, NamingException;
 
     /**
@@ -37,5 +37,5 @@ public interface MessageSenderContainer {
      * @throws NamingException
      */
     void send(Destination destination, Map<String, Object> headers,
-            String payload) throws JMSException, NamingException;
+            Object payload) throws JMSException, NamingException;
 }

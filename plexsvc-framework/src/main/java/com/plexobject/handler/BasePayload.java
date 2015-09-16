@@ -8,33 +8,33 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Statusable;
 import com.plexobject.http.HttpResponse;
 
-public abstract class AbstractPayload {
+public abstract class BasePayload<T> {
     private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String CONTENT_TYPE = "Content-Type";
     protected final Map<String, Object> properties;
     protected final Map<String, Object> headers;
     protected final long createdAt;
-    protected Object payload;
+    protected T contents;
     protected int status = 0;
 
-    AbstractPayload() {
+    BasePayload() {
         this.createdAt = System.currentTimeMillis();
         this.properties = new HashMap<>();
         this.headers = new HashMap<>();
     }
 
-    protected AbstractPayload(final Map<String, Object> properties,
-            final Map<String, Object> headers, final Object payload) {
+    protected BasePayload(final Map<String, Object> properties,
+            final Map<String, Object> headers, final T contents) {
         this.createdAt = System.currentTimeMillis();
         this.properties = properties;
         this.headers = headers;
-        this.payload = payload;
+        this.contents = contents;
     }
 
-    public void setPayload(Object obj) {
-        this.payload = obj;
-        if (payload instanceof Statusable) {
-            setStatus(((Statusable) payload).getStatus());
+    public void setContents(T obj) {
+        this.contents = obj;
+        if (contents instanceof Statusable) {
+            setStatus(((Statusable) contents).getStatus());
         }
     }
 
@@ -56,7 +56,7 @@ public abstract class AbstractPayload {
         return HttpResponse.SC_OK;
     }
 
-    public AbstractPayload setStatus(int status) {
+    public BasePayload<T> setStatus(int status) {
         this.status = status;
         properties.put(HttpResponse.STATUS, status);
         return this;
@@ -179,9 +179,7 @@ public abstract class AbstractPayload {
         return createdAt;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getPayload() {
-        return (T) payload;
+    public T getContents() {
+        return contents;
     }
-
 }

@@ -24,7 +24,7 @@ public class RequestTest {
         assertNull(request.getEndpoint());
         assertNull(request.getResponse());
         assertNull(request.getSessionId());
-        assertNull(request.getPayload());
+        assertNull(request.getContents());
     }
 
     @Test
@@ -37,7 +37,7 @@ public class RequestTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -45,7 +45,7 @@ public class RequestTest {
         assertEquals(RequestMethod.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
         assertEquals("id", request.getSessionId());
-        assertEquals("{}", request.getPayload());
+        assertEquals("{}", request.getContents());
         assertTrue(request.toString().contains("/w"));
         assertTrue(request.getCreatedAt() <= System.currentTimeMillis());
     }
@@ -58,7 +58,7 @@ public class RequestTest {
                 .setMethod(RequestMethod.GET).setSessionId(null)
                 .setProperties(properties).setHeaders(headers)
                 .setEndpoint("/w").setCodecType(CodecType.JSON)
-                .setPayload("{}").setSessionId("id")
+                .setContents("{}").setSessionId("id")
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
@@ -66,7 +66,7 @@ public class RequestTest {
         assertEquals(RequestMethod.GET, request.getMethod());
         assertEquals("/w", request.getEndpoint());
         assertEquals("id", request.getSessionId());
-        assertEquals("{}", request.getPayload());
+        assertEquals("{}", request.getContents());
     }
 
     @Test
@@ -78,13 +78,13 @@ public class RequestTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 
         request.handleUnknown(null, null);
-        request.handleUnknown(Constants.PAYLOAD, "payload");
-        assertEquals("payload", request.getPayload());
+        request.handleUnknown(Constants.CONTENTS, "payload");
+        assertEquals("payload", request.getContents());
         request.handleUnknown("key", "1");
         assertEquals("1", request.getStringProperty("key"));
         request.handleUnknown("key", 1);
@@ -107,10 +107,10 @@ public class RequestTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
-                .setCodecType(CodecType.JSON).setPayload("pay")
+                .setCodecType(CodecType.JSON).setContents("pay")
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
-        assertEquals("pay", request.getPayload());
+        assertEquals("pay", request.getContents());
 
         assertTrue(request.hasProperty("p1"));
         assertFalse(request.hasProperty("p2"));
@@ -146,7 +146,7 @@ public class RequestTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
-                .setCodecType(CodecType.JSON).setPayload(null)
+                .setCodecType(CodecType.JSON).setContents(null)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
 

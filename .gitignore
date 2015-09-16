@@ -18,3 +18,4 @@ plexsvc-samples/s3.properties
 plexsvc-framework/activemq-data/
 plexsvc-framework/build/
 plexsvc-samples/.settings/
+plexsvc-samples/build/

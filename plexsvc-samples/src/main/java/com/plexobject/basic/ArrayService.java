@@ -36,6 +36,6 @@ public class ArrayService implements RequestHandler {
             entry.put("id", i + 1);
             response.add(entry);
         }
-        request.getResponse().setPayload(response);
+        request.getResponse().setContents(response);
     }
 }

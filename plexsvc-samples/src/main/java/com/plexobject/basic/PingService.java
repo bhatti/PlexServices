@@ -23,6 +23,6 @@ public class PingService implements RequestHandler {
         if (data == null) {
             data = "";
         }
-        request.getResponse().setPayload(data);
+        request.getResponse().setContents(data);
     }
 }

@@ -4,6 +4,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.plexobject.encode.CodecType;
+import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.service.Interceptor;
 import com.plexobject.service.OutgoingInterceptorsLifecycle;
@@ -26,6 +28,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
     /**
      * This method serializes response in text and sends back to client
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public final void send(Response response) {
         // execute response interceptors if available
@@ -36,46 +39,59 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
                 response = interceptor.intercept(response);
             }
         }
+
         // nothing to send
-        String replyText = encode(response);
+        Object encodedReply = encode(response);
         // execute output interceptors if available
         if (outgoingInterceptorsLifecycle != null
                 && outgoingInterceptorsLifecycle.hasOutputInterceptors()) {
-
-            for (Interceptor<String> interceptor : outgoingInterceptorsLifecycle
+            BasePayload payload = response;
+            payload.setContents(encodedReply);
+            for (Interceptor<BasePayload<String>> interceptor : outgoingInterceptorsLifecycle
                     .getOutputInterceptors()) {
-                replyText = interceptor.intercept(replyText);
+                payload = interceptor.intercept(payload);
             }
+            encodedReply = payload.getContents();
         }
-        doSend(response, replyText);
+
+        doSend(response, encodedReply);
     }
 
-    protected String encode(Response response) {
-        Object payload = response.getPayload();
-        String replyText = null;
-        if (payload instanceof Exception) {
+    protected Object encode(Response response) {
+        Object payload = response.getContents();
+
+        if (response.getCodecType() == CodecType.SERVICE_SPECIFIC) {
+            if (response.getContents() instanceof byte[]) {
+                return (byte[]) response.getContents();
+            } else if (response.getContents() instanceof String) {
+                return response.getContentsAs();
+            }
+        } else if (payload instanceof Exception) {
             logger.warn("PLEXSVC " + getClass().getSimpleName()
                     + " Error received " + payload);
             Map<String, Object> resp = ExceptionUtils
                     .toErrors((Exception) payload);
-            replyText = ObjectCodecFactory.getInstance()
-                    .getObjectCodec(response.getCodecType()).encode(resp);
             for (String name : Response.HEADER_PROPERTIES) {
                 Object value = resp.get(name);
                 if (value != null) {
                     response.setProperty(name, value);
                 }
             }
-        } else {
-            replyText = response.getPayload() instanceof String ? (String) response
-                    .getPayload() : ObjectCodecFactory.getInstance()
-                    .getObjectCodec(response.getCodecType())
-                    .encode(response.getPayload());
+            return ObjectCodecFactory.getInstance()
+                    .getObjectCodec(response.getCodecType()).encode(resp);
+        } else if (response.getContents() instanceof String) {
+            return response.getContentsAs();
         }
-        return replyText;
+        ObjectCodec codec = ObjectCodecFactory.getInstance().getObjectCodec(
+                response.getCodecType());
+        if (codec == null) {
+            throw new IllegalArgumentException("Codec not supported for "
+                    + response.getCodecType());
+        }
+        return codec.encode(response.getContentsAs());
     }
 
-    protected void doSend(Response response, String payload) {
+    protected void doSend(Response response, Object encodedReply) {
 
     }
 

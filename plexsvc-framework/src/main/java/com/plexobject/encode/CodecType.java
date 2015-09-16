@@ -7,7 +7,7 @@ package com.plexobject.encode;
  *
  */
 public enum CodecType {
-    NONE, JSON, HTML, XML, TEXT;
+    SERVICE_SPECIFIC, JSON, HTML, XML, TEXT;
     /**
      * This method is used to set content-type header of response
      * 
@@ -22,8 +22,9 @@ public enum CodecType {
         case TEXT:
             return "application/text";
         case JSON:
-        default:
             return "application/json";
+        default:
+            return "application/text"; // should be set by service
         }
     }
 

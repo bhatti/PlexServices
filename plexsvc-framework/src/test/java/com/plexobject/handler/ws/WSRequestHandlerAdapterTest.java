@@ -27,11 +27,10 @@ import com.plexobject.domain.Constants;
 import com.plexobject.domain.Pair;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
-import com.plexobject.handler.ws.WSDelegateHandler;
-import com.plexobject.handler.ws.WSRequestHandlerAdapter;
 import com.plexobject.school.Address;
 import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
@@ -100,16 +99,16 @@ public class WSRequestHandlerAdapterTest {
                 .entrySet()) {
             serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
         }
-        serviceRegistry.addInputInterceptor(new Interceptor<String>() {
+        serviceRegistry.addInputInterceptor(new Interceptor<BasePayload<String>>() {
             @Override
-            public String intercept(String input) {
+            public BasePayload<String> intercept(BasePayload<String> input) {
                 System.out.println("INPUT: " + input);
                 return input;
             }
         });
-        serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
+        serviceRegistry.addOutputInterceptor(new Interceptor<BasePayload<String>>() {
             @Override
-            public String intercept(String output) {
+            public BasePayload<String> intercept(BasePayload<String> output) {
                 System.out.println("OUTPUT: " + output);
                 return output;
             }
@@ -368,7 +367,7 @@ public class WSRequestHandlerAdapterTest {
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(properties)
-                .setCodecType(CodecType.JSON).setPayload(payload)
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         return request;

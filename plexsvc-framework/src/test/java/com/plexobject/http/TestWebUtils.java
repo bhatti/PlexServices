@@ -27,8 +27,10 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.CharsetUtil;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -204,6 +206,20 @@ public class TestWebUtils {
         return new NettyWebContainerProvider().getWebContainer(config, handler);
     }
 
+    public static byte[] getBinary(String target, String... headers)
+            throws IOException {
+        System.out.println("****** getBinary " + target);
+
+        URL url = new URL(target);
+
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        for (int i = 0; i < headers.length - 1; i += 2) {
+            con.setRequestProperty(headers[i], headers[i + 1]);
+        }
+        return getBinaryResponse(con);
+    }
+
     public static String get(String target, String... headers)
             throws IOException {
         URL url = new URL(target);
@@ -260,8 +276,17 @@ public class TestWebUtils {
     }
 
     private static String getResponse(HttpURLConnection con) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                con.getInputStream()));
+        String resp = toString(con.getInputStream());
+        if (con.getResponseCode() != 200) {
+            throw new ServiceInvocationException("Status "
+                    + con.getResponseCode() + ": " + resp,
+                    con.getResponseCode());
+        }
+        return resp;
+    }
+
+    public static String toString(InputStream is) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(is));
         String inputLine;
         StringBuffer response = new StringBuffer();
 
@@ -269,12 +294,27 @@ public class TestWebUtils {
             response.append(inputLine);
         }
         in.close();
+        return response.toString();
+    }
 
+    private static byte[] getBinaryResponse(HttpURLConnection con)
+            throws IOException {
+        byte[] resp = toBytes(con.getInputStream());
         if (con.getResponseCode() != 200) {
             throw new ServiceInvocationException("Status "
-                    + con.getResponseCode() + "-" + response.toString(),
-                    con.getResponseCode());
+                    + con.getResponseCode(), con.getResponseCode());
         }
-        return response.toString();
+        return resp;
+    }
+
+    public static byte[] toBytes(InputStream in) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int c;
+        while ((c = in.read()) != -1) {
+            out.write(c);
+        }
+        in.close();
+
+        return out.toByteArray();
     }
 }

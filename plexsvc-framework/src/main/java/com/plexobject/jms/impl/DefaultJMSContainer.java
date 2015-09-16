@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
@@ -244,19 +245,29 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
 
     @Override
     public Future<Response> sendReceive(final Destination destination,
-            final Map<String, Object> headers, final String reqPayload,
+            final Map<String, Object> headers, final Object encodedPayload,
             final Handler<Response> handler) throws JMSException,
             NamingException {
-        Message reqMsg = createTextMessage(reqPayload);
-        JMSUtils.setHeaders(headers, reqMsg);
+        Message m = null;
+        if (encodedPayload instanceof String) {
+            m = createTextMessage((String) encodedPayload);
+        } else if (encodedPayload instanceof byte[]) {
+            m = createBinaryMessage((byte[]) encodedPayload);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unknown encoded payload for response " + encodedPayload);
+        }
+
+        JMSUtils.setHeaders(headers, m);
 
         Future<Response> promise = JMSUtils.configureReplier(
-                currentJmsSession(), reqMsg, handler, this);
+                currentJmsSession(), m, handler, this);
         if (logger.isDebugEnabled()) {
             logger.debug("PLEXSVC Sending JMS message to " + destination
-                    + ", payload " + reqPayload + ", and waiting for reply...");
+                    + ", payload " + encodedPayload
+                    + ", and waiting for reply...");
         }
-        createProducer(destination).send(reqMsg);
+        createProducer(destination).send(m);
         return promise;
     }
 
@@ -270,10 +281,18 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
 
     @Override
     public void send(final Destination destination,
-            final Map<String, Object> headers, final String payload)
+            final Map<String, Object> headers, final Object encodedPayload)
             throws JMSException, NamingException {
         // log.info("PLEXSVC Sending " + payload + " to " + destination);
-        Message m = createTextMessage(payload);
+        Message m = null;
+        if (encodedPayload instanceof String) {
+            m = createTextMessage((String) encodedPayload);
+        } else if (encodedPayload instanceof byte[]) {
+            m = createBinaryMessage((byte[]) encodedPayload);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unknown encoded payload for response " + encodedPayload);
+        }
         if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
             headers.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
         }
@@ -282,7 +301,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
         MessageProducer msgProducer = createProducer(destination);
         if (logger.isDebugEnabled()) {
             logger.debug("PLEXSVC Sending JMS message to " + destination
-                    + ", payload " + payload + ", headers " + headers);
+                    + ", payload " + encodedPayload + ", headers " + headers);
         }
         msgProducer.send(m);
         if (destination instanceof TemporaryQueue) {
@@ -304,6 +323,13 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
     public Message createTextMessage(String payload) throws JMSException,
             NamingException {
         return currentJmsSession().createTextMessage(payload);
+    }
+
+    public Message createBinaryMessage(byte[] payload) throws JMSException,
+            NamingException {
+        BytesMessage m = currentJmsSession().createBytesMessage();
+        m.writeBytes(payload);
+        return m;
     }
 
     public MessageConsumer createConsumer(final String destName)

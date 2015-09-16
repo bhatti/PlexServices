@@ -84,7 +84,7 @@ public class EventBusToJmsBridge implements Lifecycle {
             try {
                 String payload = ObjectCodecFactory.getInstance()
                         .getObjectCodec(entry.getCodecType())
-                        .encode(request.getPayload());
+                        .encode(request.getContentsAs());
                 jmsContainer.send(
                         jmsContainer.getDestination(entry.getTarget()), params,
                         payload);
@@ -160,7 +160,7 @@ public class EventBusToJmsBridge implements Lifecycle {
                 Request request = Request.builder().setProtocol(Protocol.JMS)
                         .setMethod(RequestMethod.MESSAGE).setProperties(params)
                         .setEndpoint(entry.getTarget())
-                        .setCodecType(entry.getCodecType()).setPayload(payload)
+                        .setCodecType(entry.getCodecType()).setContents(payload)
                         .setResponseDispatcher(dispatcher).build();
                 logger.info("PlexSVC Forwarding " + entry + "'s message "
                         + request);

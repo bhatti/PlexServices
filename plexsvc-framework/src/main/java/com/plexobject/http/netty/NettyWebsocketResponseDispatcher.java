@@ -1,6 +1,8 @@
 package com.plexobject.http.netty;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 import org.apache.log4j.Logger;
@@ -33,20 +35,31 @@ public class NettyWebsocketResponseDispatcher extends
     }
 
     @Override
-    protected void doSend(Response response, String responseText) {
+    protected void doSend(Response response, Object encodedPayload) {
         try {
             if (channel.isOpen()) {
-                channel.write(new TextWebSocketFrame(responseText));
+                if (encodedPayload instanceof String) {
+                    channel.write(new TextWebSocketFrame(
+                            (String) encodedPayload));
+                } else if (encodedPayload instanceof byte[]) {
+                    channel.write(new BinaryWebSocketFrame(Unpooled
+                            .copiedBuffer((byte[]) encodedPayload)));
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unknown encoded payload for response "
+                                    + encodedPayload);
+                }
                 channel.flush();
             } else {
                 throw new IllegalStateException(
-                        "channel is closed, cannot send " + responseText);
+                        "channel is closed, cannot send " + encodedPayload);
             }
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to send " + responseText + ", " + this, e);
+                logger.debug("Failed to send " + encodedPayload + ", " + this,
+                        e);
             }
             throw new RuntimeException(e);
         }

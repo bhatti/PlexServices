@@ -148,7 +148,7 @@ public class EventBusToJmsBridgeTest {
                 .setEndpoint("/w")
                 .setProperties(properties)
                 .setHeaders(headers)
-                .setPayload(payload)
+                .setContents(payload)
                 .setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();

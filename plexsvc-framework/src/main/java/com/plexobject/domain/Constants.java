@@ -4,7 +4,7 @@ public interface Constants {
     public static final String SESSION_ID = "PlexSessionID";
     public static final String REMOTE_ADDRESS = "RemoteAddress";
     public static final String ACCEPT = "Accept";
-    public static final String PAYLOAD = "Payload";
+    public static final String CONTENTS = "Contents";
     public static final String METHOD = "Method";
     public static final String HTTP_PORT = "http.port";
     public static final String HTTPS_PORT = "https.port";

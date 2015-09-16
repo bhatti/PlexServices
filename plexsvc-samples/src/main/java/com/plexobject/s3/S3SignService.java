@@ -39,10 +39,10 @@ public class S3SignService implements RequestHandler {
 
             // compute the hmac on input data bytes
             byte[] rawHmac = mac.doFinal(toSign.getBytes());
-            request.getResponse().setPayload(
+            request.getResponse().setContents(
                     DatatypeConverter.printBase64Binary(rawHmac));
         } catch (Exception e) {
-            request.getResponse().setPayload(
+            request.getResponse().setContents(
                     new SignatureException("Failed to generate HMAC : "
                             + e.getMessage()));
         }

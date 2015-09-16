@@ -29,7 +29,7 @@ public class EventBusImplTest {
     private Predicate<Request> filter = new Predicate<Request>() {
         @Override
         public boolean accept(Request obj) {
-            return obj.getPayload().toString().contains("ok");
+            return obj.getContentsAs().toString().contains("ok");
         }
     };
 
@@ -46,20 +46,15 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "payload";
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setEndpoint("/w")
-                .setCodecType(CodecType.JSON)
-                .setPayload(payload)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setProperties(properties)
+                .setHeaders(headers).setEndpoint("/w")
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         bus.publish("channel", request);
         Thread.sleep(200);
-        assertEquals("payload", requests.get(0).getPayload());
+        assertEquals("payload", requests.get(0).getContentsAs());
     }
 
     @Test
@@ -68,24 +63,19 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "payload";
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setEndpoint("/w")
-                .setCodecType(CodecType.JSON)
-                .setPayload(payload)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setProperties(properties)
+                .setHeaders(headers).setEndpoint("/w")
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         bus.publish("channel", request);
         Thread.sleep(200);
         assertEquals(0, requests.size());
-        request.setPayload("ok");
+        request.setContents("ok");
         bus.publish("channel", request);
         Thread.sleep(200);
-        assertEquals("ok", requests.get(0).getPayload());
+        assertEquals("ok", requests.get(0).getContents());
     }
 
     @Test
@@ -95,15 +85,10 @@ public class EventBusImplTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "payload";
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setEndpoint("/w")
-                .setCodecType(CodecType.JSON)
-                .setPayload(payload)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setProperties(properties)
+                .setHeaders(headers).setEndpoint("/w")
+                .setCodecType(CodecType.JSON).setContents(payload)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         bus.publish("channel", request);

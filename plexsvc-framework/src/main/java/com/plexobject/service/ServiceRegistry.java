@@ -20,6 +20,7 @@ import com.plexobject.bus.impl.EventBusImpl;
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
+import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
@@ -134,7 +135,8 @@ public class ServiceRegistry implements ServiceContainer,
         addRequestHandler(new ServiceConfigDesc(h), h);
     }
 
-    public synchronized void addRequestHandler(ServiceConfigDesc config, RequestHandler h) {
+    public synchronized void addRequestHandler(ServiceConfigDesc config,
+            RequestHandler h) {
         Preconditions.requireNotNull(config, "service handler " + h
                 + " doesn't define ServiceConfig annotation");
         ServiceContainer container = serviceRegistryContainers
@@ -310,32 +312,32 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public void addInputInterceptor(Interceptor<String> interceptor) {
+    public void addInputInterceptor(Interceptor<BasePayload<String>> interceptor) {
         interceptorLifecycle.addInputInterceptor(interceptor);
     }
 
     @Override
-    public boolean removeInputInterceptor(Interceptor<String> interceptor) {
+    public boolean removeInputInterceptor(Interceptor<BasePayload<String>> interceptor) {
         return interceptorLifecycle.removeInputInterceptor(interceptor);
     }
 
     @Override
-    public Collection<Interceptor<String>> getInputInterceptors() {
+    public Collection<Interceptor<BasePayload<String>>> getInputInterceptors() {
         return interceptorLifecycle.getInputInterceptors();
     }
 
     @Override
-    public void addOutputInterceptor(Interceptor<String> interceptor) {
+    public void addOutputInterceptor(Interceptor<BasePayload<String>> interceptor) {
         interceptorLifecycle.addOutputInterceptor(interceptor);
     }
 
     @Override
-    public boolean removeOutputInterceptor(Interceptor<String> interceptor) {
+    public boolean removeOutputInterceptor(Interceptor<BasePayload<String>> interceptor) {
         return interceptorLifecycle.removeOutputInterceptor(interceptor);
     }
 
     @Override
-    public Collection<Interceptor<String>> getOutputInterceptors() {
+    public Collection<Interceptor<BasePayload<String>>> getOutputInterceptors() {
         return interceptorLifecycle.getOutputInterceptors();
     }
 
@@ -395,12 +397,12 @@ public class ServiceRegistry implements ServiceContainer,
                 .setMethod(
                         config.protocol() == Protocol.HTTP ? RequestMethod.GET
                                 : config.method()).setEndpoint(pingEndpoint)
-                .setPayloadClass(Void.class).setRecordStatsdMetrics(false)
+                .setContentsClass(Void.class).setRecordStatsdMetrics(false)
                 .setRolesAllowed(new String[0]).build();
         final RequestHandler pingHandler = new RequestHandler() {
             @Override
             public void handle(Request request) {
-                request.getResponse().setPayload(
+                request.getResponse().setContents(
                         getServiceMetricsRegistry().getServiceMetrics(h)
                                 .getSummary());
             }

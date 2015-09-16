@@ -39,7 +39,7 @@ public class DefaultHttpRequestHandler implements RequestHandler {
         if (handler == null) {
             request.getResponse().setCodecType(CodecType.TEXT);
             request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponse().setPayload(
+            request.getResponse().setContents(
                     "Unknown request received payload " + request);
             request.sendResponse(); // TODO verify if this is needed
             logger.error("PLEXSVC Unknown request '"

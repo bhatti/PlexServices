@@ -73,7 +73,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                     .setReplyEndpoint(
                             message.getJMSReplyTo() != null ? message
                                     .getJMSReplyTo().toString() : null)
-                    .setCodecType(config.codec()).setPayload(textPayload)
+                    .setCodecType(config.codec()).setContents(textPayload)
                     .setResponseDispatcher(dispatcher).build();
             if (logger.isDebugEnabled()) {
                 logger.debug("PLEXSVC Received " + textPayload + " for "

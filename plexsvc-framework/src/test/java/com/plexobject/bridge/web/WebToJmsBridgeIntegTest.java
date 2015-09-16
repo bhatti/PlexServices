@@ -262,12 +262,13 @@ public class WebToJmsBridgeIntegTest {
         headers.put("head1", "val1");
         Request request = Request.builder().setProtocol(Protocol.HTTP)
                 .setMethod(method).setEndpoint(path).setProperties(properties)
-                .setHeaders(headers).setPayload(payload)
+                .setHeaders(headers).setContents(payload)
                 .setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                     @Override
-                    protected void doSend(Response response, String payload) {
-                        reply = response.getPayload();
+                    protected void doSend(Response response,
+                            Object encodedPayload) {
+                        reply = response.getContents();
                     }
                 }).build();
         return request;

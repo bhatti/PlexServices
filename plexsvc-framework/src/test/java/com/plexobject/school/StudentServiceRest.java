@@ -7,24 +7,24 @@ import java.util.Map;
 
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 
 public class StudentServiceRest {
     private static Map<String, Student> students = new HashMap<>();
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student.class, endpoint = "/students", method = RequestMethod.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Student.class, endpoint = "/students", method = RequestMethod.POST)
     public static class SaveHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            Student student = request.getPayload();
+            Student student = request.getContentsAs();
             students.put(student.getId(), student);
-            request.getResponse().setPayload(student);
+            request.getResponse().setContents(student);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students", method = RequestMethod.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Void.class, endpoint = "/students", method = RequestMethod.GET)
     public static class QueryHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -40,11 +40,11 @@ public class StudentServiceRest {
                     list.add(student);
                 }
             }
-            request.getResponse().setPayload(list);
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/students/{studentId}", method = RequestMethod.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Void.class, endpoint = "/students/{studentId}", method = RequestMethod.GET)
     public static class GetHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -55,7 +55,7 @@ public class StudentServiceRest {
                 throw new IllegalArgumentException("student not found for "
                         + studentId + ", local " + students.keySet());
             }
-            request.getResponse().setPayload(s);
+            request.getResponse().setContents(s);
         }
     }
 

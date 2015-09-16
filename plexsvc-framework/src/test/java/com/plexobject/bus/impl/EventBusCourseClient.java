@@ -29,7 +29,7 @@ public class EventBusCourseClient {
         eventBus.subscribe(replyChannel, new RequestHandler() {
             @Override
             public void handle(Request request) {
-                Course saved = request.getPayload();
+                Course saved = request.getContentsAs();
                 promise.complete(saved);
             }
         }, null);
@@ -47,7 +47,7 @@ public class EventBusCourseClient {
         eventBus.subscribe(replyChannel, new RequestHandler() {
             @Override
             public void handle(Request request) {
-                List<Course> result = request.getPayload();
+                List<Course> result = request.getContentsAs();
                 promise.complete(result);
             }
         }, null);
@@ -65,7 +65,7 @@ public class EventBusCourseClient {
         eventBus.subscribe(replyChannel, new RequestHandler() {
             @Override
             public void handle(Request request) {
-                List<Course> result = request.getPayload();
+                List<Course> result = request.getContentsAs();
                 promise.complete(result);
             }
         }, null);
@@ -83,7 +83,7 @@ public class EventBusCourseClient {
         eventBus.subscribe(replyChannel, new RequestHandler() {
             @Override
             public void handle(Request request) {
-                Course saved = request.getPayload();
+                Course saved = request.getContentsAs();
                 promise.complete(saved);
             }
         }, null);
@@ -100,15 +100,15 @@ public class EventBusCourseClient {
         eventBus.subscribe(replyChannel, new RequestHandler() {
             @Override
             public void handle(Request request) {
-                if (request.getPayload() instanceof String) {
-                    String result = request.getPayload();
+                if (request.getContentsAs() instanceof String) {
+                    String result = request.getContentsAs();
                     promise.complete(result);
-                } else if (request.getPayload() instanceof Exception) {
-                    Exception result = request.getPayload();
+                } else if (request.getContentsAs() instanceof Exception) {
+                    Exception result = request.getContentsAs();
                     promise.completeExceptionally(result);
                 } else {
                     promise.completeExceptionally(new IllegalArgumentException(
-                            "Unexpected type " + request.getPayload()));
+                            "Unexpected type " + request.getContentsAs()));
                 }
             }
         }, null);
@@ -121,8 +121,8 @@ public class EventBusCourseClient {
         AbstractResponseDispatcher dispatcher = new EventBusResponseDispatcher(
                 eventBus, replyChannel);
         return Request.builder().setProtocol(Protocol.EVENT_BUS)
-                .setCodecType(CodecType.NONE).setMethod(RequestMethod.MESSAGE)
+                .setCodecType(CodecType.SERVICE_SPECIFIC).setMethod(RequestMethod.MESSAGE)
                 .setResponseDispatcher(dispatcher)
-                .setReplyEndpoint(replyChannel).setPayload(payload).build();
+                .setReplyEndpoint(replyChannel).setContents(payload).build();
     }
 }

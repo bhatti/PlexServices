@@ -54,12 +54,12 @@ public class BugReportServices {
                             "bugReport not found").end();
             report.setAssignedTo(assignedTo);
             bugReportRepository.save(report);
-            request.getResponse().setPayload(report);
+            request.getResponse().setContents(report);
         }
 
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "bugNumber"), @Field(name = "projectId") })
     public static class CreateBugReportService extends AbstractBugReportService
             implements RequestHandler {
@@ -71,10 +71,10 @@ public class BugReportServices {
         // any employee who is member of same project can create bug report
         @Override
         public void handle(Request request) {
-            BugReport report = request.getPayload();
+            BugReport report = request.getContentsAs();
             report.validate();
             BugReport saved = bugReportRepository.save(report);
-            request.getResponse().setPayload(saved);
+            request.getResponse().setContents(saved);
         }
 
     }
@@ -124,7 +124,7 @@ public class BugReportServices {
                             return true;
                         }
                     });
-            request.getResponse().setPayload(reports);
+            request.getResponse().setContents(reports);
         }
     }
 
@@ -174,12 +174,12 @@ public class BugReportServices {
                             return true;
                         }
                     });
-            request.getResponse().setPayload(reports);
+            request.getResponse().setContents(reports);
         }
 
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-update-bugreport-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = BugReport.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-update-bugreport-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "id"), @Field(name = "projectId") })
     public static class UpdateBugReportService extends AbstractBugReportService
             implements RequestHandler {
@@ -191,7 +191,7 @@ public class BugReportServices {
         // any employee who is member of same project can update bug report
         @Override
         public void handle(Request request) {
-            BugReport report = request.getPayload();
+            BugReport report = request.getContentsAs();
             ValidationException
                     .builder()
                     .assertNonNull(report.getId(), "undefined_id", "id",
@@ -200,11 +200,11 @@ public class BugReportServices {
                             "undefined_projectId", "projectId",
                             "projectId not specified").end();
             BugReport saved = bugReportRepository.save(report);
-            request.getResponse().setPayload(saved);
+            request.getResponse().setContents(saved);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue://create-project-bugreport-comment-service", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue://create-project-bugreport-comment-service", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "bugNumber"), @Field(name = "projectId"),
             @Field(name = "priority") })
     public static class CreateCommentService extends AbstractBugReportService
@@ -217,7 +217,7 @@ public class BugReportServices {
         // any employee who is member of same project can create comment
         @Override
         public void handle(Request request) {
-            Comment comment = request.getPayload();
+            Comment comment = request.getContentsAs();
             BugReport report = bugReportRepository.load(Long.valueOf(comment
                     .getBugId()));
             ValidationException
@@ -226,11 +226,11 @@ public class BugReportServices {
                             "project not specified").end();
             report.getComments().add(comment);
             bugReportRepository.save(report);
-            request.getResponse().setPayload(comment);
+            request.getResponse().setContents(comment);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-query-comments-service-queue", method = RequestMethod.GET, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = Comment.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-query-comments-service-queue", method = RequestMethod.GET, codec = CodecType.JSON)
     public static class QueryCommentService extends AbstractBugReportService
             implements RequestHandler {
         public QueryCommentService(BugReportRepository bugReportRepository,
@@ -252,7 +252,7 @@ public class BugReportServices {
             for (BugReport r : reports) {
                 comments.addAll(r.getComments());
             }
-            request.getResponse().setPayload(comments);
+            request.getResponse().setContents(comments);
         }
     }
 

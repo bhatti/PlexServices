@@ -28,23 +28,23 @@ public class EventBusResponseDispatcher extends AbstractResponseDispatcher {
     }
 
     @Override
-    protected void doSend(Response reply, String payload) {
+    protected void doSend(Response reply, Object encodedReply) {
         try {
             Request responseRequest = Request
                     .builder()
                     .setProtocol(Protocol.EVENT_BUS)
                     .setMethod(RequestMethod.MESSAGE)
-                    .setCodecType(CodecType.NONE)
+                    .setCodecType(CodecType.SERVICE_SPECIFIC)
                     .setResponseDispatcher(
                             reply.getRequest().getResponseDispatcher())
-                    .setPayload(reply.getPayload()).build();
+                    .setContents(reply.getContents()).build();
 
             eventBus.publish(replyTo, responseRequest);
             if (logger.isDebugEnabled()) {
-                logger.debug("Sending reply " + payload + " to " + replyTo);
+                logger.debug("Sending reply " + encodedReply + " to " + replyTo);
             }
         } catch (Exception e) {
-            logger.error("PLEXSVC Failed to send " + payload, e);
+            logger.error("PLEXSVC Failed to send " + encodedReply, e);
         }
     }
 }

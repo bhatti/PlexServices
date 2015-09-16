@@ -9,7 +9,7 @@ import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 
-@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/person", method = RequestMethod.POST, payloadClass = Person.class, codec = CodecType.JSON)
+@ServiceConfig(protocol = Protocol.HTTP, endpoint = "/person", method = RequestMethod.POST, contentsClass = Person.class, codec = CodecType.JSON)
 public class SimpleService implements RequestHandler {
     private static final Logger log = Logger.getLogger(ReverseService.class);
 
@@ -19,7 +19,7 @@ public class SimpleService implements RequestHandler {
 
     @Override
     public void handle(Request request) {
-        Person person = request.getPayload();
+        Person person = request.getContentsAs();
         log.info("Received " + person);
         if (person == null) {
             person = new Person();
@@ -28,6 +28,6 @@ public class SimpleService implements RequestHandler {
         person.setName(person.getName() + System.currentTimeMillis());
         person.setEmail(person.getEmail() + System.currentTimeMillis()
                 + "@gmail.com");
-        request.getResponse().setPayload(person);
+        request.getResponse().setContents(person);
     }
 }

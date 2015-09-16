@@ -22,9 +22,9 @@ public class AbstractResponseDispatcherTest {
     private class Dispatcher extends AbstractResponseDispatcher {
 
         @Override
-        public void doSend(Response response, String text) {
-            super.doSend(response, text);
-            payload = text;
+        public void doSend(Response response, Object encodedReply) {
+            super.doSend(response, encodedReply);
+            payload = (String) encodedReply;
         }
     }
 
@@ -32,7 +32,7 @@ public class AbstractResponseDispatcherTest {
     private final Request request = Request.builder()
             .setProtocol(Protocol.EVENT_BUS).setCodecType(CodecType.JSON)
             .setMethod(RequestMethod.MESSAGE).setResponseDispatcher(dispatcher)
-            .setPayload("payload").build();
+            .setContents("payload").build();
 
     @Before
     public void setUp() throws Exception {
@@ -42,7 +42,7 @@ public class AbstractResponseDispatcherTest {
 
     @Test
     public void testSendError() throws Exception {
-        request.getResponse().setPayload(
+        request.getResponse().setContents(
                 new AuthException("authCode", "error message"));
         dispatcher.send(request.getResponse());
         assertTrue(payload.contains("\"errorType\":\"AuthException\""));
@@ -54,7 +54,7 @@ public class AbstractResponseDispatcherTest {
     @Test
     public void testSendString() throws Exception {
         request.getResponse().setProperty(Constants.SESSION_ID, "session");
-        request.getResponse().setPayload("hello");
+        request.getResponse().setContents("hello");
         dispatcher.send(request.getResponse());
 
         assertEquals("hello", payload);
@@ -63,11 +63,11 @@ public class AbstractResponseDispatcherTest {
     @Test
     public void testSendObject() throws Exception {
         request.getResponse().setProperty(Constants.SESSION_ID, "session");
-        request.getResponse().setPayload(null);
+        request.getResponse().setContents(null);
         dispatcher.send(request.getResponse());
         assertNull(payload);
 
-        request.getResponse().setPayload(new Date(0));
+        request.getResponse().setContents(new Date(0));
         dispatcher.send(request.getResponse());
 
         assertEquals("0", payload);

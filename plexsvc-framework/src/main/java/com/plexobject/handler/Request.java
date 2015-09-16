@@ -19,10 +19,10 @@ import com.plexobject.service.RequestMethod;
  * @author shahzad bhatti
  *
  */
-public class Request extends AbstractPayload {
+public class Request extends BasePayload<Object> {
     public static class Builder {
         private Protocol protocol;
-        private Object payload;
+        private Object contents;
         private Map<String, Object> properties = new HashMap<>();
         private Map<String, Object> headers = new HashMap<>();
         private RequestMethod method;
@@ -63,8 +63,8 @@ public class Request extends AbstractPayload {
             return this;
         }
 
-        public Builder setPayload(Object payload) {
-            this.payload = payload;
+        public Builder setContents(Object payload) {
+            this.contents = payload;
             return this;
         }
 
@@ -100,7 +100,7 @@ public class Request extends AbstractPayload {
                 properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
             }
             return new Request(protocol, method, requestUri, endpoint,
-                    replyEndpoint, properties, headers, payload, codecType,
+                    replyEndpoint, properties, headers, contents, codecType,
                     responseDispatcher);
         }
 
@@ -115,7 +115,7 @@ public class Request extends AbstractPayload {
     private CodecType codecType;
     private String methodName;
     private String requestUri;
-    private Object lastSentPayload;
+    private Object lastSentContents;
 
     public Request() {
     }
@@ -197,12 +197,12 @@ public class Request extends AbstractPayload {
     }
 
     public synchronized void sendResponse() {
-        if (response.getPayload() != null) {
-            if (response.getPayload() == lastSentPayload) {
+        if (response.getContents() != null) {
+            if (response.getContents() == lastSentContents) {
                 throw new IllegalStateException("Response already sent "
-                        + response.getPayload());
+                        + response.getContents());
             }
-            lastSentPayload = response.getPayload();
+            lastSentContents = response.getContents();
             responseDispatcher.send(response);
         }
     }
@@ -212,8 +212,8 @@ public class Request extends AbstractPayload {
     public void handleUnknown(String key, Object value) {
         if (value instanceof String || value instanceof Number
                 || value instanceof Boolean || value instanceof Character) {
-            if (Constants.PAYLOAD.equals(key)) {
-                payload = value;
+            if (Constants.CONTENTS.equals(key)) {
+                contents = value;
             } else {
                 setProperty(key, value);
             }
@@ -230,7 +230,7 @@ public class Request extends AbstractPayload {
         return "Request [method=" + method + ", requestUri=" + requestUri
                 + ", endpoint=" + endpoint + ", properties=" + properties
                 + ", headers=" + headers + ", createdAt=" + createdAt
-                + ", payload=" + payload + "]";
+                + ", contents=" + contents + "]";
     }
 
     public static Builder builder() {
@@ -243,5 +243,10 @@ public class Request extends AbstractPayload {
 
     public void setMethodName(String methodName) {
         this.methodName = methodName;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getContentsAs() {
+        return (T) contents;
     }
 }

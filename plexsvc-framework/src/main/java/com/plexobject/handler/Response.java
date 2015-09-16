@@ -12,7 +12,7 @@ import com.plexobject.http.HttpResponse;
  * @author shahzad bhatti
  *
  */
-public class Response extends AbstractPayload {
+public class Response extends BasePayload<Object> {
     public static final String[] HEADER_PROPERTIES = new String[] {
             HttpResponse.STATUS, HttpResponse.LOCATION, Constants.SESSION_ID };
     private CodecType codecType;
@@ -79,9 +79,14 @@ public class Response extends AbstractPayload {
         return codecType;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getContentsAs() {
+        return (T) contents;
+    }
+
     @Override
     public String toString() {
-        return "Response getPayload()=" + getPayload() + "]";
+        return "Response getContents()=" + getContents() + "]";
     }
 
 }

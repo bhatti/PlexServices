@@ -42,12 +42,12 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     private static ServiceRegistry serviceRegistry;
     private List<Request> requests = new ArrayList<>();
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = TestUser.class, endpoint = "/path", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = TestUser.class, endpoint = "/path", method = RequestMethod.GET, codec = CodecType.JSON, rolesAllowed = "employee")
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request request) {
             requests.add(request);
-            request.getResponse().setPayload(request.getPayload());
+            request.getResponse().setContents(request.getContents());
         }
     }
 

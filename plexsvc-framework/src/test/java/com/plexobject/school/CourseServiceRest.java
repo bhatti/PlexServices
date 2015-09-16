@@ -15,30 +15,30 @@ import com.plexobject.validation.ValidationException;
 public class CourseServiceRest {
     private static Map<String, Course> courses = new HashMap<>();
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course.class, endpoint = "/courses", method = RequestMethod.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Course.class, endpoint = "/courses", method = RequestMethod.POST)
     public static class SaveHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            Course course = request.getPayload();
+            Course course = request.getContentsAs();
             courses.put(course.getId(), course);
-            request.getResponse().setPayload(course);
+            request.getResponse().setContents(course);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Customer[].class, endpoint = "/customers", method = RequestMethod.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Customer[].class, endpoint = "/customers", method = RequestMethod.POST)
     public static class CustomersHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            Customer[] list = request.getPayload();
-            request.getResponse().setPayload(list);
+            Customer[] list = request.getContentsAs();
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Student[].class, endpoint = "/courses/enroll", method = RequestMethod.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Student[].class, endpoint = "/courses/enroll", method = RequestMethod.POST)
     public static class EnrollHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            Student[] students = request.getPayload();
+            Student[] students = request.getContentsAs();
 
             List<Course> list = new ArrayList<>();
             for (Student student : students) {
@@ -50,11 +50,11 @@ public class CourseServiceRest {
                     }
                 }
             }
-            request.getResponse().setPayload(list);
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/students/{studentId}", method = RequestMethod.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Void.class, endpoint = "/courses/students/{studentId}", method = RequestMethod.GET)
     public static class CoursesForStudentHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -65,11 +65,11 @@ public class CourseServiceRest {
                     list.add(course);
                 }
             }
-            request.getResponse().setPayload(list);
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses", method = RequestMethod.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Void.class, endpoint = "/courses", method = RequestMethod.GET)
     public static class QueryHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -85,11 +85,11 @@ public class CourseServiceRest {
                     list.add(course);
                 }
             }
-            request.getResponse().setPayload(list);
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/{courseId}", method = RequestMethod.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Void.class, endpoint = "/courses/{courseId}", method = RequestMethod.GET)
     public static class GetHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
@@ -99,23 +99,23 @@ public class CourseServiceRest {
                 throw new IllegalArgumentException("course not found for "
                         + courseId + ", local " + courses.keySet());
             }
-            request.getResponse().setPayload(c);
+            request.getResponse().setContents(c);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Course[].class, endpoint = "/courses/create", method = RequestMethod.POST)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Course[].class, endpoint = "/courses/create", method = RequestMethod.POST)
     public static class CreateHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            Course[] list = request.getPayload();
+            Course[] list = request.getContentsAs();
             for (Course c : list) {
                 courses.put(c.getId(), c);
             }
-            request.getResponse().setPayload(list);
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.HTTP, payloadClass = Void.class, endpoint = "/courses/error", method = RequestMethod.GET)
+    @ServiceConfig(protocol = Protocol.HTTP, contentsClass = Void.class, endpoint = "/courses/error", method = RequestMethod.GET)
     public static class ErrorHandler implements RequestHandler {
         @Override
         public void handle(Request request) {

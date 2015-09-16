@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.service.AroundInterceptor;
@@ -13,8 +14,8 @@ import com.plexobject.service.InterceptorsLifecycle;
 public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
     private final List<Interceptor<Request>> requestInterceptors = new ArrayList<>();
     private final List<Interceptor<Response>> responseInterceptors = new ArrayList<>();
-    private final List<Interceptor<String>> inputInterceptors = new ArrayList<>();
-    private final List<Interceptor<String>> outputInterceptors = new ArrayList<>();
+    private final List<Interceptor<BasePayload<String>>> inputInterceptors = new ArrayList<>();
+    private final List<Interceptor<BasePayload<String>>> outputInterceptors = new ArrayList<>();
     private AroundInterceptor aroundInterceptor;
     private boolean hasRequestInterceptors;
     private boolean hasResponseInterceptors;
@@ -117,7 +118,8 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      * @param interceptor
      */
     @Override
-    public synchronized void addInputInterceptor(Interceptor<String> interceptor) {
+    public synchronized void addInputInterceptor(
+            Interceptor<BasePayload<String>> interceptor) {
         if (!inputInterceptors.contains(interceptor)) {
             inputInterceptors.add(interceptor);
         }
@@ -132,7 +134,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized boolean removeInputInterceptor(
-            Interceptor<String> interceptor) {
+            Interceptor<BasePayload<String>> interceptor) {
         int ndx = inputInterceptors.indexOf(interceptor);
         if (ndx != -1) {
             inputInterceptors.remove(ndx);
@@ -149,7 +151,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      * @return
      */
     @Override
-    public synchronized Collection<Interceptor<String>> getInputInterceptors() {
+    public synchronized Collection<Interceptor<BasePayload<String>>> getInputInterceptors() {
         return inputInterceptors;
     }
 
@@ -161,7 +163,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized void addOutputInterceptor(
-            Interceptor<String> interceptor) {
+            Interceptor<BasePayload<String>> interceptor) {
         if (!outputInterceptors.contains(interceptor)) {
             outputInterceptors.add(interceptor);
         }
@@ -176,7 +178,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized boolean removeOutputInterceptor(
-            Interceptor<String> interceptor) {
+            Interceptor<BasePayload<String>> interceptor) {
         int ndx = outputInterceptors.indexOf(interceptor);
         if (ndx != -1) {
             outputInterceptors.remove(ndx);
@@ -192,7 +194,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      * @return
      */
     @Override
-    public synchronized Collection<Interceptor<String>> getOutputInterceptors() {
+    public synchronized Collection<Interceptor<BasePayload<String>>> getOutputInterceptors() {
         return outputInterceptors;
     }
 

@@ -27,21 +27,21 @@ public class EventBusCourseService {
 
     static Map<String, Course> courses = new HashMap<>();
 
-    @ServiceConfig(protocol = Protocol.EVENT_BUS, payloadClass = Course.class, endpoint = COURSES_SAVE, method = RequestMethod.MESSAGE)
+    @ServiceConfig(protocol = Protocol.EVENT_BUS, contentsClass = Course.class, endpoint = COURSES_SAVE, method = RequestMethod.MESSAGE)
     public static class SaveHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            Course course = request.getPayload();
+            Course course = request.getContentsAs();
             courses.put(course.getId(), course);
-            request.getResponse().setPayload(course);
+            request.getResponse().setContents(course);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.EVENT_BUS, payloadClass = Student[].class, endpoint = COURSES_ENROLL, method = RequestMethod.MESSAGE)
+    @ServiceConfig(protocol = Protocol.EVENT_BUS, contentsClass = Student[].class, endpoint = COURSES_ENROLL, method = RequestMethod.MESSAGE)
     public static class EnrollHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            List<Student> students = request.getPayload();
+            List<Student> students = request.getContentsAs();
 
             List<Course> list = new ArrayList<>();
             for (Student student : students) {
@@ -53,40 +53,40 @@ public class EventBusCourseService {
                     }
                 }
             }
-            request.getResponse().setPayload(list);
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.EVENT_BUS, payloadClass = Void.class, endpoint = GET_COURSES_FOR_STUDENT_ID, method = RequestMethod.MESSAGE)
+    @ServiceConfig(protocol = Protocol.EVENT_BUS, contentsClass = Void.class, endpoint = GET_COURSES_FOR_STUDENT_ID, method = RequestMethod.MESSAGE)
     public static class CoursesForStudentHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            String studentId = request.getPayload();
+            String studentId = request.getContentsAs();
             List<Course> list = new ArrayList<>();
             for (Course course : courses.values()) {
                 if (course.getStudentIds().contains(studentId)) {
                     list.add(course);
                 }
             }
-            request.getResponse().setPayload(list);
+            request.getResponse().setContents(list);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.EVENT_BUS, payloadClass = Void.class, endpoint = GET_COURSE, method = RequestMethod.MESSAGE)
+    @ServiceConfig(protocol = Protocol.EVENT_BUS, contentsClass = Void.class, endpoint = GET_COURSE, method = RequestMethod.MESSAGE)
     public static class GetHandler implements RequestHandler {
         @Override
         public void handle(Request request) {
-            String courseId = request.getPayload();
+            String courseId = request.getContentsAs();
             Course c = courses.get(courseId);
             if (c == null) {
                 throw new IllegalArgumentException("course not found for "
                         + courseId + ", local " + courses.keySet());
             }
-            request.getResponse().setPayload(c);
+            request.getResponse().setContents(c);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.EVENT_BUS, payloadClass = Void.class, endpoint = COURSE_ERROR, method = RequestMethod.MESSAGE)
+    @ServiceConfig(protocol = Protocol.EVENT_BUS, contentsClass = Void.class, endpoint = COURSE_ERROR, method = RequestMethod.MESSAGE)
     public static class ErrorHandler implements RequestHandler {
         @Override
         public void handle(Request request) {

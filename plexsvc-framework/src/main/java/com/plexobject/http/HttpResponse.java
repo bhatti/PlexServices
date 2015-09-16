@@ -284,7 +284,7 @@ public interface HttpResponse {
 
     void setStatus(int sc);
 
-    void send(String contents) throws IOException;
+    void send(Object contents) throws IOException;
 
     void sendError(int sc, String msg) throws IOException;
 }

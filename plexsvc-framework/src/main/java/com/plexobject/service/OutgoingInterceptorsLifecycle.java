@@ -2,6 +2,7 @@ package com.plexobject.service;
 
 import java.util.Collection;
 
+import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Response;
 
 public interface OutgoingInterceptorsLifecycle {
@@ -12,7 +13,7 @@ public interface OutgoingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    void addOutputInterceptor(Interceptor<String> interceptor);
+    void addOutputInterceptor(Interceptor<BasePayload<String>> interceptor);
 
     /**
      * This method remove interceptor for raw JSON/XML output before it's send
@@ -20,7 +21,7 @@ public interface OutgoingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    boolean removeOutputInterceptor(Interceptor<String> interceptor);
+    boolean removeOutputInterceptor(Interceptor<BasePayload<String>> interceptor);
 
     /**
      * This method returns interceptors for raw JSON/XML output before it's send
@@ -28,7 +29,7 @@ public interface OutgoingInterceptorsLifecycle {
      * 
      * @return
      */
-    Collection<Interceptor<String>> getOutputInterceptors();
+    Collection<Interceptor<BasePayload<String>>> getOutputInterceptors();
 
     /**
      * This method returns true if output interceptors exist

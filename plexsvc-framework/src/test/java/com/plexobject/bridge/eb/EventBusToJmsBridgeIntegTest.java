@@ -153,7 +153,7 @@ public class EventBusToJmsBridgeIntegTest {
             @Override
             public void handle(Request request) {
                 try {
-                    TestUser u = request.getPayload();
+                    TestUser u = request.getContentsAs();
                     name.append(u.name);
                     latch.countDown();
                 } catch (Exception e) {
@@ -179,15 +179,10 @@ public class EventBusToJmsBridgeIntegTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "message";
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setPayload(payload)
-                .setCodecType(CodecType.JSON)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setEndpoint("/w")
+                .setProperties(properties).setHeaders(headers)
+                .setContents(payload).setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -222,9 +217,9 @@ public class EventBusToJmsBridgeIntegTest {
         eb.subscribe("mychannel", new RequestHandler() {
             @Override
             public void handle(Request request) {
-                TestUser u = request.getPayload();
+                TestUser u = request.getContentsAs();
                 name.append(u.name);
-                request.getResponse().setPayload("ted");
+                request.getResponse().setContents("ted");
                 request.sendResponse();
                 // request.getDispatcher().send(request.getResponse());
                 latch.countDown();
@@ -237,7 +232,7 @@ public class EventBusToJmsBridgeIntegTest {
                 new Handler<Response>() {
                     @Override
                     public void handle(Response resp) {
-                        reply.append((String) resp.getPayload());
+                        reply.append((String) resp.getContentsAs());
                         latch.countDown();
                     }
                 });

@@ -25,7 +25,7 @@ public class ServiceConfigDescTest {
         ServiceConfigDesc desc = new ServiceConfigDesc(WebService.class);
         assertEquals(RequestMethod.GET, desc.method());
         assertEquals(Protocol.HTTP, desc.protocol());
-        assertEquals(Void.class, desc.payloadClass());
+        assertEquals(Void.class, desc.contentsClass());
         assertEquals(CodecType.JSON, desc.codec());
         assertEquals("1.0", desc.version());
         assertEquals("/w", desc.endpoint());
@@ -39,7 +39,7 @@ public class ServiceConfigDescTest {
         ServiceConfigDesc desc = new ServiceConfigDesc(new WebService());
         assertEquals(RequestMethod.GET, desc.method());
         assertEquals(Protocol.HTTP, desc.protocol());
-        assertEquals(Void.class, desc.payloadClass());
+        assertEquals(Void.class, desc.contentsClass());
         assertEquals(CodecType.JSON, desc.codec());
         assertEquals("1.0", desc.version());
         assertEquals("/w", desc.endpoint());
@@ -55,7 +55,7 @@ public class ServiceConfigDescTest {
         builder.setCodecType(CodecType.XML);
         builder.setMethod(RequestMethod.PUT);
         builder.setProtocol(Protocol.WEBSOCKET);
-        builder.setPayloadClass(Void.class);
+        builder.setContentsClass(Void.class);
         builder.setVersion("2");
         builder.setEndpoint("/ws");
         builder.setRecordStatsdMetrics(false);
@@ -63,7 +63,7 @@ public class ServiceConfigDescTest {
         ServiceConfigDesc desc = builder.build();
         assertEquals(RequestMethod.PUT, desc.method());
         assertEquals(Protocol.WEBSOCKET, desc.protocol());
-        assertEquals(Void.class, desc.payloadClass());
+        assertEquals(Void.class, desc.contentsClass());
         assertEquals(CodecType.XML, desc.codec());
         assertEquals("2", desc.version());
         assertEquals("/ws", desc.endpoint());
@@ -79,7 +79,7 @@ public class ServiceConfigDescTest {
         ServiceConfigDesc desc = builder.build();
         assertEquals(RequestMethod.GET, desc.method());
         assertEquals(Protocol.HTTP, desc.protocol());
-        assertEquals(Void.class, desc.payloadClass());
+        assertEquals(Void.class, desc.contentsClass());
         assertEquals(CodecType.JSON, desc.codec());
         assertEquals("", desc.version());
         assertEquals("/w", desc.endpoint());

@@ -34,7 +34,7 @@ public class JmsSender {
                     @Override
                     public void handle(Response reply) {
                         try {
-                            String payload = reply.getPayload();
+                            String payload = reply.getContentsAs();
                             log.info(payload);
                         } finally {
                             jmsContainer.stop();

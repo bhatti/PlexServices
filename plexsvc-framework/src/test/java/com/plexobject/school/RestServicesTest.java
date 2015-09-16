@@ -17,6 +17,7 @@ import com.plexobject.deploy.AutoDeployer;
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
+import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.SecurityAuthorizer;
@@ -48,16 +49,16 @@ public class RestServicesTest {
         serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
         AutoDeployer.addHandlersFromPackages(serviceRegistry,
                 "com.plexobject.school");
-        serviceRegistry.addInputInterceptor(new Interceptor<String>() {
+        serviceRegistry.addInputInterceptor(new Interceptor<BasePayload<String>>() {
             @Override
-            public String intercept(String input) {
+            public BasePayload<String> intercept(BasePayload<String> input) {
                 System.out.println("INPUT: " + input);
                 return input;
             }
         });
-        serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
+        serviceRegistry.addOutputInterceptor(new Interceptor<BasePayload<String>>() {
             @Override
-            public String intercept(String output) {
+            public BasePayload<String> intercept(BasePayload<String> output) {
                 System.out.println("OUTPUT: " + output);
                 return output;
             }

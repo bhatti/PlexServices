@@ -54,12 +54,20 @@ public class ServletResponseDispatcher extends HttpResponseDispatcher {
             }
 
             @Override
-            public void send(String contents) throws IOException {
+            public void send(Object contents) throws IOException {
                 if (location != null || errorMessage != null) {
                     return;
                 }
+                if (contents instanceof String) {
+                    resp.getOutputStream()
+                            .write(((String) contents).getBytes());
+                } else if (contents instanceof byte[]) {
+                    resp.getOutputStream().write((byte[]) contents);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unknown encoded contents " + contents);
+                }
 
-                resp.getOutputStream().write(contents.getBytes());
                 resp.getOutputStream().flush();
             }
 

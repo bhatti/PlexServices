@@ -29,7 +29,7 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
     }
 
     @Override
-    protected void doSend(Response reply, String payload) {
+    protected void doSend(Response reply, Object encodedReply) {
         String location = (String) reply
                 .getStringProperty(HttpResponse.LOCATION);
         if (location != null) {
@@ -63,10 +63,11 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
                 }
             }
 
-            response.send(payload);
+            response.send(encodedReply);
             handledable.setHandled(true);
         } catch (Exception e) {
-            logger.error("PLEXSVC Failed to write " + payload + ", " + this, e);
+            logger.error("PLEXSVC Failed to write " + encodedReply + ", "
+                    + this, e);
         }
     }
 

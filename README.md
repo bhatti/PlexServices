@@ -85,7 +85,7 @@ PlexServices uses Netty server as embedded web server to host web services by de
 
 ### Defining a REST service for creating a user
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.HTTP, contentsClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
@@ -97,9 +97,9 @@ RequestHandler {
 
   @Override
     public void handle(Request request) {
-      User user = request.getPayload();
+      User user = request.getContentsAs();
       User saved = userRepository.save(user);
-      request.getResponse().setPayload(saved);
+      request.getResponse().setContents(saved);
     }
 }
 
@@ -134,7 +134,7 @@ PlexServices supports both war files and embedded Netty server for hosting webse
 which is default setting.
 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, contentsClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
@@ -146,9 +146,9 @@ RequestHandler {
 
   @Override
     public void handle(Request request) {
-      User user = request.getPayload();
+      User user = request.getContentsAs();
       User saved = userRepository.save(user);
-      request.getResponse().setPayload(saved);
+      request.getResponse().setContents(saved);
     }
 }
 ```
@@ -159,7 +159,7 @@ Note that we use URL format for endpoints for websockets, but it can be in any f
 ```javascript 
 var ws = new WebSocket("ws://127.0.0.1:8181/ws");
 ws.onopen = function() {
-  var req = {"payload":"", "endpoint":"/login", "method":"POST", 
+  var req = {"contents":"", "endpoint":"/login", "method":"POST", 
     "username":"scott", "password":"pass"};
   ws.send(JSON.stringify(req));
 };
@@ -177,7 +177,7 @@ ws.onerror = function(err) {
 
 ### Defining a JMS service for creating a user
 ```java 
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, contentsClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", 
       method = RequestMethod.MESSAGE, 
       concurrency = 10,
@@ -190,9 +190,9 @@ public class CreateUserService extends AbstractUserService implements RequestHan
 
     @Override
     public void handle(Request request) {
-      User user = request.getPayload();
+      User user = request.getContentsAs();
       User saved = userRepository.save(user);
-      request.getResponse().setPayload(saved);
+      request.getResponse().setContents(saved);
     }
 }
 ```
@@ -203,7 +203,7 @@ Note: concurrency parameter specifies number of concurrent consumers that would 
 
 ### Defining a REST service with parameterized URLs
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.HTTP, contentsClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = RequestMethod.POST, 
       codec = CodecType.JSON)
@@ -218,9 +218,9 @@ public class CreateBugReportService extends AbstractBugReportService implements 
 
     @Override
       public void handle(Request request) {
-        BugReport report = request.getPayload();
+        BugReport report = request.getContentsAs();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponse().setPayload(saved);
+        request.getResponse().setContents(saved);
       }
 }
 ```
@@ -232,7 +232,7 @@ classes into JSON when delivering messages over HTTP.
 
 ### Defining a Websocket based service to create bug-report 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, contentsClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", 
       method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugNumber"),
@@ -247,9 +247,9 @@ public class CreateBugReportService extends AbstractBugReportService implements
 
     @Override
     public void handle(Request request) {
-        BugReport report = request.getPayload();
+        BugReport report = request.getContentsAs();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponse().setPayload(saved);
+        request.getResponse().setContents(saved);
     }
 
 }
@@ -264,7 +264,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
  
 var ws = new WebSocket("ws://127.0.0.1:8181/ws");
 ws.onopen = function() {
-  var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", 
+  var req = {"contents":{"title":"my title", "description":"my description","bugNumber":"story-201", 
     "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", 
       "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
   ws.send(JSON.stringify(req));
@@ -286,7 +286,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
 
 ### Defining a REST service for querying users
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.HTTP, contentsClass = User.class, 
   rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.GET, 
   codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements
@@ -302,7 +302,7 @@ public QueryUserService(UserRepository userRepository) {
             return true;
         }
         });
-    request.getResponse().setPayload(users);
+    request.getResponse().setContents(users);
   }
 }
 ```
@@ -310,7 +310,7 @@ public QueryUserService(UserRepository userRepository) {
 
 ### Defining a JMS service for querying users
 ```java 
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, contentsClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", 
       method = RequestMethod.MESSAGE, 
       codec = CodecType.JSON)
@@ -326,7 +326,7 @@ public class QueryUserService extends AbstractUserService implements RequestHand
                 return true;
             }
             });
-        request.getResponse().setPayload(users);
+        request.getResponse().setContents(users);
       }
 }
 ```
@@ -353,7 +353,7 @@ public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
     String data = request.getProperty("data");
-    request.getResponse().setPayload(data);
+    request.getResponse().setContents(data);
   }
 }
 
@@ -413,7 +413,7 @@ public class StaticFileServer implements RequestHandler {
             final File filePath = new File(webFolder, path);
 
             if (!filePath.getCanonicalPath().startsWith(canonicalDirPath)) {
-                request.getResponse().setPayload(
+                request.getResponse().setContents(
                         new IOException("Relative path '" + path
                                 + "' not allowed"));
             }
@@ -425,11 +425,11 @@ public class StaticFileServer implements RequestHandler {
                         HttpResponse.CONTENT_TYPE, contentType);
             }
             //
-            request.getResponse().setPayload(
+            request.getResponse().setContents(
                     new String(Files.readAllBytes(Paths.get(filePath
                             .toURI()))));
         } catch (IOException e) {
-            request.getResponse().setPayload(e);
+            request.getResponse().setContents(e);
         }
     }
 }
@@ -466,17 +466,17 @@ public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
 You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.
 
 ```java  
-serviceRegistry.addInputInterceptor(new Interceptor<String>() {
+serviceRegistry.addInputInterceptor(new Interceptor<BaseRequest<String>>() {
   @Override
-  public String intercept(String input) {
+  public BaseRequest<String> intercept(BaseRequest<String> input) {
       logger.info("INPUT: " + input);
       return input;
   }
 });
 
-serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
+serviceRegistry.addOutputInterceptor(new Interceptor<BaseRequest<String>>() {
   @Override
-  public String intercept(String output) {
+  public BaseRequest<String> intercept(BaseRequest<String> output) {
       logger.info("OUTPUT: " + output);
       return output;
   }
@@ -612,13 +612,13 @@ version of Spring with PlexServices.
 PlexServices uses EventBus for publishing or subscribing messages within the same process. You can define services with protocol of Protocol.EVENT_BUS and add it to service-registry similar to other services, e.g.
 
 ```java 
-@ServiceConfig(protocol = Protocol.EVENT_BUS, payloadClass = Course.class, endpoint = "courses", method = RequestMethod.MESSAGE)
+@ServiceConfig(protocol = Protocol.EVENT_BUS, contentsClass = Course.class, endpoint = "courses", method = RequestMethod.MESSAGE)
 public static class SaveHandler implements RequestHandler {
     @Override
     public void handle(Request request) {
-        Course course = request.getPayload();
+        Course course = request.getContentsAs();
         courses.put(course.getId(), course);
-        request.getResponse().setPayload(course);
+        request.getResponse().setContents(course);
     }
 }
 
@@ -631,7 +631,7 @@ You can also use EventBus directly without service registry, e.g.
 ```java 
 EventBus eb = new EventBusImpl();
 // publishing a request
-Request req = Request.builder().setPayload("test").build();
+Request req = Request.builder().setContents("test").build();
 eb.publish("test-channel", req);
 
 // subscribing to receive requests
@@ -970,7 +970,7 @@ public class QuoteStreamer extends TimerTask {
                     e.getValue());
             for (Request r : requests) {
                 try {
-                    r.getResponse().setPayload(q);
+                    r.getResponse().setContents(q);
                     r.sendResponse();
                 } catch (Exception ex) {
                     remove(e.getKey(), d);
@@ -991,7 +991,7 @@ Here is a javascript client that subscribes to the streaming quotes:
       var lasts = {};
       ws.onmessage = function (evt) {
         //console.log(evt.data);
-        var quote = JSON.parse(evt.data).payload;
+        var quote = JSON.parse(evt.data).contents;
         var d = new Date(quote.timestamp);
         $('#time').text(d.toString());
         $('#company').text(quote.company);

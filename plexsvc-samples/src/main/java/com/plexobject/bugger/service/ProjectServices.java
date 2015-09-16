@@ -27,7 +27,7 @@ public class ProjectServices {
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "queue://{scope}-create-projects-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = Project.class, rolesAllowed = "Manager", endpoint = "queue://{scope}-create-projects-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "projectCode") })
     public static class CreateProjectService extends AbstractProjectService
             implements RequestHandler {
@@ -39,14 +39,14 @@ public class ProjectServices {
         // Each employee and project lead assigned to a single project
         @Override
         public void handle(Request request) {
-            Project project = request.getPayload();
+            Project project = request.getContentsAs();
             Project saved = projectRepository.save(project);
-            request.getResponse().setPayload(saved);
+            request.getResponse().setContents(saved);
         }
 
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-query-projects-service", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = Project.class, rolesAllowed = "Employee", endpoint = "queue://{scope}-query-projects-service", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     public static class QueryProjectService extends AbstractProjectService
             implements RequestHandler {
         public QueryProjectService(ProjectRepository projectRepository,
@@ -64,11 +64,11 @@ public class ProjectServices {
                             return true;
                         }
                     });
-            request.getResponse().setPayload(projects);
+            request.getResponse().setContents(projects);
         }
     }
 
-    @ServiceConfig(protocol = Protocol.JMS, payloadClass = Project.class, rolesAllowed = "Manager", endpoint = "queue://{scope}-update-project-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
+    @ServiceConfig(protocol = Protocol.JMS, contentsClass = Project.class, rolesAllowed = "Manager", endpoint = "queue://{scope}-update-project-service-queue", method = RequestMethod.MESSAGE, codec = CodecType.JSON)
     @RequiredFields({ @Field(name = "id") })
     public static class UpdateProjectService extends AbstractProjectService
             implements RequestHandler {
@@ -79,9 +79,9 @@ public class ProjectServices {
 
         @Override
         public void handle(Request request) {
-            Project project = request.getPayload();
+            Project project = request.getContentsAs();
             Project saved = projectRepository.save(project);
-            request.getResponse().setPayload(saved);
+            request.getResponse().setContents(saved);
         }
     }
 
@@ -109,7 +109,7 @@ public class ProjectServices {
                 project.setProjectLead(assignedTo);
             }
             project.addMember(assignedTo);
-            request.getResponse().setPayload(project);
+            request.getResponse().setContents(project);
         }
     }
 
@@ -139,7 +139,7 @@ public class ProjectServices {
             } else {
                 project.removeMember(assignedTo);
             }
-            request.getResponse().setPayload(project);
+            request.getResponse().setContents(project);
         }
     }
 
