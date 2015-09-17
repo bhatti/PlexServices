@@ -208,8 +208,6 @@ public class TestWebUtils {
 
     public static byte[] getBinary(String target, String... headers)
             throws IOException {
-        System.out.println("****** getBinary " + target);
-
         URL url = new URL(target);
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -268,8 +266,8 @@ public class TestWebUtils {
         OutputStream out = con.getOutputStream();
         if (contents != null) {
             out.write(contents.getBytes());
+            out.flush();
         }
-        out.flush();
         out.close();
         String cookie = con.getHeaderField("Set-Cookie");
         return Pair.of(getResponse(con), cookie);

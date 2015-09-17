@@ -20,3 +20,5 @@
 
 1.0 - Added support for JavaWS based services 
 
+1.1 - Added support for sending binary files
+

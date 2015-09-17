@@ -162,8 +162,9 @@ public class WSDelegateHandler implements RequestHandler {
                 if (methodsByName.size() == 1) {
                     method = defaultMethodInfo.iMethod.getName();
                 } else {
-                    throw new IllegalArgumentException("Unsupported request "
-                            + request.getProperties());
+                    throw new IllegalArgumentException(
+                            "Could not find method-name in request "
+                                    + request.getProperties());
                 }
             }
             //

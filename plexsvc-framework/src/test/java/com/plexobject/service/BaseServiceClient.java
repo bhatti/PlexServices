@@ -26,12 +26,21 @@ public class BaseServiceClient {
     public static class RequestBuilder {
         final Map<String, Object> request = new HashMap<>();
 
+        public RequestBuilder() {
+
+        }
+
         public RequestBuilder(String method, Object payload) {
-            request.put(method, payload);
+            if (payload != null) {
+                request.put(method, payload);
+            }
         }
 
         public String encode() {
-            return getObjectCodec().encode(request);
+            if (request.size() > 0) {
+                return getObjectCodec().encode(request);
+            }
+            return null;
         }
 
         @Override

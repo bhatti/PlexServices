@@ -63,7 +63,7 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file (build/libs/plexsvc-framework-1.0-SNAPSHOT.jar) manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-1.1-SNAPSHOT.jar) manually in your application.
 
 
 
@@ -74,7 +74,7 @@ cd plexsvc-framework
 - JMS API 1.1
 
 ##Version
-- 1.0
+- 1.1
 
 ##License
 - MIT
@@ -433,6 +433,10 @@ public class StaticFileServer implements RequestHandler {
         }
     }
 }
+
+You can send both text files or binary files. For example, you can call request.getResponse().setContents() method with String parameter to send back text files or byte[] parameter to send back binary files.
+
+
 ```
   The end-point can contain variables such as scope that are initialized from configuration.
 

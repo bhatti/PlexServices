@@ -1,4 +1,4 @@
-package com.plexobject.handler.ws;
+package com.plexobject.handler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -102,7 +102,7 @@ public class FileDownloadTest {
                     public BasePayload<String> intercept(
                             BasePayload<String> input) {
                         System.out.println("INPUT\n\tHeaders: "
-                                + input.getHeaders() + "\n"
+                                + input.getHeaders() + ", "
                                 + input.getProperties() + "\n\tPayload: "
                                 + input.getContents() + "\n\n");
                         return input;
@@ -114,7 +114,7 @@ public class FileDownloadTest {
                     public BasePayload<String> intercept(
                             BasePayload<String> output) {
                         System.out.println("OUTPUT Headers: "
-                                + output.getHeaders() + "\n"
+                                + output.getHeaders() + ", "
                                 + output.getProperties() + "\n\n");
                         return output;
                     }
