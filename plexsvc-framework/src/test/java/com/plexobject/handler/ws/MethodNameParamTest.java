@@ -100,7 +100,7 @@ public class MethodNameParamTest {
         props.setProperty(Constants.HTTP_PORT,
                 String.valueOf(BaseServiceClient.DEFAULT_PORT));
         Configuration config = new Configuration(props);
-        if (true || config.getBoolean("logTest")) {
+        if (config.getBoolean("logTest")) {
             BasicConfigurator.configure();
             LogManager.getRootLogger().setLevel(Level.INFO);
         }
