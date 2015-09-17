@@ -72,8 +72,8 @@ public class FileDownloadTest {
                     contentType = Files.probeContentType(filePath.toPath());
                 }
                 if (contentType != null) {
-                    request.getResponse().setProperty(
-                            HttpResponse.CONTENT_TYPE, contentType);
+                    request.getResponse().setHeader(HttpResponse.CONTENT_TYPE,
+                            contentType);
                 }
                 //
                 request.getResponse().setContents(
