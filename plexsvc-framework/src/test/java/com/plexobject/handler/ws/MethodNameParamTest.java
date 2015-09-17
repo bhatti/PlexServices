@@ -147,12 +147,6 @@ public class MethodNameParamTest {
     }
 
     @Test
-    public void testWait() throws Exception {
-        Thread.sleep(100000000L);
-    }
-
-    /*
-    @Test
     public void testGetById() throws Exception {
         RequestBuilder request = new RequestBuilder("getById", 100L);
         String resp = TestWebUtils.post("http://localhost:"
@@ -183,5 +177,4 @@ public class MethodNameParamTest {
                 "{\"getByMyClassResponse\":{\"id\":300,\"name\":\"three hundred\"}}",
                 resp);
     }
-    */
 }
