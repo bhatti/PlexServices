@@ -9,6 +9,8 @@ PlexServices is designed on following design principles:
 
 - Micro framework - PlexServices is only meant for writing web and messaging services and it's not general purpose MVC framework.
 
+- Uniform interface - PlexServices uses uniform interfaces for defining services, which can be configured to be deployed via REST, websocket, JMS or intra-process event bus.
+
 - Minimal Dependencies: PlexServices depends only on a small number of external libraries for XML/JSON serialization.
 
 - Easily Configurable: PlexServices uses DRY principle using annotations for configuring services but allows them to override the properties at run-time.
@@ -40,7 +42,7 @@ PlexServices is designed on following design principles:
 
 - PlexServices also supports reactive messaging services using JMS APIs and support a number of messageing middlewares such as ActiveMQ, SwiftMQ, etc. 
 
-- PlexServices allows you to import existing JavaWS based services and expose them as REST or POX services. 
+- PlexServices allows you to import existing JaxWS/JaxRS annotations based services and expose them as REST or POX services. 
 
 - PlexServices allows you to auto-deploy services by specifying package names of services, it deploys all services automatically that implement ServiceConfig annotation.
 
@@ -61,7 +63,7 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file (build/libs/plexsvc-framework-1.0-SNAPSHOT.jar) manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-1.1-SNAPSHOT.jar) manually in your application.
 
 
 
@@ -72,7 +74,7 @@ cd plexsvc-framework
 - JMS API 1.1
 
 ##Version
-- 1.0
+- 1.1
 
 ##License
 - MIT
@@ -83,7 +85,7 @@ PlexServices uses Netty server as embedded web server to host web services by de
 
 ### Defining a REST service for creating a user
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.HTTP, contentsClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
@@ -95,9 +97,9 @@ RequestHandler {
 
   @Override
     public void handle(Request request) {
-      User user = request.getPayload();
+      User user = request.getContentsAs();
       User saved = userRepository.save(user);
-      request.getResponse().setPayload(saved);
+      request.getResponse().setContents(saved);
     }
 }
 
@@ -132,7 +134,7 @@ PlexServices supports both war files and embedded Netty server for hosting webse
 which is default setting.
 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, contentsClass = User.class, 
     rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.POST, 
     codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "username") })
@@ -144,9 +146,9 @@ RequestHandler {
 
   @Override
     public void handle(Request request) {
-      User user = request.getPayload();
+      User user = request.getContentsAs();
       User saved = userRepository.save(user);
-      request.getResponse().setPayload(saved);
+      request.getResponse().setContents(saved);
     }
 }
 ```
@@ -157,7 +159,7 @@ Note that we use URL format for endpoints for websockets, but it can be in any f
 ```javascript 
 var ws = new WebSocket("ws://127.0.0.1:8181/ws");
 ws.onopen = function() {
-  var req = {"payload":"", "endpoint":"/login", "method":"POST", 
+  var req = {"contents":"", "endpoint":"/login", "method":"POST", 
     "username":"scott", "password":"pass"};
   ws.send(JSON.stringify(req));
 };
@@ -175,7 +177,7 @@ ws.onerror = function(err) {
 
 ### Defining a JMS service for creating a user
 ```java 
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, contentsClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-create-user-service-queue", 
       method = RequestMethod.MESSAGE, 
       concurrency = 10,
@@ -188,9 +190,9 @@ public class CreateUserService extends AbstractUserService implements RequestHan
 
     @Override
     public void handle(Request request) {
-      User user = request.getPayload();
+      User user = request.getContentsAs();
       User saved = userRepository.save(user);
-      request.getResponse().setPayload(saved);
+      request.getResponse().setContents(saved);
     }
 }
 ```
@@ -201,7 +203,7 @@ Note: concurrency parameter specifies number of concurrent consumers that would 
 
 ### Defining a REST service with parameterized URLs
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.HTTP, contentsClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "/projects/{projectId}/bugreports", 
       method = RequestMethod.POST, 
       codec = CodecType.JSON)
@@ -216,9 +218,9 @@ public class CreateBugReportService extends AbstractBugReportService implements 
 
     @Override
       public void handle(Request request) {
-        BugReport report = request.getPayload();
+        BugReport report = request.getContentsAs();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponse().setPayload(saved);
+        request.getResponse().setContents(saved);
       }
 }
 ```
@@ -230,7 +232,7 @@ classes into JSON when delivering messages over HTTP.
 
 ### Defining a Websocket based service to create bug-report 
 ```java 
-@ServiceConfig(protocol = Protocol.WEBSOCKET, payloadClass = BugReport.class, 
+@ServiceConfig(protocol = Protocol.WEBSOCKET, contentsClass = BugReport.class, 
       rolesAllowed = "Employee", endpoint = "queue://{scope}-create-bugreport-service-queue", 
       method = RequestMethod.MESSAGE, codec = CodecType.JSON)
 @RequiredFields({ @Field(name = "bugNumber"),
@@ -245,9 +247,9 @@ public class CreateBugReportService extends AbstractBugReportService implements
 
     @Override
     public void handle(Request request) {
-        BugReport report = request.getPayload();
+        BugReport report = request.getContentsAs();
         BugReport saved = bugReportRepository.save(report);
-        request.getResponse().setPayload(saved);
+        request.getResponse().setContents(saved);
     }
 
 }
@@ -262,7 +264,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
  
 var ws = new WebSocket("ws://127.0.0.1:8181/ws");
 ws.onopen = function() {
-  var req = {"payload":{"title":"my title", "description":"my description","bugNumber":"story-201", 
+  var req = {"contents":{"title":"my title", "description":"my description","bugNumber":"story-201", 
     "assignedTo":"mike", "developedBy":"mike"},"PlexSessionID":"4", 
       "endpoint":"/projects/2/bugreports/2/assign", "method":"POST"};
   ws.send(JSON.stringify(req));
@@ -284,7 +286,7 @@ PlexServices automatically passes any json parameters sent as part of request, w
 
 ### Defining a REST service for querying users
 ```java 
-@ServiceConfig(protocol = Protocol.HTTP, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.HTTP, contentsClass = User.class, 
   rolesAllowed = "Administrator", endpoint = "/users", method = RequestMethod.GET, 
   codec = CodecType.JSON)
 public class QueryUserService extends AbstractUserService implements
@@ -300,7 +302,7 @@ public QueryUserService(UserRepository userRepository) {
             return true;
         }
         });
-    request.getResponse().setPayload(users);
+    request.getResponse().setContents(users);
   }
 }
 ```
@@ -308,7 +310,7 @@ public QueryUserService(UserRepository userRepository) {
 
 ### Defining a JMS service for querying users
 ```java 
-@ServiceConfig(protocol = Protocol.JMS, payloadClass = User.class, 
+@ServiceConfig(protocol = Protocol.JMS, contentsClass = User.class, 
       rolesAllowed = "Administrator", endpoint = "queue://{scope}-query-user-service-queue", 
       method = RequestMethod.MESSAGE, 
       codec = CodecType.JSON)
@@ -324,7 +326,7 @@ public class QueryUserService extends AbstractUserService implements RequestHand
                 return true;
             }
             });
-        request.getResponse().setPayload(users);
+        request.getResponse().setContents(users);
       }
 }
 ```
@@ -351,7 +353,7 @@ public class PingService implements RequestHandler {
   @Override
   public void handle(Request request) {
     String data = request.getProperty("data");
-    request.getResponse().setPayload(data);
+    request.getResponse().setContents(data);
   }
 }
 
@@ -411,7 +413,7 @@ public class StaticFileServer implements RequestHandler {
             final File filePath = new File(webFolder, path);
 
             if (!filePath.getCanonicalPath().startsWith(canonicalDirPath)) {
-                request.getResponse().setPayload(
+                request.getResponse().setContents(
                         new IOException("Relative path '" + path
                                 + "' not allowed"));
             }
@@ -423,14 +425,18 @@ public class StaticFileServer implements RequestHandler {
                         HttpResponse.CONTENT_TYPE, contentType);
             }
             //
-            request.getResponse().setPayload(
+            request.getResponse().setContents(
                     new String(Files.readAllBytes(Paths.get(filePath
                             .toURI()))));
         } catch (IOException e) {
-            request.getResponse().setPayload(e);
+            request.getResponse().setContents(e);
         }
     }
 }
+
+You can send both text files or binary files. For example, you can call request.getResponse().setContents() method with String parameter to send back text files or byte[] parameter to send back binary files.
+
+
 ```
   The end-point can contain variables such as scope that are initialized from configuration.
 
@@ -464,17 +470,17 @@ public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
 You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.
 
 ```java  
-serviceRegistry.addInputInterceptor(new Interceptor<String>() {
+serviceRegistry.addInputInterceptor(new Interceptor<BaseRequest<String>>() {
   @Override
-  public String intercept(String input) {
+  public BaseRequest<String> intercept(BaseRequest<String> input) {
       logger.info("INPUT: " + input);
       return input;
   }
 });
 
-serviceRegistry.addOutputInterceptor(new Interceptor<String>() {
+serviceRegistry.addOutputInterceptor(new Interceptor<BaseRequest<String>>() {
   @Override
-  public String intercept(String output) {
+  public BaseRequest<String> intercept(BaseRequest<String> output) {
       logger.info("OUTPUT: " + output);
       return output;
   }
@@ -607,11 +613,29 @@ version of Spring with PlexServices.
 
 
 ### EventBus for intra-process communication
-Here is an example of using EventBus publishing or subscribing messages within the same process:
+PlexServices uses EventBus for publishing or subscribing messages within the same process. You can define services with protocol of Protocol.EVENT_BUS and add it to service-registry similar to other services, e.g.
+
+```java 
+@ServiceConfig(protocol = Protocol.EVENT_BUS, contentsClass = Course.class, endpoint = "courses", method = RequestMethod.MESSAGE)
+public static class SaveHandler implements RequestHandler {
+    @Override
+    public void handle(Request request) {
+        Course course = request.getContentsAs();
+        courses.put(course.getId(), course);
+        request.getResponse().setContents(course);
+    }
+}
+
+...
+serviceRegistry.addRequestHandler(new SaveHandler());
+...
+
+```
+You can also use EventBus directly without service registry, e.g.
 ```java 
 EventBus eb = new EventBusImpl();
 // publishing a request
-Request req = Request.builder().setPayload("test").build();
+Request req = Request.builder().setContents("test").build();
 eb.publish("test-channel", req);
 
 // subscribing to receive requests
@@ -644,8 +668,8 @@ Here is a sample json file that describes mapping:
 "com.plexobject.bugger.model.User"}]
 ```
 
-### JavaWS support
-PlexServices allows you to import existing JavaWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
+### JaxWS/JaxRS annotations support
+PlexServices allows you to import existing JaxWS based services and export them as services to be deployed with web server or JMS server. For example, let's assume you have an existing service such as:
 ```java 
 import javax.jws.WebService;
 import javax.ws.rs.FormParam;
@@ -679,24 +703,37 @@ public class CourseServiceImpl implements CourseService {
     }
     @Override
     @GET
-    @Path("/courses/query")
+    @Path("/query")
     public List<Course> query(Map<String, Object> criteria) {
         . . .
         return list;
     }
+
+    @Override
+    @GET
+    public void find(@FormParam("id") Long id, @DefaultValue("all") @FormParam("type") String type) {
+        . . .
+    }
+
+    @Override
+    @Path("/path/{path1}/{path2}")
+    @GET
+    public Course getWithId(@PathParam("path1"), String @PathParam("path2")) {
+    }
+
 }
 
 ```
-You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. You can convert the JavaWS service into RequestHandler as follows:
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. If Path annotations are defined at method level, it will add class-level path, e.g. if in above example "/courses" is defined at class level and "/query" is defined at method level for query so when you call query API, you would use "/courses/query" when invoking to the API. You can convert the JaxWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
 SecurityAuthorizer securityAuthorizer = ...
 serviceRegistry = new ServiceRegistry(config);
 serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
-RequestHandlerAdapterJavaws requestHandlerAdapterJavaws = new RequestHandlerAdapterJavaws(config);
-Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapterJavaws
-                .createFromPackages("com.plexobject.handler.javaws");
+WSRequestHandlerAdapter requestHandlerAdapter = new WSRequestHandlerAdapter(config);
+Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
+                .createFromPackages("com.plexobject.handler.ws");
 for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers.entrySet()) {
   serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
 }
@@ -840,7 +877,6 @@ cd plexsvc-samples
 ./gradlew jettyRun
 ```
 
-
 ### Auto-Deploying
 In addition to specifying services manually for deployment, PlexServices provides support to scan all services 
 in your application package that implement ServiceConfig annotation and deploy them, e.g.
@@ -938,7 +974,7 @@ public class QuoteStreamer extends TimerTask {
                     e.getValue());
             for (Request r : requests) {
                 try {
-                    r.getResponse().setPayload(q);
+                    r.getResponse().setContents(q);
                     r.sendResponse();
                 } catch (Exception ex) {
                     remove(e.getKey(), d);
@@ -959,7 +995,7 @@ Here is a javascript client that subscribes to the streaming quotes:
       var lasts = {};
       ws.onmessage = function (evt) {
         //console.log(evt.data);
-        var quote = JSON.parse(evt.data).payload;
+        var quote = JSON.parse(evt.data).contents;
         var d = new Date(quote.timestamp);
         $('#time').text(d.toString());
         $('#company').text(quote.company);
@@ -1042,7 +1078,7 @@ Here is the html form that displays quotes:
 
 
 ## Sample Applications
-      You can view a full-fledged sample application under plexsvc-sample folder for detailed examples of services and various configurations.
+      You can view sample applications under plexsvc-sample folder for detailed examples of services and various configurations.
 
 ## Support or Contact
       Email bhatti AT plexobject DOT com for any questions or suggestions.
