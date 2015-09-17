@@ -434,11 +434,10 @@ public class StaticFileServer implements RequestHandler {
     }
 }
 
-You can send both text files or binary files. For example, you can call request.getResponse().setContents() method with String parameter to send back text files or byte[] parameter to send back binary files.
-
-
 ```
-  The end-point can contain variables such as scope that are initialized from configuration.
+
+The end-point can contain variables such as scope that are initialized from configuration.
+You can send both text files or binary files. For example, you can call request.getResponse().setContents() method with String parameter to send back text files or byte[] parameter to send back binary files.
 
 ### Defining role-based security
 ```java 
