@@ -64,6 +64,11 @@ public class ServiceRegistry implements ServiceContainer,
     private SecurityAuthorizer securityAuthorizer;
     private EventBus eventBus = new EventBusImpl();
 
+    // pass this as VM param -Dfile.encoding=UTF-8
+    static {
+        System.setProperty("file.encoding", "UTF-8");
+    }
+
     public ServiceRegistry(Configuration config) {
         this(config, new NettyWebContainerProvider());
     }
@@ -317,7 +322,8 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public boolean removeInputInterceptor(Interceptor<BasePayload<String>> interceptor) {
+    public boolean removeInputInterceptor(
+            Interceptor<BasePayload<String>> interceptor) {
         return interceptorLifecycle.removeInputInterceptor(interceptor);
     }
 
@@ -327,12 +333,14 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public void addOutputInterceptor(Interceptor<BasePayload<String>> interceptor) {
+    public void addOutputInterceptor(
+            Interceptor<BasePayload<String>> interceptor) {
         interceptorLifecycle.addOutputInterceptor(interceptor);
     }
 
     @Override
-    public boolean removeOutputInterceptor(Interceptor<BasePayload<String>> interceptor) {
+    public boolean removeOutputInterceptor(
+            Interceptor<BasePayload<String>> interceptor) {
         return interceptorLifecycle.removeOutputInterceptor(interceptor);
     }
 
