@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.jms.BytesMessage;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
@@ -55,11 +56,21 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
 
     @Override
     public void onMessage(Message message) {
-        TextMessage txtMessage = (TextMessage) message;
         ServiceConfigDesc config = serviceRegistry.getServiceConfig(handler);
         try {
+            String textPayload = null;
+            if (message instanceof TextMessage) {
+                TextMessage txtMessage = (TextMessage) message;
+                textPayload = txtMessage.getText();
+            } else if (message instanceof BytesMessage) {
+                BytesMessage bMessage = (BytesMessage) message;
+                byte data[] = new byte[(int) bMessage.getBodyLength()];
+                bMessage.readBytes(data);
+                textPayload = new String(data);
+            } else {
+                throw new IllegalArgumentException("Unknown message " + message);
+            }
             Map<String, Object> params = JMSUtils.getProperties(message);
-            final String textPayload = txtMessage.getText();
 
             AbstractResponseDispatcher dispatcher = new JmsResponseDispatcher(
                     jmsContainer, message.getJMSReplyTo());

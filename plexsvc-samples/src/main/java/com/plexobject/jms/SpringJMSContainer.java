@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import javax.jms.BytesMessage;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -91,7 +92,7 @@ public class SpringJMSContainer extends BaseJMSContainer {
 
     @Override
     public Future<Response> sendReceive(final Destination destination,
-            final Map<String, Object> headers, final String reqPayload,
+            final Map<String, Object> headers, final Object reqPayload,
             final Handler<Response> handler) throws JMSException,
             NamingException {
         return doSend(destination, headers, reqPayload, buildReceiver(handler));
@@ -99,7 +100,7 @@ public class SpringJMSContainer extends BaseJMSContainer {
 
     @Override
     public void send(final Destination destination,
-            final Map<String, Object> headers, final String payload)
+            final Map<String, Object> headers, final Object payload)
             throws JMSException, NamingException {
         doSend(destination, headers, payload, null);
     }
@@ -181,7 +182,7 @@ public class SpringJMSContainer extends BaseJMSContainer {
     }
 
     private Future<Response> doSend(final Destination destination,
-            final Map<String, Object> headers, final String reqPayload,
+            final Map<String, Object> headers, final Object reqPayload,
             final Function<Message, Future<Response>> beforeSend)
             throws JMSException {
         if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
@@ -200,13 +201,23 @@ public class SpringJMSContainer extends BaseJMSContainer {
                     throws JMSException {
                 MessageProducer producer = session.createProducer(destination);
                 try {
-                    Message reqMsg = session.createTextMessage(reqPayload);
-                    JMSUtils.setHeaders(headers, reqMsg);
+                    Message m = null;
+                    if (reqPayload instanceof String) {
+                        m = session.createTextMessage((String) reqPayload);
+                    } else if (reqPayload instanceof byte[]) {
+                        m = session.createBytesMessage();
+                        ((BytesMessage) m).writeBytes((byte[]) reqPayload);
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Unknown encoded payload for response "
+                                        + reqPayload);
+                    }
+                    JMSUtils.setHeaders(headers, m);
                     Future<Response> promise = null;
                     if (beforeSend != null) {
-                        promise = beforeSend.invoke(reqMsg);
+                        promise = beforeSend.invoke(m);
                     }
-                    producer.send(reqMsg);
+                    producer.send(m);
                     return promise;
                 } catch (Exception e) {
                     throw new ListenerExecutionFailedException(

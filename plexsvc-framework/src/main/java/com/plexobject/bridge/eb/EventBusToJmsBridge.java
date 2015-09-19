@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.jms.BytesMessage;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
@@ -136,10 +137,21 @@ public class EventBusToJmsBridge implements Lifecycle {
 
         @Override
         public void onMessage(Message message) {
-            TextMessage txtMessage = (TextMessage) message;
             try {
+                String textPayload = null;
+                if (message instanceof TextMessage) {
+                    TextMessage txtMessage = (TextMessage) message;
+                    textPayload = txtMessage.getText();
+                } else if (message instanceof BytesMessage) {
+                    BytesMessage bMessage = (BytesMessage) message;
+                    byte data[] = new byte[(int) bMessage.getBodyLength()];
+                    bMessage.readBytes(data);
+                    textPayload = new String(data);
+                } else {
+                    throw new IllegalArgumentException("Unknown message "
+                            + message);
+                }
                 Map<String, Object> params = JMSUtils.getProperties(message);
-                final String textPayload = txtMessage.getText();
                 AbstractResponseDispatcher dispatcher = message.getJMSReplyTo() != null ? new JmsResponseDispatcher(
                         jmsContainer, message.getJMSReplyTo())
                         : new AbstractResponseDispatcher() {
@@ -160,8 +172,9 @@ public class EventBusToJmsBridge implements Lifecycle {
                 Request request = Request.builder().setProtocol(Protocol.JMS)
                         .setMethod(RequestMethod.MESSAGE).setProperties(params)
                         .setEndpoint(entry.getTarget())
-                        .setCodecType(entry.getCodecType()).setContents(payload)
-                        .setResponseDispatcher(dispatcher).build();
+                        .setCodecType(entry.getCodecType())
+                        .setContents(payload).setResponseDispatcher(dispatcher)
+                        .build();
                 logger.info("PlexSVC Forwarding " + entry + "'s message "
                         + request);
                 eb.publish(entry.getTarget(), request);
