@@ -115,10 +115,10 @@ public class MethodNameParamTest {
         }
         //
         serviceRegistry
-                .addInputInterceptor(new Interceptor<BasePayload<String>>() {
+                .addInputInterceptor(new Interceptor<BasePayload<Object>>() {
                     @Override
-                    public BasePayload<String> intercept(
-                            BasePayload<String> input) {
+                    public BasePayload<Object> intercept(
+                            BasePayload<Object> input) {
                         System.out.println("INPUT\n\tHeaders: "
                                 + input.getHeaders() + ", "
                                 + input.getProperties() + "\n\tPayload: "
@@ -127,10 +127,10 @@ public class MethodNameParamTest {
                     }
                 });
         serviceRegistry
-                .addOutputInterceptor(new Interceptor<BasePayload<String>>() {
+                .addOutputInterceptor(new Interceptor<BasePayload<Object>>() {
                     @Override
-                    public BasePayload<String> intercept(
-                            BasePayload<String> output) {
+                    public BasePayload<Object> intercept(
+                            BasePayload<Object> output) {
                         System.out.println("OUTPUT Headers: "
                                 + output.getHeaders() + ", "
                                 + output.getProperties() + "\n\n");

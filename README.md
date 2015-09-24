@@ -469,17 +469,17 @@ public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
 You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.
 
 ```java  
-serviceRegistry.addInputInterceptor(new Interceptor<BaseRequest<String>>() {
+serviceRegistry.addInputInterceptor(new Interceptor<BaseRequest<Object>>() {
   @Override
-  public BaseRequest<String> intercept(BaseRequest<String> input) {
+  public BaseRequest<Object> intercept(BaseRequest<Object> input) {
       logger.info("INPUT: " + input);
       return input;
   }
 });
 
-serviceRegistry.addOutputInterceptor(new Interceptor<BaseRequest<String>>() {
+serviceRegistry.addOutputInterceptor(new Interceptor<BaseRequest<Object>>() {
   @Override
-  public BaseRequest<String> intercept(BaseRequest<String> output) {
+  public BaseRequest<Object> intercept(BaseRequest<Object> output) {
       logger.info("OUTPUT: " + output);
       return output;
   }

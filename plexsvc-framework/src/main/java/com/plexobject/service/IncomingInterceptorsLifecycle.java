@@ -19,7 +19,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    void addInputInterceptor(Interceptor<BasePayload<String>> interceptor);
+    void addInputInterceptor(Interceptor<BasePayload<Object>> interceptor);
 
     /**
      * This method remove interceptor for raw JSON/XML input before it's decoded
@@ -27,7 +27,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    boolean removeInputInterceptor(Interceptor<BasePayload<String>> interceptor);
+    boolean removeInputInterceptor(Interceptor<BasePayload<Object>> interceptor);
 
     /**
      * This method returns interceptors for raw JSON/XML input before it's
@@ -35,7 +35,7 @@ public interface IncomingInterceptorsLifecycle {
      * 
      * @return
      */
-    Collection<Interceptor<BasePayload<String>>> getInputInterceptors();
+    Collection<Interceptor<BasePayload<Object>>> getInputInterceptors();
 
     /**
      * This method returns true if input interceptors exist

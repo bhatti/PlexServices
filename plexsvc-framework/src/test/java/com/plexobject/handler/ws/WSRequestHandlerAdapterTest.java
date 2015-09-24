@@ -91,28 +91,31 @@ public class WSRequestHandlerAdapterTest {
         };
         serviceRegistry = new ServiceRegistry(config);
         serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
-        requestHandlerAdapter = new WSRequestHandlerAdapter(
-                serviceRegistry);
+        requestHandlerAdapter = new WSRequestHandlerAdapter(serviceRegistry);
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
                 .createFromPackages("com.plexobject.handler.ws");
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
         }
-        serviceRegistry.addInputInterceptor(new Interceptor<BasePayload<String>>() {
-            @Override
-            public BasePayload<String> intercept(BasePayload<String> input) {
-                System.out.println("INPUT: " + input);
-                return input;
-            }
-        });
-        serviceRegistry.addOutputInterceptor(new Interceptor<BasePayload<String>>() {
-            @Override
-            public BasePayload<String> intercept(BasePayload<String> output) {
-                System.out.println("OUTPUT: " + output);
-                return output;
-            }
-        });
+        serviceRegistry
+                .addInputInterceptor(new Interceptor<BasePayload<Object>>() {
+                    @Override
+                    public BasePayload<Object> intercept(
+                            BasePayload<Object> input) {
+                        System.out.println("INPUT: " + input);
+                        return input;
+                    }
+                });
+        serviceRegistry
+                .addOutputInterceptor(new Interceptor<BasePayload<Object>>() {
+                    @Override
+                    public BasePayload<Object> intercept(
+                            BasePayload<Object> output) {
+                        System.out.println("OUTPUT: " + output);
+                        return output;
+                    }
+                });
         if (config.getBoolean("debug")) {
             serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
                 @Override
@@ -304,8 +307,8 @@ public class WSRequestHandlerAdapterTest {
     public void testGetMethodNameAndPayload() throws Exception {
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
                 .create(new TestServiceImpl(), "/test", RequestMethod.POST);
-        WSDelegateHandler handler = (WSDelegateHandler) handlers
-                .values().iterator().next();
+        WSDelegateHandler handler = (WSDelegateHandler) handlers.values()
+                .iterator().next();
         String[] stringPayloads = { "{get:'   '}", "{get:  { }  }",
                 "{'get':'myid'}", "{  \"get\"\n\t:'myid  \n' \t}",
                 "  {' get' : \"myid\"  } \n\t", "{\"get':'myid' \n }\t" };

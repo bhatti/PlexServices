@@ -154,7 +154,7 @@ public class ServiceInvocationHelper {
         // apply input interceptors
         if (serviceRegistry.hasInputInterceptors()) {
             BasePayload payload = request;
-            for (Interceptor<BasePayload<String>> interceptor : serviceRegistry
+            for (Interceptor<BasePayload<Object>> interceptor : serviceRegistry
                     .getInputInterceptors()) {
                 payload = interceptor.intercept(payload);
             }

@@ -13,7 +13,7 @@ public interface OutgoingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    void addOutputInterceptor(Interceptor<BasePayload<String>> interceptor);
+    void addOutputInterceptor(Interceptor<BasePayload<Object>> interceptor);
 
     /**
      * This method remove interceptor for raw JSON/XML output before it's send
@@ -21,7 +21,7 @@ public interface OutgoingInterceptorsLifecycle {
      * 
      * @param interceptor
      */
-    boolean removeOutputInterceptor(Interceptor<BasePayload<String>> interceptor);
+    boolean removeOutputInterceptor(Interceptor<BasePayload<Object>> interceptor);
 
     /**
      * This method returns interceptors for raw JSON/XML output before it's send
@@ -29,7 +29,7 @@ public interface OutgoingInterceptorsLifecycle {
      * 
      * @return
      */
-    Collection<Interceptor<BasePayload<String>>> getOutputInterceptors();
+    Collection<Interceptor<BasePayload<Object>>> getOutputInterceptors();
 
     /**
      * This method returns true if output interceptors exist

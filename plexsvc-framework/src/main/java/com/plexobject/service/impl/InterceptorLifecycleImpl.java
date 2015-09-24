@@ -14,8 +14,8 @@ import com.plexobject.service.InterceptorsLifecycle;
 public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
     private final List<Interceptor<Request>> requestInterceptors = new ArrayList<>();
     private final List<Interceptor<Response>> responseInterceptors = new ArrayList<>();
-    private final List<Interceptor<BasePayload<String>>> inputInterceptors = new ArrayList<>();
-    private final List<Interceptor<BasePayload<String>>> outputInterceptors = new ArrayList<>();
+    private final List<Interceptor<BasePayload<Object>>> inputInterceptors = new ArrayList<>();
+    private final List<Interceptor<BasePayload<Object>>> outputInterceptors = new ArrayList<>();
     private AroundInterceptor aroundInterceptor;
     private boolean hasRequestInterceptors;
     private boolean hasResponseInterceptors;
@@ -119,7 +119,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized void addInputInterceptor(
-            Interceptor<BasePayload<String>> interceptor) {
+            Interceptor<BasePayload<Object>> interceptor) {
         if (!inputInterceptors.contains(interceptor)) {
             inputInterceptors.add(interceptor);
         }
@@ -134,7 +134,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized boolean removeInputInterceptor(
-            Interceptor<BasePayload<String>> interceptor) {
+            Interceptor<BasePayload<Object>> interceptor) {
         int ndx = inputInterceptors.indexOf(interceptor);
         if (ndx != -1) {
             inputInterceptors.remove(ndx);
@@ -151,7 +151,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      * @return
      */
     @Override
-    public synchronized Collection<Interceptor<BasePayload<String>>> getInputInterceptors() {
+    public synchronized Collection<Interceptor<BasePayload<Object>>> getInputInterceptors() {
         return inputInterceptors;
     }
 
@@ -163,7 +163,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized void addOutputInterceptor(
-            Interceptor<BasePayload<String>> interceptor) {
+            Interceptor<BasePayload<Object>> interceptor) {
         if (!outputInterceptors.contains(interceptor)) {
             outputInterceptors.add(interceptor);
         }
@@ -178,7 +178,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      */
     @Override
     public synchronized boolean removeOutputInterceptor(
-            Interceptor<BasePayload<String>> interceptor) {
+            Interceptor<BasePayload<Object>> interceptor) {
         int ndx = outputInterceptors.indexOf(interceptor);
         if (ndx != -1) {
             outputInterceptors.remove(ndx);
@@ -194,7 +194,7 @@ public class InterceptorLifecycleImpl implements InterceptorsLifecycle {
      * @return
      */
     @Override
-    public synchronized Collection<Interceptor<BasePayload<String>>> getOutputInterceptors() {
+    public synchronized Collection<Interceptor<BasePayload<Object>>> getOutputInterceptors() {
         return outputInterceptors;
     }
 

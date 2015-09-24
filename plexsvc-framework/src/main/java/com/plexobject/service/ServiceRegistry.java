@@ -312,32 +312,35 @@ public class ServiceRegistry implements ServiceContainer,
     }
 
     @Override
-    public void addInputInterceptor(Interceptor<BasePayload<String>> interceptor) {
+    public void addInputInterceptor(Interceptor<BasePayload<Object>> interceptor) {
         interceptorLifecycle.addInputInterceptor(interceptor);
     }
 
     @Override
-    public boolean removeInputInterceptor(Interceptor<BasePayload<String>> interceptor) {
+    public boolean removeInputInterceptor(
+            Interceptor<BasePayload<Object>> interceptor) {
         return interceptorLifecycle.removeInputInterceptor(interceptor);
     }
 
     @Override
-    public Collection<Interceptor<BasePayload<String>>> getInputInterceptors() {
+    public Collection<Interceptor<BasePayload<Object>>> getInputInterceptors() {
         return interceptorLifecycle.getInputInterceptors();
     }
 
     @Override
-    public void addOutputInterceptor(Interceptor<BasePayload<String>> interceptor) {
+    public void addOutputInterceptor(
+            Interceptor<BasePayload<Object>> interceptor) {
         interceptorLifecycle.addOutputInterceptor(interceptor);
     }
 
     @Override
-    public boolean removeOutputInterceptor(Interceptor<BasePayload<String>> interceptor) {
+    public boolean removeOutputInterceptor(
+            Interceptor<BasePayload<Object>> interceptor) {
         return interceptorLifecycle.removeOutputInterceptor(interceptor);
     }
 
     @Override
-    public Collection<Interceptor<BasePayload<String>>> getOutputInterceptors() {
+    public Collection<Interceptor<BasePayload<Object>>> getOutputInterceptors() {
         return interceptorLifecycle.getOutputInterceptors();
     }
 

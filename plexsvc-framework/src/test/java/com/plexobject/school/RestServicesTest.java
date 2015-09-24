@@ -49,20 +49,24 @@ public class RestServicesTest {
         serviceRegistry.setSecurityAuthorizer(securityAuthorizer);
         AutoDeployer.addHandlersFromPackages(serviceRegistry,
                 "com.plexobject.school");
-        serviceRegistry.addInputInterceptor(new Interceptor<BasePayload<String>>() {
-            @Override
-            public BasePayload<String> intercept(BasePayload<String> input) {
-                System.out.println("INPUT: " + input);
-                return input;
-            }
-        });
-        serviceRegistry.addOutputInterceptor(new Interceptor<BasePayload<String>>() {
-            @Override
-            public BasePayload<String> intercept(BasePayload<String> output) {
-                System.out.println("OUTPUT: " + output);
-                return output;
-            }
-        });
+        serviceRegistry
+                .addInputInterceptor(new Interceptor<BasePayload<Object>>() {
+                    @Override
+                    public BasePayload<Object> intercept(
+                            BasePayload<Object> input) {
+                        System.out.println("INPUT: " + input);
+                        return input;
+                    }
+                });
+        serviceRegistry
+                .addOutputInterceptor(new Interceptor<BasePayload<Object>>() {
+                    @Override
+                    public BasePayload<Object> intercept(
+                            BasePayload<Object> output) {
+                        System.out.println("OUTPUT: " + output);
+                        return output;
+                    }
+                });
         serviceRegistry.start();
         Thread.sleep(500);
     }

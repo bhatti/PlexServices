@@ -47,7 +47,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
                 && outgoingInterceptorsLifecycle.hasOutputInterceptors()) {
             BasePayload payload = response;
             payload.setContents(encodedReply);
-            for (Interceptor<BasePayload<String>> interceptor : outgoingInterceptorsLifecycle
+            for (Interceptor<BasePayload<Object>> interceptor : outgoingInterceptorsLifecycle
                     .getOutputInterceptors()) {
                 payload = interceptor.intercept(payload);
             }
@@ -59,16 +59,20 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
 
     protected Object encode(Response response) {
         Object payload = response.getContents();
-
-        if (response.getCodecType() == CodecType.SERVICE_SPECIFIC) {
-            if (response.getContents() instanceof byte[]) {
-                return (byte[]) response.getContents();
-            } else if (response.getContents() instanceof String) {
-                return response.getContentsAs();
+        CodecType codecType = response.getCodecType();
+        if (codecType == CodecType.SERVICE_SPECIFIC) {
+            if (payload instanceof byte[]) {
+                return (byte[]) payload;
+            } else if (payload instanceof String) {
+                return payload;
+            } else {
+                logger.warn("Unknown content " + payload);
+                codecType = CodecType.JSON;
             }
-        } else if (payload instanceof Exception) {
+        }
+        if (payload instanceof Exception) {
             logger.warn("PLEXSVC " + getClass().getSimpleName()
-                    + " Error received " + payload);
+                    + " Error received " + payload, (Exception) payload);
             Map<String, Object> resp = ExceptionUtils
                     .toErrors((Exception) payload);
             for (String name : Response.HEADER_PROPERTIES) {
@@ -77,13 +81,13 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
                     response.setProperty(name, value);
                 }
             }
-            return ObjectCodecFactory.getInstance()
-                    .getObjectCodec(response.getCodecType()).encode(resp);
-        } else if (response.getContents() instanceof String) {
-            return response.getContentsAs();
+            return ObjectCodecFactory.getInstance().getObjectCodec(codecType)
+                    .encode(resp);
+        } else if (payload instanceof String) {
+            return payload;
         }
         ObjectCodec codec = ObjectCodecFactory.getInstance().getObjectCodec(
-                response.getCodecType());
+                codecType);
         if (codec == null) {
             throw new IllegalArgumentException("Codec not supported for "
                     + response.getCodecType());
