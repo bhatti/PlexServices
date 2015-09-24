@@ -64,6 +64,11 @@ public class ServiceRegistry implements ServiceContainer,
     private SecurityAuthorizer securityAuthorizer;
     private EventBus eventBus = new EventBusImpl();
 
+    // pass this as VM param -Dfile.encoding=UTF-8
+    static {
+        System.setProperty("file.encoding", "UTF-8");
+    }
+
     public ServiceRegistry(Configuration config) {
         this(config, new NettyWebContainerProvider());
     }

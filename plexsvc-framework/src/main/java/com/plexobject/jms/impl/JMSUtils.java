@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import javax.jms.BytesMessage;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -182,14 +183,26 @@ public class JMSUtils {
         final MessageListener listener = new MessageListener() {
             @Override
             public void onMessage(Message message) {
-                TextMessage respMsg = (TextMessage) message;
                 try {
+                    String textPayload = null;
+                    if (message instanceof TextMessage) {
+                        TextMessage txtMessage = (TextMessage) message;
+                        textPayload = txtMessage.getText();
+                    } else if (message instanceof BytesMessage) {
+                        BytesMessage bMessage = (BytesMessage) message;
+                        byte data[] = new byte[(int) bMessage.getBodyLength()];
+                        bMessage.readBytes(data);
+                        textPayload = new String(data);
+                    } else {
+                        throw new IllegalArgumentException("Unknown message "
+                                + message);
+                    }
+
                     final Map<String, Object> params = JMSUtils
                             .getProperties(message);
-                    final String respText = respMsg.getText();
                     // TODO 6/26/15 setting request to null, verify
                     final Response response = new Response(null, params,
-                            params, respText, null);
+                            params, textPayload, null);
                     reqHandler.handle(response);
                     promise.complete(response);
                 } catch (Exception e) {
