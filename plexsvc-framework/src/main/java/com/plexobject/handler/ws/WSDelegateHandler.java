@@ -49,7 +49,8 @@ public class WSDelegateHandler implements RequestHandler {
                     + "', available " + methodsByName.keySet() + ", request "
                     + request.getContents());
             throw new ServiceInvocationException("Unknown method '"
-                    + methodAndPayload.first + "'"+ methodsByName.keySet(), HttpResponse.SC_NOT_FOUND);
+                    + methodAndPayload.first + "'" + methodsByName.keySet(),
+                    HttpResponse.SC_NOT_FOUND);
         }
         // set method name
         request.setMethodName(methodInfo.iMethod.getName());
@@ -114,19 +115,21 @@ public class WSDelegateHandler implements RequestHandler {
             serviceRegistry.getSecurityAuthorizer().authorize(request, null);
         }
         try {
-            Map<String, Object> response = new HashMap<>();
             Object result = methodInfo.implMethod.invoke(delegate, args);
             if (logger.isDebugEnabled()) {
                 logger.debug("****PLEXSVC MLN Invoking "
                         + methodInfo.iMethod.getName() + " with "
                         + Arrays.toString(args) + ", result " + result);
             }
-            if (result != null) {
-                response.put(responseTag, result);
-            } else {
-                response.put(responseTag, null);
+            if (request.getResponse().getContents() == null) {
+                Map<String, Object> response = new HashMap<>();
+                if (result != null) {
+                    response.put(responseTag, result);
+                } else {
+                    response.put(responseTag, null);
+                }
+                request.getResponse().setContents(response);
             }
-            request.getResponse().setContents(response);
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof Exception) {
                 throw (Exception) e.getCause();

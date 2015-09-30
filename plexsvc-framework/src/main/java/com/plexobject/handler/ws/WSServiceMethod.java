@@ -2,7 +2,6 @@ package com.plexobject.handler.ws;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +43,7 @@ class WSServiceMethod {
 
         boolean canBuild() {
             int annotationParameterIndex = 0;
-            Parameter[] methodParams = implMethod.getParameters();
+            Class<?>[] methodParamTypes = implMethod.getParameterTypes();
             for (Annotation[] annotations : implMethod
                     .getParameterAnnotations()) {
                 String paramName = null;
@@ -71,10 +70,10 @@ class WSServiceMethod {
                 if (paramName != null) {
                     params.add(new Param(ParamType.QUERY_FORM_PARAM, paramName,
                             defValue));
-                } else if (methodParams[annotationParameterIndex].getType() == Request.class) {
+                } else if (methodParamTypes[annotationParameterIndex] == Request.class) {
                     params.add(new Param(ParamType.REQUEST_PARAM, null, null));
                     hasMultipleParamTypes = true;
-                } else if (methodParams[annotationParameterIndex].getType() == Map.class) {
+                } else if (methodParamTypes[annotationParameterIndex] == Map.class) {
                     params.add(new Param(ParamType.MAP_PARAM, null, null));
                     hasMultipleParamTypes = true;
                 } else if (numObjectParams == 0
