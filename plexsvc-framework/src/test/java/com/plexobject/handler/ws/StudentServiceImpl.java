@@ -27,7 +27,6 @@ public class StudentServiceImpl implements StudentService {
         String studentId = (String) criteria.get("studentId");
         String courseId = (String) criteria.get("courseId");
         List<Student> list = new ArrayList<>();
-
         for (Student student : students.values()) {
             if (studentId != null && student.getId().equals(studentId)) {
                 list.add(student);

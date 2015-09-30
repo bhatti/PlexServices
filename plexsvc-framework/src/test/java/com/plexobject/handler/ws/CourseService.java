@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
+import com.plexobject.handler.Request;
 import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
 import com.plexobject.school.Student;
@@ -54,4 +55,13 @@ public interface CourseService {
     Integer nullInteger();
 
     Course nullCourse();
+
+    Course paramAndObject(String courseId, Course course);
+
+    Course paramAndObjectRequest(String courseId, Course course, Request request);
+
+    Course paramAndObjectRequestAndMap(String courseId, Course course,
+            Request request, Map<String, Object> params);
+
+    Course paramAndRequest(String courseId, Request request);
 }

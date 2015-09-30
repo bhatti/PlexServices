@@ -18,6 +18,22 @@ import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.json.JsonObjectCodec;
 
 public class ReflectUtils {
+    public enum ParamType {
+        QUERY_FORM_PARAM, JSON_PARAM, REQUEST_PARAM, MAP_PARAM, UNKNOWN_PARAM
+    }
+
+    public static class Param {
+        public final String name;
+        public final ParamType type;
+        public Object defaultValue;
+
+        public Param(ParamType type, String name, Object defaultValue) {
+            this.type = type;
+            this.name = name;
+            this.defaultValue = defaultValue;
+        }
+    }
+
     public static Collection<Class<?>> getAnnotatedClasses(
             Class<? extends Annotation> klass, String... pkgNames) {
         Set<Class<?>> serviceClasses = new HashSet<>();
@@ -33,52 +49,57 @@ public class ReflectUtils {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static Object[] decode(Method m,
-            Pair<String, String>[] paramNamesAndDefaults,
-            Map<String, Object> props) throws Exception {
-        Pair<Class, Type>[] pairs = new Pair[m.getParameterTypes().length];
-        for (int i = 0; i < m.getParameterTypes().length; i++) {
-            pairs[i] = Pair.of((Class) m.getParameterTypes()[i],
-                    m.getGenericParameterTypes()[i]);
+    public static Object[] decode(Method m, Map<String, Object> props,
+            Param[] params, String payload, ObjectCodec codec) throws Exception {
+        Pair<Class, Type>[] types = new Pair[m.getParameterTypes().length];
+        if (params == null) {
+            params = new Param[types.length];
         }
-        return decode(pairs, paramNamesAndDefaults, props);
+        for (int i = 0; i < m.getParameterTypes().length; i++) {
+            types[i] = Pair.of((Class) m.getParameterTypes()[i],
+                    m.getGenericParameterTypes()[i]);
+            if (params[i] == null) {
+                params[i] = new Param(ParamType.JSON_PARAM, null, null);
+            }
+        }
+        return decode(types, props, params, payload, codec);
     }
 
     @SuppressWarnings("rawtypes")
     public static Object[] decode(Pair<Class, Type>[] types,
-            Pair<String, String>[] paramNamesAndDefaults,
-            Map<String, Object> props) throws Exception {
+            Map<String, Object> props, Param[] params, String payload,
+            ObjectCodec codec) throws Exception {
         Object[] args = new Object[types.length];
         for (int i = 0; i < types.length; i++) {
             Class<?> klass = types[i].first;
-            Object value = props.get(paramNamesAndDefaults[i].first);
-            if (value == null) {
-                value = paramNamesAndDefaults[i].second;
+            Type pKlass = types[i].second;
+
+            switch (params[i].type) {
+            case QUERY_FORM_PARAM:
+                Object value = props.get(params[i].name);
+                if (value == null) {
+                    value = params[i].defaultValue;
+                }
+                args[i] = decodePrimitive(value, klass);
+                break;
+            case JSON_PARAM:
+                args[i] = decode(payload, klass, pKlass, codec);
+                break;
+            case MAP_PARAM: // TODO this can be improved to make sure we pass
+                            // header/properties properly if payload is given
+                            // and when multiple parameters are passed
+                if (payload != null && payload.length() > 0) {
+                    args[i] = decode(payload, klass, pKlass, codec);
+                } else {
+                    args[i] = params[i].defaultValue;
+                }
+                break;
+            case REQUEST_PARAM:
+                args[i] = params[i].defaultValue;
+                break;
+            default:
+                break;
             }
-            args[i] = decodePrimitive(value, klass);
-        }
-        return args;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static Object[] decode(String payload, Method m, ObjectCodec codec)
-            throws Exception {
-        Pair<Class, Type>[] pairs = new Pair[m.getParameterTypes().length];
-        for (int i = 0; i < m.getParameterTypes().length; i++) {
-            pairs[i] = Pair.of((Class) m.getParameterTypes()[i],
-                    m.getGenericParameterTypes()[i]);
-        }
-        return decode(payload, pairs, codec);
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static Object[] decode(String payload, Pair<Class, Type>[] params,
-            ObjectCodec codec) throws Exception {
-        Object[] args = new Object[params.length];
-        for (int i = 0; i < params.length; i++) {
-            Class<?> klass = params[i].first;
-            Type pKlass = params[i].second;
-            args[i] = decode(payload, klass, pKlass, codec);
         }
         return args;
     }

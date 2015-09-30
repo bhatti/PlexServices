@@ -2,6 +2,7 @@ package com.plexobject.handler.ws;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
@@ -264,6 +265,37 @@ public class WSRequestHandlerAdapterTest {
         assertEquals(2, result.size());
         assertEquals("1", result.get(0).getAccountNumber());
         assertEquals("2", result.get(1).getAccountNumber());
+    }
+
+    @Test
+    public void testParamAndObject() throws Exception {
+        Course course = buildCourse();
+        Course result = courseService.paramAndObject("100", course);
+        assertEquals(course, result);
+    }
+
+    @Test
+    public void testParamAndObjectAndRequest() throws Exception {
+        Course course = buildCourse();
+
+        Course result = courseService
+                .paramAndObjectRequest("100", course, null);
+        assertEquals(course, result);
+    }
+
+    @Test
+    public void testParamAndRequest() throws Exception {
+        Course result = courseService.paramAndRequest("100", null);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testParamAndObjectRequestAndMap() throws Exception {
+        Course course = buildCourse();
+
+        Course result = courseService.paramAndObjectRequestAndMap("100",
+                course, null, null);
+        assertEquals(course, result);
     }
 
     @Test

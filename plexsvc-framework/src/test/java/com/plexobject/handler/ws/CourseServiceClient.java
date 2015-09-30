@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jws.WebMethod;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 
+import com.plexobject.handler.Request;
 import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
 import com.plexobject.school.Student;
@@ -138,6 +142,67 @@ public class CourseServiceClient extends BaseServiceClient implements
         try {
             return getWithReturnType("methodName=get&courseId=" + courseId,
                     Course.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @WebMethod(exclude = true)
+    @Override
+    @POST
+    public Course paramAndObject(@FormParam("courseId") String courseId,
+            Course course) {
+        RequestBuilder request = new RequestBuilder("paramAndObject", course);
+        try {
+            Course resp = post(COURSE_SERVICE + "?courseId=" + courseId,
+                    request, Course.class, null);
+            return resp;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @WebMethod(exclude = true)
+    @Override
+    @POST
+    public Course paramAndObjectRequest(@FormParam("courseId") String courseId,
+            Course course, Request incomingRequest) {
+        RequestBuilder request = new RequestBuilder("paramAndObjectRequest",
+                course);
+        try {
+            Course resp = post(COURSE_SERVICE + "?courseId=" + courseId,
+                    request, Course.class, null);
+            return resp;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @WebMethod(exclude = true)
+    @Override
+    @GET
+    public Course paramAndRequest(@FormParam("courseId") String courseId,
+            Request incomingRequest) {
+        try {
+            return getWithReturnType("methodName=paramAndRequest&courseId="
+                    + courseId, Course.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @WebMethod(exclude = true)
+    @Override
+    @GET
+    public Course paramAndObjectRequestAndMap(String courseId, Course course,
+            Request incomingRequest, Map<String, Object> params) {
+        RequestBuilder request = new RequestBuilder(
+                "paramAndObjectRequestAndMap", course);
+
+        try {
+            Course resp = post(COURSE_SERVICE + "?courseId=" + courseId,
+                    request, Course.class, null);
+            return resp;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

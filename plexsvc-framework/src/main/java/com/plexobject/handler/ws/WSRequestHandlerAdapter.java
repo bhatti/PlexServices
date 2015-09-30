@@ -1,31 +1,21 @@
 package com.plexobject.handler.ws;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
-import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 import org.apache.log4j.Logger;
 
-import com.plexobject.domain.Pair;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.RequestHandlerAdapter;
 import com.plexobject.service.Protocol;
@@ -108,39 +98,42 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
         for (final Method implMethod : serviceClass.getMethods()) {
             Method iMethod = getExported(webService, implMethod);
             if (iMethod != null) {
-                String methodPath = getMethodPath(
+                WSServiceMethod.Builder methodBuilder = new WSServiceMethod.Builder();
+                methodBuilder.iMethod = iMethod;
+                methodBuilder.implMethod = implMethod;
+                methodBuilder.methodPath = getMethodPath(
                         defaultServiceConfig.endpoint(), iMethod, implMethod);
-                if (methodPath == null) {
-                    methodPath = defaultServiceConfig.endpoint();
+                if (methodBuilder.methodPath == null) {
+                    methodBuilder.methodPath = defaultServiceConfig.endpoint();
                 }
-                Pair<String, String>[] paramNamesAndDefaults = getParamsAndDefaults(implMethod);
-                if (implMethod.getParameterTypes().length > 1
-                        && paramNamesAndDefaults.length != implMethod
-                                .getParameterTypes().length) {
-                    continue; // skip methods that take more than one parameter
-                              // and does not defined form or query parameters
-                }
-                RequestMethod requestMethod = getRequestMethod(iMethod,
+                //
+                methodBuilder.requestMethod = getRequestMethod(iMethod,
                         implMethod);
+                // we now allow users to send query/form parameters, JSON object
+                // (if POST) and Request parameter
+                if (!methodBuilder.canBuild()) {
+                    logger.warn("PLEXSVC: Skipping handler for " + iMethod.getName()
+                            + " method, path " + methodBuilder.methodPath
+                            + ", service " + service.getClass().getSimpleName());
+
+                    continue;
+                }
+                //
                 ServiceConfigDesc serviceConfig = ServiceConfigDesc
-                        .builder(defaultServiceConfig).setMethod(requestMethod)
-                        .setEndpoint(methodPath).build();
+                        .builder(defaultServiceConfig)
+                        .setMethod(methodBuilder.requestMethod)
+                        .setEndpoint(methodBuilder.methodPath).build();
                 RequestHandler handler = handlers.get(serviceConfig);
                 if (handler == null) {
                     handler = new WSDelegateHandler(service, registry);
                     handlers.put(serviceConfig, handler);
                 }
                 //
-                ((WSDelegateHandler) handler).addMethod(new WSServiceMethod(
-                        iMethod, implMethod, requestMethod,
-                        paramNamesAndDefaults, methodPath));
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Added handler "
-                            + handler.getClass().getSimpleName() + " for "
-                            + requestMethod + " " + iMethod.getName()
-                            + ", path " + methodPath + ", service "
-                            + service.getClass().getSimpleName());
-                }
+                ((WSDelegateHandler) handler).addMethod(methodBuilder.build());
+                logger.info("PLEXSVC: Added handler " + handler + " for "
+                        + methodBuilder.requestMethod + " " + iMethod.getName()
+                        + ", path " + methodBuilder.methodPath + ", service "
+                        + service.getClass().getSimpleName());
             }
         }
         return handlers;
@@ -154,36 +147,6 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
         }
         return path == null ? null : (prefix != null ? prefix : "")
                 + path.value();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Pair<String, String>[] getParamsAndDefaults(final Method implMethod) {
-        List<Pair<String, String>> paramsAndDefaults = new ArrayList<>();
-        for (Annotation[] annotations : implMethod.getParameterAnnotations()) {
-            String param = null;
-            String defValue = null;
-            for (Annotation a : annotations) {
-                if (a instanceof QueryParam) {
-                    param = ((QueryParam) a).value();
-                } else if (a instanceof FormParam) {
-                    param = ((FormParam) a).value();
-                } else if (a instanceof PathParam) {
-                    param = ((PathParam) a).value();
-                } else if (a instanceof HeaderParam) {
-                    param = ((HeaderParam) a).value();
-                } else if (a instanceof CookieParam) {
-                    param = ((CookieParam) a).value();
-                } else if (a instanceof FormParam) {
-                    param = ((FormParam) a).value();
-                } else if (a instanceof DefaultValue) {
-                    defValue = ((DefaultValue) a).value();
-                }
-            }
-            if (param != null) {
-                paramsAndDefaults.add(Pair.of(param, defValue));
-            }
-        }
-        return paramsAndDefaults.toArray(new Pair[paramsAndDefaults.size()]);
     }
 
     private static String getEndpoint(Class<?> serviceClass, Class<?> webService) {

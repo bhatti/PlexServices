@@ -16,6 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import com.plexobject.handler.Request;
 import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
 import com.plexobject.school.Student;
@@ -81,6 +82,41 @@ public class CourseServiceImpl implements CourseService {
             }
         }
         return list;
+    }
+
+    @Override
+    @POST
+    public Course paramAndObject(@FormParam("courseId") String courseId,
+            Course course) {
+        System.out.println("paramAndObject " + courseId + "\n" + course);
+        return course;
+    }
+
+    @Override
+    @POST
+    public Course paramAndObjectRequest(@FormParam("courseId") String courseId,
+            Course course, Request incomingRequest) {
+        System.out.println("paramAndObjectRequest " + courseId + "\n" + course
+                + "\n" + incomingRequest);
+        return course;
+    }
+
+    @Override
+    @GET
+    public Course paramAndRequest(@FormParam("courseId") String courseId,
+            Request incomingRequest) {
+        System.out.println("paramAndObjectRequest " + courseId);
+        return new Course(courseId, courseId);
+    }
+
+    @Override
+    @POST
+    public Course paramAndObjectRequestAndMap(
+            @FormParam("courseId") String courseId, Course course,
+            Request incomingRequest, Map<String, Object> params) {
+        System.out.println("paramAndObjectRequestAndMap " + courseId + "\n"
+                + course + "\n" + incomingRequest + "\n params " + params);
+        return course;
     }
 
     @Override

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +45,8 @@ public class EventBusToJmsBridgeTest {
     private Closeable consumer;
     @Mocked
     private TextMessage message;
+    @Mocked
+    private Enumeration propertyNames;
     private EventBusToJmsBridge bridge;
 
     @Before
@@ -111,9 +114,11 @@ public class EventBusToJmsBridgeTest {
         JmsListener listener = bridge.getJmsListener(entry);
         new Expectations() {
             {
-                message.getPropertyNames();
                 message.getText();
-                returns("{}");
+                message.getPropertyNames();
+                returns(propertyNames);
+                propertyNames.hasMoreElements();
+                returns(false);
                 message.getJMSReplyTo();
                 returns(null);
                 eb.publish("query-user-channel", (Request) any);
@@ -141,15 +146,10 @@ public class EventBusToJmsBridgeTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        Request request = Request
-                .builder()
-                .setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET)
-                .setEndpoint("/w")
-                .setProperties(properties)
-                .setHeaders(headers)
-                .setContents(payload)
-                .setCodecType(CodecType.JSON)
+        Request request = Request.builder().setProtocol(Protocol.HTTP)
+                .setMethod(RequestMethod.GET).setEndpoint("/w")
+                .setProperties(properties).setHeaders(headers)
+                .setContents(payload).setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         listener.handle(request);

@@ -55,7 +55,6 @@ public class StudentServiceClient extends BaseServiceClient implements
     @Override
     public List<Student> query(Map<String, Object> criteria) {
         RequestBuilder request = new RequestBuilder("query", criteria);
-
         try {
             Method m = StudentService.class.getMethod("count", List.class);
             Class<?> klass = m.getParameterTypes()[0];

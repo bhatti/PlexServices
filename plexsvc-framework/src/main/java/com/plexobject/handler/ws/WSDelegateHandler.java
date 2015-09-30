@@ -16,6 +16,7 @@ import com.plexobject.http.HttpResponse;
 import com.plexobject.http.ServiceInvocationException;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
+import com.plexobject.util.ReflectUtils.ParamType;
 
 public class WSDelegateHandler implements RequestHandler {
     private static final Logger logger = Logger
@@ -44,10 +45,11 @@ public class WSDelegateHandler implements RequestHandler {
         final WSServiceMethod methodInfo = methodsByName
                 .get(methodAndPayload.first);
         if (methodInfo == null) {
-            throw new ServiceInvocationException("Unknown method "
-                    + methodAndPayload.first + ", available "
-                    + methodsByName.keySet() + ", request "
-                    + request.getContents(), HttpResponse.SC_NOT_FOUND);
+            logger.warn("PLEXSVC: Unknown method '" + methodAndPayload.first
+                    + "', available " + methodsByName.keySet() + ", request "
+                    + request.getContents());
+            throw new ServiceInvocationException("Unknown method '"
+                    + methodAndPayload.first + "'"+ methodsByName.keySet(), HttpResponse.SC_NOT_FOUND);
         }
         // set method name
         request.setMethodName(methodInfo.iMethod.getName());
@@ -59,14 +61,20 @@ public class WSDelegateHandler implements RequestHandler {
             // We can get input parameters either from JSON text, form/query
             // parameters or method simply takes Map so we just pass all request
             // properties
-            final Object[] args = methodInfo.useNameParams() ? ReflectUtils
-                    .decode(methodInfo.iMethod,
-                            methodInfo.paramNamesAndDefaults,
-                            request.getPropertiesAndHeaders())
-                    : methodInfo.useMapProperties(methodAndPayload.second) ? new Object[] { request
-                            .getPropertiesAndHeaders() } : ReflectUtils.decode(
-                            methodAndPayload.second, methodInfo.iMethod,
-                            request.getCodec());
+            if (methodInfo.hasMultipleParamTypes) {
+                for (int i = 0; i < methodInfo.params.length; i++) {
+                    if (methodInfo.params[i].type == ParamType.MAP_PARAM) {
+                        methodInfo.params[i].defaultValue = request
+                                .getPropertiesAndHeaders();
+                    } else if (methodInfo.params[i].type == ParamType.REQUEST_PARAM) {
+                        methodInfo.params[i].defaultValue = request;
+                    }
+                }
+            }
+            //
+            final Object[] args = ReflectUtils.decode(methodInfo.iMethod,
+                    request.getPropertiesAndHeaders(), methodInfo.params,
+                    methodAndPayload.second, request.getCodec());
 
             invokeWithAroundInterceptorIfNeeded(request, methodInfo,
                     responseTag, args);

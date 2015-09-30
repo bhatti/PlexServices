@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,6 @@ import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.school.Address;
 import com.plexobject.school.Course;
 import com.plexobject.school.Student;
-import com.plexobject.util.ReflectUtils;
 
 public class ReflectUtilsTest {
     public static class TestService {
@@ -140,7 +140,9 @@ public class ReflectUtilsTest {
         Student s = buildStudent();
         Method m = TestService.class.getMethod("printStudent", Student.class);
         String payload = CODEC.encode(s);
-        Object[] args = ReflectUtils.decode(payload, m, CODEC);
+
+        Object[] args = ReflectUtils.decode(m, new HashMap<String, Object>(),
+                null, payload, CODEC);
         List<Object> result = (List<Object>) m.invoke(service, args);
         assertEquals(s, result.get(0));
     }
@@ -152,7 +154,9 @@ public class ReflectUtilsTest {
         Method m = TestService.class
                 .getMethod("printCourses", Collection.class);
         String payload = CODEC.encode(c);
-        Object[] args = ReflectUtils.decode(payload, m, CODEC);
+        Object[] args = ReflectUtils.decode(m, new HashMap<String, Object>(),
+                null, payload, CODEC);
+        System.out.println(" args " + Arrays.toString(args));
         List<Object> result = (List<Object>) m.invoke(service, args);
         assertEquals(c, result);
     }
@@ -163,7 +167,8 @@ public class ReflectUtilsTest {
         Map<String, Student> students = buildStudentsMap();
         Method m = TestService.class.getMethod("printStudents", Map.class);
         String payload = CODEC.encode(students);
-        Object[] args = ReflectUtils.decode(payload, m, CODEC);
+        Object[] args = ReflectUtils.decode(m, new HashMap<String, Object>(),
+                null, payload, CODEC);
         Collection<Object> result = (Collection<Object>) m
                 .invoke(service, args);
         assertEquals(students.size(), result.size());
