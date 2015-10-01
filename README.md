@@ -720,10 +720,32 @@ public class CourseServiceImpl implements CourseService {
     public Course getWithId(@PathParam("path1"), String @PathParam("path2")) {
     }
 
+
+    @Override
+    @GET
+    public void getFile(@FormParam("name") String name, Request request) {
+        File webFolder = new File("./src/test/resources");
+        try {
+            final File filePath = new File(webFolder, name);
+            //
+            byte[] contents = TestWebUtils.toBytes(new FileInputStream(
+                    filePath));
+            request.getResponse().setCodecType(CodecType.SERVICE_SPECIFIC);
+            request.getResponse().setContents(contents);
+            request.getResponse().setHeader(HttpResponse.CONTENT_TYPE,
+                    "application/pdf");
+            request.getResponse().setHeader(HttpResponse.CONTENT_LENGTH,
+                    contents.length);
+        } catch (IOException e) {
+            request.getResponse().setContents(e);
+        }
+    }
 }
 
 ```
-You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. If Path annotations are defined at method level, it will add class-level path, e.g. if in above example "/courses" is defined at class level and "/query" is defined at method level for query so when you call query API, you would use "/courses/query" when invoking to the API. You can convert the JaxWS service into RequestHandler as follows:
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. If Path annotations are defined at method level, it will add class-level path, e.g. if in above example "/courses" is defined at class level and "/query" is defined at method level for query so when you call query API, you would use "/courses/query" when invoking to the API. You can also have Request parameter as one of the argument and take full control on what kind of data that you are sending back, e.g. in above example getFile method returns PDF file from the service API.
+
+You can convert the JaxWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
