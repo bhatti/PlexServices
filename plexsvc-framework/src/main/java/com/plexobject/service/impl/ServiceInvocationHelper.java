@@ -51,7 +51,7 @@ public class ServiceInvocationHelper {
             ServiceConfigDesc config = serviceRegistry
                     .getServiceConfig(handler);
             if (logger.isDebugEnabled()) {
-                logger.debug("Received request for handler "
+                logger.debug("PLEXSVC Received request for handler "
                         + handler.getClass().getSimpleName() + ", protocol "
                         + config.protocol() + ", request " + request);
             }

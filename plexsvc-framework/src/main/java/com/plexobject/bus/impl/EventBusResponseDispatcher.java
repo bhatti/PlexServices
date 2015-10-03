@@ -41,7 +41,7 @@ public class EventBusResponseDispatcher extends AbstractResponseDispatcher {
 
             eventBus.publish(replyTo, responseRequest);
             if (logger.isDebugEnabled()) {
-                logger.debug("Sending reply " + encodedReply + " to " + replyTo);
+                logger.debug("PLEXSVC Sending reply " + encodedReply + " to " + replyTo);
             }
         } catch (Exception e) {
             logger.error("PLEXSVC Failed to send " + encodedReply, e);

@@ -138,7 +138,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
         } catch (Exception e) {
             if (e.getCause() instanceof EOFException) {
             } else {
-                logger.error("Failed to shutdown connection " + e);
+                logger.error("PLEXSVC Failed to shutdown connection " + e);
             }
         }
     }
@@ -147,7 +147,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
         while (!running) {
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Waiting for JMSContainer to start " + running);
+                    logger.debug("PLEXSVC Waiting for JMSContainer to start " + running);
                 }
                 wait(DEFAULT_WAIT_TIME);
             } catch (InterruptedException e) {

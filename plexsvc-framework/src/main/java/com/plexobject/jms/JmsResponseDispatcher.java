@@ -32,7 +32,7 @@ public class JmsResponseDispatcher extends AbstractResponseDispatcher {
             messageListenerContainer.send(replyTo, reply.getProperties(),
                     encodedPayload);
             if (logger.isDebugEnabled()) {
-                logger.debug("Sending reply " + encodedPayload + " to " + replyTo);
+                logger.debug("PLEXSVC Sending reply " + encodedPayload + " to " + replyTo);
             }
         } catch (Exception e) {
             if (e.toString().contains("temp-queue")) {

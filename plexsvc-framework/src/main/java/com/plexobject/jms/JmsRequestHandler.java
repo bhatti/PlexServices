@@ -126,7 +126,7 @@ class JmsRequestHandler implements MessageListener, ExceptionListener {
                 desc.concurrency(), true, Session.AUTO_ACKNOWLEDGE, 0);
         consumer = jmsContainer.setMessageListener(destination, this,
                 MessageListenerConfig);
-        logger.info("PlexSVC registering " + handler.getClass().getSimpleName()
+        logger.info("PLEXSVC registering " + handler.getClass().getSimpleName()
                 + " and Listening on JMS " + destination + "...");
     }
 

@@ -120,7 +120,7 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
                 handshakers.put(ctx.channel().remoteAddress().toString(),
                         handshaker);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("handshaking with "
+                    logger.debug("PLEXSVC handshaking with "
                             + ctx.channel().remoteAddress());
                 }
             }

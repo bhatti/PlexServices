@@ -29,7 +29,7 @@ public class NettyWebsocketResponseDispatcher extends
         String textJson = ObjectCodecFactory.getInstance()
                 .getObjectCodec(response.getCodecType()).encode(response);
         if (logger.isDebugEnabled()) {
-            logger.debug("Sending to " + id + ":" + textJson);
+            logger.debug("PLEXSVC Sending to " + id + ":" + textJson);
         }
         return textJson;
     }
@@ -58,7 +58,7 @@ public class NettyWebsocketResponseDispatcher extends
             throw e;
         } catch (Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to send " + encodedPayload + ", " + this,
+                logger.debug("PLEXSVC Failed to send " + encodedPayload + ", " + this,
                         e);
             }
             throw new RuntimeException(e);

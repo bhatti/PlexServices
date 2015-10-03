@@ -66,7 +66,7 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
             } else if (payload instanceof String) {
                 return payload;
             } else {
-                logger.warn("Unknown content " + payload);
+                logger.warn("PLEXSVC Unknown content " + payload);
                 codecType = CodecType.JSON;
             }
         }

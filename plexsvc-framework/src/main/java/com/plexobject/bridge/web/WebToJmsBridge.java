@@ -88,7 +88,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(),
                 this);
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding Web->JMS mapping for " + e.getShortString());
+            logger.debug("PLEXSVC Adding Web->JMS mapping for " + e.getShortString());
         }
     }
 
@@ -109,7 +109,7 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(),
                 this);
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding Websocket->JMS mapping for "
+            logger.debug("PLEXSVC Adding Websocket->JMS mapping for "
                     + e.getShortString());
         }
 
@@ -194,14 +194,14 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     request.getResponse().setCodecType(entry.getCodecType());
                     request.getResponse().setContents(reply.getContents());
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Status " + reply.getStatus()
+                        logger.debug("PLEXSVC Status " + reply.getStatus()
                                 + ", Replying back " + reply + ", params "
                                 + params + ", response" + ": "
                                 + request.getResponse() + ", reply params "
                                 + reply.getPropertyNames());
                     }
                 } catch (Exception e) {
-                    logger.error("Could not send back websocket " + reply, e);
+                    logger.error("PLEXSVC Could not send back websocket " + reply, e);
                 }
             }
         };

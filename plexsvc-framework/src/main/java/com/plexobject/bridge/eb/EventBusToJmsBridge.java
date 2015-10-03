@@ -89,11 +89,11 @@ public class EventBusToJmsBridge implements Lifecycle {
                 jmsContainer.send(
                         jmsContainer.getDestination(entry.getTarget()), params,
                         payload);
-                logger.info("PlexSVC Forwarding " + entry + "'s message "
+                logger.info("PLEXSVC Forwarding " + entry + "'s message "
                         + payload);
 
             } catch (Exception e) {
-                logger.error("PlexSVC Failed to send request", e);
+                logger.error("PLEXSVC Failed to send request", e);
             }
         }
 
@@ -175,23 +175,23 @@ public class EventBusToJmsBridge implements Lifecycle {
                         .setCodecType(entry.getCodecType())
                         .setContents(payload).setResponseDispatcher(dispatcher)
                         .build();
-                logger.info("PlexSVC Forwarding " + entry + "'s message "
+                logger.info("PLEXSVC Forwarding " + entry + "'s message "
                         + request);
                 eb.publish(entry.getTarget(), request);
             } catch (Exception e) {
-                logger.error("PlexSVC Failed to handle request", e);
+                logger.error("PLEXSVC Failed to handle request", e);
             }
         }
 
         @Override
         public void onException(JMSException ex) {
             logger.error(
-                    "PlexSVC Found error while listening, will resubscribe", ex);
+                    "PLEXSVC Found error while listening, will resubscribe", ex);
             try {
                 stop();
                 start();
             } catch (Exception e) {
-                logger.error("PlexSVC Failed to resubscribe", e);
+                logger.error("PLEXSVC Failed to resubscribe", e);
             }
         }
 
@@ -205,7 +205,7 @@ public class EventBusToJmsBridge implements Lifecycle {
                         0);
                 this.consumer = jmsContainer.setMessageListener(destination,
                         this, messageListenerConfig);
-                logger.info("PlexSVC Listening on JMS " + destination);
+                logger.info("PLEXSVC Listening on JMS " + destination);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -280,7 +280,7 @@ public class EventBusToJmsBridge implements Lifecycle {
             JmsListener listener = new JmsListener(jmsContainer, eb, e);
             jmsListeners.put(e, listener);
         }
-        logger.info("PlexSVC Adding " + e);
+        logger.info("PLEXSVC Adding " + e);
     }
 
     /**
