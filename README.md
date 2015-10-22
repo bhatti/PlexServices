@@ -63,7 +63,7 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file (build/libs/plexsvc-framework-1.1-SNAPSHOT.jar) manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-1.2-SNAPSHOT.jar) manually in your application.
 
 
 
@@ -74,7 +74,7 @@ cd plexsvc-framework
 - JMS API 1.1
 
 ##Version
-- 1.1
+- 1.2
 
 ##License
 - MIT
@@ -434,11 +434,10 @@ public class StaticFileServer implements RequestHandler {
     }
 }
 
-You can send both text files or binary files. For example, you can call request.getResponse().setContents() method with String parameter to send back text files or byte[] parameter to send back binary files.
-
-
 ```
-  The end-point can contain variables such as scope that are initialized from configuration.
+
+The end-point can contain variables such as scope that are initialized from configuration.
+You can send both text files or binary files. For example, you can call request.getResponse().setContents() method with String parameter to send back text files or byte[] parameter to send back binary files.
 
 ### Defining role-based security
 ```java 
@@ -470,17 +469,17 @@ public class BuggerSecurityAuthorizer implements SecurityAuthorizer {
 You can add interceptors for raw-input/raw-output (stringified XML/JSON) as well as interceptors for request/response objects to execute cross cutting logic, e.g.
 
 ```java  
-serviceRegistry.addInputInterceptor(new Interceptor<BaseRequest<String>>() {
+serviceRegistry.addInputInterceptor(new Interceptor<BaseRequest<Object>>() {
   @Override
-  public BaseRequest<String> intercept(BaseRequest<String> input) {
+  public BaseRequest<Object> intercept(BaseRequest<Object> input) {
       logger.info("INPUT: " + input);
       return input;
   }
 });
 
-serviceRegistry.addOutputInterceptor(new Interceptor<BaseRequest<String>>() {
+serviceRegistry.addOutputInterceptor(new Interceptor<BaseRequest<Object>>() {
   @Override
-  public BaseRequest<String> intercept(BaseRequest<String> output) {
+  public BaseRequest<Object> intercept(BaseRequest<Object> output) {
       logger.info("OUTPUT: " + output);
       return output;
   }
@@ -721,10 +720,32 @@ public class CourseServiceImpl implements CourseService {
     public Course getWithId(@PathParam("path1"), String @PathParam("path2")) {
     }
 
+
+    @Override
+    @GET
+    public void getFile(@FormParam("name") String name, Request request) {
+        File webFolder = new File("./src/test/resources");
+        try {
+            final File filePath = new File(webFolder, name);
+            //
+            byte[] contents = TestWebUtils.toBytes(new FileInputStream(
+                    filePath));
+            request.getResponse().setCodecType(CodecType.SERVICE_SPECIFIC);
+            request.getResponse().setContents(contents);
+            request.getResponse().setHeader(HttpResponse.CONTENT_TYPE,
+                    "application/pdf");
+            request.getResponse().setHeader(HttpResponse.CONTENT_LENGTH,
+                    contents.length);
+        } catch (IOException e) {
+            request.getResponse().setContents(e);
+        }
+    }
 }
 
 ```
-You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. If Path annotations are defined at method level, it will add class-level path, e.g. if in above example "/courses" is defined at class level and "/query" is defined at method level for query so when you call query API, you would use "/courses/query" when invoking to the API. You can convert the JaxWS service into RequestHandler as follows:
+You can also use JaxRS's annotations such as GET/POST to specify HTTP methods and QueryParam/FormParam to send query or form parameters. You can use DefaultValue for specifying default form/query parameter and use PathParam to extract parameter from URL path. Note that you can optionally define Path at method level so that methods are invoked for specific URLs. If Path annotations are defined at method level, it will add class-level path, e.g. if in above example "/courses" is defined at class level and "/query" is defined at method level for query so when you call query API, you would use "/courses/query" when invoking to the API. You can also have Request parameter as one of the argument and take full control on what kind of data that you are sending back, e.g. in above example getFile method returns PDF file from the service API.
+
+You can convert the JaxWS service into RequestHandler as follows:
 
 ```java 
 Configuration config = ...
