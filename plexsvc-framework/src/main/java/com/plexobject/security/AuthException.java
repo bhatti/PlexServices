@@ -31,8 +31,13 @@ public class AuthException extends RuntimeException implements Redirectable,
     }
 
     @Override
-    public int getStatus() {
+    public int getStatusCode() {
         return HttpResponse.SC_UNAUTHORIZED;
+    }
+
+    @Override
+    public String getStatusMessage() {
+        return getMessage();
     }
 
     @Override

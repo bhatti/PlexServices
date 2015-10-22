@@ -6,7 +6,8 @@ public interface HttpResponse {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONNECTION = "Connection";
     public static final String CONTENT_LENGTH = "Content-Length";
-    public static final String STATUS = "status";
+    public static final String STATUS_CODE = "statusCode";
+    public static final String STATUS_MESSAGE = "statusMessage";
     public static final String LOCATION = "location";
     public static final String ERROR_MESSAGE = "errorMessage";
 
@@ -282,7 +283,7 @@ public interface HttpResponse {
 
     void addHeader(String name, String value);
 
-    void setStatus(int sc);
+    void setStatus(int statusCode);
 
     void send(Object contents) throws IOException;
 

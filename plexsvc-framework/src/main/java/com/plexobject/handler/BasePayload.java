@@ -8,14 +8,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Statusable;
 import com.plexobject.http.HttpResponse;
 
-public abstract class BasePayload<T> {
+public abstract class BasePayload<T> implements Statusable {
     private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String CONTENT_TYPE = "Content-Type";
     protected final Map<String, Object> properties;
     protected final Map<String, Object> headers;
     protected final long createdAt;
     protected T contents;
-    protected int status = 0;
+    protected int statusCode = 0;
+    protected String statusMessage;
 
     BasePayload() {
         this.createdAt = System.currentTimeMillis();
@@ -34,31 +35,56 @@ public abstract class BasePayload<T> {
     public void setContents(T obj) {
         this.contents = obj;
         if (contents instanceof Statusable) {
-            setStatus(((Statusable) contents).getStatus());
+            setStatusCode(((Statusable) contents).getStatusCode());
         }
     }
 
-    public int getStatus() {
-        if (status > 0) {
-            return status;
+    public boolean isGoodStatus() {
+        return getStatusCode() < HttpResponse.SC_MULTIPLE_CHOICES
+                && getStatusMessage() == null;
+    }
+
+    @Override
+    public int getStatusCode() {
+        if (statusCode > 0) {
+            return statusCode;
         } else {
-            Object value = properties.get(HttpResponse.STATUS);
+            Object value = properties.get(HttpResponse.STATUS_CODE);
             if (value != null) {
                 if (value instanceof Number) {
-                    setStatus(((Number) value).intValue());
-                    return status;
+                    setStatusCode(((Number) value).intValue());
+                    return statusCode;
                 } else if (value instanceof String) {
-                    setStatus(Integer.parseInt((String) value));
-                    return status;
+                    setStatusCode(Integer.parseInt((String) value));
+                    return statusCode;
                 }
             }
         }
         return HttpResponse.SC_OK;
     }
 
-    public BasePayload<T> setStatus(int status) {
-        this.status = status;
-        properties.put(HttpResponse.STATUS, status);
+    public BasePayload<T> setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+        properties.put(HttpResponse.STATUS_CODE, statusCode);
+        return this;
+    }
+
+    @Override
+    public String getStatusMessage() {
+        if (statusMessage != null) {
+            return statusMessage;
+        } else {
+            String value = (String) properties.get(HttpResponse.STATUS_MESSAGE);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    public BasePayload<T> setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+        properties.put(HttpResponse.STATUS_MESSAGE, statusMessage);
         return this;
     }
 

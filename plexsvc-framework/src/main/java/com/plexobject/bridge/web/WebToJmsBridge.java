@@ -88,7 +88,8 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         serviceRegistry.addRequestHandler(ServiceConfigDesc.builder(e).build(),
                 this);
         if (logger.isDebugEnabled()) {
-            logger.debug("PLEXSVC Adding Web->JMS mapping for " + e.getShortString());
+            logger.debug("PLEXSVC Adding Web->JMS mapping for "
+                    + e.getShortString());
         }
     }
 
@@ -124,7 +125,9 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
         final WebToJmsEntry entry = getMappingEntry(request);
 
         if (entry == null) {
-            request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
+            request.getResponse().setStatusCode(HttpResponse.SC_NOT_FOUND);
+            request.getResponse().setStatusMessage(
+                    "Unknown request received " + request.getContents());
             request.getResponse().setContents(
                     "Unknown request received " + request.getContents());
             logger.warn("PLEXSVC Unknown request received "
@@ -159,7 +162,10 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
             }
         } catch (TimeoutException e) {
             request.getResponse().setCodecType(CodecType.TEXT);
-            request.getResponse().setStatus(HttpResponse.SC_GATEWAY_TIMEOUT);
+            request.getResponse()
+                    .setStatusCode(HttpResponse.SC_GATEWAY_TIMEOUT);
+            request.getResponse().setStatusMessage(
+                    "Request timedout " + entry.getTimeoutSecs() + " secs");
             request.getResponse().setContents(
                     "Request timedout " + entry.getTimeoutSecs() + " secs");
             logger.warn("PLEXSVC Timed out request from " + entry.getEndpoint()
@@ -194,14 +200,16 @@ public class WebToJmsBridge implements RequestHandler, LifecycleAware {
                     request.getResponse().setCodecType(entry.getCodecType());
                     request.getResponse().setContents(reply.getContents());
                     if (logger.isDebugEnabled()) {
-                        logger.debug("PLEXSVC Status " + reply.getStatus()
+                        logger.debug("PLEXSVC Status " + reply.getStatusCode()
+                                + "/" + reply.getStatusMessage()
                                 + ", Replying back " + reply + ", params "
                                 + params + ", response" + ": "
                                 + request.getResponse() + ", reply params "
                                 + reply.getPropertyNames());
                     }
                 } catch (Exception e) {
-                    logger.error("PLEXSVC Could not send back websocket " + reply, e);
+                    logger.error("PLEXSVC Could not send back websocket "
+                            + reply, e);
                 }
             }
         };

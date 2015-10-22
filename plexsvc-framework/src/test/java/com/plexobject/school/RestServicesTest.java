@@ -2,7 +2,6 @@ package com.plexobject.school;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -19,6 +18,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
+import com.plexobject.http.ServiceInvocationException;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.BaseServiceClient;
@@ -76,7 +76,7 @@ public class RestServicesTest {
         serviceRegistry.stop();
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = ServiceInvocationException.class)
     public void testCourseException() throws Exception {
         CourseClientRest.error();
     }

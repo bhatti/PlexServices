@@ -48,7 +48,7 @@ public class AbstractResponseDispatcherTest {
         assertTrue(payload.contains("\"errorType\":\"AuthException\""));
         assertTrue(payload.contains("\"errorCode\":\"authCode\""));
         assertTrue(payload.contains("\"message\":\"error message\""));
-        assertTrue(payload.contains("\"status\":401"));
+        assertTrue(payload.contains("\"statusCode\":401"));
     }
 
     @Test
@@ -74,13 +74,23 @@ public class AbstractResponseDispatcherTest {
     }
 
     @Test
-    public void testGetSetStatus() throws Exception {
-        request.getResponse().setStatus(0);
-        assertEquals(0, request.getResponse().getStatus());
-        request.getResponse().setProperty(HttpResponse.STATUS, 200);
-        assertEquals(200, request.getResponse().getStatus());
-        request.getResponse().setStatus(10);
-        assertEquals(10, request.getResponse().getStatus());
+    public void testGetSetStatusCode() throws Exception {
+        request.getResponse().setStatusCode(0);
+        assertEquals(0, request.getResponse().getStatusCode());
+        request.getResponse().setProperty(HttpResponse.STATUS_CODE, 200);
+        assertEquals(200, request.getResponse().getStatusCode());
+        request.getResponse().setStatusCode(10);
+        assertEquals(10, request.getResponse().getStatusCode());
+    }
+
+    @Test
+    public void testGetSetStatusMessage() throws Exception {
+        request.getResponse().setStatusMessage(null);
+        assertNull(request.getResponse().getStatusMessage());
+        request.getResponse().setProperty(HttpResponse.STATUS_MESSAGE, "xxxx");
+        assertEquals("xxxx", request.getResponse().getStatusMessage());
+        request.getResponse().setStatusMessage("zzz");
+        assertEquals("zzz", request.getResponse().getStatusMessage());
     }
 
 }

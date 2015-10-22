@@ -117,12 +117,14 @@ public class NettyResponseDispatcher extends HttpResponseDispatcher {
 
             @Override
             public void sendError(int sc, String msg) throws IOException {
+                if (msg == null) {
+                    msg = "";
+                }
                 this.status = sc;
                 this.errorMessage = msg;
                 FullHttpResponse response = new DefaultFullHttpResponse(
                         HTTP_1_1, HttpResponseStatus.valueOf(status),
-                        Unpooled.copiedBuffer("Failure: " + status + "\r\n",
-                                CharsetUtil.UTF_8));
+                        Unpooled.copiedBuffer(msg + "\r\n", CharsetUtil.UTF_8));
                 response.headers().set(CONTENT_TYPE,
                         "text/plain; charset=UTF-8");
 

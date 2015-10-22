@@ -50,7 +50,12 @@ public class HttpResponseDispatcher extends AbstractResponseDispatcher {
                             .getContentType());
                 }
             }
-            response.setStatus(reply.getStatus());
+            if (reply.isGoodStatus()) {
+                response.setStatus(reply.getStatusCode());
+            } else {
+                response.sendError(reply.getStatusCode(),
+                        reply.getStatusMessage());
+            }
             //
             for (Map.Entry<String, Object> e : reply.getProperties().entrySet()) {
                 Object value = e.getValue();

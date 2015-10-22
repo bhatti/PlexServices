@@ -14,7 +14,8 @@ import com.plexobject.http.HttpResponse;
  */
 public class Response extends BasePayload<Object> {
     public static final String[] HEADER_PROPERTIES = new String[] {
-            HttpResponse.STATUS, HttpResponse.LOCATION, Constants.SESSION_ID };
+            HttpResponse.STATUS_CODE, HttpResponse.STATUS_MESSAGE,
+            HttpResponse.LOCATION, Constants.SESSION_ID };
     private CodecType codecType;
     private final Request request;
 

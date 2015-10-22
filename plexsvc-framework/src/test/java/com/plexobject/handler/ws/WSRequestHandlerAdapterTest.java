@@ -1,7 +1,6 @@
 package com.plexobject.handler.ws;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -32,6 +31,7 @@ import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
+import com.plexobject.http.HttpResponse;
 import com.plexobject.school.Address;
 import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
@@ -117,22 +117,27 @@ public class WSRequestHandlerAdapterTest {
                         return output;
                     }
                 });
-        if (config.getBoolean("debug")) {
-            serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
-                @Override
-                public Request intercept(Request input) {
-                    System.out.println("INPUT PAYLOAD: " + input);
-                    return input;
+        serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
+            @Override
+            public Request intercept(Request input) {
+                System.out.println("INPUT PAYLOAD: " + input);
+                return input;
+            }
+        });
+        serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
+            @Override
+            public Response intercept(Response response) {
+                if (response.getContents() instanceof Throwable
+                        && response.getStatusCode() == HttpResponse.SC_OK) {
+                    response.setStatusCode(HttpResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.setStatusMessage("My message");
                 }
-            });
-            serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
-                @Override
-                public Response intercept(Response output) {
-                    System.out.println("OUTPUT PAYLOAD: " + output);
-                    return output;
-                }
-            });
-        }
+                System.out.println("OUTPUT PAYLOAD: "
+                        + response.getContents().getClass().getName() + ": "
+                        + response.getContents());
+                return response;
+            }
+        });
         serviceRegistry.setAroundInterceptor(new AroundInterceptor() {
             @Override
             public Object proceed(Object service, String method,
@@ -151,12 +156,12 @@ public class WSRequestHandlerAdapterTest {
         serviceRegistry.stop();
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testCourseException() throws Exception {
         courseService.exceptionExample(false);
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testRtCourseException() throws Exception {
         BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.INFO);
@@ -164,7 +169,7 @@ public class WSRequestHandlerAdapterTest {
         courseService.exceptionExample(true);
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testStudentRuntimeException() throws Exception {
         studentService.exceptionExample();
     }
@@ -178,11 +183,11 @@ public class WSRequestHandlerAdapterTest {
         assertEquals(student, loaded);
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testExistSaveStudent() throws Exception {
         Student student = buildStudent();
-        assertFalse(studentService.exists(Long.valueOf(student.getId()),
-                Long.valueOf(student.getCourseIds().get(0))));
+        studentService.exists(Long.valueOf(student.getId()),
+                Long.valueOf(student.getCourseIds().get(0)));
     }
 
     @Test

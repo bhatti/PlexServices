@@ -274,12 +274,14 @@ public class TestWebUtils {
     }
 
     private static String getResponse(HttpURLConnection con) throws IOException {
-        String resp = toString(con.getInputStream());
         if (con.getResponseCode() != 200) {
+            System.err.println("HTTP ERROR " + con.getResponseCode() + ": "
+                    + con.getResponseMessage());
             throw new ServiceInvocationException("Status "
-                    + con.getResponseCode() + ": " + resp,
+                    + con.getResponseCode() + ": " + con.getResponseMessage(),
                     con.getResponseCode());
         }
+        String resp = toString(con.getInputStream());
         return resp;
     }
 

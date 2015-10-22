@@ -61,8 +61,8 @@ public class ServiceInvocationHelper {
                     && config.contentsClass() != Void.class
                     && request.getContents() == null
                     && request.getProperties().size() == 0) {
-                request.getResponse().setStatus(HttpResponse.SC_FORBIDDEN);
-                request.getResponse().setContents(
+                request.getResponse().setStatusCode(HttpResponse.SC_FORBIDDEN);
+                request.getResponse().setStatusMessage(
                         "Expected payload of type "
                                 + config.contentsClass().getName()
                                 + ", but payload was: " + request);
@@ -117,12 +117,15 @@ public class ServiceInvocationHelper {
                                 ((Redirectable) e).getLocation());
                     }
                 } else if (e instanceof FileNotFoundException) {
-                    request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
+                    request.getResponse().setStatusCode(
+                            HttpResponse.SC_NOT_FOUND);
                 } else if (e instanceof Statusable) {
-                    request.getResponse().setStatus(
-                            ((Statusable) e).getStatus());
+                    request.getResponse().setStatusCode(
+                            ((Statusable) e).getStatusCode());
+                    request.getResponse().setStatusMessage(
+                            ((Statusable) e).getStatusMessage());
                 } else {
-                    request.getResponse().setStatus(
+                    request.getResponse().setStatusCode(
                             HttpResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 request.getResponse().setContents(e);
@@ -133,8 +136,8 @@ public class ServiceInvocationHelper {
                     + request.getProperties() + ", payload "
                     + request.getContents());
             request.getResponse().setCodecType(CodecType.TEXT);
-            request.getResponse().setStatus(HttpResponse.SC_NOT_FOUND);
-            request.getResponse().setContents("page not found");
+            request.getResponse().setStatusCode(HttpResponse.SC_NOT_FOUND);
+            request.getResponse().setStatusMessage("page not found");
             request.sendResponse();
         }
     }

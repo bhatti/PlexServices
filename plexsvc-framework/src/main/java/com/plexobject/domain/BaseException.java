@@ -94,29 +94,29 @@ public abstract class BaseException extends RuntimeException implements
     }
 
     private Collection<Error> errors;
-    private int status;
+    private int statusCode;
 
     protected BaseException() {
     }
 
-    public BaseException(String message, int status, final Error... errors) {
+    public BaseException(String message, int statusCode, final Error... errors) {
         super(message);
         this.errors = Arrays.asList(errors);
-        this.status = status;
+        this.statusCode = statusCode;
     }
 
     protected BaseException(String message, Throwable cause,
-            final Collection<Error> errors, int status) {
+            final Collection<Error> errors, int statusCode) {
         super(message, cause);
         this.errors = errors;
-        this.status = status;
+        this.statusCode = statusCode;
     }
 
     protected BaseException(String message, final Collection<Error> errors,
-            int status) {
+            int statusCode) {
         super(message);
         this.errors = errors;
-        this.status = status;
+        this.statusCode = statusCode;
     }
 
     public Collection<Error> getErrors() {
@@ -130,8 +130,12 @@ public abstract class BaseException extends RuntimeException implements
     }
 
     @Override
-    public int getStatus() {
-        return status;
+    public int getStatusCode() {
+        return statusCode;
     }
 
+    @Override
+    public String getStatusMessage() {
+        return super.getMessage();
+    }
 }
