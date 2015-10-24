@@ -22,3 +22,7 @@
 
 1.1 - Added support for sending binary files
 
+1.2 - Added support for Request parametr for JAX-RS/JAX-WS services
+
+1.3 - Added status line support to the services
+
