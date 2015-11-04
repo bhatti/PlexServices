@@ -20,6 +20,8 @@ import com.plexobject.service.RequestMethod;
  *
  */
 public class Request extends BasePayload<Object> {
+    private static ThreadLocal<Request> currentRequest = new ThreadLocal<Request>();
+
     public static class Builder {
         private Protocol protocol;
         private Object contents;
@@ -141,6 +143,7 @@ public class Request extends BasePayload<Object> {
         this.responseDispatcher = responseDispatcher;
         this.response = new Response(this, new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, codecType);
+        currentRequest.set(this);
     }
 
     public Protocol getProtocol() {
@@ -248,5 +251,9 @@ public class Request extends BasePayload<Object> {
     @SuppressWarnings("unchecked")
     public <T> T getContentsAs() {
         return (T) contents;
+    }
+
+    public static Request getCurrentRequest() {
+        return currentRequest.get();
     }
 }
