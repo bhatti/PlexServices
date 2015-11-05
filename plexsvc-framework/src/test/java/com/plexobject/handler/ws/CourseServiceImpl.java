@@ -26,6 +26,30 @@ import com.plexobject.validation.ValidationException;
 @WebService
 @Path("/courses")
 public class CourseServiceImpl implements CourseService {
+    static class TestException1 extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public TestException1(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    static class TestException2 extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public TestException2(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    static class TestException3 extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public TestException3(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
     private Map<String, Course> courses = new HashMap<>();
 
     @Override
@@ -188,6 +212,12 @@ public class CourseServiceImpl implements CourseService {
                     .addError("402", "email", "email not defined").build();
         else
             throw new TestException("my error");
+    }
+
+    @Override
+    public void nestedExceptionExample() throws Throwable {
+        throw new TestException1("my error 1", new TestException2("my error 2",
+                new TestException3("my error 3", null)));
     }
 
     @Override

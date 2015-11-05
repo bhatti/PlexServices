@@ -38,7 +38,7 @@ public class ExceptionUtils {
         }
     };
 
-    public static Map<String, Object> toErrors(Exception e) {
+    public static Map<String, Object> toErrors(Throwable e) {
         if (e.getCause() != null) {
             e = (Exception) e.getCause();
         }
@@ -58,7 +58,7 @@ public class ExceptionUtils {
         return errorsMap;
     }
 
-    private static void addErrors(Exception e, Map<String, Object> errorsMap) {
+    private static void addErrors(Throwable e, Map<String, Object> errorsMap) {
         try {
             BeanInfo info = Introspector.getBeanInfo(e.getClass());
             for (PropertyDescriptor pd : info.getPropertyDescriptors()) {
@@ -71,8 +71,8 @@ public class ExceptionUtils {
                     }
                 }
             }
-            if (e.getCause() instanceof Exception) {
-                Exception root = (Exception) e.getCause();
+            if (e.getCause() instanceof Throwable) {
+                Throwable root = (Throwable) e.getCause();
                 addErrors(root, errorsMap);
             }
         } catch (Exception ex) {

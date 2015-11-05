@@ -359,4 +359,17 @@ public class CourseServiceClient extends BaseServiceClient implements
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    @WebMethod(exclude = true)
+    public void nestedExceptionExample() throws Throwable {
+        RequestBuilder request = new RequestBuilder("nestedExceptionExample",
+                "");
+        try {
+            post(COURSE_SERVICE, request, Void.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

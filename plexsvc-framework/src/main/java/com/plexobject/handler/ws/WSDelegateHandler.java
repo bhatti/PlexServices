@@ -130,12 +130,12 @@ public class WSDelegateHandler implements RequestHandler {
                 }
                 request.getResponse().setContents(response);
             }
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof Exception) {
-                throw (Exception) e.getCause();
-            } else {
-                throw e;
+        } catch (InvocationTargetException invocationTargetException) {
+            Exception e = invocationTargetException;
+            if (e.getCause() instanceof Exception) { // TODO can this be while
+                e = (Exception) e.getCause();
             }
+            throw e;
         } catch (Exception e) {
             throw e;
         }

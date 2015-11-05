@@ -70,11 +70,11 @@ public abstract class AbstractResponseDispatcher implements ResponseDispatcher {
                 codecType = CodecType.JSON;
             }
         }
-        if (payload instanceof Exception) {
+        if (payload instanceof Throwable) {
             logger.warn("PLEXSVC " + getClass().getSimpleName()
-                    + " Error received " + payload, (Exception) payload);
+                    + " Error received " + payload, (Throwable) payload);
             Map<String, Object> resp = ExceptionUtils
-                    .toErrors((Exception) payload);
+                    .toErrors((Throwable) payload);
             for (String name : Response.HEADER_PROPERTIES) {
                 Object value = resp.get(name);
                 if (value != null) {
