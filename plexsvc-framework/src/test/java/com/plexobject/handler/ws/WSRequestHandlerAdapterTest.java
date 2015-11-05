@@ -163,17 +163,16 @@ public class WSRequestHandlerAdapterTest {
 
     @Test(expected = RuntimeException.class)
     public void testRtCourseException() throws Exception {
-        BasicConfigurator.configure();
-
         courseService.exceptionExample(true);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCourseNestedException() throws Throwable {
+    @Test
+    public void testObjectExceptionExample() throws Throwable {
         BasicConfigurator.configure();
         // LogManager.getRootLogger().setLevel(Level.INFO);
 
-        courseService.nestedExceptionExample();
+        Exception e = (Exception) courseService.objectExceptionExample();
+        assertEquals("my error 1", e.getMessage());
     }
 
     @Test(expected = RuntimeException.class)

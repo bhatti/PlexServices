@@ -362,11 +362,11 @@ public class CourseServiceClient extends BaseServiceClient implements
 
     @Override
     @WebMethod(exclude = true)
-    public void nestedExceptionExample() throws Throwable {
-        RequestBuilder request = new RequestBuilder("nestedExceptionExample",
+    public Object objectExceptionExample() {
+        RequestBuilder request = new RequestBuilder("objectExceptionExample",
                 "");
         try {
-            post(COURSE_SERVICE, request, Void.class, null);
+            return post(COURSE_SERVICE, request, Exception.class, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

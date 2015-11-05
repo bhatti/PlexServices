@@ -29,6 +29,10 @@ public class CourseServiceImpl implements CourseService {
     static class TestException1 extends Exception {
         private static final long serialVersionUID = 1L;
 
+        TestException1() {
+
+        }
+
         public TestException1(String message, Throwable cause) {
             super(message, cause);
         }
@@ -37,6 +41,10 @@ public class CourseServiceImpl implements CourseService {
     static class TestException2 extends Exception {
         private static final long serialVersionUID = 1L;
 
+        TestException2() {
+
+        }
+
         public TestException2(String message, Throwable cause) {
             super(message, cause);
         }
@@ -44,6 +52,10 @@ public class CourseServiceImpl implements CourseService {
 
     static class TestException3 extends Exception {
         private static final long serialVersionUID = 1L;
+
+        TestException3() {
+
+        }
 
         public TestException3(String message, Throwable cause) {
             super(message, cause);
@@ -215,9 +227,9 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void nestedExceptionExample() throws Throwable {
-        throw new TestException1("my error 1", new TestException2("my error 2",
-                new TestException3("my error 3", null)));
+    public Object objectExceptionExample() {
+        return new TestException1("my error 1", new TestException2(
+                "my error 2", new TestException3("my error 3", null)));
     }
 
     @Override

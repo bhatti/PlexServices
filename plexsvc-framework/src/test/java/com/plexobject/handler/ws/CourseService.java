@@ -38,7 +38,7 @@ public interface CourseService {
 
     void exceptionExample(boolean rt) throws Exception;
 
-    void nestedExceptionExample() throws Throwable;
+    Object objectExceptionExample();
 
     String pathExample(String param1, String param2);
 
