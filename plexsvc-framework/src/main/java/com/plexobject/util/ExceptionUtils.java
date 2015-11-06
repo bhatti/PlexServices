@@ -66,7 +66,7 @@ public class ExceptionUtils {
                 if (reader != null
                         && !FORBIDDEN_EXCEPTION_FIELDS.contains(pd.getName())) {
                     Object value = reader.invoke(e);
-                    if (value != null) {
+                    if (value != null && value instanceof Throwable == false) {
                         errorsMap.put(pd.getName(), value);
                     }
                 }

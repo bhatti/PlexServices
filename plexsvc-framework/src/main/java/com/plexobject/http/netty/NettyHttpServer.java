@@ -21,7 +21,6 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 
-
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.service.Lifecycle;
