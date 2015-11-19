@@ -136,16 +136,8 @@ public class WSRequestHandlerAdapterTest {
                     response.setStatusCode(HttpResponse.SC_INTERNAL_SERVER_ERROR);
                     response.setStatusMessage("My message");
                 }
-                if (response.getContents() instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> map = (Map<String, Object>) response
-                            .getContents();
-                    if (map.values().size() > 0) {
-                        Object obj = map.values().iterator().next();
-                        System.out.println("OUTPUT RESPONSE: "
-                                + obj.getClass().getName() + ": " + obj);
-                    }
-                }
+                System.out.println("OUTPUT RESPONSE: "
+                        + response.getContents().getClass().getName() + ": " + response.getContents());
                 return response;
             }
         });
