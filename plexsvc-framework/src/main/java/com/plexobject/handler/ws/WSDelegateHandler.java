@@ -14,6 +14,7 @@ import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.ServiceInvocationException;
+import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 import com.plexobject.util.ReflectUtils.ParamType;
@@ -76,7 +77,11 @@ public class WSDelegateHandler implements RequestHandler {
             final Object[] args = ReflectUtils.decode(methodInfo.iMethod,
                     request.getPropertiesAndHeaders(), methodInfo.params,
                     methodAndPayload.second, request.getCodec());
-
+            if (args.length > 0) {
+                request.setContents(args[0]); // In most cases the first
+                                              // argument will be the decoded
+                                              // object
+            }
             invokeWithAroundInterceptorIfNeeded(request, methodInfo,
                     responseTag, args);
         } catch (Exception e) {
@@ -91,13 +96,15 @@ public class WSDelegateHandler implements RequestHandler {
         return "WSDelegateHandler [delegate=" + delegate + "]";
     }
 
-    private void invokeWithAroundInterceptorIfNeeded(final Request request,
+    private void invokeWithAroundInterceptorIfNeeded(Request request,
             final WSServiceMethod methodInfo, final String responseTag,
             final Object[] args) throws Exception {
         if (serviceRegistry.getAroundInterceptor() != null) {
+            final Request inputRequest = request;
             Callable<Object> callable = new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
+                    Request request = requestAfterRequestInterceptors(inputRequest);
                     invoke(request, methodInfo, responseTag, args);
                     return null;
                 }
@@ -105,8 +112,19 @@ public class WSDelegateHandler implements RequestHandler {
             serviceRegistry.getAroundInterceptor().proceed(delegate,
                     methodInfo.iMethod.getName(), callable);
         } else {
+            request = requestAfterRequestInterceptors(request);
             invoke(request, methodInfo, responseTag, args);
         }
+    }
+
+    private Request requestAfterRequestInterceptors(Request request) {
+        if (serviceRegistry.hasRequestInterceptors()) {
+            for (Interceptor<Request> interceptor : serviceRegistry
+                    .getRequestInterceptors()) {
+                request = interceptor.intercept(request);
+            }
+        }
+        return request;
     }
 
     private void invoke(Request request, final WSServiceMethod methodInfo,

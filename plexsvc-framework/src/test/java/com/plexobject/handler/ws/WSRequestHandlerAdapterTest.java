@@ -120,7 +120,11 @@ public class WSRequestHandlerAdapterTest {
         serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
             @Override
             public Request intercept(Request input) {
-                System.out.println("INPUT PAYLOAD: " + input);
+                if (input.getContents() != null) {
+                    System.out.println("INPUT REQUEST: "
+                            + input.getContents().getClass() + ":"
+                            + input.getContents());
+                }
                 return input;
             }
         });
@@ -132,9 +136,16 @@ public class WSRequestHandlerAdapterTest {
                     response.setStatusCode(HttpResponse.SC_INTERNAL_SERVER_ERROR);
                     response.setStatusMessage("My message");
                 }
-                System.out.println("OUTPUT PAYLOAD: "
-                        + response.getContents().getClass().getName() + ": "
-                        + response.getContents());
+                if (response.getContents() instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> map = (Map<String, Object>) response
+                            .getContents();
+                    if (map.values().size() > 0) {
+                        Object obj = map.values().iterator().next();
+                        System.out.println("OUTPUT RESPONSE: "
+                                + obj.getClass().getName() + ": " + obj);
+                    }
+                }
                 return response;
             }
         });

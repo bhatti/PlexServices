@@ -86,7 +86,10 @@ public class ServiceInvocationHelper {
             }
             //
             // Invoking request interceptors
-            if (registry.hasRequestInterceptors()) {
+            // WSDelegateHandler decodes parameters locally so it will run
+            // interceptors there
+            if (registry.hasRequestInterceptors()
+                    && !(handler instanceof WSDelegateHandler)) {
                 for (Interceptor<Request> interceptor : registry
                         .getRequestInterceptors()) {
                     request = interceptor.intercept(request);
