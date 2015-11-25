@@ -18,7 +18,7 @@ import com.plexobject.service.RequestMethod;
 public class RequestTest {
     @Test
     public void testCreateUsingDefaultConstructor() throws Exception {
-        Request request = new Request();
+        Request request = new NettyRequest();
         assertNull(request.getProtocol());
         assertNull(request.getMethod());
         assertNull(request.getEndpoint());
@@ -34,7 +34,7 @@ public class RequestTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -54,7 +54,7 @@ public class RequestTest {
     public void testCreateUsingBuilder() throws Exception {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setSessionId(null)
                 .setProperties(properties).setHeaders(headers)
                 .setEndpoint("/w").setCodecType(CodecType.JSON)
@@ -75,7 +75,7 @@ public class RequestTest {
         properties.put("p1", "v1");
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -104,7 +104,7 @@ public class RequestTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("p1", "v1");
         Map<String, Object> headers = new HashMap<>();
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
                 .setCodecType(CodecType.JSON).setContents("pay")
@@ -143,7 +143,7 @@ public class RequestTest {
         Map<String, Object> headers = new HashMap<>();
         headers.put("head1", "val1");
         headers.put("head2", 2);
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setProperties(properties)
                 .setHeaders(headers).setEndpoint("/w")
                 .setCodecType(CodecType.JSON).setContents(null)

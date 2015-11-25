@@ -20,20 +20,20 @@ import com.plexobject.service.RequestMethod;
  *
  */
 public class Request extends BasePayload<Object> {
-    private static ThreadLocal<Request> currentRequest = new ThreadLocal<Request>();
+    protected static ThreadLocal<Request> currentRequest = new ThreadLocal<Request>();
 
     public static class Builder {
-        private Protocol protocol;
-        private Object contents;
-        private Map<String, Object> properties = new HashMap<>();
-        private Map<String, Object> headers = new HashMap<>();
-        private RequestMethod method;
-        private String remoteAddress;
-        private String requestUri;
-        private String endpoint;
-        private String replyEndpoint;
-        private CodecType codecType;
-        private ResponseDispatcher responseDispatcher;
+        protected Protocol protocol;
+        protected Object contents;
+        protected Map<String, Object> properties = new HashMap<>();
+        protected Map<String, Object> headers = new HashMap<>();
+        protected RequestMethod method;
+        protected String remoteAddress;
+        protected String requestUri;
+        protected String endpoint;
+        protected String replyEndpoint;
+        protected CodecType codecType;
+        protected ResponseDispatcher responseDispatcher;
 
         public Builder setProtocol(Protocol protocol) {
             this.protocol = protocol;
@@ -108,21 +108,21 @@ public class Request extends BasePayload<Object> {
 
     }
 
-    private transient ResponseDispatcher responseDispatcher;
-    private transient Response response;
-    private Protocol protocol;
-    private RequestMethod method;
-    private String endpoint;
-    private String replyEndpoint;
-    private CodecType codecType;
-    private String methodName;
-    private String requestUri;
-    private Object lastSentContents;
+    protected transient ResponseDispatcher responseDispatcher;
+    protected transient Response response;
+    protected Protocol protocol;
+    protected RequestMethod method;
+    protected String endpoint;
+    protected String replyEndpoint;
+    protected CodecType codecType;
+    protected String methodName;
+    protected String requestUri;
+    protected Object lastSentContents;
 
-    public Request() {
+    protected Request() {
     }
 
-    public Request(final Protocol protocol, final RequestMethod method,
+    protected Request(final Protocol protocol, final RequestMethod method,
             final String requestUri, final String endpoint,
             final String replyEndpoint, final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
@@ -234,10 +234,6 @@ public class Request extends BasePayload<Object> {
                 + ", endpoint=" + endpoint + ", properties=" + properties
                 + ", headers=" + headers + ", createdAt=" + createdAt
                 + ", contents=" + contents + "]";
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public String getMethodName() {

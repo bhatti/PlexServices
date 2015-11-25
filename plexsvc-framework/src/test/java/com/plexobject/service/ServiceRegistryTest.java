@@ -23,6 +23,7 @@ import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
@@ -298,7 +299,7 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -318,7 +319,7 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "test";
 
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -337,7 +338,7 @@ public class ServiceRegistryTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{\"username\":\"john\"}";
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -360,7 +361,7 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
         final StringBuilder out = new StringBuilder();
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -385,7 +386,7 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
         final StringBuilder out = new StringBuilder();
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -411,7 +412,7 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
         final StringBuilder out = new StringBuilder();
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setCodecType(CodecType.JSON).setContents(payload)
@@ -437,7 +438,7 @@ public class ServiceRegistryTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
         final StringBuilder out = new StringBuilder();
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setCodecType(CodecType.JSON).setContents(payload)

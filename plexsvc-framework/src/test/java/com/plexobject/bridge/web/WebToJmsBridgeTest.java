@@ -23,6 +23,7 @@ import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.Handler;
+import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
@@ -63,7 +64,7 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setContents(payload).setCodecType(CodecType.JSON)
@@ -85,7 +86,7 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setContents(payload).setCodecType(CodecType.JSON)
@@ -114,7 +115,7 @@ public class WebToJmsBridgeTest {
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
 
-        final Request request = Request.builder().setProtocol(Protocol.HTTP)
+        final Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setContents(payload).setCodecType(CodecType.JSON)

@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import com.plexobject.bus.EventBus;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.EventBusRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.service.Protocol;
@@ -30,8 +31,9 @@ public class EventBusResponseDispatcher extends AbstractResponseDispatcher {
     @Override
     protected void doSend(Response reply, Object encodedReply) {
         try {
-            Request responseRequest = Request
+            Request responseRequest = EventBusRequest
                     .builder()
+                    .setEventBus(eventBus)
                     .setProtocol(Protocol.EVENT_BUS)
                     .setMethod(RequestMethod.MESSAGE)
                     .setCodecType(CodecType.SERVICE_SPECIFIC)
@@ -41,7 +43,8 @@ public class EventBusResponseDispatcher extends AbstractResponseDispatcher {
 
             eventBus.publish(replyTo, responseRequest);
             if (logger.isDebugEnabled()) {
-                logger.debug("PLEXSVC Sending reply " + encodedReply + " to " + replyTo);
+                logger.debug("PLEXSVC Sending reply " + encodedReply + " to "
+                        + replyTo);
             }
         } catch (Exception e) {
             logger.error("PLEXSVC Failed to send " + encodedReply, e);

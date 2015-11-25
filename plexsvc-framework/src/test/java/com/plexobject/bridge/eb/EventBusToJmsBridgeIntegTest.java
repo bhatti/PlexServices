@@ -37,6 +37,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.EventBusRequest;
 import com.plexobject.handler.Handler;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
@@ -179,10 +180,11 @@ public class EventBusToJmsBridgeIntegTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "message";
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
-                .setMethod(RequestMethod.GET).setEndpoint("/w")
-                .setProperties(properties).setHeaders(headers)
-                .setContents(payload).setCodecType(CodecType.JSON)
+        Request request = EventBusRequest.builder().setEventBus(eb)
+                .setProtocol(Protocol.HTTP).setMethod(RequestMethod.GET)
+                .setEndpoint("/w").setProperties(properties)
+                .setHeaders(headers).setContents(payload)
+                .setCodecType(CodecType.JSON)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {
                 }).build();
         final CountDownLatch latch = new CountDownLatch(1);

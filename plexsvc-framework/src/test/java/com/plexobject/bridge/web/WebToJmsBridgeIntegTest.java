@@ -33,6 +33,7 @@ import com.plexobject.domain.Configuration;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.JMSContainer;
@@ -260,7 +261,7 @@ public class WebToJmsBridgeIntegTest {
         properties.put("prop1", "val1");
         Map<String, Object> headers = new HashMap<>();
         headers.put("head1", "val1");
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(method).setEndpoint(path).setProperties(properties)
                 .setHeaders(headers).setContents(payload)
                 .setCodecType(CodecType.JSON)

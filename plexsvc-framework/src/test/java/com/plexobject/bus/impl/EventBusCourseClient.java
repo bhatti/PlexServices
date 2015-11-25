@@ -8,6 +8,7 @@ import com.plexobject.bus.EventBus;
 import com.plexobject.domain.Promise;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.EventBusRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.school.Course;
@@ -120,7 +121,7 @@ public class EventBusCourseClient {
     Request request(String replyChannel, Object payload) {
         AbstractResponseDispatcher dispatcher = new EventBusResponseDispatcher(
                 eventBus, replyChannel);
-        return Request.builder().setProtocol(Protocol.EVENT_BUS)
+        return EventBusRequest.builder().setProtocol(Protocol.EVENT_BUS)
                 .setCodecType(CodecType.SERVICE_SPECIFIC).setMethod(RequestMethod.MESSAGE)
                 .setResponseDispatcher(dispatcher)
                 .setReplyEndpoint(replyChannel).setContents(payload).build();

@@ -44,6 +44,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.Request.Builder;
 import com.plexobject.handler.RequestHandler;
@@ -155,7 +156,7 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             Map<String, Object> params = getParams(req);
             Request handlerReq = buildRequest(ctx, uri, dispatcher,
                     textPayload, Protocol.HTTP, method, headers, params);
-            
+
             logger.info("PLEXSVC HTTP Received URI '" + uri + "', wsPath '"
                     + wsPath + "', request " + handlerReq);
             handler.handle(handlerReq);
@@ -168,7 +169,8 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             Map<String, Object> headers, Map<String, Object> params) {
         SocketAddress remoteAddr = ctx.channel() != null ? ctx.channel()
                 .remoteAddress() : null;
-        Builder handlerReqBuilder = Request.builder().setEndpoint(uri)
+        Builder handlerReqBuilder = NettyRequest.builder()
+                .setChannelHandlerContext(ctx).setEndpoint(uri)
                 .setProtocol(protocol).setMethod(method).setProperties(params)
                 .setHeaders(headers).setCodecType(codecType)
                 .setContents(textPayload).setResponseDispatcher(dispatcher);

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +16,7 @@ import org.junit.Test;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.TestWebUtils;
@@ -41,6 +45,9 @@ public class NettyWebsocketRequestHandlerTest {
 
     @Before
     public void setUp() throws Exception {
+        BasicConfigurator.configure();
+        LogManager.getRootLogger().setLevel(Level.INFO);
+
         server = (NettyHttpServer) TestWebUtils.createHttpServer(HTTP_PORT,
                 handler);
 
@@ -55,7 +62,7 @@ public class NettyWebsocketRequestHandlerTest {
 
     @Test
     public void testWebHandler() throws Exception {
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/ping")
                 .setCodecType(CodecType.JSON).setContents(PING)
                 .setResponseDispatcher(new AbstractResponseDispatcher() {

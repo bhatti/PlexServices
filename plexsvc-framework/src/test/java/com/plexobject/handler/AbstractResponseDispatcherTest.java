@@ -29,7 +29,7 @@ public class AbstractResponseDispatcherTest {
     }
 
     private final AbstractResponseDispatcher dispatcher = new Dispatcher();
-    private final Request request = Request.builder()
+    private final Request request = EventBusRequest.builder()
             .setProtocol(Protocol.EVENT_BUS).setCodecType(CodecType.JSON)
             .setMethod(RequestMethod.MESSAGE).setResponseDispatcher(dispatcher)
             .setContents("payload").build();

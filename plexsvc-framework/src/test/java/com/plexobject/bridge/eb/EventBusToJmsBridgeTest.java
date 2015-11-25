@@ -25,6 +25,7 @@ import com.plexobject.bridge.eb.EventBusToJmsBridge.JmsListener;
 import com.plexobject.bus.EventBus;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.jms.JMSContainer;
 import com.plexobject.jms.MessageListenerConfig;
@@ -46,7 +47,7 @@ public class EventBusToJmsBridgeTest {
     @Mocked
     private TextMessage message;
     @Mocked
-    private Enumeration propertyNames;
+    private Enumeration<?> propertyNames;
     private EventBusToJmsBridge bridge;
 
     @Before
@@ -146,7 +147,7 @@ public class EventBusToJmsBridgeTest {
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> headers = new HashMap<>();
         String payload = "{}";
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(headers)
                 .setContents(payload).setCodecType(CodecType.JSON)

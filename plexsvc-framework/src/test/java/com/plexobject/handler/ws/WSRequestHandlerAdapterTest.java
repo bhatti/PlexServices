@@ -28,6 +28,7 @@ import com.plexobject.domain.Pair;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.BasePayload;
+import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
@@ -413,7 +414,7 @@ public class WSRequestHandlerAdapterTest {
 
     private static Request newRequest(String payload,
             Map<String, Object> properties) {
-        Request request = Request.builder().setProtocol(Protocol.HTTP)
+        Request request = NettyRequest.builder().setProtocol(Protocol.HTTP)
                 .setMethod(RequestMethod.GET).setEndpoint("/w")
                 .setProperties(properties).setHeaders(properties)
                 .setCodecType(CodecType.JSON).setContents(payload)

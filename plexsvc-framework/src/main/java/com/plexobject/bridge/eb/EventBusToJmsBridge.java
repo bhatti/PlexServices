@@ -29,6 +29,7 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.encode.json.JsonObjectCodec;
 import com.plexobject.handler.AbstractResponseDispatcher;
+import com.plexobject.handler.JMSRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.jms.JMSContainer;
@@ -169,7 +170,8 @@ public class EventBusToJmsBridge implements Lifecycle {
                 }
 
                 // TODO do we need entry.getRequestTypeClass()
-                Request request = Request.builder().setProtocol(Protocol.JMS)
+                Request request = JMSRequest.builder().setMessage(message)
+                        .setProtocol(Protocol.JMS)
                         .setMethod(RequestMethod.MESSAGE).setProperties(params)
                         .setEndpoint(entry.getTarget())
                         .setCodecType(entry.getCodecType())
