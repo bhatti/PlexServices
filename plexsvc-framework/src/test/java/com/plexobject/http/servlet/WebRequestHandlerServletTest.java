@@ -23,12 +23,13 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.ServletRequest;
 import com.plexobject.http.StubHttpServletRequest;
 import com.plexobject.http.StubHttpServletResponse;
 import com.plexobject.security.AuthException;
 import com.plexobject.security.SecurityAuthorizer;
-import com.plexobject.service.RequestMethod;
 import com.plexobject.service.Protocol;
+import com.plexobject.service.RequestMethod;
 import com.plexobject.service.ServiceConfig;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -46,7 +47,16 @@ public class WebRequestHandlerServletTest implements ServletConfig,
     public class WebService implements RequestHandler {
         @Override
         public void handle(Request request) {
+            ServletRequest servletRequest = (ServletRequest) Request
+                    .getCurrentRequest();
+            if (servletRequest.getHttpRequest() == null) {
+                throw new IllegalArgumentException("null http request");
+            }
+            if (servletRequest.getHttpResponse() == null) {
+                throw new IllegalArgumentException("null http response");
+            }
             requests.add(request);
+
             request.getResponse().setContents(request.getContents());
         }
     }

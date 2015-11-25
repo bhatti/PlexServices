@@ -13,15 +13,15 @@ import com.plexobject.service.RequestMethod;
 public class ServletRequest extends Request {
     public static class ServletBuilder extends Builder {
         private HttpServletRequest httpRequest;
-        private HttpServletResponse httpResonse;
+        private HttpServletResponse httpResponse;
 
         public ServletBuilder setHttpRequest(HttpServletRequest httpRequest) {
             this.httpRequest = httpRequest;
             return this;
         }
 
-        public ServletBuilder setHttpResonse(HttpServletResponse httpResonse) {
-            this.httpResonse = httpResonse;
+        public ServletBuilder setHttpResponse(HttpServletResponse httpResponse) {
+            this.httpResponse = httpResponse;
             return this;
         }
 
@@ -31,13 +31,13 @@ public class ServletRequest extends Request {
             }
             return new ServletRequest(protocol, method, requestUri, endpoint,
                     replyEndpoint, properties, headers, contents, codecType,
-                    responseDispatcher, httpRequest, httpResonse);
+                    responseDispatcher, httpRequest, httpResponse);
         }
 
     }
 
     private HttpServletRequest httpRequest;
-    private HttpServletResponse httpResonse;
+    private HttpServletResponse httpResponse;
 
     public ServletRequest() {
         super();
@@ -48,22 +48,22 @@ public class ServletRequest extends Request {
             Map<String, Object> properties, Map<String, Object> headers,
             Object payload, CodecType codecType,
             ResponseDispatcher responseDispatcher,
-            HttpServletRequest httpRequest, HttpServletResponse httpResonse) {
+            HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         super(protocol, method, requestUri, endpoint, replyEndpoint,
                 properties, headers, payload, codecType, responseDispatcher);
         this.httpRequest = httpRequest;
-        this.httpResonse = httpResonse;
+        this.httpResponse = httpResponse;
     }
 
     public HttpServletRequest getHttpRequest() {
         return httpRequest;
     }
 
-    public HttpServletResponse getHttpResonse() {
-        return httpResonse;
+    public HttpServletResponse getHttpResponse() {
+        return httpResponse;
     }
 
-    public static Builder builder() {
+    public static ServletBuilder builder() {
         return new ServletBuilder();
     }
 
