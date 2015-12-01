@@ -79,7 +79,10 @@ public class JMSUtils {
                 reqMsg.setDoubleProperty(name, (Double) value);
             } else {
                 // logger.debug("*** key " + name + ", value " + value);
-                reqMsg.setStringProperty(e.getKey(), e.getValue().toString());
+                if (e.getValue() != null) {
+                    reqMsg.setStringProperty(e.getKey(), e.getValue()
+                            .toString());
+                }
             }
         }
     }

@@ -39,8 +39,9 @@ public class TextObjectCodec extends AbstractObjectCodec {
                 throw new EncodingException("Failed to instantiate " + type
                         + " with " + text, e);
             }
-            throw new EncodingException("Failed to find string constructor for " + type
-                                + " with " + text);
+            throw new EncodingException(
+                    "Failed to find string constructor for " + type + " with "
+                            + text);
         } else {
             return propertyDecode(params, type);
         }

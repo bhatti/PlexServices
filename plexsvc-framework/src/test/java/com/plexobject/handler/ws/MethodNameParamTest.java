@@ -18,7 +18,10 @@ import org.junit.Test;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
+import com.plexobject.encode.json.FilteringJsonCodecConfigurer;
+import com.plexobject.encode.json.FilteringJsonCodecWriter;
 import com.plexobject.handler.BasePayload;
+import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.BaseServiceClient;
@@ -29,18 +32,21 @@ import com.plexobject.service.ServiceRegistry;
 
 public class MethodNameParamTest {
     private static ServiceRegistry serviceRegistry;
+    private static final FilteringJsonCodecConfigurer filteringJsonCodecConfigurer = new FilteringJsonCodecConfigurer();
 
     static class MyClass {
         private Long id;
         private String name;
+        private String description;
 
         MyClass() {
 
         }
 
-        public MyClass(Long id, String name) {
+        public MyClass(Long id, String name, String description) {
             this.id = id;
             this.name = name;
+            this.description = description;
         }
 
         public Long getId() {
@@ -61,7 +67,16 @@ public class MethodNameParamTest {
 
         @Override
         public String toString() {
-            return "MyClass [id=" + id + ", name=" + name + "]";
+            return "MyClass [id=" + id + ", name=" + name + ", description="
+                    + description + "]";
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
         }
 
     }
@@ -80,12 +95,13 @@ public class MethodNameParamTest {
     static class MyServiceImpl implements MyService {
         @Override
         public MyClass getById(Long id) {
-            return new MyClass(id, "getById");
+            return new MyClass(id, "getById", "my description for getById");
         }
 
         @Override
         public MyClass getByParam(@FormParam("id") Long id) {
-            return new MyClass(id, "getByParam");
+            return new MyClass(id, "getByParam",
+                    "my description for getByParam");
         }
 
         @Override
@@ -119,10 +135,6 @@ public class MethodNameParamTest {
                     @Override
                     public BasePayload<Object> intercept(
                             BasePayload<Object> input) {
-                        System.out.println("INPUT\n\tHeaders: "
-                                + input.getHeaders() + ", "
-                                + input.getProperties() + "\n\tPayload: "
-                                + input.getContents() + "\n\n");
                         return input;
                     }
                 });
@@ -131,9 +143,7 @@ public class MethodNameParamTest {
                     @Override
                     public BasePayload<Object> intercept(
                             BasePayload<Object> output) {
-                        System.out.println("OUTPUT Headers: "
-                                + output.getHeaders() + ", "
-                                + output.getProperties() + "\n\n");
+
                         return output;
                     }
                 });
@@ -148,19 +158,25 @@ public class MethodNameParamTest {
 
     @Test
     public void testGetById() throws Exception {
+        addFiltering();
+
         RequestBuilder request = new RequestBuilder("getById", 100L);
         String resp = TestWebUtils.post("http://localhost:"
-                + BaseServiceClient.DEFAULT_PORT + "/myservice",
-                request.encode()).first;
+                + BaseServiceClient.DEFAULT_PORT
+                + "/myservice?filteredFieldNames=id,name", request.encode()).first;
         assertEquals("{\"getByIdResponse\":{\"id\":100,\"name\":\"getById\"}}",
                 resp);
     }
 
     @Test
     public void testGetByParam() throws Exception {
-        String resp = TestWebUtils.post("http://localhost:"
-                + BaseServiceClient.DEFAULT_PORT
-                + "/myservice?id=200&methodName=getByParam", null).first;
+        addFiltering();
+
+        String resp = TestWebUtils
+                .post("http://localhost:"
+                        + BaseServiceClient.DEFAULT_PORT
+                        + "/myservice?id=200&methodName=getByParam&filteredFieldNames=id,name",
+                        null).first;
         assertEquals(
                 "{\"getByParamResponse\":{\"id\":200,\"name\":\"getByParam\"}}",
                 resp);
@@ -168,13 +184,83 @@ public class MethodNameParamTest {
 
     @Test
     public void testGetByMyClass() throws Exception {
+        addFiltering();
+
         RequestBuilder request = new RequestBuilder("getByMyClass",
-                new MyClass(300L, "three hundred"));
+                new MyClass(300L, "three hundred", "my description"));
+        String resp = TestWebUtils.post("http://localhost:"
+                + BaseServiceClient.DEFAULT_PORT
+                + "/myservice?filteredFieldNames=id,name", request.encode()).first;
+        assertEquals(
+                "{\"getByMyClassResponse\":{\"id\":300,\"name\":\"three hundred\"}}",
+                resp);
+    }
+
+    @Test
+    public void testGetByMyClassWithoutFilter() throws Exception {
+        addFiltering();
+
+        RequestBuilder request = new RequestBuilder("getByMyClass",
+                new MyClass(300L, "three hundred", "my description"));
         String resp = TestWebUtils.post("http://localhost:"
                 + BaseServiceClient.DEFAULT_PORT + "/myservice",
                 request.encode()).first;
         assertEquals(
-                "{\"getByMyClassResponse\":{\"id\":300,\"name\":\"three hundred\"}}",
+                "{\"getByMyClassResponse\":{\"id\":300,\"name\":\"three hundred\",\"description\":\"my description\"}}",
                 resp);
+    }
+
+    // manual test
+    // @Test
+    public void testMeasureGetByMyClass() throws Exception {
+        final RequestBuilder request = new RequestBuilder("getByMyClass",
+                new MyClass(300L, "three hundred", "my description"));
+        // warm up
+        for (int i = 0; i < 1000; i++) {
+            TestWebUtils.post("http://localhost:"
+                    + BaseServiceClient.DEFAULT_PORT + "/myservice",
+                    request.encode());
+        }
+        long started = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            TestWebUtils.post("http://localhost:"
+                    + BaseServiceClient.DEFAULT_PORT + "/myservice",
+                    request.encode());
+        }
+        System.out.println("Without filtering took "
+                + (System.currentTimeMillis() - started) + " Millis");
+        addFiltering();
+
+        started = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            TestWebUtils
+                    .post("http://localhost:" + BaseServiceClient.DEFAULT_PORT
+                            + "/myservice?filteredFieldNames=id,name",
+                            request.encode());
+        }
+        System.out.println("With filtering took "
+                + (System.currentTimeMillis() - started) + " Millis");
+    }
+
+    private static void addFiltering() {
+        serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
+            @Override
+            public Request intercept(Request request) {
+                if (request
+                        .getProperty(FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM) != null) {
+                    request.getCodec().setCodecConfigurer(
+                            filteringJsonCodecConfigurer);
+                    request.getCodec()
+                            .setObjectCodecFilteredWriter(
+                                    new FilteringJsonCodecWriter(
+                                            request,
+                                            FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM));
+                } else {
+                    request.getCodec().setObjectCodecFilteredWriter(null);
+                    request.getCodec().setCodecConfigurer(null);
+                }
+                return request;
+            }
+        });
     }
 }

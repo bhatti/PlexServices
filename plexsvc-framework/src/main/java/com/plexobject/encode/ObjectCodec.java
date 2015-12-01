@@ -31,4 +31,19 @@ public interface ObjectCodec {
      */
     <T> T decode(String text, Class<?> type, Map<String, Object> params)
             throws EncodingException;
+
+    /**
+     * This method sets current code configurer to customize underlying encoder
+     * 
+     * @param codecConfigurer
+     */
+    void setCodecConfigurer(CodecConfigurer codecConfigurer);
+
+    /**
+     * This method sets filtered writer for omitting any fields from the string
+     * response
+     * 
+     * @param writer
+     */
+    void setObjectCodecFilteredWriter(ObjectCodecFilteredWriter writer);
 }

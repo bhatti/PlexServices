@@ -16,16 +16,14 @@ public class Response extends BasePayload<Object> {
     public static final String[] HEADER_PROPERTIES = new String[] {
             HttpResponse.STATUS_CODE, HttpResponse.STATUS_MESSAGE,
             HttpResponse.LOCATION, Constants.SESSION_ID };
-    private CodecType codecType;
     private final Request request;
 
     public Response(final Request request,
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             CodecType codecType) {
-        super(properties, headers, payload);
+        super(codecType, properties, headers, payload);
         this.request = request;
-        this.codecType = codecType;
     }
 
     public Request getRequest() {
@@ -76,9 +74,6 @@ public class Response extends BasePayload<Object> {
         return false;
     }
 
-    public CodecType getCodecType() {
-        return codecType;
-    }
 
     @SuppressWarnings("unchecked")
     public <T> T getContentsAs() {

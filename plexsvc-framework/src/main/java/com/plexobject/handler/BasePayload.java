@@ -6,6 +6,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Statusable;
+import com.plexobject.encode.CodecType;
+import com.plexobject.encode.ObjectCodec;
+import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.http.HttpResponse;
 
 public abstract class BasePayload<T> implements Statusable {
@@ -14,6 +17,7 @@ public abstract class BasePayload<T> implements Statusable {
     protected final Map<String, Object> properties;
     protected final Map<String, Object> headers;
     protected final long createdAt;
+    protected CodecType codecType;
     protected T contents;
     protected int statusCode = 0;
     protected String statusMessage;
@@ -24,12 +28,24 @@ public abstract class BasePayload<T> implements Statusable {
         this.headers = new HashMap<>();
     }
 
-    protected BasePayload(final Map<String, Object> properties,
+    protected BasePayload(final CodecType codecType,
+            final Map<String, Object> properties,
             final Map<String, Object> headers, final T contents) {
         this.createdAt = System.currentTimeMillis();
+        this.codecType = codecType;
         this.properties = properties;
         this.headers = headers;
         this.contents = contents;
+    }
+
+    public CodecType getCodecType() {
+        return codecType;
+    }
+
+    @JsonIgnore
+    public ObjectCodec getCodec() {
+        return codecType != null ? ObjectCodecFactory.getInstance()
+                .getObjectCodec(codecType) : null;
     }
 
     public void setContents(T obj) {

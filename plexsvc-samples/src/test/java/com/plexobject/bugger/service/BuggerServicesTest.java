@@ -29,6 +29,7 @@ import com.plexobject.bugger.repository.CommentRepository;
 import com.plexobject.bugger.repository.ProjectRepository;
 import com.plexobject.bugger.repository.UserRepository;
 import com.plexobject.domain.Configuration;
+import com.plexobject.http.ServiceInvocationException;
 import com.plexobject.jms.JMSTestUtils;
 import com.plexobject.service.ServiceRegistry;
 
@@ -72,17 +73,17 @@ public class BuggerServicesTest {
         broker.stop();
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = ServiceInvocationException.class)
     public void testLoginWithValidationError() throws Exception {
         BuggerServicesClient.login(null, null);
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = ServiceInvocationException.class)
     public void testLoginWithInvalidUsername() throws Exception {
         BuggerServicesClient.login("bad", "bad");
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = ServiceInvocationException.class)
     public void testDeleteUserWithInvalidRole() throws Exception {
         BuggerServicesClient.login("erica", "pass");
         BuggerServicesClient.deleteUser(2L);
@@ -106,7 +107,7 @@ public class BuggerServicesTest {
         assertEquals(Boolean.TRUE, result.get("deleted"));
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = ServiceInvocationException.class)
     public void testAccessingUnauthorizedService() throws Exception {
         BuggerServicesClient.login("erica", "pass");
         BuggerServicesClient.getUsers();
@@ -209,35 +210,50 @@ public class BuggerServicesTest {
 
     // *************** PRIVATE HELPER METHODS ***************
     private static void addServices(ServiceRegistry serviceRegistry) {
-        serviceRegistry.addRequestHandler(new UserServices.LoginService(userRepository));
-        serviceRegistry.addRequestHandler(new UserServices.CreateUserService(userRepository));
-        serviceRegistry.addRequestHandler(new UserServices.UpdateUserService(userRepository));
-        serviceRegistry.addRequestHandler(new UserServices.QueryUserService(userRepository));
-        serviceRegistry.addRequestHandler(new UserServices.DeleteUserService(userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.LoginService(
+                userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.CreateUserService(
+                userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.UpdateUserService(
+                userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.QueryUserService(
+                userRepository));
+        serviceRegistry.addRequestHandler(new UserServices.DeleteUserService(
+                userRepository));
 
         //
-        serviceRegistry.addRequestHandler(new ProjectServices.CreateProjectService(
-                projectRepository, userRepository));
-        serviceRegistry.addRequestHandler(new ProjectServices.UpdateProjectService(
-                projectRepository, userRepository));
-        serviceRegistry.addRequestHandler(new ProjectServices.QueryProjectService(
-                projectRepository, userRepository));
-        serviceRegistry.addRequestHandler(new ProjectServices.AddProjectMemberService(
-                projectRepository, userRepository));
-        serviceRegistry.addRequestHandler(new ProjectServices.RemoveProjectMemberService(
-                projectRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new ProjectServices.CreateProjectService(
+                        projectRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new ProjectServices.UpdateProjectService(
+                        projectRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new ProjectServices.QueryProjectService(
+                        projectRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new ProjectServices.AddProjectMemberService(
+                        projectRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new ProjectServices.RemoveProjectMemberService(
+                        projectRepository, userRepository));
         //
-        serviceRegistry.addRequestHandler(new BugReportServices.CreateBugReportService(
-                bugreportRepository, userRepository));
-        serviceRegistry.addRequestHandler(new BugReportServices.UpdateBugReportService(
-                bugreportRepository, userRepository));
-        serviceRegistry.addRequestHandler(new BugReportServices.QueryBugReportService(
-                bugreportRepository, userRepository));
-        serviceRegistry.addRequestHandler(new BugReportServices.QueryProjectBugReportService(
-                bugreportRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new BugReportServices.CreateBugReportService(
+                        bugreportRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new BugReportServices.UpdateBugReportService(
+                        bugreportRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new BugReportServices.QueryBugReportService(
+                        bugreportRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new BugReportServices.QueryProjectBugReportService(
+                        bugreportRepository, userRepository));
 
-        serviceRegistry.addRequestHandler(new BugReportServices.AssignBugReportService(
-                bugreportRepository, userRepository));
+        serviceRegistry
+                .addRequestHandler(new BugReportServices.AssignBugReportService(
+                        bugreportRepository, userRepository));
     }
 
     private static void populateTestData() {

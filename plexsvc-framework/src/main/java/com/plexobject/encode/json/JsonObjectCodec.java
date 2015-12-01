@@ -11,8 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.plexobject.encode.AbstractObjectCodec;
+import com.plexobject.encode.CodecConfigurer;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.EncodingException;
+import com.plexobject.encode.ObjectCodecFilteredWriter;
 
 /**
  * This class implements codec for JSON
@@ -21,31 +23,34 @@ import com.plexobject.encode.EncodingException;
  *
  */
 public class JsonObjectCodec extends AbstractObjectCodec {
-    public interface ObjectMapperFactory {
-        ObjectMapper createObjectMapper();
-    }
-
-    private final ObjectMapper mapper;
-    private static ObjectMapperFactory objectMapperFactory = new ObjectMapperFactory() {
+    private static ThreadLocal<ObjectMapper> currentMapper = new ThreadLocal<ObjectMapper>() {
         @Override
-        public ObjectMapper createObjectMapper() {
-            return new ObjectMapper();
+        protected ObjectMapper initialValue() {
+            final ObjectMapper mapper = new ObjectMapper();
+            // mapper.enableDefaultTyping();
+            // mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL,
+            // JsonTypeInfo.As.WRAPPER_OBJECT);
+            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+            mapper.setSerializationInclusion(Include.NON_NULL);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    false);
+            SimpleModule module = new SimpleModule();
+            // module.addSerializer(Throwable.class, new ExceptionSerializer());
+            mapper.registerModule(module);
+            //
+            return mapper;
         }
     };
 
     public JsonObjectCodec() {
-        mapper = objectMapperFactory.createObjectMapper();
+    }
 
-        // mapper.enableDefaultTyping();
-        // mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL,
-        // JsonTypeInfo.As.WRAPPER_OBJECT);
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        mapper.setSerializationInclusion(Include.NON_NULL);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                false);
-        SimpleModule module = new SimpleModule();
-        // module.addSerializer(Throwable.class, new ExceptionSerializer());
-        mapper.registerModule(module);
+    @Override
+    public void setCodecConfigurer(CodecConfigurer codecConfigurer) {
+        super.setCodecConfigurer(codecConfigurer);
+        if (codecConfigurer != null) {
+            codecConfigurer.configureCodec(currentMapper.get());
+        }
     }
 
     @Override
@@ -59,7 +64,12 @@ public class JsonObjectCodec extends AbstractObjectCodec {
             return obj.toString();
         }
         try {
-            return mapper.writeValueAsString(obj);
+            final ObjectCodecFilteredWriter writer = getObjectCodecFilteredWriter();
+            if (writer != null) {
+                return writer.writeString(currentMapper.get(), obj);
+            } else {
+                return currentMapper.get().writeValueAsString(obj);
+            }
         } catch (JsonProcessingException e) {
             throw new EncodingException("Failed to convert " + obj, e);
         }
@@ -81,7 +91,7 @@ public class JsonObjectCodec extends AbstractObjectCodec {
             return null;
         }
         try {
-            return mapper.readValue(text, type);
+            return currentMapper.get().readValue(text, type);
         } catch (IOException e) {
             throw new EncodingException("Failed to decode " + text, e);
         }
@@ -101,23 +111,12 @@ public class JsonObjectCodec extends AbstractObjectCodec {
         try {
             Thread.currentThread().setContextClassLoader(
                     getClass().getClassLoader());
-            return (T) mapper.readValue(text, type);
+            return (T) currentMapper.get().readValue(text, type);
         } catch (IOException e) {
             throw new EncodingException("Failed to decode '" + text + "' to "
                     + type, e);
         } finally {
             Thread.currentThread().setContextClassLoader(savedCL);
-        }
-    }
-
-    public static ObjectMapperFactory getObjectMapperFactory() {
-        return objectMapperFactory;
-    }
-
-    public static void setObjectMapperFactory(
-            ObjectMapperFactory objectMapperFactory) {
-        if (objectMapperFactory != null) {
-            JsonObjectCodec.objectMapperFactory = objectMapperFactory;
         }
     }
 }

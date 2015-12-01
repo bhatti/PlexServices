@@ -122,5 +122,4 @@ public class XmlObjectCodec extends AbstractObjectCodec {
     public CodecType getType() {
         return CodecType.XML;
     }
-
 }

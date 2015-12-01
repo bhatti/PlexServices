@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plexobject.domain.Constants;
 import com.plexobject.domain.Preconditions;
 import com.plexobject.encode.CodecType;
-import com.plexobject.encode.ObjectCodec;
-import com.plexobject.encode.ObjectCodecFactory;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
 
@@ -114,7 +112,6 @@ public class Request extends BasePayload<Object> {
     protected RequestMethod method;
     protected String endpoint;
     protected String replyEndpoint;
-    protected CodecType codecType;
     protected String methodName;
     protected String requestUri;
     protected Object lastSentContents;
@@ -128,10 +125,9 @@ public class Request extends BasePayload<Object> {
             final Map<String, Object> headers, final Object payload,
             final CodecType codecType,
             final ResponseDispatcher responseDispatcher) {
-        super(properties, headers, payload);
+        super(codecType, properties, headers, payload);
         Preconditions.requireNotNull(protocol, "protocol is required");
         Preconditions.requireNotNull(method, "method is required");
-        Preconditions.requireNotNull(codecType, "codecType is required");
         Preconditions.requireNotNull(responseDispatcher,
                 "responseDispatcher is required");
         this.protocol = protocol;
@@ -139,7 +135,6 @@ public class Request extends BasePayload<Object> {
         this.requestUri = requestUri == null ? endpoint : requestUri;
         this.endpoint = endpoint;
         this.replyEndpoint = replyEndpoint;
-        this.codecType = codecType;
         this.responseDispatcher = responseDispatcher;
         this.response = new Response(this, new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, codecType);
@@ -179,15 +174,7 @@ public class Request extends BasePayload<Object> {
         return sessionId;
     }
 
-    public CodecType getCodecType() {
-        return codecType;
-    }
 
-    @JsonIgnore
-    public ObjectCodec getCodec() {
-        return codecType != null ? ObjectCodecFactory.getInstance()
-                .getObjectCodec(codecType) : null;
-    }
 
     @JsonIgnore
     public Response getResponse() {

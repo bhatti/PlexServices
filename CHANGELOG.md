@@ -26,3 +26,7 @@
 
 1.3 - Added status line support to the services
 
+1.4 - Added protocol specific request classes such as ServletRequest to store additional attributes
+
+1.5 - Added filtering of JSON fields from response
+

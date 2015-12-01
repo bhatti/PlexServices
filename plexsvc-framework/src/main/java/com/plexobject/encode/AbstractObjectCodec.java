@@ -15,6 +15,26 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractObjectCodec implements ObjectCodec {
     protected final Logger logger = Logger.getLogger(getClass());
+    private static ThreadLocal<ObjectCodecFilteredWriter> currentObjectCodecFilteredWriter = new ThreadLocal<ObjectCodecFilteredWriter>() {
+        @Override
+        protected ObjectCodecFilteredWriter initialValue() {
+            return null;
+        }
+    };
+
+    @Override
+    public void setCodecConfigurer(CodecConfigurer codecConfigurer) {
+    }
+
+    protected ObjectCodecFilteredWriter getObjectCodecFilteredWriter() {
+        return currentObjectCodecFilteredWriter.get();
+    }
+
+    @Override
+    public void setObjectCodecFilteredWriter(ObjectCodecFilteredWriter writer) {
+        currentObjectCodecFilteredWriter.set(writer);
+    }
+
     private static final BeanUtilsBean beanUtilsBean = new BeanUtilsBean(
             new ConvertUtilsBean() {
                 @SuppressWarnings("unchecked")
