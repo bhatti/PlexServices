@@ -135,7 +135,7 @@ public class WSDelegateHandler implements RequestHandler {
         try {
             Object result = methodInfo.implMethod.invoke(delegate, args);
             if (logger.isDebugEnabled()) {
-                logger.debug("****PLEXSVC MLN Invoking "
+                logger.debug("****PLEXSVC Invoking "
                         + methodInfo.iMethod.getName() + " with "
                         + Arrays.toString(args) + ", result " + result);
             }

@@ -22,6 +22,8 @@ public class FilteringJsonCodecWriter extends SimpleBeanPropertyFilter
     private static final Logger logger = Logger
             .getLogger(FilteringJsonCodecWriter.class);
     private static final String RESPONSE_SUFFIX = "Response";
+    private static final String[] INCLUDED_FIELDS = { "class", "errorCode",
+            "errorMessage", "error", "errors" };
     private final Set<String> filteredFieldNames = new HashSet<>();
     private final SimpleFilterProvider simpleFilterProvider = new SimpleFilterProvider();
 
@@ -36,6 +38,9 @@ public class FilteringJsonCodecWriter extends SimpleBeanPropertyFilter
                 }
                 filteredFieldNames.add(request.getMethodName()
                         + RESPONSE_SUFFIX);
+                for (String field : INCLUDED_FIELDS) {
+                    filteredFieldNames.add(field);
+                }
             }
         }
     }
