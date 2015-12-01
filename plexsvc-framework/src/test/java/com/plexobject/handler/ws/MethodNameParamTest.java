@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
-import com.plexobject.encode.json.FilteringJsonCodecConfigurer;
 import com.plexobject.encode.json.FilteringJsonCodecWriter;
 import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
@@ -32,7 +31,6 @@ import com.plexobject.service.ServiceRegistry;
 
 public class MethodNameParamTest {
     private static ServiceRegistry serviceRegistry;
-    private static final FilteringJsonCodecConfigurer filteringJsonCodecConfigurer = new FilteringJsonCodecConfigurer();
 
     static class MyClass {
         private Long id;
@@ -247,9 +245,7 @@ public class MethodNameParamTest {
             @Override
             public Request intercept(Request request) {
                 if (request
-                        .getProperty(FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM) != null) {
-                    request.getCodec().setCodecConfigurer(
-                            filteringJsonCodecConfigurer);
+                        .hasProperty(FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM)) {
                     request.getCodec()
                             .setObjectCodecFilteredWriter(
                                     new FilteringJsonCodecWriter(
@@ -257,7 +253,6 @@ public class MethodNameParamTest {
                                             FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM));
                 } else {
                     request.getCodec().setObjectCodecFilteredWriter(null);
-                    request.getCodec().setCodecConfigurer(null);
                 }
                 return request;
             }

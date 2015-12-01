@@ -23,6 +23,8 @@ import com.plexobject.encode.ObjectCodecFilteredWriter;
  *
  */
 public class JsonObjectCodec extends AbstractObjectCodec {
+    private static final FilteringJsonCodecConfigurer filteringJsonCodecConfigurer = new FilteringJsonCodecConfigurer();
+
     private static ThreadLocal<ObjectMapper> currentMapper = new ThreadLocal<ObjectMapper>() {
         @Override
         protected ObjectMapper initialValue() {
@@ -46,9 +48,22 @@ public class JsonObjectCodec extends AbstractObjectCodec {
     }
 
     @Override
+    public void setObjectCodecFilteredWriter(ObjectCodecFilteredWriter writer) {
+        super.setObjectCodecFilteredWriter(writer);
+        if (writer != null && getCodecConfigurer() == null) {
+            // add configurer for annotation hooks
+            setCodecConfigurer(filteringJsonCodecConfigurer);
+        } else if (writer == null
+                && getCodecConfigurer() instanceof FilteringJsonCodecConfigurer) {
+            setCodecConfigurer(null);
+        }
+    }
+
+    @Override
     public void setCodecConfigurer(CodecConfigurer codecConfigurer) {
         super.setCodecConfigurer(codecConfigurer);
         if (codecConfigurer != null) {
+            // add configurer for annotation hooks
             codecConfigurer.configureCodec(currentMapper.get());
         }
     }
