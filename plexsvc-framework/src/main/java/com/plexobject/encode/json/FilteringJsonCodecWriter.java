@@ -23,7 +23,9 @@ public class FilteringJsonCodecWriter extends SimpleBeanPropertyFilter
             .getLogger(FilteringJsonCodecWriter.class);
     private static final String RESPONSE_SUFFIX = "Response";
     private static final String[] INCLUDED_FIELDS = { "class", "errorCode",
-            "errorMessage", "error", "errors" };
+            "message", "errorMessage", "error", "errors", "faultInfo",
+            "errorType" };
+    //
     private final Set<String> filteredFieldNames = new HashSet<>();
     private final SimpleFilterProvider simpleFilterProvider = new SimpleFilterProvider();
 
@@ -53,32 +55,22 @@ public class FilteringJsonCodecWriter extends SimpleBeanPropertyFilter
         }
         ObjectMapper mapper = (ObjectMapper) underlyingEncoder;
         //
-        if (filteredFieldNames.size() > 0) {
-            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter
-                    .filterOutAllExcept(filteredFieldNames);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Adding filter for all except"
-                        + filteredFieldNames);
-            }
-            FilterProvider fProvider = simpleFilterProvider
-                    .addFilter(
-                            FilteringJsonCodecConfigurer.FILTERING_JSON_CODEC_CONFIGURER,
-                            filter)
-                    // setFailOnUnknownId: Ignore filtering the reference member
-                    // fields
-                    // Refer: https://jira.codehaus.org/browse/JACKSON-650
-                    .setFailOnUnknownId(false);
-            try {
-                return mapper.writer(fProvider).writeValueAsString(value);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to parse " + value, e);
-            }
-        } else {
-            try {
-                return mapper.writeValueAsString(value);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to parse " + value, e);
-            }
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter
+                .filterOutAllExcept(filteredFieldNames);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding filter for all except" + filteredFieldNames);
+        }
+        FilterProvider fProvider = simpleFilterProvider.addFilter(
+                FilteringJsonCodecConfigurer.FILTERING_JSON_CODEC_CONFIGURER,
+                filter)
+        // setFailOnUnknownId: Ignore filtering the reference member
+        // fields
+        // Refer: https://jira.codehaus.org/browse/JACKSON-650
+                .setFailOnUnknownId(false);
+        try {
+            return mapper.writer(fProvider).writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse " + value, e);
         }
     }
 
