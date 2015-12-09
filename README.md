@@ -46,6 +46,8 @@ PlexServices is designed on following design principles:
 
 - PlexServices allows you to auto-deploy services by specifying package names of services, it deploys all services automatically that implement ServiceConfig annotation.
 
+- PlexServices allows you to filter response JSON fields by passing comma-delimited list of field names from the response object.
+
 
 ##Building
 - Download and install <a href="http://www.gradle.org/downloads">Gradle</a>.
@@ -501,6 +503,36 @@ serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
   }
 });
 ```
+
+
+### Filtering JSON Response fields 
+You can filter fields by passing comma-delimited list of field names from the JSON response object, e.g.
+
+```java  
+ObjectCodecFactory.getInstance().getObjectCodec(CodecType.JSON)
+                .setCodecConfigurer(new FilteringJsonCodecConfigurer());
+
+serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
+    @Override
+    public Request intercept(Request request) {
+        if (request
+                .hasProperty(FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM)) {
+            request.getCodec()
+                    .setObjectCodecFilteredWriter(
+                            new FilteringJsonCodecWriter(
+                                    request,
+                                    FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM));
+        } else {
+            request.getCodec().setObjectCodecFilteredWriter(
+                    new NonFilteringJsonCodecWriter());
+        }
+
+        return request;
+    }
+});
+```
+For example, if your service returns a JSON response of {"getByMyClassResponse":{"id": 485, "name": "my name", "description": "my description"}} and you call the service
+as /myservice?filteredFieldNames=id,name then you will only receive {"getByMyClassResponse":{"id": 485,"name": "my name"}}. This can be useful for low bandwidth mobile devices when you are calling an existing service that returns a lot of unnecessary data.
 
 
 

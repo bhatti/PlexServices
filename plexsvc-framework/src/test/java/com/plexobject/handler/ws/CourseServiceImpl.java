@@ -124,7 +124,6 @@ public class CourseServiceImpl implements CourseService {
     @POST
     public Course paramAndObject(@FormParam("courseId") String courseId,
             Course course) {
-        System.out.println("paramAndObject " + courseId + "\n" + course);
         return course;
     }
 
@@ -132,8 +131,6 @@ public class CourseServiceImpl implements CourseService {
     @POST
     public Course paramAndObjectRequest(@FormParam("courseId") String courseId,
             Course course, Request incomingRequest) {
-        System.out.println("paramAndObjectRequest " + courseId + "\n" + course
-                + "\n" + incomingRequest);
         return course;
     }
 
@@ -141,7 +138,6 @@ public class CourseServiceImpl implements CourseService {
     @GET
     public Course paramAndRequest(@FormParam("courseId") String courseId,
             Request incomingRequest) {
-        System.out.println("paramAndObjectRequest " + courseId);
         return new Course(courseId, courseId);
     }
 
@@ -150,8 +146,6 @@ public class CourseServiceImpl implements CourseService {
     public Course paramAndObjectRequestAndMap(
             @FormParam("courseId") String courseId, Course course,
             Request incomingRequest, Map<String, Object> params) {
-        System.out.println("paramAndObjectRequestAndMap " + courseId + "\n"
-                + course + "\n" + incomingRequest + "\n params " + params);
         return course;
     }
 

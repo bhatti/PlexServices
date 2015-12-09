@@ -35,4 +35,5 @@ public class FilteringJsonCodecConfigurer implements CodecConfigurer {
             mapper.setAnnotationIntrospector(filterIntrospector);
         }
     }
+
 }

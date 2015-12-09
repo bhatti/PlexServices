@@ -156,7 +156,6 @@ public class ReflectUtilsTest {
         String payload = CODEC.encode(c);
         Object[] args = ReflectUtils.decode(m, new HashMap<String, Object>(),
                 null, payload, CODEC);
-        System.out.println(" args " + Arrays.toString(args));
         List<Object> result = (List<Object>) m.invoke(service, args);
         assertEquals(c, result);
     }

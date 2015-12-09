@@ -88,7 +88,6 @@ public class WSRequestHandlerAdapterTest {
             @Override
             public void authorize(Request request, String[] roles)
                     throws AuthException {
-                // System.out.println("Checking Auth");
             }
         };
         serviceRegistry = new ServiceRegistry(config);

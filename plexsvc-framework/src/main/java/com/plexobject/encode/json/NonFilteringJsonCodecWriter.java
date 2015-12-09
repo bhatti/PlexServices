@@ -1,51 +1,58 @@
 package com.plexobject.encode.json;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.plexobject.encode.ObjectCodecFilteredWriter;
-import com.plexobject.handler.Request;
 
-public class FilteringJsonCodecWriter extends SimpleBeanPropertyFilter
+public class NonFilteringJsonCodecWriter extends SimpleBeanPropertyFilter
         implements ObjectCodecFilteredWriter {
-    public static final String DEFAULT_FILTERED_NAMES_PARAM = "filteredFieldNames";
 
     private static final Logger logger = Logger
-            .getLogger(FilteringJsonCodecWriter.class);
-    private static final String RESPONSE_SUFFIX = "Response";
-    private static final String[] INCLUDED_FIELDS = { "class", "errorCode",
-            "message", "errorMessage", "error", "errors", "faultInfo",
-            "errorType" };
-    //
-    private final Set<String> filteredFieldNames = new HashSet<>();
+            .getLogger(NonFilteringJsonCodecWriter.class);
     private final SimpleFilterProvider simpleFilterProvider = new SimpleFilterProvider();
-
-    public FilteringJsonCodecWriter(Request request, String filteredFieldParam) {
-        if (request != null) {
-            String filteredFieldNamesValue = request
-                    .getProperty(filteredFieldParam);
-            if (filteredFieldNamesValue != null) {
-                String[] fields = filteredFieldNamesValue.split("[,;\\s]");
-                for (String field : fields) {
-                    filteredFieldNames.add(field);
-                }
-                filteredFieldNames.add(request.getMethodName()
-                        + RESPONSE_SUFFIX);
-                for (String field : INCLUDED_FIELDS) {
-                    filteredFieldNames.add(field);
-                }
-            }
+    private final PropertyFilter filter = new PropertyFilter() {
+        @Override
+        public void serializeAsField(Object pojo, JsonGenerator jgen,
+                SerializerProvider prov, PropertyWriter writer)
+                throws Exception {
+            writer.serializeAsField(pojo, jgen, prov);
         }
-    }
+
+        @Override
+        public void serializeAsElement(Object elementValue, JsonGenerator jgen,
+                SerializerProvider prov, PropertyWriter writer)
+                throws Exception {
+            writer.serializeAsElement(elementValue, jgen, prov);
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public void depositSchemaProperty(PropertyWriter writer,
+                ObjectNode propertiesNode, SerializerProvider provider)
+                throws JsonMappingException {
+            writer.depositSchemaProperty(propertiesNode, provider);
+        }
+
+        @Override
+        public void depositSchemaProperty(PropertyWriter writer,
+                JsonObjectFormatVisitor objectVisitor,
+                SerializerProvider provider) throws JsonMappingException {
+            writer.depositSchemaProperty(objectVisitor);
+        }
+    };
 
     @Override
     public String writeString(Object underlyingEncoder, Object value) {
@@ -55,10 +62,8 @@ public class FilteringJsonCodecWriter extends SimpleBeanPropertyFilter
         }
         ObjectMapper mapper = (ObjectMapper) underlyingEncoder;
         //
-        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter
-                .filterOutAllExcept(filteredFieldNames);
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding filter for all except" + filteredFieldNames);
+            logger.debug("Adding no filtering");
         }
 
         FilterProvider fProvider = simpleFilterProvider.addFilter(

@@ -23,8 +23,7 @@ import com.plexobject.encode.ObjectCodecFilteredWriter;
  *
  */
 public class JsonObjectCodec extends AbstractObjectCodec {
-    private static final FilteringJsonCodecConfigurer filteringJsonCodecConfigurer = new FilteringJsonCodecConfigurer();
-
+    private static CodecConfigurer defaultCodecConfigurer;
     private static ThreadLocal<ObjectMapper> currentMapper = new ThreadLocal<ObjectMapper>() {
         @Override
         protected ObjectMapper initialValue() {
@@ -39,6 +38,9 @@ public class JsonObjectCodec extends AbstractObjectCodec {
             SimpleModule module = new SimpleModule();
             // module.addSerializer(Throwable.class, new ExceptionSerializer());
             mapper.registerModule(module);
+            if (defaultCodecConfigurer != null) {
+                defaultCodecConfigurer.configureCodec(mapper);
+            }
             //
             return mapper;
         }
@@ -50,22 +52,11 @@ public class JsonObjectCodec extends AbstractObjectCodec {
     @Override
     public void setObjectCodecFilteredWriter(ObjectCodecFilteredWriter writer) {
         super.setObjectCodecFilteredWriter(writer);
-        if (writer != null && getCodecConfigurer() == null) {
-            // add configurer for annotation hooks
-            setCodecConfigurer(filteringJsonCodecConfigurer);
-        } else if (writer == null
-                && getCodecConfigurer() instanceof FilteringJsonCodecConfigurer) {
-            setCodecConfigurer(null);
-        }
     }
 
     @Override
     public void setCodecConfigurer(CodecConfigurer codecConfigurer) {
-        super.setCodecConfigurer(codecConfigurer);
-        if (codecConfigurer != null) {
-            // add configurer for annotation hooks
-            codecConfigurer.configureCodec(currentMapper.get());
-        }
+        defaultCodecConfigurer = codecConfigurer;
     }
 
     @Override
@@ -78,8 +69,8 @@ public class JsonObjectCodec extends AbstractObjectCodec {
         } else if (obj instanceof CharSequence) {
             return obj.toString();
         }
+        final ObjectCodecFilteredWriter writer = getObjectCodecFilteredWriter();
         try {
-            final ObjectCodecFilteredWriter writer = getObjectCodecFilteredWriter();
             if (writer != null) {
                 return writer.writeString(currentMapper.get(), obj);
             } else {

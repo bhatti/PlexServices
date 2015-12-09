@@ -8,7 +8,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.ObjectCodec;
+import com.plexobject.encode.json.FilteringJsonCodecConfigurer;
 import com.plexobject.encode.json.JsonObjectCodec;
+import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.encode.xml.XmlObjectCodec;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.util.ReflectUtils;
@@ -18,8 +20,11 @@ public class BaseServiceClient {
     public static CodecType codecType = CodecType.JSON;
 
     protected static ObjectCodec getObjectCodec() {
-        return codecType == CodecType.JSON ? new JsonObjectCodec()
+        ObjectCodec codec = codecType == CodecType.JSON ? new JsonObjectCodec()
                 : new XmlObjectCodec();
+        codec.setCodecConfigurer(new FilteringJsonCodecConfigurer());
+        codec.setObjectCodecFilteredWriter(new NonFilteringJsonCodecWriter());
+        return codec;
     }
 
     @XmlRootElement
