@@ -35,6 +35,8 @@ import com.plexobject.service.ServiceRegistry;
 
 public class JsonFilteringServiceTest {
     private static ServiceRegistry serviceRegistry;
+    private final static AtomicInteger filteringCount = new AtomicInteger();
+    private final static AtomicInteger nonfilteringCount = new AtomicInteger();
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -199,38 +201,49 @@ public class JsonFilteringServiceTest {
     }
 
     // manual test
-    // @Test
+    @Test
     public void testMeasureGetByMyClass() throws Exception {
-        final RequestBuilder request = new RequestBuilder("getByMyClass",
-                new MyClass(300L, "three hundred", "my description"));
-        // warm up
-        for (int i = 0; i < 1000; i++) {
-            TestWebUtils.post("http://localhost:"
-                    + BaseServiceClient.DEFAULT_PORT + "/myservice",
-                    request.encode());
-        }
-        long started = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
-            TestWebUtils.post("http://localhost:"
-                    + BaseServiceClient.DEFAULT_PORT + "/myservice",
-                    request.encode());
-        }
-        System.out.println("Without filtering took "
-                + (System.currentTimeMillis() - started) + " Millis");
         addFiltering();
 
+        final RequestBuilder request = new RequestBuilder("getByMyClass",
+                new MyClass(300L, "three hundred", "my description"));
+        final int max = 1000;
+        // warm up
+        for (int i = 0; i < max; i++) {
+            TestWebUtils.post("http://localhost:"
+                    + BaseServiceClient.DEFAULT_PORT + "/myservice",
+                    request.encode());
+        }
+        filteringCount.set(0);
+        nonfilteringCount.set(0);
+
+        long started = System.currentTimeMillis();
+        for (int i = 0; i < max; i++) {
+            TestWebUtils.post("http://localhost:"
+                    + BaseServiceClient.DEFAULT_PORT + "/myservice",
+                    request.encode());
+        }
+
+        System.out.println("Without filtering took "
+                + (System.currentTimeMillis() - started) + " Millis "
+                + nonfilteringCount.get());
+
         started = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < max; i++) {
             TestWebUtils
                     .post("http://localhost:" + BaseServiceClient.DEFAULT_PORT
                             + "/myservice?filteredFieldNames=id,name",
                             request.encode());
         }
         System.out.println("With filtering took "
-                + (System.currentTimeMillis() - started) + " Millis");
+                + (System.currentTimeMillis() - started) + " Millis "
+                + filteringCount.get());
     }
 
     private static void addFiltering() {
+        filteringCount.set(0);
+        nonfilteringCount.set(0);
+        final NonFilteringJsonCodecWriter nonFilteringJsonCodecWriter = new NonFilteringJsonCodecWriter();
         serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
             @Override
             public Request intercept(Request request) {
@@ -239,14 +252,16 @@ public class JsonFilteringServiceTest {
 
                 if (request
                         .hasProperty(FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM)) {
+                    filteringCount.incrementAndGet();
                     request.getCodec()
                             .setObjectCodecFilteredWriter(
                                     new FilteringJsonCodecWriter(
                                             request,
                                             FilteringJsonCodecWriter.DEFAULT_FILTERED_NAMES_PARAM));
                 } else {
+                    nonfilteringCount.incrementAndGet();
                     request.getCodec().setObjectCodecFilteredWriter(
-                            new NonFilteringJsonCodecWriter());
+                            nonFilteringJsonCodecWriter);
                 }
 
                 return request;

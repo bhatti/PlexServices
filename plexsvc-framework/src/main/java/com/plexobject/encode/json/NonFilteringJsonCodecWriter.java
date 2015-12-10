@@ -25,29 +25,29 @@ public class NonFilteringJsonCodecWriter extends SimpleBeanPropertyFilter
     private final SimpleFilterProvider simpleFilterProvider = new SimpleFilterProvider();
     private final PropertyFilter filter = new PropertyFilter() {
         @Override
-        public void serializeAsField(Object pojo, JsonGenerator jgen,
+        public final void serializeAsField(Object pojo, JsonGenerator jgen,
                 SerializerProvider prov, PropertyWriter writer)
                 throws Exception {
             writer.serializeAsField(pojo, jgen, prov);
         }
 
         @Override
-        public void serializeAsElement(Object elementValue, JsonGenerator jgen,
-                SerializerProvider prov, PropertyWriter writer)
-                throws Exception {
+        public final void serializeAsElement(Object elementValue,
+                JsonGenerator jgen, SerializerProvider prov,
+                PropertyWriter writer) throws Exception {
             writer.serializeAsElement(elementValue, jgen, prov);
         }
 
         @SuppressWarnings("deprecation")
         @Override
-        public void depositSchemaProperty(PropertyWriter writer,
+        public final void depositSchemaProperty(PropertyWriter writer,
                 ObjectNode propertiesNode, SerializerProvider provider)
                 throws JsonMappingException {
             writer.depositSchemaProperty(propertiesNode, provider);
         }
 
         @Override
-        public void depositSchemaProperty(PropertyWriter writer,
+        public final void depositSchemaProperty(PropertyWriter writer,
                 JsonObjectFormatVisitor objectVisitor,
                 SerializerProvider provider) throws JsonMappingException {
             writer.depositSchemaProperty(objectVisitor);
@@ -73,7 +73,7 @@ public class NonFilteringJsonCodecWriter extends SimpleBeanPropertyFilter
         // fields
         // Refer: https://jira.codehaus.org/browse/JACKSON-650
                 .setFailOnUnknownId(false);
-
+        //
         try {
             return mapper.writer(fProvider).writeValueAsString(value);
         } catch (JsonProcessingException e) {

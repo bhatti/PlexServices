@@ -65,18 +65,18 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file (build/libs/plexsvc-framework-1.2-SNAPSHOT.jar) manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-1.5-SNAPSHOT.jar) manually in your application.
 
 
 
 ##Dependencies
-- Netty 4.0
+- Netty 4.0 for standalone services otherwise web container such as Jetty or Tomcat
 - Fast JSON  2.4
 - XStream 1.4
 - JMS API 1.1
 
 ##Version
-- 1.2
+- 1.5
 
 ##License
 - MIT
