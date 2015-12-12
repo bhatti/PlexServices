@@ -811,7 +811,9 @@ and
 You can invoke both services with one request such as:
 ```javascript 
 [{"service1":{"service1-param":"value"}},{"service2":{"service2-param":"value"}}]
-```
+``` 
+
+You will then receive response as an array as well, e.g.
 ```javascript 
 [{"service1Response":{"service1-resp":"value"}},{"service2Response":{"service2-resp":"value"}}]
 ```
