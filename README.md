@@ -820,7 +820,14 @@ You will then receive response as an array as well, e.g.
 
 This batching of requests can improve performance if client such as mobile app needs to call multiple services. 
 Note that all of the services must use same HTTP verb, e.g. all services must be either GET or POST.
-Also, if one of the service fails, you will receive errors for that service and normal response from other services.
+Also, if one of the service fails, you will receive errors for that service and normal response from other services, e.g. if you call two services such as:
+```javascript 
+[{"save":{"id":"1449902","name":"Java","studentIds":["1449903","1449904"],"addresses":[{"street":"100 main","city":"Seattle","zip":"98101"}]}},{"errorService":""}]]
+```
+And errorServie fails, you will receive:
+```javascript 
+[{"saveResponse":{"id":"1449902","name":"Java","studentIds":["1449903","1449904"],"addresses":[{"street":"100 main","city":"Seattle","zip":"98101"}]}},{"errorServiceResponse":{"errors":[{"errorType":"IOException","message":"IO error"}]}}]
+```
 
 
 ### Finite State Machine
