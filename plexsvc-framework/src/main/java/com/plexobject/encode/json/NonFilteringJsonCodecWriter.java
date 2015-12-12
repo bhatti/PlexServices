@@ -1,5 +1,8 @@
 package com.plexobject.encode.json;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -23,7 +26,8 @@ public class NonFilteringJsonCodecWriter extends SimpleBeanPropertyFilter
     private static final Logger logger = Logger
             .getLogger(NonFilteringJsonCodecWriter.class);
     private final SimpleFilterProvider simpleFilterProvider = new SimpleFilterProvider();
-    private final PropertyFilter filter = new PropertyFilter() {
+    private static final Set<String> emptySet = Collections.emptySet();
+    final PropertyFilter filter = new PropertyFilter() {
         @Override
         public final void serializeAsField(Object pojo, JsonGenerator jgen,
                 SerializerProvider prov, PropertyWriter writer)
@@ -66,18 +70,21 @@ public class NonFilteringJsonCodecWriter extends SimpleBeanPropertyFilter
             logger.debug("Adding no filtering");
         }
 
+        //
         FilterProvider fProvider = simpleFilterProvider.addFilter(
                 FilteringJsonCodecConfigurer.FILTERING_JSON_CODEC_CONFIGURER,
-                filter)
-        // setFailOnUnknownId: Ignore filtering the reference member
-        // fields
-        // Refer: https://jira.codehaus.org/browse/JACKSON-650
+                SimpleBeanPropertyFilter.serializeAllExcept(emptySet)) // filter
+                // setFailOnUnknownId: Ignore filtering the reference member
+                // fields
+                // Refer: https://jira.codehaus.org/browse/JACKSON-650
                 .setFailOnUnknownId(false);
         //
+        mapper.setFilters(fProvider);
+
         try {
-            return mapper.writer(fProvider).writeValueAsString(value);
+            return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to parse " + value, e);
+            throw new RuntimeException("Failed to write " + value, e);
         }
     }
 

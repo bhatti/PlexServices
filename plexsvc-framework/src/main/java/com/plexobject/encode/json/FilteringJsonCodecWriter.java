@@ -69,8 +69,9 @@ public class FilteringJsonCodecWriter extends SimpleBeanPropertyFilter
         // Refer: https://jira.codehaus.org/browse/JACKSON-650
                 .setFailOnUnknownId(false);
 
+        mapper.setFilters(fProvider);
         try {
-            return mapper.writer(fProvider).writeValueAsString(value);
+            return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to parse " + value, e);
         }

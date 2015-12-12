@@ -48,6 +48,8 @@ PlexServices is designed on following design principles:
 
 - PlexServices allows you to filter response JSON fields by passing comma-delimited list of field names from the response object.
 
+- PlexServices allows you to call multiple services at once when using JaxRS based JSON requests
+
 
 ##Building
 - Download and install <a href="http://www.gradle.org/downloads">Gradle</a>.
@@ -795,6 +797,29 @@ serviceRegistry.start();
 Above code looks for classes that implement WebService and createFromPackages
 returns RequestHandlers. If you have an existing service object then you can
 use create method instead.
+
+
+### Invoking Multiple Requests with JaxWS/JaxRS annotations 
+PlexServices allows you to call multiple services when using JaxWS/JaxRS based requests, e.g. if you are invoking your service with JSON as:
+```javascript 
+{"service1":{"service1-param":"value"}}
+``` 
+and
+```javascript 
+{"service2":{"service2-param":"value"}}
+```
+You can invoke both services with one request such as:
+```javascript 
+[{"service1":{"service1-param":"value"}},{"service2":{"service2-param":"value"}}]
+```
+```javascript 
+[{"service1Response":{"service1-resp":"value"}},{"service2Response":{"service2-resp":"value"}}]
+```
+
+This batching of requests can improve performance if client such as mobile app needs to call multiple services. 
+Note that all of the services must use same HTTP verb, e.g. all services must be either GET or POST.
+Also, if one of the service fails, you will receive errors for that service and normal response from other services.
+
 
 ### Finite State Machine
 PlexServices provides helper classes to implement finite state machine. For example, here is how you can implement FSM for Android application lifecycle:

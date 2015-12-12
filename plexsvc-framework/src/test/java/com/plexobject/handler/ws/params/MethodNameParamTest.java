@@ -1,4 +1,4 @@
-package com.plexobject.handler.ws;
+package com.plexobject.handler.ws.params;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,10 +18,11 @@ import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.ws.WSRequestHandlerAdapter;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.BaseServiceClient;
-import com.plexobject.service.BaseServiceClient.RequestBuilder;
 import com.plexobject.service.Interceptor;
+import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 

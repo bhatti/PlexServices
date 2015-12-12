@@ -1,4 +1,4 @@
-package com.plexobject.handler.ws;
+package com.plexobject.handler.ws.file;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -28,6 +28,7 @@ import com.plexobject.encode.CodecType;
 import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.ws.WSRequestHandlerAdapter;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.BaseServiceClient;
@@ -45,7 +46,7 @@ public class WSFileTransferTest {
 
     @WebService
     @Path("/transferService")
-    static class TransferServiceImpl implements TransferService {
+    public static class TransferServiceImpl implements TransferService {
         private static File webFolder = new File("./src/test/resources");
 
         @Override
@@ -91,7 +92,7 @@ public class WSFileTransferTest {
         WSRequestHandlerAdapter requestHandlerAdapter = new WSRequestHandlerAdapter(
                 serviceRegistry);
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
-                .createFromPackages("com.plexobject.handler.ws");
+                .createFromPackages("com.plexobject.handler.ws.file");
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             serviceRegistry.addRequestHandler(e.getKey(), e.getValue());

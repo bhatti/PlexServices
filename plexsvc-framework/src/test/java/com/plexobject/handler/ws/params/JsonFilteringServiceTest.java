@@ -1,4 +1,4 @@
-package com.plexobject.handler.ws;
+package com.plexobject.handler.ws.params;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,10 +26,11 @@ import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.handler.ws.WSRequestHandlerAdapter;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.BaseServiceClient;
-import com.plexobject.service.BaseServiceClient.RequestBuilder;
 import com.plexobject.service.Interceptor;
+import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
@@ -52,7 +53,7 @@ public class JsonFilteringServiceTest {
         WSRequestHandlerAdapter requestHandlerAdapter = new WSRequestHandlerAdapter(
                 serviceRegistry);
         Map<ServiceConfigDesc, RequestHandler> handlers = requestHandlerAdapter
-                .createFromPackages("com.plexobject.handler.ws");
+                .createFromPackages("com.plexobject.handler.ws.params");
         for (Map.Entry<ServiceConfigDesc, RequestHandler> e : handlers
                 .entrySet()) {
             serviceRegistry.addRequestHandler(e.getKey(), e.getValue());
@@ -71,7 +72,6 @@ public class JsonFilteringServiceTest {
                     @Override
                     public BasePayload<Object> intercept(
                             BasePayload<Object> output) {
-
                         return output;
                     }
                 });

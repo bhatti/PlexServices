@@ -1,11 +1,11 @@
-package com.plexobject.handler.ws;
+package com.plexobject.handler.ws.params;
 
 public class MyClass {
     private Long id;
     private String name;
     private String description;
 
-    MyClass() {
+    public MyClass() {
 
     }
 

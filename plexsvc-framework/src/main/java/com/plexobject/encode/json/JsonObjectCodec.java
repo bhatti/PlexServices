@@ -35,12 +35,12 @@ public class JsonObjectCodec extends AbstractObjectCodec {
             mapper.setSerializationInclusion(Include.NON_NULL);
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                     false);
-            SimpleModule module = new SimpleModule();
-            // module.addSerializer(Throwable.class, new ExceptionSerializer());
-            mapper.registerModule(module);
             if (defaultCodecConfigurer != null) {
                 defaultCodecConfigurer.configureCodec(mapper);
             }
+            SimpleModule module = new SimpleModule();
+            module.addSerializer(Throwable.class, new ExceptionSerializer());
+            mapper.registerModule(module);
             //
             return mapper;
         }

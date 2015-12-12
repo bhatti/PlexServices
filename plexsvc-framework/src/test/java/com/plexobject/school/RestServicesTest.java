@@ -24,6 +24,7 @@ import com.plexobject.security.AuthException;
 import com.plexobject.security.SecurityAuthorizer;
 import com.plexobject.service.BaseServiceClient;
 import com.plexobject.service.Interceptor;
+import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceRegistry;
 
 public class RestServicesTest {
@@ -39,7 +40,7 @@ public class RestServicesTest {
             BasicConfigurator.configure();
             LogManager.getRootLogger().setLevel(Level.WARN);
         }
-        BaseServiceClient.codecType = CodecType.JSON;
+        RequestBuilder.codecType = CodecType.JSON;
         SecurityAuthorizer securityAuthorizer = new SecurityAuthorizer() {
             @Override
             public void authorize(Request request, String[] roles)

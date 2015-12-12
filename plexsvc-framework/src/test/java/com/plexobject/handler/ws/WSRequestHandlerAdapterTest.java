@@ -181,13 +181,16 @@ public class WSRequestHandlerAdapterTest {
         courseService.error();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testObjectExceptionExample() throws Throwable {
         BasicConfigurator.configure();
         // LogManager.getRootLogger().setLevel(Level.INFO);
 
-        Exception e = (Exception) courseService.objectExceptionExample();
-        assertEquals("my error 1", e.getMessage());
+        Map<String, Object> e = (Map<String, Object>) courseService.objectExceptionExample();
+        List<Map<String, Object>> errorList = (List<Map<String, Object>>) e.get("errors");
+        Map<String, Object> error = (Map<String, Object>) errorList.get(0);
+        assertEquals("my error 3", error.get("message"));
     }
 
     @Test(expected = RuntimeException.class)
@@ -380,43 +383,50 @@ public class WSRequestHandlerAdapterTest {
         String[] badPayloads = { "my text", " 345 " };
         String[] badResult = { "my text", "345" };
         Map<String, Object> properties = new HashMap<>();
+        boolean[] multiRequest = new boolean[1];
         for (int i = 0; i < stringPayloads.length; i++) {
             Request request = newRequest(stringPayloads[i], properties);
-            Pair<String, String> resp = handler
-                    .getMethodNameAndPayload(request);
+            List<Pair<String, String>> respList = handler
+                    .getMethodNameAndPayloads(request, multiRequest);
+            System.out.println("Verifying " + stringPayloads[i]);
+            assertEquals(1, respList.size());
+            Pair<String, String> resp = respList.get(0);
             assertEquals("get", resp.first);
             assertEquals(stringResult[i], resp.second);
         }
+
         for (int i = 0; i < intPayloads.length; i++) {
             Request request = newRequest(intPayloads[i], properties);
-            Pair<String, String> resp = handler
-                    .getMethodNameAndPayload(request);
+            List<Pair<String, String>> respList = handler
+                    .getMethodNameAndPayloads(request, multiRequest);
+            assertEquals(1, respList.size());
+            Pair<String, String> resp = respList.get(0);
             assertEquals("get", resp.first);
             assertEquals(intResult[i], resp.second);
         }
         for (int i = 0; i < objPayloads.length; i++) {
             Request request = newRequest(objPayloads[i], properties);
-            Pair<String, String> resp = handler
-                    .getMethodNameAndPayload(request);
+            List<Pair<String, String>> respList = handler
+                    .getMethodNameAndPayloads(request, multiRequest);
+            assertEquals(1, respList.size());
+            Pair<String, String> resp = respList.get(0);
             assertEquals("get", resp.first);
             assertEquals(objResults[i], resp.second);
         }
         for (int i = 0; i < badPayloads.length; i++) {
             Request request = newRequest(badPayloads[i], properties);
-            try {
-                Pair<String, String> resp = handler
-                        .getMethodNameAndPayload(request);
-                throw new RuntimeException("Unexpected " + resp);
-            } catch (IllegalArgumentException e) {
-                // as expected
-            }
+            List<Pair<String, String>> respList = handler
+                    .getMethodNameAndPayloads(request, multiRequest);
+            assertEquals(0, respList.size());
         }
         //
         properties.put("methodName", "get");
         for (int i = 0; i < badPayloads.length; i++) {
             Request request = newRequest(badPayloads[i], properties);
-            Pair<String, String> resp = handler
-                    .getMethodNameAndPayload(request);
+            List<Pair<String, String>> respList = handler
+                    .getMethodNameAndPayloads(request, multiRequest);
+            assertEquals(1, respList.size());
+            Pair<String, String> resp = respList.get(0);
             assertEquals("get", resp.first);
             assertEquals(badResult[i], resp.second);
         }

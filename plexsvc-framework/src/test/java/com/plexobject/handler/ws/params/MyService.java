@@ -1,4 +1,4 @@
-package com.plexobject.handler.ws;
+package com.plexobject.handler.ws.params;
 
 import javax.jws.WebService;
 

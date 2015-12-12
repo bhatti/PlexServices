@@ -1,13 +1,18 @@
 package com.plexobject.handler.ws;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.plexobject.domain.Pair;
 import com.plexobject.handler.Request;
@@ -23,7 +28,7 @@ public class WSDelegateHandler implements RequestHandler {
     private static final Logger logger = Logger
             .getLogger(WSDelegateHandler.class);
     private static final String RESPONSE_SUFFIX = "Response";
-
+    private static final ObjectMapper jsonMapper = new ObjectMapper();
     private final Object delegate;
     private final ServiceRegistry serviceRegistry;
     private final Map<String, WSServiceMethod> methodsByName = new HashMap<>();
@@ -41,53 +46,93 @@ public class WSDelegateHandler implements RequestHandler {
 
     @Override
     public void handle(final Request request) {
-        Pair<String, String> methodAndPayload = getMethodNameAndPayload(request);
-
-        final WSServiceMethod methodInfo = methodsByName
-                .get(methodAndPayload.first);
-        if (methodInfo == null) {
-            logger.warn("PLEXSVC: Unknown method '" + methodAndPayload.first
-                    + "', available " + methodsByName.keySet() + ", request "
-                    + request.getContents());
-            throw new ServiceInvocationException("Unknown method '"
-                    + methodAndPayload.first + "'" + methodsByName.keySet(),
-                    HttpResponse.SC_NOT_FOUND);
+        boolean[] multiRequest = new boolean[1];
+        List<Pair<String, String>> methodAndPayloads = getMethodNameAndPayloads(
+                request, multiRequest);
+        if (methodAndPayloads.size() == 0) {
+            throw new IllegalArgumentException(
+                    "Could not find method-name in request "
+                            + request.getProperties());
         }
-        // set method name
-        request.setMethodName(methodInfo.iMethod.getName());
-        //
-        final String responseTag = methodAndPayload.first + RESPONSE_SUFFIX;
-        try {
-            // make sure you use iMethod to decode because implMethod might have
-            // erased parameterized type
-            // We can get input parameters either from JSON text, form/query
-            // parameters or method simply takes Map so we just pass all request
-            // properties
-            if (methodInfo.hasMultipleParamTypes) {
-                for (int i = 0; i < methodInfo.params.length; i++) {
-                    if (methodInfo.params[i].type == ParamType.MAP_PARAM) {
-                        methodInfo.params[i].defaultValue = request
-                                .getPropertiesAndHeaders();
-                    } else if (methodInfo.params[i].type == ParamType.REQUEST_PARAM) {
-                        methodInfo.params[i].defaultValue = request;
+        final List<Object> multiRequestResponse = new ArrayList<>();
+
+        for (int n = 0; n < methodAndPayloads.size(); n++) {
+            final Pair<String, String> methodAndPayload = methodAndPayloads
+                    .get(n);
+            final String responseTag = methodAndPayload.first + RESPONSE_SUFFIX;
+
+            //
+            final WSServiceMethod methodInfo = methodsByName
+                    .get(methodAndPayload.first);
+            try {
+                if (methodInfo == null) {
+                    logger.warn("PLEXSVC: Unknown method '"
+                            + methodAndPayload.first + "', available "
+                            + methodsByName.keySet() + ", request "
+                            + request.getContents());
+                    throw new ServiceInvocationException("Unknown method '"
+                            + methodAndPayload.first + "'",
+                            multiRequest[0] ? HttpResponse.SC_OK
+                                    : HttpResponse.SC_NOT_FOUND);
+                }
+                // set method name
+                request.setMethodName(methodInfo.iMethod.getName());
+                //
+                // make sure you use iMethod to decode because implMethod might
+                // have
+                // erased parameterized type
+                // We can get input parameters either from JSON text, form/query
+                // parameters or method simply takes Map so we just pass all
+                // request
+                // properties
+                if (methodInfo.hasMultipleParamTypes) {
+                    for (int i = 0; i < methodInfo.params.length; i++) {
+                        if (methodInfo.params[i].type == ParamType.MAP_PARAM) {
+                            methodInfo.params[i].defaultValue = request
+                                    .getPropertiesAndHeaders();
+                        } else if (methodInfo.params[i].type == ParamType.REQUEST_PARAM) {
+                            methodInfo.params[i].defaultValue = request;
+                        }
                     }
                 }
+                //
+                final Object[] args = ReflectUtils.decode(methodInfo.iMethod,
+                        request.getPropertiesAndHeaders(), methodInfo.params,
+                        methodAndPayload.second, request.getCodec());
+                if (args.length > 0) {
+                    request.setContents(args[0]); // In most cases the first
+                                                  // argument will be the
+                                                  // decoded
+                                                  // object
+                }
+                invokeWithAroundInterceptorIfNeeded(request, methodInfo,
+                        responseTag, args);
+            } catch (Exception e) {
+                logger.error("PLEXSVC Failed to invoke "
+                        + (methodInfo != null ? methodInfo.iMethod
+                                : " unknown-method") + ", for request "
+                        + request, e);
+                request.getResponse().setContents(e);
             }
-            //
-            final Object[] args = ReflectUtils.decode(methodInfo.iMethod,
-                    request.getPropertiesAndHeaders(), methodInfo.params,
-                    methodAndPayload.second, request.getCodec());
-            if (args.length > 0) {
-                request.setContents(args[0]); // In most cases the first
-                                              // argument will be the decoded
-                                              // object
+            if (multiRequest[0]) {
+                if (request.getResponse().getContents() instanceof Exception) {
+                    Map<String, Object> response = new HashMap<String, Object>();
+                    response.put(responseTag, request.getResponse()
+                            .getContents());
+                    multiRequestResponse.add(response);
+                } else {
+                    multiRequestResponse.add(request.getResponse()
+                            .getContents());
+                }
+                request.getResponse().setContents(null);// so that we can
+                                                        // overwrite it in
+                                                        // invoke otherwise it
+                                                        // assumes service set
+                                                        // the contents
             }
-            invokeWithAroundInterceptorIfNeeded(request, methodInfo,
-                    responseTag, args);
-        } catch (Exception e) {
-            logger.error("PLEXSVC Failed to invoke " + methodInfo.iMethod
-                    + ", for request " + request, e);
-            request.getResponse().setContents(e);
+        }
+        if (multiRequest[0]) {
+            request.getResponse().setContents(multiRequestResponse);
         }
     }
 
@@ -127,8 +172,9 @@ public class WSDelegateHandler implements RequestHandler {
         return request;
     }
 
-    private void invoke(Request request, final WSServiceMethod methodInfo,
-            String responseTag, Object[] args) throws Exception {
+    private void invoke(final Request request,
+            final WSServiceMethod methodInfo, final String responseTag,
+            final Object[] args) throws Exception {
         if (serviceRegistry.getSecurityAuthorizer() != null) {
             serviceRegistry.getSecurityAuthorizer().authorize(request, null);
         }
@@ -159,6 +205,75 @@ public class WSDelegateHandler implements RequestHandler {
         }
     }
 
+    @VisibleForTesting
+    List<Pair<String, String>> getMethodNameAndPayloads(Request request,
+            boolean[] multiRequest) {
+        String text = request.getContentsAs();
+        List<Pair<String, String>> response = new ArrayList<>();
+        if (text != null) {
+            try {
+                JsonNode rootNode = jsonMapper.readTree(text);
+                if (rootNode.isObject()) {
+                    parseMethodPayload(response, rootNode);
+                } else if (rootNode.isArray()) {
+                    multiRequest[0] = true;
+                    for (int i = 0; i < rootNode.size(); i++) {
+                        JsonNode node = rootNode.get(i);
+                        parseMethodPayload(response, node);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Failed to parse " + text, e);
+                int startObject = text.indexOf('{');
+                int endObject = text.lastIndexOf('}');
+                int colonPos = text.indexOf(':');
+                //
+                if (startObject != -1 && endObject != -1 && colonPos != -1) {
+                    int methodStart = incrWhileSkipWhitespacesAndQuotes(text,
+                            startObject + 1);
+                    int methodEnd = decrWhileSkipWhitespacesAndQuotes(text,
+                            colonPos - 1);
+                    String method = text.substring(methodStart, methodEnd + 1);
+                    //
+                    int payloadStart = incrWhileSkipWhitespacesAndQuotes(text,
+                            colonPos + 1);
+                    int payloadEnd = decrWhileSkipWhitespacesAndQuotes(text,
+                            endObject - 1);
+                    String payload = payloadStart <= payloadEnd ? text
+                            .substring(payloadStart, payloadEnd + 1).trim()
+                            : "";
+                    response.add(Pair.of(method, payload));
+                }
+            }
+        }
+        if (response.size() == 0) {
+            // trying to find method from the parameters
+            String method = request.getStringProperty("methodName");
+            if (method == null) {
+                if (methodsByName.size() == 1) {
+                    method = defaultMethodInfo.iMethod.getName();
+                }
+            }
+            //
+            if (method != null) {
+                response.add(Pair.of(method, text == null ? text : text.trim()));
+            }
+        }
+        return response;
+    }
+
+    private static void parseMethodPayload(List<Pair<String, String>> response,
+            JsonNode node) {
+        if (node.isObject()) {
+            Iterator<String> it = node.fieldNames();
+            if (it.hasNext()) {
+                String methodName = it.next();
+                String payload = node.get(methodName).toString();
+                response.add(Pair.of(methodName, payload));
+            }
+        }
+    }
+
     private static int incrWhileSkipWhitespacesAndQuotes(String text, int start) {
         while (Character.isWhitespace(text.charAt(start))
                 || text.charAt(start) == '\'' || text.charAt(start) == '"') {
@@ -173,42 +288,5 @@ public class WSDelegateHandler implements RequestHandler {
             end--;
         }
         return end;
-    }
-
-    @VisibleForTesting
-    Pair<String, String> getMethodNameAndPayload(Request request) {
-        String text = request.getContentsAs();
-        // hard coding to handle JSON messages
-        // manual parsing because I don't want to run complete JSON parser
-        int startObject = text != null ? text.indexOf('{') : -1;
-        int endObject = text != null ? text.lastIndexOf('}') : -1;
-        int colonPos = text.indexOf(':');
-
-        if (text == null || startObject == -1 || endObject == -1
-                || colonPos == -1) {
-            String method = request.getStringProperty("methodName");
-            if (method == null) {
-                if (methodsByName.size() == 1) {
-                    method = defaultMethodInfo.iMethod.getName();
-                } else {
-                    throw new IllegalArgumentException(
-                            "Could not find method-name in request "
-                                    + request.getProperties());
-                }
-            }
-            //
-            return Pair.of(method, text == null ? text : text.trim());
-        }
-        //
-        int methodStart = incrWhileSkipWhitespacesAndQuotes(text,
-                startObject + 1);
-        int methodEnd = decrWhileSkipWhitespacesAndQuotes(text, colonPos - 1);
-        String method = text.substring(methodStart, methodEnd + 1);
-        //
-        int payloadStart = incrWhileSkipWhitespacesAndQuotes(text, colonPos + 1);
-        int payloadEnd = decrWhileSkipWhitespacesAndQuotes(text, endObject - 1);
-        String payload = payloadStart <= payloadEnd ? text.substring(
-                payloadStart, payloadEnd + 1).trim() : "";
-        return Pair.of(method, payload);
     }
 }

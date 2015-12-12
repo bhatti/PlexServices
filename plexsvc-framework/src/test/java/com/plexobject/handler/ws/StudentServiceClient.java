@@ -11,6 +11,7 @@ import javax.jws.WebMethod;
 
 import com.plexobject.school.Student;
 import com.plexobject.service.BaseServiceClient;
+import com.plexobject.service.RequestBuilder;
 
 public class StudentServiceClient extends BaseServiceClient implements
         StudentService {

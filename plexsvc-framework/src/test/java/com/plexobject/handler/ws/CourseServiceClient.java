@@ -16,6 +16,7 @@ import com.plexobject.school.Course;
 import com.plexobject.school.Customer;
 import com.plexobject.school.Student;
 import com.plexobject.service.BaseServiceClient;
+import com.plexobject.service.RequestBuilder;
 
 public class CourseServiceClient extends BaseServiceClient implements
         CourseService {
@@ -378,7 +379,7 @@ public class CourseServiceClient extends BaseServiceClient implements
         RequestBuilder request = new RequestBuilder("objectExceptionExample",
                 "");
         try {
-            return post(COURSE_SERVICE, request, Exception.class, null);
+            return post(COURSE_SERVICE, request, Map.class, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

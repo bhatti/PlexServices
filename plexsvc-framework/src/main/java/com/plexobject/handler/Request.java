@@ -174,8 +174,6 @@ public class Request extends BasePayload<Object> {
         return sessionId;
     }
 
-
-
     @JsonIgnore
     public Response getResponse() {
         return response;
@@ -217,6 +215,11 @@ public class Request extends BasePayload<Object> {
 
     @Override
     public String toString() {
+        return "Request [method=" + method + ", requestUri=" + requestUri
+                + ", endpoint=" + endpoint + ", contents=" + contents + "]";
+    }
+
+    public String toDetailedString() {
         return "Request [method=" + method + ", requestUri=" + requestUri
                 + ", endpoint=" + endpoint + ", properties=" + properties
                 + ", headers=" + headers + ", createdAt=" + createdAt
