@@ -1,5 +1,6 @@
 package com.plexobject.handler.ws;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,8 @@ public interface CourseService {
     List<Customer> getCustomers(Long id1, String id2);
 
     void exceptionExample(boolean rt) throws Exception;
+
+    void error() throws IOException;
 
     Object objectExceptionExample();
 

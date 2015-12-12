@@ -1,5 +1,6 @@
 package com.plexobject.handler.ws;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -252,6 +253,17 @@ public class CourseServiceClient extends BaseServiceClient implements
     @WebMethod(exclude = true)
     public void exceptionExample(boolean type) throws Exception {
         RequestBuilder request = new RequestBuilder("exceptionExample", type);
+        try {
+            post(COURSE_SERVICE, request, Void.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @WebMethod(exclude = true)
+    public void error() throws IOException {
+        RequestBuilder request = new RequestBuilder("error", "");
         try {
             post(COURSE_SERVICE, request, Void.class, null);
         } catch (Exception e) {

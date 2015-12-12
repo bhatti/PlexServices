@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.net.BindException;
 import java.util.Properties;
 
 import org.apache.activemq.broker.BrokerService;
@@ -39,8 +40,11 @@ public class ServiceHandlerLifecycleTest {
     @Before
     public void setUp() throws Exception {
         final Properties properties = new Properties();
-        broker.addConnector("tcp://localhost:61616");
-        broker.start();
+        try {
+            broker.addConnector("tcp://localhost:61616");
+            broker.start();
+        } catch (BindException e) {
+        }
 
         properties.put(JMSUtils.JMS_CONTEXT_FACTORY,
                 "org.apache.activemq.jndi.ActiveMQInitialContextFactory");

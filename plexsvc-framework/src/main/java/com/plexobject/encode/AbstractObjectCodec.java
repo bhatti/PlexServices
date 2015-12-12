@@ -57,8 +57,10 @@ public abstract class AbstractObjectCodec implements ObjectCodec {
             populateProperties(params, object);
             return object;
         } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new EncodingException("Failed to decode " + params, ex);
+            logger.error("While creating " + type.getName()
+                    + ", failed to decode " + params, ex);
+            throw new RuntimeException("While creating " + type.getName()
+                    + ", failed to decode " + params, ex);
         }
     }
 

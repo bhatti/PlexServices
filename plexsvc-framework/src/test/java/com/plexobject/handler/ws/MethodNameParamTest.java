@@ -14,7 +14,9 @@ import org.junit.Test;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
+import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.handler.BasePayload;
+import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.BaseServiceClient;
@@ -63,6 +65,19 @@ public class MethodNameParamTest {
                         return output;
                     }
                 });
+        serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
+            @Override
+            public Request intercept(Request input) {
+                input.getCodec().setObjectCodecFilteredWriter(
+                        new NonFilteringJsonCodecWriter());
+                if (input.getContents() != null) {
+                    System.out.println("INPUT REQUEST: "
+                            + input.getContents().getClass() + ":"
+                            + input.getContents());
+                }
+                return input;
+            }
+        });
         serviceRegistry.start();
         Thread.sleep(500);
     }

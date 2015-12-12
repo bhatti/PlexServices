@@ -26,6 +26,7 @@ import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
 import com.plexobject.domain.Pair;
 import com.plexobject.encode.CodecType;
+import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.handler.AbstractResponseDispatcher;
 import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.NettyRequest;
@@ -117,9 +118,13 @@ public class WSRequestHandlerAdapterTest {
                         return output;
                     }
                 });
+        final NonFilteringJsonCodecWriter nonFilteringJsonCodecWriter = new NonFilteringJsonCodecWriter();
+
         serviceRegistry.addRequestInterceptor(new Interceptor<Request>() {
             @Override
             public Request intercept(Request input) {
+                input.getCodec().setObjectCodecFilteredWriter(
+                        nonFilteringJsonCodecWriter);
                 if (input.getContents() != null) {
                     System.out.println("INPUT REQUEST: "
                             + input.getContents().getClass() + ":"
@@ -128,6 +133,7 @@ public class WSRequestHandlerAdapterTest {
                 return input;
             }
         });
+
         serviceRegistry.addResponseInterceptor(new Interceptor<Response>() {
             @Override
             public Response intercept(Response response) {
@@ -137,7 +143,8 @@ public class WSRequestHandlerAdapterTest {
                     response.setStatusMessage("My message");
                 }
                 System.out.println("OUTPUT RESPONSE: "
-                        + response.getContents().getClass().getName() + ": " + response.getContents());
+                        + response.getContents().getClass().getName() + ": "
+                        + response.getContents());
                 return response;
             }
         });
@@ -167,6 +174,11 @@ public class WSRequestHandlerAdapterTest {
     @Test(expected = RuntimeException.class)
     public void testRtCourseException() throws Exception {
         courseService.exceptionExample(true);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testError() throws Exception {
+        courseService.error();
     }
 
     @Test

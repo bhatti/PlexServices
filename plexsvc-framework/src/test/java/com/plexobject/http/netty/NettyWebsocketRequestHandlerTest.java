@@ -50,7 +50,7 @@ public class NettyWebsocketRequestHandlerTest {
 
         server = (NettyHttpServer) TestWebUtils.createHttpServer(HTTP_PORT,
                 handler);
-
+        
         server.start();
     }
 
@@ -76,7 +76,7 @@ public class NettyWebsocketRequestHandlerTest {
         Request reply = ObjectCodecFactory
                 .getInstance()
                 .getObjectCodec(CodecType.JSON)
-                .decode(jsonResponse, Request.class,
+                .decode(jsonResponse, NettyRequest.class,
                         new HashMap<String, Object>());
         assertEquals(PONG, reply.getContentsAs());
     }

@@ -1,5 +1,6 @@
 package com.plexobject.handler.ws;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -273,5 +274,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course nullCourse() {
         return null;
+    }
+
+    @Override
+    public void error() throws IOException {
+        throw new IOException("IO error");
     }
 }
