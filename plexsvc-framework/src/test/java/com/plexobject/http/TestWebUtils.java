@@ -269,6 +269,8 @@ public class TestWebUtils {
         }
         out.close();
         String cookie = con.getHeaderField("Set-Cookie");
+        // System.out.println("API Version: "
+        // + con.getHeaderField(HttpResponse.VERSION_HEADER));
         return Pair.of(getResponse(con), cookie);
     }
 

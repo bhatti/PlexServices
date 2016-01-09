@@ -15,7 +15,8 @@ import com.plexobject.http.HttpResponse;
 public class Response extends BasePayload<Object> {
     public static final String[] HEADER_PROPERTIES = new String[] {
             HttpResponse.STATUS_CODE, HttpResponse.STATUS_MESSAGE,
-            HttpResponse.LOCATION, Constants.SESSION_ID };
+            HttpResponse.LOCATION, Constants.SESSION_ID,
+            HttpResponse.VERSION_HEADER };
     private final Request request;
 
     public Response(final Request request,
@@ -42,6 +43,11 @@ public class Response extends BasePayload<Object> {
 
     public Response addSessionId(String value) {
         properties.put(Constants.SESSION_ID, value);
+        return this;
+    }
+
+    public Response setVersionHeader(String version) {
+        properties.put(HttpResponse.VERSION_HEADER, version);
         return this;
     }
 
@@ -73,7 +79,6 @@ public class Response extends BasePayload<Object> {
         }
         return false;
     }
-
 
     @SuppressWarnings("unchecked")
     public <T> T getContentsAs() {

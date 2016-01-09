@@ -10,6 +10,7 @@ public interface HttpResponse {
     public static final String STATUS_MESSAGE = "statusMessage";
     public static final String LOCATION = "location";
     public static final String ERROR_MESSAGE = "errorMessage";
+    public static final String VERSION_HEADER = "X-API-Version";
 
     /**
      * Status code (100) indicating the client can continue.

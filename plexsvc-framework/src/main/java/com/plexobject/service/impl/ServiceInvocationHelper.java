@@ -55,7 +55,9 @@ public class ServiceInvocationHelper {
                         + handler.getClass().getSimpleName() + ", protocol "
                         + config.protocol() + ", request " + request);
             }
-
+            // add version header
+            request.getResponse().setVersionHeader(config.version());
+            //
             // check if payload is required
             if (config.contentsClass() != null
                     && config.contentsClass() != Void.class
