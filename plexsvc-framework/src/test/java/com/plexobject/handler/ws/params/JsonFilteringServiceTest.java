@@ -41,6 +41,7 @@ public class JsonFilteringServiceTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
+        RequestBuilder.filtering = true;
         Properties props = new Properties();
         props.setProperty(Constants.HTTP_PORT,
                 String.valueOf(BaseServiceClient.DEFAULT_PORT));

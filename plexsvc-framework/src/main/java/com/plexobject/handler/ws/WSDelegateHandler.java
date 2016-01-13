@@ -210,7 +210,7 @@ public class WSDelegateHandler implements RequestHandler {
             boolean[] multiRequest) {
         String text = request.getContentsAs();
         List<Pair<String, String>> response = new ArrayList<>();
-        if (text != null) {
+        if (text != null && text.length() > 0) {
             try {
                 JsonNode rootNode = jsonMapper.readTree(text);
                 if (rootNode.isObject()) {

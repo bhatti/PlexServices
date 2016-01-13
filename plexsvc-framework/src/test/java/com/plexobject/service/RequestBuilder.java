@@ -15,12 +15,15 @@ import com.plexobject.encode.xml.XmlObjectCodec;
 @XmlRootElement
 public class RequestBuilder {
     public static CodecType codecType = CodecType.JSON;
+    public static boolean filtering;
 
     public static ObjectCodec getObjectCodec() {
         ObjectCodec codec = codecType == CodecType.JSON ? new JsonObjectCodec()
                 : new XmlObjectCodec();
-        codec.setCodecConfigurer(new FilteringJsonCodecConfigurer());
-        codec.setObjectCodecFilteredWriter(new NonFilteringJsonCodecWriter());
+        if (filtering) {
+            codec.setCodecConfigurer(new FilteringJsonCodecConfigurer());
+            codec.setObjectCodecFilteredWriter(new NonFilteringJsonCodecWriter());
+        }
         return codec;
     }
 

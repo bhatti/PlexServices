@@ -22,12 +22,15 @@ import com.plexobject.encode.xml.XmlObjectCodec;
 public class MultiRequestBuilder {
     public static CodecType codecType = CodecType.JSON;
     private static final ObjectMapper jsonMapper = new ObjectMapper();
+    public static boolean filtering;
 
     public static ObjectCodec getObjectCodec() {
         ObjectCodec codec = codecType == CodecType.JSON ? new JsonObjectCodec()
                 : new XmlObjectCodec();
-        codec.setCodecConfigurer(new FilteringJsonCodecConfigurer());
-        codec.setObjectCodecFilteredWriter(new NonFilteringJsonCodecWriter());
+        if (filtering) {
+            codec.setCodecConfigurer(new FilteringJsonCodecConfigurer());
+            codec.setObjectCodecFilteredWriter(new NonFilteringJsonCodecWriter());
+        }
         return codec;
     }
 
