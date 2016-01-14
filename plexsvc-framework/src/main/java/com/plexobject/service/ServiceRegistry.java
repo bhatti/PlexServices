@@ -77,8 +77,6 @@ public class ServiceRegistry implements ServiceContainer,
             WebContainerProvider webContainerProvider) {
         Preconditions.requireNotNull(config,
                 "config is required");
-        Preconditions.requireNotNull(webContainerProvider,
-                "webContainerProvider is required");
         //
         this.config = config;
         this.serviceInvocationHelper = new ServiceInvocationHelper(this);
