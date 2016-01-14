@@ -1,0 +1,2 @@
+./gradlew compileJava
+./gradlew order
