@@ -1,7 +1,5 @@
 package com.plexobject.data;
 
-import java.util.Collection;
-
 /**
  * This interface defines method for producing collection of data fields given
  * input fields
@@ -13,12 +11,15 @@ public interface DataProducer {
     /**
      * This method will produce set of data fields given input
      * 
-     * @param input
-     * @param expectedOutputFields
-     *            - information about output fields
+     * @param requestFields
+     *            - input parameter fields
+     * @param responseFields
+     *            - output fields
+     * @param config
+     *            - configuration parameters
      * @return
      * @throws DataProviderException
      */
-    Collection<DataFieldRow> produce(Collection<DataFieldRow> input,
-            MetaFields expectedOutputFields) throws DataProviderException;
+    void produce(DataFieldRowSet requestFields, DataFieldRowSet responseFields,
+            DataConfiguration config) throws DataProviderException;
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
-public class MetaField {
+public class MetaField implements Comparable<MetaField> {
     private final String name;
     private final MetaFieldType type;
 
@@ -48,6 +48,11 @@ public class MetaField {
 
     @Override
     public String toString() {
-        return "MetaField [name=" + name + ", type=" + type + "]";
+        return name; // "[" + name + "/" + type + "]";
+    }
+
+    @Override
+    public int compareTo(MetaField other) {
+        return name.compareTo(other.name);
     }
 }

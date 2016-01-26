@@ -1,25 +1,24 @@
 package com.plexobject.data;
 
-
 /**
  * This interface defines a method for producing data fields given input
  * 
  * @author shahzad bhatti
  *
  */
-public interface DataProvider extends DataProducer {
+public interface DataProvider extends DataProducer, Comparable<DataProvider> {
     /**
-     * This method returns required input fields
+     * This method returns required request fields
      * 
      * @return
      */
-    MetaFields getInputFields();
+    MetaFields getRequestFields();
 
     /**
-     * This method returns output fields information
+     * This method returns response fields information
      * 
      * @return
      */
-    MetaFields getOutputFields();
+    MetaFields getResponseFields();
 
 }

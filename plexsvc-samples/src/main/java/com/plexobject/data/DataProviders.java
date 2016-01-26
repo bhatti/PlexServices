@@ -38,8 +38,10 @@ public interface DataProviders extends DataProducer {
      * This method will return data-provider that produce the required output
      * fields passed as parameter.
      * 
-     * @param outputFields
+     * @param requestFields
+     * @param responseFields
      * @return collection of data providers
      */
-    Collection<DataProvider> getDataProviders(MetaFields outputFields);
+    Collection<DataProvider> getDataProviders(MetaFields requestFields,
+            MetaFields responseFields);
 }

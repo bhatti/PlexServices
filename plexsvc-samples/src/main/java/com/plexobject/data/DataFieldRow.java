@@ -1,11 +1,9 @@
 package com.plexobject.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -19,112 +17,110 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
  */
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class DataFieldRow {
-    private final Set<DataField> fields = new HashSet<>();
-    private final transient Map<String, DataField> fieldsByName = new HashMap<>();
+    private final List<Object> fields = new ArrayList<>();
 
-    public DataFieldRow(Set<DataField> fields) {
-        for (DataField field : fields) {
+    public DataFieldRow() {
+    }
+
+    public DataFieldRow(Object... fields) {
+        for (Object field : fields) {
             addField(field);
         }
     }
 
-    public static DataFieldRow of(DataField... args) {
-        Set<DataField> fields = new HashSet<>();
-        for (DataField arg : args) {
-            fields.add(arg);
+    public DataFieldRow(Collection<Object> fields) {
+        for (Object field : fields) {
+            addField(field);
         }
-        return new DataFieldRow(fields);
     }
 
-    public Collection<DataField> getFields() {
+    void addField(Object field) {
+        if (field == null) {
+            field = new NullObject();
+        }
+        fields.add(field);
+    }
+
+    public int size() {
+        return fields.size();
+    }
+
+    public List<Object> getFields() {
         return fields;
     }
 
-    public DataField getField(String name) {
-        return fieldsByName.get(name);
+    public boolean hasFieldValue(int n) {
+        Object field = fields.get(n);
+        if (field == null || field instanceof NullObject
+                || field instanceof InitialValue || field instanceof Exception) {
+            return false;
+        }
+        return true;
     }
 
-    public long getValueAsLong(String name) {
-        DataField field = getField(name);
-        if (field == null) {
-            throw new IllegalStateException("DataField with name " + name
+    public Object getField(int n) {
+        Object field = fields.get(n);
+        if (field == null || field instanceof NullObject) {
+            throw new IllegalStateException("DataField at index " + n
                     + " doesn't exist");
         }
-        return field.getAsLong();
-    }
-
-    public double getValueAsDecimal(String name) {
-        DataField field = getField(name);
-        if (field == null) {
-            throw new IllegalStateException("DataField with name " + name
-                    + " doesn't exist");
+        if (field instanceof RuntimeException) {
+            throw (RuntimeException) field;
+        } else if (field instanceof Exception) {
+            throw new DataProviderException("Error found retrieving at index "
+                    + n, (Exception) field);
         }
-
-        return field.getAsDecimal();
+        return field;
     }
 
-    public byte[] getValueAsBinary(String name) {
-        DataField field = getField(name);
-        if (field == null) {
-            throw new IllegalStateException("DataField with name " + name
-                    + " doesn't exist");
-        }
-        return field.getBinary();
+    public String getFieldAsText(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsText(value);
     }
 
-    public Date getValueAsDate(String name) {
-        DataField field = getField(name);
-        if (field == null) {
-            throw new IllegalStateException("DataField with name " + name
-                    + " doesn't exist");
-        }
-        return field.getAsDate();
+    public long getFieldAsLong(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsLong(value);
     }
 
-    public long[] getValueAsLongArray(String name) {
-        DataField field = getField(name);
-        if (field == null) {
-            throw new IllegalStateException("DataField with name " + name
-                    + " doesn't exist");
-        }
-        return field.getAsLongArray();
+    public double getFieldAsDecimal(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsDecimal(value);
     }
 
-    public double[] getValueAsDecimalArray(String name) {
-        DataField field = getField(name);
-        if (field == null) {
-            throw new IllegalStateException("DataField with name " + name
-                    + " doesn't exist");
-        }
-        return field.getAsDecimalArray();
+    public byte[] getFieldAsBinary(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsBinary(value);
     }
 
-    public Date[] getValueAsDateArray(String name) {
-        DataField field = getField(name);
-        if (field == null) {
-            throw new IllegalStateException("DataField with name " + name
-                    + " doesn't exist");
-        }
-        return field.getAsDateArray();
+    public Date getFieldAsDate(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsDate(value);
     }
 
-    public void addField(String name, MetaFieldType type, Object value) {
-        addField(new DataField(new MetaField(name, type), value));
+    public long[] getFieldAsLongArray(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsLongArray(value);
     }
 
-    public void addField(DataField field) {
-        fields.add(field);
-        fieldsByName.put(field.getMetaField().getName(), field);
+    public double[] getFieldAsDecimalArray(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsDecimalArray(value);
     }
 
-    public void removeField(DataField field) {
-        fields.remove(field);
-        fieldsByName.remove(field.getMetaField().getName());
+    public Date[] getFieldAsDateArray(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsDateArray(value);
+    }
+
+    public String[] getFieldAsTextArray(int n) {
+        Object value = getField(n);
+        return ConversionUtils.getAsTextArray(value);
     }
 
     @Override
     public String toString() {
-        return "DataFields [fields=" + fields + "]";
+        return "[fields=" + fields + "]";
     }
 
 }
