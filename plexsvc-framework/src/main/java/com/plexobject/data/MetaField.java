@@ -8,7 +8,7 @@ public class MetaField implements Comparable<MetaField> {
     private final String name;
     private final MetaFieldType type;
 
-    public MetaField(String name, MetaFieldType type) {
+    MetaField(String name, MetaFieldType type) {
         this.name = name;
         this.type = type;
     }

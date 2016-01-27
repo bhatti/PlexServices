@@ -1,9 +1,8 @@
 package com.plexobject.data;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -17,119 +16,110 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
  */
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class DataFieldRow {
-    private final List<Object> fields = new ArrayList<>();
+    private final Map<MetaField, Object> fields = new ConcurrentHashMap<>();
 
     public DataFieldRow() {
     }
 
-    public DataFieldRow(Object... fields) {
-        for (int i = 0; i < fields.length; i++) {
-            addField(fields[i], i);
+    public synchronized void addField(MetaField field, Object value) {
+        if (value == null) {
+            value = NullObject.instance;
         }
+        fields.put(field, value);
     }
 
-    public DataFieldRow(Collection<Object> fields) {
-        int i = 0;
-        for (Object field : fields) {
-            addField(field, i++);
-        }
-    }
-
-    void addField(Object field, int column) {
-        if (field == null) {
-            field = NullObject.instance;
-        } else if (field instanceof Number == false
-                && field instanceof Date == false
-                && field instanceof String == false
-                && field instanceof Number[] == false
-                && field instanceof Date[] == false
-                && field instanceof String[] == false) {
-            throw new IllegalArgumentException("Unsupported value "
-                    + field.getClass().getName() + "/" + field);
-        }
-        int buffer = 0;
-        while (column > fields.size()) {
-            fields.add(InitialValue.instance);
-            buffer++;
-        }
-        fields.add(column, field);
-    }
-
-    public int size() {
+    public synchronized int size() {
         return fields.size();
     }
 
-    public List<Object> getFields() {
+    public synchronized Map<MetaField, Object> getFields() {
         return fields;
     }
 
-    public boolean hasFieldValue(int n) {
-        Object field = fields.get(n);
-        if (field == null || field instanceof NullObject
-                || field instanceof InitialValue || field instanceof Exception) {
+    public synchronized boolean hasFieldValue(MetaField field) {
+        Object value = fields.get(field);
+        if (value == null || value instanceof NullObject
+                || value instanceof InitialValue || value instanceof Exception) {
             return false;
         }
         return true;
     }
 
-    public Object getField(int n) {
-        Object field = fields.get(n);
-        if (field == null || field instanceof NullObject) {
-            throw new IllegalStateException("DataField at index " + n
+    public synchronized Object getValue(MetaField field) {
+        Object value = fields.get(field);
+        if (value == null || value instanceof NullObject
+                || value instanceof InitialValue) {
+            throw new IllegalStateException("DataField " + field
                     + " doesn't exist");
         }
-        if (field instanceof RuntimeException) {
-            throw (RuntimeException) field;
-        } else if (field instanceof Exception) {
-            throw new DataProviderException("Error found retrieving at index "
-                    + n, (Exception) field);
+        if (value instanceof RuntimeException) {
+            throw (RuntimeException) value;
+        } else if (value instanceof Exception) {
+            throw new DataProviderException("Error found retrieving " + field,
+                    (Exception) value);
         }
-        return field;
+        return value;
     }
 
-    public String getFieldAsText(int n) {
-        Object value = getField(n);
+    public String getValueAsText(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsText(value);
     }
 
-    public long getFieldAsLong(int n) {
-        Object value = getField(n);
+    public long getValueAsLong(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsLong(value);
     }
 
-    public double getFieldAsDecimal(int n) {
-        Object value = getField(n);
+    public double getValueAsDecimal(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsDecimal(value);
     }
 
-    public byte[] getFieldAsBinary(int n) {
-        Object value = getField(n);
+    public byte[] getValueAsBinary(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsBinary(value);
     }
 
-    public Date getFieldAsDate(int n) {
-        Object value = getField(n);
+    public Date getValueAsDate(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsDate(value);
     }
 
-    public long[] getFieldAsLongArray(int n) {
-        Object value = getField(n);
+    public long[] getValueAsLongArray(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsLongArray(value);
     }
 
-    public double[] getFieldAsDecimalArray(int n) {
-        Object value = getField(n);
+    public double[] getValueAsDecimalArray(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsDecimalArray(value);
     }
 
-    public Date[] getFieldAsDateArray(int n) {
-        Object value = getField(n);
+    public Date[] getValueAsDateArray(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsDateArray(value);
     }
 
-    public String[] getFieldAsTextArray(int n) {
-        Object value = getField(n);
+    public String[] getValueAsTextArray(MetaField field) {
+        Object value = getValue(field);
         return ConversionUtils.getAsTextArray(value);
+    }
+
+    /**
+     * The objects should be paired by MetaField and value
+     * 
+     * @param objects
+     * @return
+     */
+    public static DataFieldRow from(Object... objects) {
+        DataFieldRow row = new DataFieldRow();
+        for (int i = 0; i < objects.length; i += 2) {
+            MetaField field = (MetaField) objects[i];
+            Object value = objects[i + 1];
+            row.addField(field, value);
+        }
+        return row;
     }
 
     @Override

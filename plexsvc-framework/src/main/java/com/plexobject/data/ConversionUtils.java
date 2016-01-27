@@ -11,7 +11,9 @@ public class ConversionUtils {
         } else if (value != null) {
             return value.toString();
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static long getAsLong(Object value) {
@@ -20,7 +22,9 @@ public class ConversionUtils {
         } else if (value instanceof String) {
             return Long.valueOf((String) value);
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static double getAsDecimal(Object value) {
@@ -29,7 +33,9 @@ public class ConversionUtils {
         } else if (value instanceof String) {
             return Double.valueOf((String) value);
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static byte[] getAsBinary(Object value) {
@@ -38,7 +44,9 @@ public class ConversionUtils {
         } else if (value instanceof String) {
             return ((String) value).getBytes();
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static Date getAsDate(Object value) {
@@ -49,7 +57,9 @@ public class ConversionUtils {
         } else if (value instanceof String) {
             return new Date(Long.valueOf((String) value));
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static long[] getAsLongArray(Object value) {
@@ -68,8 +78,13 @@ public class ConversionUtils {
                 values[i++] = ConversionUtils.getAsLong(Array.get(array, i));
             }
             return values;
+        } else if (value instanceof double[]) {
+            long[] array = (long[]) value;
+            return array;
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static double[] getAsDecimalArray(Object value) {
@@ -88,8 +103,13 @@ public class ConversionUtils {
                 values[i++] = ConversionUtils.getAsDecimal(Array.get(array, i));
             }
             return values;
+        } else if (value instanceof double[]) {
+            double[] array = (double[]) value;
+            return array;
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static Date[] getAsDateArray(Object value) {
@@ -108,8 +128,13 @@ public class ConversionUtils {
                 values[i++] = ConversionUtils.getAsDate(Array.get(array, i));
             }
             return values;
+        } else if (value instanceof Date[]) {
+            Date[] array = (Date[]) value;
+            return array;
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 
     public static String[] getAsTextArray(Object value) {
@@ -128,7 +153,12 @@ public class ConversionUtils {
                 values[i++] = ConversionUtils.getAsText(Array.get(array, i));
             }
             return values;
+        } else if (value instanceof String[]) {
+            String[] array = (String[]) value;
+            return array;
         }
-        throw new DataProviderException("unexpected type found, value " + value);
+        throw new DataProviderException("unexpected type found "
+                + (value != null ? value.getClass().getSimpleName() : "null")
+                + ", value " + value);
     }
 }

@@ -38,22 +38,27 @@ public class DataFieldRowSet {
         }
     }
 
-    public void addDataField(MetaField metaField, Object value, int rowNumber) {
+    public synchronized void addDataField(MetaField metaField, Object value,
+            int rowNumber) {
         DataFieldRow row = getOrCreateRow(rowNumber);
+        if (row == null) {
+            throw new RuntimeException("XXX " + metaField + ", " + value
+                    + ", row-num " + rowNumber + ", rows " + rows.size()
+                    + ", rows " + rows + ", meta " + metaFields);
+        }
         addMetaField(metaField);
         //
-        int column = getIndex(metaField);
-        row.addField(value, column);
+        row.addField(metaField, value);
     }
 
-    public DataFieldRow getOrCreateRow(int row) {
-        while (rows.size() <= row) {
-            rows.add(new DataFieldRow());
+    public synchronized DataFieldRow getOrCreateRow(int row) {
+        while (row >= rows.size()) {
+            addRow(new DataFieldRow());
         }
         return rows.get(row);
     }
 
-    public void addRow(DataFieldRow row) {
+    public synchronized void addRow(DataFieldRow row) {
         Preconditions.checkNotNull(row, "row cannot be null");
         rows.add(row);
     }
@@ -62,46 +67,25 @@ public class DataFieldRowSet {
         return metaFields;
     }
 
-    public int size() {
+    public synchronized int size() {
         return rows.size();
     }
 
-    public List<DataFieldRow> getRows() {
+    public synchronized List<DataFieldRow> getRows() {
         return rows;
     }
 
-    public boolean hasFieldValue(MetaField metaField, int row) {
-        if (rows.size() >= row) {
+    public synchronized boolean hasFieldValue(MetaField metaField, int row) {
+        if (row >= rows.size()) {
             return false;
         }
-        int column = metaFields.getIndex(metaField);
-        if (column == -1) {
-            return false;
-        }
-        return rows.get(row).hasFieldValue(column);
+        return rows.get(row).hasFieldValue(metaField);
     }
 
-    public int getIndex(MetaField metaField) {
-        Preconditions.checkNotNull(metaField, "metaField cannot be null");
-
-        int column = metaFields.getIndex(metaField);
-        if (column == -1) {
-            throw new IllegalStateException("MetaField " + metaField
-                    + " doesn't exist [" + metaFields + "]");
-        }
-        return column;
-    }
-
-    public Object getField(MetaField metaField, int rowNumber) {
+    public synchronized Object getField(MetaField metaField, int rowNumber) {
         validateRow(rowNumber);
         DataFieldRow row = rows.get(rowNumber);
-        int column = getIndex(metaField);
-        if (column >= row.size()) {
-            throw new IllegalArgumentException("column " + column + " for "
-                    + metaField + " is higher than internal columns "
-                    + row.size());
-        }
-        return row.getField(column);
+        return row.getValue(metaField);
     }
 
     private void validateRow(int row) {
@@ -111,115 +95,102 @@ public class DataFieldRowSet {
         }
     }
 
-    public String getFieldAsText(MetaField metaField, int row) {
+    public String getValueAsText(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsText(column);
+        return rows.get(row).getValueAsText(metaField);
     }
 
-    public long getFieldAsLong(MetaField metaField, int row) {
+    public long getValueAsLong(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsLong(column);
+        return rows.get(row).getValueAsLong(metaField);
     }
 
-    public double getFieldAsDecimal(MetaField metaField, int row) {
+    public double getValueAsDecimal(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsDecimal(column);
+        return rows.get(row).getValueAsDecimal(metaField);
     }
 
-    public byte[] getFieldAsBinary(MetaField metaField, int row) {
+    public byte[] getValueAsBinary(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsBinary(column);
+        return rows.get(row).getValueAsBinary(metaField);
     }
 
-    public Date getFieldAsDate(MetaField metaField, int row) {
+    public Date getValueAsDate(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsDate(column);
+        return rows.get(row).getValueAsDate(metaField);
     }
 
-    public long[] getFieldAsLongArray(MetaField metaField, int row) {
+    public long[] getValueAsLongArray(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsLongArray(column);
+        return rows.get(row).getValueAsLongArray(metaField);
     }
 
-    public double[] getFieldAsDecimalArray(MetaField metaField, int row) {
+    public double[] getValueAsDecimalArray(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsDecimalArray(column);
+        return rows.get(row).getValueAsDecimalArray(metaField);
     }
 
-    public Date[] getFieldAsDateArray(MetaField metaField, int row) {
+    public Date[] getValueAsDateArray(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsDateArray(column);
+        return rows.get(row).getValueAsDateArray(metaField);
     }
 
-    public String[] getFieldAsTextArray(MetaField metaField, int row) {
+    public String[] getValueAsTextArray(MetaField metaField, int row) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
         validateRow(row);
-        int column = getIndex(metaField);
-        return rows.get(row).getFieldAsTextArray(column);
+        return rows.get(row).getValueAsTextArray(metaField);
     }
 
     public boolean hasFieldValue(String name, int row) {
         return hasFieldValue(getMetaFieldsByName(name), row);
     }
 
-    public int getIndex(String name) {
-        return getIndex(getMetaFieldsByName(name));
-    }
-
     public Object getField(String name, int row) {
         return getField(getMetaFieldsByName(name), row);
     }
 
-    public String getFieldAsText(String name, int row) {
-        return getFieldAsText(getMetaFieldsByName(name), row);
+    public String getValueAsText(String name, int row) {
+        return getValueAsText(getMetaFieldsByName(name), row);
     }
 
-    public long getFieldAsLong(String name, int row) {
-        return getFieldAsLong(getMetaFieldsByName(name), row);
+    public long getValueAsLong(String name, int row) {
+        return getValueAsLong(getMetaFieldsByName(name), row);
     }
 
-    public double getFieldAsDecimal(String name, int row) {
-        return getFieldAsDecimal(getMetaFieldsByName(name), row);
+    public double getValueAsDecimal(String name, int row) {
+        return getValueAsDecimal(getMetaFieldsByName(name), row);
     }
 
-    public byte[] getFieldAsBinary(String name, int row) {
-        return getFieldAsBinary(getMetaFieldsByName(name), row);
+    public byte[] getValueAsBinary(String name, int row) {
+        return getValueAsBinary(getMetaFieldsByName(name), row);
     }
 
-    public Date getFieldAsDate(String name, int row) {
-        return getFieldAsDate(getMetaFieldsByName(name), row);
+    public Date getValueAsDate(String name, int row) {
+        return getValueAsDate(getMetaFieldsByName(name), row);
     }
 
-    public long[] getFieldAsLongArray(String name, int row) {
-        return getFieldAsLongArray(getMetaFieldsByName(name), row);
+    public long[] getValueAsLongArray(String name, int row) {
+        return getValueAsLongArray(getMetaFieldsByName(name), row);
     }
 
-    public double[] getFieldAsDecimalArray(String name, int row) {
-        return getFieldAsDecimalArray(getMetaFieldsByName(name), row);
+    public double[] getValueAsDecimalArray(String name, int row) {
+        return getValueAsDecimalArray(getMetaFieldsByName(name), row);
     }
 
-    public Date[] getFieldAsDateArray(String name, int row) {
-        return getFieldAsDateArray(getMetaFieldsByName(name), row);
+    public Date[] getValueAsDateArray(String name, int row) {
+        return getValueAsDateArray(getMetaFieldsByName(name), row);
     }
 
-    public String[] getFieldAsTextArray(String name, int row) {
-        return getFieldAsTextArray(getMetaFieldsByName(name), row);
+    public String[] getValueAsTextArray(String name, int row) {
+        return getValueAsTextArray(getMetaFieldsByName(name), row);
     }
 
     @Override
@@ -241,7 +212,7 @@ public class DataFieldRowSet {
         return field;
     }
 
-    private void addMetaField(MetaField metaField) {
+    private synchronized void addMetaField(MetaField metaField) {
         if (!metaFieldsByName.containsKey(metaField.getName())) {
             metaFields.addMetaField(metaField);
             metaFieldsByName.put(metaField.getName(), metaField);

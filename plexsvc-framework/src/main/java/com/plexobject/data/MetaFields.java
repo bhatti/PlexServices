@@ -1,10 +1,8 @@
 package com.plexobject.data;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -12,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class MetaFields {
-    private final List<MetaField> metaFields = new ArrayList<>();
+    private final Set<MetaField> metaFields = new HashSet<>();
 
     public MetaFields() {
     }
@@ -27,65 +25,61 @@ public class MetaFields {
         }
     }
 
-    public void addMetaField(MetaField metaField) {
+    public synchronized void addMetaField(MetaField metaField) {
         if (!metaFields.contains(metaField)) {
             metaFields.add(metaField);
         }
     }
 
-    public void addMetaFields(MetaFields metaFields) {
+    public synchronized void addMetaFields(MetaFields metaFields) {
         for (MetaField metaField : metaFields.getMetaFields()) {
             addMetaField(metaField);
         }
     }
 
-    public void removeMetaFields(MetaFields metaFields) {
+    public synchronized void removeMetaFields(MetaFields metaFields) {
         for (MetaField metaField : metaFields.getMetaFields()) {
             removeMetaField(metaField);
         }
     }
 
-    public void removeMetaField(MetaField metaField) {
+    public synchronized void removeMetaField(MetaField metaField) {
         metaFields.remove(metaField);
     }
 
-    public int getIndex(MetaField field) {
-        return metaFields.indexOf(field);
-    }
-
-    public boolean containsAll(MetaFields other) {
+    public synchronized boolean containsAll(MetaFields other) {
         return getMissingCount(other) == 0;
     }
 
-    public boolean contains(MetaField other) {
+    public synchronized boolean contains(MetaField other) {
         return getMissingCount(MetaFields.of(other)) == 0;
     }
 
-    public int getMissingCount(MetaFields other) {
+    public synchronized int getMissingCount(MetaFields other) {
         int count = 0;
         for (MetaField field : other.metaFields) {
-            if (metaFields.indexOf(field) == -1) {
+            if (!metaFields.contains(field)) {
                 count++;
             }
         }
         return count;
     }
 
-    public MetaFields getMissingMetaFields(MetaFields other) {
+    public synchronized MetaFields getMissingMetaFields(MetaFields other) {
         Set<MetaField> missingMetaFields = new HashSet<MetaField>();
         for (MetaField field : other.metaFields) {
-            if (metaFields.indexOf(field) == -1) {
+            if (!metaFields.contains(field)) {
                 missingMetaFields.add(field);
             }
         }
         return new MetaFields(missingMetaFields);
     }
 
-    public List<MetaField> getMetaFields() {
+    public synchronized Collection<MetaField> getMetaFields() {
         return metaFields;
     }
 
-    public int size() {
+    public synchronized int size() {
         return metaFields.size();
     }
 
@@ -100,7 +94,7 @@ public class MetaFields {
     public static MetaFields of(String... args) {
         final MetaFields metaFields = new MetaFields();
         for (int i = 0; i < args.length; i += 2) {
-            MetaField field = new MetaField(args[i],
+            MetaField field = MetaFieldFactory.create(args[i],
                     MetaFieldType.valueOf(args[i + 1].toString()));
             metaFields.addMetaField(field);
         }
@@ -130,7 +124,7 @@ public class MetaFields {
             return false;
         }
         for (MetaField field : other.metaFields) {
-            if (metaFields.indexOf(field) == -1) {
+            if (!metaFields.contains(field)) {
                 return false;
             }
         }

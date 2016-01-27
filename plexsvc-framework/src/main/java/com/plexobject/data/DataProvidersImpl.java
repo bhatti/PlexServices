@@ -35,24 +35,33 @@ public class DataProvidersImpl implements DataProviders {
                 requestFields.getMetaFields(), responseFields.getMetaFields());
         final ExecutorService executor = Executors.newFixedThreadPool(Math.min(
                 providers.size(), 3));
-        // Add intermediate data needed, e.g. we could call provider A that
-        // returns some fields, which are used as input for provider B
-        addIntermediateFields(requestFields, responseFields, providers);
-        // go through all providers
-        while (providers.size() > 0) {
-            final Map<DataProvider, Boolean> waitingProviders = new HashMap<>();
-            // We will execute providers asynchronously and then wait for
-            // providers until they are finished
-            executeProviders(requestFields, responseFields, config, providers,
-                    waitingProviders, executor);
-            // waiting for providers to finish
-            waitForProviders(providers, waitingProviders);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
+        try {
+            // Add intermediate data needed, e.g. we could call provider A that
+            // returns some fields, which are used as input for provider B
+            addIntermediateFields(requestFields, responseFields, providers);
+            // go through all providers
+            while (providers.size() > 0) {
+                final Map<DataProvider, Boolean> waitingProviders = new HashMap<>();
+                // We will execute providers asynchronously and then wait for
+                // providers until they are finished
+                executeProviders(requestFields, responseFields, config,
+                        providers, waitingProviders, executor);
+                // waiting for providers to finish
+                waitForProviders(providers, waitingProviders);
+                if (providers.size() > 0 && waitingProviders.size() == 0) {
+                    logger.warn("Providers " + providers
+                            + " cannot be fulfilled\n\trequestFields "
+                            + requestFields + "\n\tresponseFields"
+                            + responseFields);
+                    throw new IllegalStateException("Providers " + providers
+                            + " cannot be fulfilled\n\trequestFields "
+                            + requestFields + "\n\tresponseFields"
+                            + responseFields);
+                }
             }
+        } finally {
+            executor.shutdown();
         }
-        executor.shutdown();
     }
 
     @Override
@@ -195,6 +204,15 @@ public class DataProvidersImpl implements DataProviders {
                                 waitingProviders, provider);
                     }
                 });
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Provider "
+                            + provider
+                            + ", waiting for "
+                            + requestFields.getMetaFields()
+                                    .getMissingMetaFields(
+                                            provider.getRequestFields()));
+                }
             }
         }
     }
@@ -209,7 +227,8 @@ public class DataProvidersImpl implements DataProviders {
             for (int i = 0; i < responseFields.size(); i++) {
                 for (MetaField responseField : provider.getResponseFields()
                         .getMetaFields()) {
-                    if (responseFields.getMetaFields().contains(responseField)) {
+                    if (responseFields.getMetaFields().contains(responseField)
+                            && responseFields.hasFieldValue(responseField, i)) {
                         Object value = responseFields
                                 .getField(responseField, i);
                         requestFields.addDataField(responseField, value, i);
