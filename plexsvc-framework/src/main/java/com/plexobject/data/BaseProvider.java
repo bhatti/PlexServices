@@ -1,8 +1,5 @@
-package com.plexobject.data.impl;
+package com.plexobject.data;
 
-import com.plexobject.data.DataProvider;
-import com.plexobject.data.MetaField;
-import com.plexobject.data.MetaFields;
 
 public abstract class BaseProvider implements DataProvider {
     private final MetaFields requestFields;

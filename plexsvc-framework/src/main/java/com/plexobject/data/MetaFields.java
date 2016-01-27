@@ -3,10 +3,8 @@ package com.plexobject.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -15,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class MetaFields {
     private final List<MetaField> metaFields = new ArrayList<>();
-    private transient final Map<MetaField, Integer> metaFieldsLookup = new HashMap<>();
 
     public MetaFields() {
     }
@@ -31,9 +28,8 @@ public class MetaFields {
     }
 
     public void addMetaField(MetaField metaField) {
-        if (!metaFieldsLookup.containsKey(metaField)) {
+        if (!metaFields.contains(metaField)) {
             metaFields.add(metaField);
-            metaFieldsLookup.put(metaField, metaFieldsLookup.size());
         }
     }
 
@@ -43,8 +39,18 @@ public class MetaFields {
         }
     }
 
-    public Integer getIndex(MetaField field) {
-        return metaFieldsLookup.get(field);
+    public void removeMetaFields(MetaFields metaFields) {
+        for (MetaField metaField : metaFields.getMetaFields()) {
+            removeMetaField(metaField);
+        }
+    }
+
+    public void removeMetaField(MetaField metaField) {
+        metaFields.remove(metaField);
+    }
+
+    public int getIndex(MetaField field) {
+        return metaFields.indexOf(field);
     }
 
     public boolean containsAll(MetaFields other) {
@@ -58,7 +64,7 @@ public class MetaFields {
     public int getMissingCount(MetaFields other) {
         int count = 0;
         for (MetaField field : other.metaFields) {
-            if (metaFieldsLookup.get(field) == null) {
+            if (metaFields.indexOf(field) == -1) {
                 count++;
             }
         }
@@ -68,7 +74,7 @@ public class MetaFields {
     public MetaFields getMissingMetaFields(MetaFields other) {
         Set<MetaField> missingMetaFields = new HashSet<MetaField>();
         for (MetaField field : other.metaFields) {
-            if (metaFieldsLookup.get(field) == null) {
+            if (metaFields.indexOf(field) == -1) {
                 missingMetaFields.add(field);
             }
         }
@@ -124,7 +130,7 @@ public class MetaFields {
             return false;
         }
         for (MetaField field : other.metaFields) {
-            if (metaFieldsLookup.get(field) == null) {
+            if (metaFields.indexOf(field) == -1) {
                 return false;
             }
         }

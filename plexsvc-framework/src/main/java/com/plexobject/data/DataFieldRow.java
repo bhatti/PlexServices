@@ -23,22 +23,36 @@ public class DataFieldRow {
     }
 
     public DataFieldRow(Object... fields) {
-        for (Object field : fields) {
-            addField(field);
+        for (int i = 0; i < fields.length; i++) {
+            addField(fields[i], i);
         }
     }
 
     public DataFieldRow(Collection<Object> fields) {
+        int i = 0;
         for (Object field : fields) {
-            addField(field);
+            addField(field, i++);
         }
     }
 
-    void addField(Object field) {
+    void addField(Object field, int column) {
         if (field == null) {
-            field = new NullObject();
+            field = NullObject.instance;
+        } else if (field instanceof Number == false
+                && field instanceof Date == false
+                && field instanceof String == false
+                && field instanceof Number[] == false
+                && field instanceof Date[] == false
+                && field instanceof String[] == false) {
+            throw new IllegalArgumentException("Unsupported value "
+                    + field.getClass().getName() + "/" + field);
         }
-        fields.add(field);
+        int buffer = 0;
+        while (column > fields.size()) {
+            fields.add(InitialValue.instance);
+            buffer++;
+        }
+        fields.add(column, field);
     }
 
     public int size() {

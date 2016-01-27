@@ -1,6 +1,5 @@
 package com.plexobject.data;
 
-import java.util.Collection;
 
 /**
  * This interface extends DataProvider and defines methods for
@@ -33,15 +32,4 @@ public interface DataProviders extends DataProducer {
      * @param provider
      */
     void unregister(DataProvider provider);
-
-    /**
-     * This method will return data-provider that produce the required output
-     * fields passed as parameter.
-     * 
-     * @param requestFields
-     * @param responseFields
-     * @return collection of data providers
-     */
-    Collection<DataProvider> getDataProviders(MetaFields requestFields,
-            MetaFields responseFields);
 }

@@ -40,9 +40,10 @@ public class DataFieldRowSet {
 
     public void addDataField(MetaField metaField, Object value, int rowNumber) {
         DataFieldRow row = getOrCreateRow(rowNumber);
-        metaFields.addMetaField(metaField);
-        metaFieldsByName.put(metaField.getName(), metaField);
-        row.addField(value);
+        addMetaField(metaField);
+        //
+        int column = getIndex(metaField);
+        row.addField(value, column);
     }
 
     public DataFieldRow getOrCreateRow(int row) {
@@ -73,8 +74,8 @@ public class DataFieldRowSet {
         if (rows.size() >= row) {
             return false;
         }
-        Integer column = getIndex(metaField);
-        if (column == null) {
+        int column = metaFields.getIndex(metaField);
+        if (column == -1) {
             return false;
         }
         return rows.get(row).hasFieldValue(column);
@@ -83,10 +84,10 @@ public class DataFieldRowSet {
     public int getIndex(MetaField metaField) {
         Preconditions.checkNotNull(metaField, "metaField cannot be null");
 
-        Integer column = metaFields.getIndex(metaField);
-        if (column == null) {
+        int column = metaFields.getIndex(metaField);
+        if (column == -1) {
             throw new IllegalStateException("MetaField " + metaField
-                    + " doesn't exist");
+                    + " doesn't exist [" + metaFields + "]");
         }
         return column;
     }
@@ -239,4 +240,12 @@ public class DataFieldRowSet {
         }
         return field;
     }
+
+    private void addMetaField(MetaField metaField) {
+        if (!metaFieldsByName.containsKey(metaField.getName())) {
+            metaFields.addMetaField(metaField);
+            metaFieldsByName.put(metaField.getName(), metaField);
+        }
+    }
+
 }

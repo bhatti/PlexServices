@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.log4j.Logger;
+
 /**
  * This class implements Data Providers interface
  * 
@@ -19,17 +21,18 @@ import java.util.concurrent.Executors;
  *
  */
 public class DataProvidersImpl implements DataProviders {
+    private static final Logger logger = Logger
+            .getLogger(DataProvidersImpl.class);
+
     private ConcurrentHashMap<MetaField, Set<DataProvider>> providersByOutputMetaField = new ConcurrentHashMap<>();
 
     @Override
     public void produce(final DataFieldRowSet requestFields,
             final DataFieldRowSet responseFields, DataConfiguration config)
             throws DataProviderException {
-        long started = System.currentTimeMillis();
         // Get all data providers needed
         Collection<DataProvider> providers = getDataProviders(
                 requestFields.getMetaFields(), responseFields.getMetaFields());
-        System.out.println("providers " + providers);
         final ExecutorService executor = Executors.newFixedThreadPool(Math.min(
                 providers.size(), 3));
         // Add intermediate data needed, e.g. we could call provider A that
@@ -44,10 +47,12 @@ public class DataProvidersImpl implements DataProviders {
                     waitingProviders, executor);
             // waiting for providers to finish
             waitForProviders(providers, waitingProviders);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
         executor.shutdown();
-        long elapsed = System.currentTimeMillis() - started;
-        System.out.println("ALL DONE " + elapsed);
     }
 
     @Override
@@ -87,19 +92,26 @@ public class DataProvidersImpl implements DataProviders {
         }
     }
 
-    @Override
-    public Collection<DataProvider> getDataProviders(MetaFields requestFields,
+    /**
+     * This method will return data-provider that produce the required output
+     * fields passed as parameter.
+     * 
+     * @param requestFields
+     * @param responseFields
+     * @return collection of data providers
+     */
+    Collection<DataProvider> getDataProviders(MetaFields requestFields,
             MetaFields responseFields) {
         final List<DataProvider> providers = new ArrayList<>();
-        getDataProviders(new MetaFields(requestFields.getMetaFields()),
+        populateDataProviders(new MetaFields(requestFields.getMetaFields()),
                 new MetaFields(responseFields.getMetaFields()), providers);
         Collections.sort(providers); // sort by dependency
         return providers;
     }
 
-    private void getDataProviders(MetaFields requestFields,
+    private void populateDataProviders(MetaFields requestFields,
             MetaFields responseFields, List<DataProvider> existingProviders) {
-        responseFields.getMetaFields().removeAll(requestFields.getMetaFields());
+        responseFields.removeMetaFields(requestFields);
         for (MetaField responseField : responseFields.getMetaFields()) {
             Set<DataProvider> providers = providersByOutputMetaField
                     .get(responseField);
@@ -122,7 +134,7 @@ public class DataProvidersImpl implements DataProviders {
             requestFields.addMetaFields(provider.getResponseFields());
             //
             if (missingFields.size() > 0) {
-                getDataProviders(requestFields, missingFields,
+                populateDataProviders(requestFields, missingFields,
                         existingProviders);
             }
         }
@@ -155,15 +167,11 @@ public class DataProvidersImpl implements DataProviders {
                 Boolean completed = waitingProviders.get(e.getKey());
                 while (!completed) {
                     try {
-                        System.out.println("Waiting " + e.getKey() + " with "
-                                + Thread.currentThread().getName());
                         e.getKey().wait();
                     } catch (InterruptedException ex) {
                     }
                     completed = waitingProviders.get(e.getKey());
                 }
-                System.out.println("Finished Waiting " + e.getKey() + " with "
-                        + Thread.currentThread().getName());
             }
         }
     }
@@ -187,15 +195,6 @@ public class DataProvidersImpl implements DataProviders {
                                 waitingProviders, provider);
                     }
                 });
-
-            } else {
-                // System.out.println("Provider "
-                // + provider
-                // + " has available "
-                // + availableFields
-                // + ", missing "
-                // + availableFields.getMissingMetaFields(provider
-                // .getRequestFields()));
             }
         }
     }
@@ -217,14 +216,9 @@ public class DataProvidersImpl implements DataProviders {
                     }
                 }
             }
-            // System.out.println("---------------Executing " + provider
-            // + " with " + Thread.currentThread().getName()
-            // + "\n\tavailable " + availableFields + "\n\trequestFields "
-            // + requestFields + "\n\tresponseFields " + responseFields);
         } catch (Exception e) {
-            System.out.println("Failed to execute " + provider + " with input "
-                    + requestFields);
-            e.printStackTrace();
+            logger.error("PLEXSVC Failed to execute " + provider
+                    + " with input " + requestFields, e);
         } finally {
             synchronized (provider) {
                 waitingProviders.put(provider, true);
@@ -240,7 +234,7 @@ public class DataProvidersImpl implements DataProviders {
         for (final DataProvider provider : providers) {
             for (MetaField metaField : provider.getRequestFields()
                     .getMetaFields()) {
-                if (!requestFields.getMetaFields().contains(metaField)) {
+                if (!responseFields.getMetaFields().contains(metaField)) {
                     responseFields.getMetaFields().addMetaField(metaField);
                 }
             }
