@@ -216,7 +216,7 @@ public class Request extends BasePayload<Object> {
     @Override
     public String toString() {
         return "Request [method=" + method + ", requestUri=" + requestUri
-                + ", endpoint=" + endpoint + ", contents=" + contents + "]";
+                + ", endpoint=" + endpoint + "]";
     }
 
     public String toDetailedString() {
