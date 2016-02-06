@@ -17,13 +17,14 @@ import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.ws.WSRequestHandlerAdapter;
 import com.plexobject.http.TestWebUtils;
-import com.plexobject.service.BaseServiceClient;
 import com.plexobject.service.Interceptor;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
 
 public class WSPerformanceTest {
+    private static final int HTTP_PORT = 8325;
+
     private static ServiceRegistry serviceRegistry;
     private static Account[] accounts = { new Account(1001, "CX2001"),
             new Account(2001, "DX1001"), new Account(3001, "EX3001") };
@@ -38,8 +39,7 @@ public class WSPerformanceTest {
     public static void setUp() throws Exception {
         RequestBuilder.filtering = false;
         Properties props = new Properties();
-        props.setProperty(Constants.HTTP_PORT,
-                String.valueOf(BaseServiceClient.DEFAULT_PORT));
+        props.setProperty(Constants.HTTP_PORT, String.valueOf(HTTP_PORT));
         Configuration config = new Configuration(props);
         if (config.getBoolean("logTest")) {
             BasicConfigurator.configure();
@@ -90,12 +90,10 @@ public class WSPerformanceTest {
         for (int n = 0; n < 1000; n++) {
             Order order = create();
             RequestBuilder request = new RequestBuilder("create", order);
-            TestWebUtils.post("http://localhost:"
-                    + BaseServiceClient.DEFAULT_PORT + "/orders",
+            TestWebUtils.post("http://localhost:" + HTTP_PORT + "/orders",
                     request.encode());
-            TestWebUtils.get("http://localhost:"
-                    + BaseServiceClient.DEFAULT_PORT + "/orders?orderId="
-                    + order.orderId);
+            TestWebUtils.get("http://localhost:" + HTTP_PORT
+                    + "/orders?orderId=" + order.orderId);
         }
         System.out.println("createGetTest took "
                 + (System.currentTimeMillis() - started));
@@ -110,13 +108,11 @@ public class WSPerformanceTest {
                 Order order = create();
                 order.account = account;
                 RequestBuilder request = new RequestBuilder("create", order);
-                TestWebUtils.post("http://localhost:"
-                        + BaseServiceClient.DEFAULT_PORT + "/orders",
+                TestWebUtils.post("http://localhost:" + HTTP_PORT + "/orders",
                         request.encode());
             }
 
-            TestWebUtils.get("http://localhost:"
-                    + BaseServiceClient.DEFAULT_PORT
+            TestWebUtils.get("http://localhost:" + HTTP_PORT
                     + "/orders/account?accountId=" + account.accountId);
         }
         System.out.println("createGetByAccountTest took "

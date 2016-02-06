@@ -24,7 +24,7 @@ import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
 
 public class NettyWebsocketRequestHandlerTest {
-    private static final int HTTP_PORT = 8323;
+    private static final int HTTP_PORT = 8324;
 
     private static final String PONG = "pong";
     private static final String PING = "ping";

@@ -24,6 +24,9 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -81,6 +84,8 @@ public class EventBusToJmsBridgeIntegTest {
         eb = new EventBusImpl();
         bridge = new EventBusToJmsBridge(jmsContainer,
                 new ArrayList<EventBusToJmsEntry>(), eb);
+        BasicConfigurator.configure();
+        LogManager.getRootLogger().setLevel(Level.INFO);
     }
 
     @BeforeClass

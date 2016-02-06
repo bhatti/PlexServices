@@ -24,7 +24,8 @@ public class Response extends BasePayload<Object> {
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             CodecType codecType) {
-        super(request.getRequestId(), codecType, properties, headers, payload);
+        super(request != null ? request.getRequestId() : 0, codecType,
+                properties, headers, payload);
         headers.put(Constants.REMOTE_ADDRESS, HostUtils.getLocalHost());
         this.request = request;
     }
