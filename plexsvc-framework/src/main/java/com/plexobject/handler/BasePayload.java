@@ -14,6 +14,7 @@ import com.plexobject.http.HttpResponse;
 public abstract class BasePayload<T> implements Statusable {
     private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String CONTENT_TYPE = "Content-Type";
+    protected long requestId;
     protected final Map<String, Object> properties;
     protected final Map<String, Object> headers;
     protected final long createdAt;
@@ -28,9 +29,10 @@ public abstract class BasePayload<T> implements Statusable {
         this.headers = new HashMap<>();
     }
 
-    protected BasePayload(final CodecType codecType,
+    protected BasePayload(long requestId, final CodecType codecType,
             final Map<String, Object> properties,
             final Map<String, Object> headers, final T contents) {
+        this.requestId = requestId;
         this.createdAt = System.currentTimeMillis();
         this.codecType = codecType;
         this.properties = properties;

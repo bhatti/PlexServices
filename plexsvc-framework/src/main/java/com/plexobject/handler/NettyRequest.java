@@ -4,7 +4,6 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.util.Map;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
@@ -20,12 +19,12 @@ public class NettyRequest extends Request {
         }
 
         public Request build() {
-            if (remoteAddress != null) {
-                properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
-            }
-            return new NettyRequest(protocol, method, requestUri, endpoint,
-                    replyEndpoint, properties, headers, contents, codecType,
-                    responseDispatcher, channelHandlerContext);
+            initRemoteAddress();
+            initRequestId();
+
+            return new NettyRequest(requestId, protocol, method, requestUri,
+                    endpoint, replyEndpoint, properties, headers, contents,
+                    codecType, responseDispatcher, channelHandlerContext);
         }
 
     }
@@ -36,13 +35,13 @@ public class NettyRequest extends Request {
         super();
     }
 
-    public NettyRequest(Protocol protocol, RequestMethod method,
-            String requestUri, String endpoint, String replyEndpoint,
-            Map<String, Object> properties, Map<String, Object> headers,
-            Object payload, CodecType codecType,
+    public NettyRequest(long requestId, Protocol protocol,
+            RequestMethod method, String requestUri, String endpoint,
+            String replyEndpoint, Map<String, Object> properties,
+            Map<String, Object> headers, Object payload, CodecType codecType,
             ResponseDispatcher responseDispatcher,
             ChannelHandlerContext channelHandlerContext) {
-        super(protocol, method, requestUri, endpoint, replyEndpoint,
+        super(requestId, protocol, method, requestUri, endpoint, replyEndpoint,
                 properties, headers, payload, codecType, responseDispatcher);
         this.channelHandlerContext = channelHandlerContext;
     }

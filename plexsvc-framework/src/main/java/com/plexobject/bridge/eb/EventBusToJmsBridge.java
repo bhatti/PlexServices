@@ -39,6 +39,7 @@ import com.plexobject.jms.impl.JMSUtils;
 import com.plexobject.service.Lifecycle;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
+import com.plexobject.util.HostUtils;
 import com.plexobject.util.IOUtils;
 
 /**
@@ -81,7 +82,7 @@ public class EventBusToJmsBridge implements Lifecycle {
             params.putAll(request.getProperties());
             params.putAll(request.getHeaders());
             if (!params.containsKey(Constants.REMOTE_ADDRESS)) {
-                params.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
+                params.put(Constants.REMOTE_ADDRESS, HostUtils.getLocalHost());
             }
             try {
                 String payload = ObjectCodecFactory.getInstance()

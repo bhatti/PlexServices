@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
@@ -26,14 +25,12 @@ public class ServletRequest extends Request {
         }
 
         public Request build() {
-            if (remoteAddress != null) {
-                properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
-            }
-            return new ServletRequest(protocol, method, requestUri, endpoint,
-                    replyEndpoint, properties, headers, contents, codecType,
-                    responseDispatcher, httpRequest, httpResponse);
+            initRemoteAddress();
+            initRequestId();
+            return new ServletRequest(requestId, protocol, method, requestUri,
+                    endpoint, replyEndpoint, properties, headers, contents,
+                    codecType, responseDispatcher, httpRequest, httpResponse);
         }
-
     }
 
     private HttpServletRequest httpRequest;
@@ -43,13 +40,13 @@ public class ServletRequest extends Request {
         super();
     }
 
-    public ServletRequest(Protocol protocol, RequestMethod method,
-            String requestUri, String endpoint, String replyEndpoint,
-            Map<String, Object> properties, Map<String, Object> headers,
-            Object payload, CodecType codecType,
+    public ServletRequest(long requestId, Protocol protocol,
+            RequestMethod method, String requestUri, String endpoint,
+            String replyEndpoint, Map<String, Object> properties,
+            Map<String, Object> headers, Object payload, CodecType codecType,
             ResponseDispatcher responseDispatcher,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        super(protocol, method, requestUri, endpoint, replyEndpoint,
+        super(requestId, protocol, method, requestUri, endpoint, replyEndpoint,
                 properties, headers, payload, codecType, responseDispatcher);
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;

@@ -32,6 +32,7 @@ import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.DestinationResolver;
 import com.plexobject.jms.MessageListenerConfig;
+import com.plexobject.util.HostUtils;
 
 /**
  * This class provides helper methods for communication with JMS
@@ -147,7 +148,8 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
         while (!running) {
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("PLEXSVC Waiting for JMSContainer to start " + running);
+                    logger.debug("PLEXSVC Waiting for JMSContainer to start "
+                            + running);
                 }
                 wait(DEFAULT_WAIT_TIME);
             } catch (InterruptedException e) {
@@ -294,7 +296,7 @@ public class DefaultJMSContainer extends BaseJMSContainer implements
                     "Unknown encoded payload for response " + encodedPayload);
         }
         if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
-            headers.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
+            headers.put(Constants.REMOTE_ADDRESS, HostUtils.getLocalHost());
         }
         JMSUtils.setHeaders(headers, m);
 

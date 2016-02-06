@@ -2,7 +2,8 @@ package com.plexobject.domain;
 
 public interface Constants {
     public static final String SESSION_ID = "PlexSessionID";
-    public static final String REMOTE_ADDRESS = "RemoteAddress";
+    public static final String REQUEST_ID = "requestId";
+    public static final String REMOTE_ADDRESS = "remoteAddress";
     public static final String ACCEPT = "Accept";
     public static final String CONTENTS = "Contents";
     public static final String METHOD = "Method";

@@ -192,6 +192,7 @@ public class WSDelegateHandler implements RequestHandler {
                 } else {
                     response.put(responseTag, null);
                 }
+                //
                 request.getResponse().setContents(response);
             }
         } catch (InvocationTargetException invocationTargetException) {

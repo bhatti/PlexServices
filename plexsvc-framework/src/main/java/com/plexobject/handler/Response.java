@@ -5,6 +5,7 @@ import java.util.Map;
 import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.http.HttpResponse;
+import com.plexobject.util.HostUtils;
 
 /**
  * This class encapsulates response
@@ -23,7 +24,8 @@ public class Response extends BasePayload<Object> {
             final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             CodecType codecType) {
-        super(codecType, properties, headers, payload);
+        super(request.getRequestId(), codecType, properties, headers, payload);
+        headers.put(Constants.REMOTE_ADDRESS, HostUtils.getLocalHost());
         this.request = request;
     }
 

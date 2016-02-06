@@ -3,7 +3,6 @@ package com.plexobject.handler;
 import java.util.Map;
 
 import com.plexobject.bus.EventBus;
-import com.plexobject.domain.Constants;
 import com.plexobject.encode.CodecType;
 import com.plexobject.service.Protocol;
 import com.plexobject.service.RequestMethod;
@@ -18,12 +17,12 @@ public class EventBusRequest extends Request {
         }
 
         public Request build() {
-            if (remoteAddress != null) {
-                properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
-            }
-            return new EventBusRequest(protocol, method, requestUri, endpoint,
-                    replyEndpoint, properties, headers, contents, codecType,
-                    responseDispatcher, eventBus);
+            initRemoteAddress();
+            initRequestId();
+
+            return new EventBusRequest(requestId, protocol, method, requestUri,
+                    endpoint, replyEndpoint, properties, headers, contents,
+                    codecType, responseDispatcher, eventBus);
         }
 
     }
@@ -34,12 +33,12 @@ public class EventBusRequest extends Request {
         super();
     }
 
-    public EventBusRequest(Protocol protocol, RequestMethod method,
-            String requestUri, String endpoint, String replyEndpoint,
-            Map<String, Object> properties, Map<String, Object> headers,
-            Object payload, CodecType codecType,
+    public EventBusRequest(long requestId, Protocol protocol,
+            RequestMethod method, String requestUri, String endpoint,
+            String replyEndpoint, Map<String, Object> properties,
+            Map<String, Object> headers, Object payload, CodecType codecType,
             ResponseDispatcher responseDispatcher, EventBus eventBus) {
-        super(protocol, method, requestUri, endpoint, replyEndpoint,
+        super(requestId, protocol, method, requestUri, endpoint, replyEndpoint,
                 properties, headers, payload, codecType, responseDispatcher);
         this.eventBus = eventBus;
     }

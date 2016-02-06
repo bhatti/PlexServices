@@ -21,6 +21,7 @@ public class Request extends BasePayload<Object> {
     protected static ThreadLocal<Request> currentRequest = new ThreadLocal<Request>();
 
     public static class Builder {
+        protected long requestId;
         protected Protocol protocol;
         protected Object contents;
         protected Map<String, Object> properties = new HashMap<>();
@@ -32,6 +33,11 @@ public class Request extends BasePayload<Object> {
         protected String replyEndpoint;
         protected CodecType codecType;
         protected ResponseDispatcher responseDispatcher;
+
+        public Builder setRequestId(long requestId) {
+            this.requestId = requestId;
+            return this;
+        }
 
         public Builder setProtocol(Protocol protocol) {
             this.protocol = protocol;
@@ -95,13 +101,38 @@ public class Request extends BasePayload<Object> {
             return this;
         }
 
+        protected void initRemoteAddress() {
+            if (remoteAddress != null) {
+                properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
+            }
+        }
+
+        protected void initRequestId() {
+            if (requestId == 0 && properties.containsKey(Constants.REQUEST_ID)) {
+                Object reqId = properties.get(Constants.REQUEST_ID);
+                if (reqId != null) {
+                    if (reqId instanceof Number) {
+                        try {
+                            requestId = ((Number) reqId).longValue();
+                        } catch (NumberFormatException e) {
+                        }
+                    } else if (reqId instanceof String) {
+                        try {
+                            requestId = Long.valueOf((String) reqId);
+                        } catch (NumberFormatException e) {
+                        }
+                    }
+                }
+            }
+        }
+
         public Request build() {
             if (remoteAddress != null) {
                 properties.put(Constants.REMOTE_ADDRESS, remoteAddress);
             }
-            return new Request(protocol, method, requestUri, endpoint,
-                    replyEndpoint, properties, headers, contents, codecType,
-                    responseDispatcher);
+            return new Request(requestId, protocol, method, requestUri,
+                    endpoint, replyEndpoint, properties, headers, contents,
+                    codecType, responseDispatcher);
         }
 
     }
@@ -119,13 +150,14 @@ public class Request extends BasePayload<Object> {
     protected Request() {
     }
 
-    protected Request(final Protocol protocol, final RequestMethod method,
-            final String requestUri, final String endpoint,
-            final String replyEndpoint, final Map<String, Object> properties,
+    protected Request(final long requestId, final Protocol protocol,
+            final RequestMethod method, final String requestUri,
+            final String endpoint, final String replyEndpoint,
+            final Map<String, Object> properties,
             final Map<String, Object> headers, final Object payload,
             final CodecType codecType,
             final ResponseDispatcher responseDispatcher) {
-        super(codecType, properties, headers, payload);
+        super(requestId, codecType, properties, headers, payload);
         Preconditions.requireNotNull(protocol, "protocol is required");
         Preconditions.requireNotNull(method, "method is required");
         Preconditions.requireNotNull(responseDispatcher,
@@ -139,6 +171,10 @@ public class Request extends BasePayload<Object> {
         this.response = new Response(this, new HashMap<String, Object>(),
                 new HashMap<String, Object>(), null, codecType);
         currentRequest.set(this);
+    }
+
+    public long getRequestId() {
+        return requestId;
     }
 
     public Protocol getProtocol() {
