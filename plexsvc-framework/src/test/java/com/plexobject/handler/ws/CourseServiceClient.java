@@ -48,6 +48,18 @@ public class CourseServiceClient extends BaseServiceClient implements
 
     @WebMethod(exclude = true)
     @Override
+    public long getNanoTime() {
+        RequestBuilder request = new RequestBuilder("getNanoTime", "");
+        try {
+            Integer time = post(COURSE_SERVICE, request, Integer.class, null);
+            return time;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @WebMethod(exclude = true)
+    @Override
     public Course save(Course course) {
         RequestBuilder request = new RequestBuilder("save", course);
         try {

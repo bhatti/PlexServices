@@ -133,6 +133,20 @@ public class MultiRequestTest {
     }
 
     @Test
+    public void testSameMethodAgain() throws Throwable {
+        MultiRequestBuilder b = new MultiRequestBuilder();
+
+        b.add("getNanoTime", "");
+        b.add("getNanoTime", "");
+
+        String resp = TestWebUtils.post("http://localhost:"
+                + BaseServiceClient.DEFAULT_PORT + "/courses", b.encode(),
+                "Accept", RequestBuilder.getAcceptHeader()).first;
+        List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
+        assertEquals(2, jsonList.size());
+    }
+
+    @Test
     public void testSingleMethod() throws Throwable {
         MultiRequestBuilder b = new MultiRequestBuilder();
         Map<String, Object> extra = new HashMap<>();

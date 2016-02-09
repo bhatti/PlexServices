@@ -243,6 +243,12 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @POST
+    public long getNanoTime() {
+        return System.nanoTime();
+    }
+
+    @Override
     public void nullVoid() {
     }
 
@@ -280,4 +286,5 @@ public class CourseServiceImpl implements CourseService {
     public void error() throws IOException {
         throw new IOException("IO error");
     }
+
 }

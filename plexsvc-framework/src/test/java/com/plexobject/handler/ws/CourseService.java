@@ -51,6 +51,8 @@ public interface CourseService {
 
     String nullString();
 
+    long getNanoTime();
+
     String[] nullArray();
 
     List<?> nullList();
