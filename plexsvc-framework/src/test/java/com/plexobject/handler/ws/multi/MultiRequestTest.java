@@ -1,6 +1,7 @@
 package com.plexobject.handler.ws.multi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -144,6 +145,29 @@ public class MultiRequestTest {
                 "Accept", RequestBuilder.getAcceptHeader()).first;
         List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
         assertEquals(2, jsonList.size());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testTimeAndError() throws Throwable {
+        MultiRequestBuilder b = new MultiRequestBuilder();
+        b.add("getNanoTime", "");
+        b.add("error", "");
+
+        String resp = TestWebUtils.post("http://localhost:"
+                + BaseServiceClient.DEFAULT_PORT + "/courses", b.encode(),
+                "Accept", RequestBuilder.getAcceptHeader()).first;
+        List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
+        assertEquals(2, jsonList.size());
+        assertTrue(Long.valueOf(jsonList.get(0)) > 0);
+        Map<String, Object> error = MultiRequestBuilder.getObjectCodec()
+                .decode(jsonList.get(1), HashMap.class,
+                        new HashMap<String, Object>());
+        List<Map<String, Object>> errorList = (List<Map<String, Object>>) error
+                .get("errors");
+        Map<String, Object> error3a = (Map<String, Object>) errorList.get(0);
+        assertEquals("IOException", error3a.get("errorType"));
+
     }
 
     @Test
