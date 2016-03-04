@@ -34,6 +34,7 @@ import com.plexobject.handler.Handler;
 import com.plexobject.handler.Response;
 import com.plexobject.jms.impl.BaseJMSContainer;
 import com.plexobject.jms.impl.JMSUtils;
+import com.plexobject.util.HostUtils;
 
 /**
  * This class implements JMS container using Spring framework
@@ -186,7 +187,7 @@ public class SpringJMSContainer extends BaseJMSContainer {
             final Function<Message, Future<Response>> beforeSend)
             throws JMSException {
         if (!headers.containsKey(Constants.REMOTE_ADDRESS)) {
-            headers.put(Constants.REMOTE_ADDRESS, JMSUtils.getLocalHost());
+            headers.put(Constants.REMOTE_ADDRESS, HostUtils.getLocalHost());
         }
         if (logger.isDebugEnabled()) {
             logger.debug("PLEXSVC Sending JMS message to " + destination

@@ -157,8 +157,7 @@ public class NettyWebRequestHandler extends SimpleChannelInboundHandler<Object> 
             Request handlerReq = buildRequest(ctx, uri, dispatcher,
                     textPayload, Protocol.HTTP, method, headers, params);
 
-            logger.info("PLEXSVC HTTP Received URI '" + uri + "', wsPath '"
-                    + wsPath + "', request " + handlerReq);
+            logger.info("PLEXSVC HTTP Received URI '" + uri + "', wsPath '" + wsPath);
             handler.handle(handlerReq);
         }
     }

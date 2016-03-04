@@ -180,9 +180,7 @@ public class WebRequestHandlerServlet extends HttpServlet implements Lifecycle {
                 .setCodecType(codecType).setContents(textPayload)
                 .setResponseDispatcher(dispatcher).build();
 
-        logger.info("PLEXSVC HTTP Received URI '" + uri + "', request "
-                + handlerReq.getContents() + ", params "
-                + handlerReq.getProperties());
+        logger.info("PLEXSVC HTTP Received URI " + uri);
         defaultExecutor.handle(handlerReq);
     }
 
