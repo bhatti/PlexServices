@@ -44,8 +44,6 @@ public class WSDelegateHandler implements RequestHandler {
 
     @Override
     public void handle(final Request incomingRequest) {
-        long started = System.currentTimeMillis();
-
         MethodPayLoadRequest methodPayLoadRequest = MethodPayLoadRequest
                 .getMethodNameAndPayloads(
                         incomingRequest,
@@ -57,8 +55,6 @@ public class WSDelegateHandler implements RequestHandler {
             invokeRequest(methodPayLoadRequest.requests.get(0),
                     incomingRequest, methodPayLoadRequest.multiRequest);
         }
-        long elapsed = System.currentTimeMillis() - started;
-        incomingRequest.getResponse().setResponseMilliTime(elapsed);
     }
 
     // ///////////////////////////////////////////////////////////////////////

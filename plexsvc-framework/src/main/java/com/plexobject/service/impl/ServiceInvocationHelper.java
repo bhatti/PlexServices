@@ -221,7 +221,10 @@ public class ServiceInvocationHelper {
             final long started, ServiceMetrics metrics, ServiceConfigDesc config) {
         // invoke authorizer if set
         handler.handle(request);
-        metrics.addResponseTime(System.currentTimeMillis() - started);
+        long elapsed = System.currentTimeMillis() - started;
+        metrics.addResponseTime(elapsed);
+        request.getResponse().setResponseMilliTime(elapsed);
+
         // send back the reply
         if (request.getResponse().getContents() != null) {
             request.sendResponse();
