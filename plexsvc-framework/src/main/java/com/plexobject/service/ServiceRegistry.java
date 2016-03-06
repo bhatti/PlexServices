@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -63,7 +65,7 @@ public class ServiceRegistry implements ServiceContainer,
     private ServletContext servletContext;
     private SecurityAuthorizer securityAuthorizer;
     private EventBus eventBus = new EventBusImpl();
-
+    private ExecutorService defaultExecutorService;
     // pass this as VM param -Dfile.encoding=UTF-8
     static {
         System.setProperty("file.encoding", "UTF-8");
@@ -75,10 +77,12 @@ public class ServiceRegistry implements ServiceContainer,
 
     public ServiceRegistry(Configuration config,
             WebContainerProvider webContainerProvider) {
-        Preconditions.requireNotNull(config,
-                "config is required");
+        Preconditions.requireNotNull(config, "config is required");
         //
         this.config = config;
+        setDefaultExecutorService(Executors.newFixedThreadPool(config
+                .getInteger("defaultExecutorThreads", 10)));
+
         this.serviceInvocationHelper = new ServiceInvocationHelper(this);
         this.serviceRegistryHandlers = new ServiceRegistryHandlers();
         this.serviceRegistryContainers = new ServiceRegistryContainers(config,
@@ -460,6 +464,14 @@ public class ServiceRegistry implements ServiceContainer,
         } catch (Exception e) {
             logger.error("PLEXSVC Could not register mbean " + objName, e);
         }
+    }
+
+    public ExecutorService getDefaultExecutorService() {
+        return defaultExecutorService;
+    }
+
+    public void setDefaultExecutorService(ExecutorService defaultExecutorService) {
+        this.defaultExecutorService = defaultExecutorService;
     }
 
 }

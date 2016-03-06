@@ -3,6 +3,7 @@ package com.plexobject.handler.ws;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +25,6 @@ import org.junit.Test;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
-import com.plexobject.domain.Pair;
 import com.plexobject.encode.CodecType;
 import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.handler.AbstractResponseDispatcher;
@@ -33,6 +33,8 @@ import com.plexobject.handler.NettyRequest;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.handler.Response;
+import com.plexobject.handler.ws.WSDelegateHandler.MethodPayLoadInfo;
+import com.plexobject.handler.ws.WSDelegateHandler.MethodPayLoadRequest;
 import com.plexobject.http.HttpResponse;
 import com.plexobject.school.Address;
 import com.plexobject.school.Course;
@@ -187,8 +189,10 @@ public class WSRequestHandlerAdapterTest {
         BasicConfigurator.configure();
         // LogManager.getRootLogger().setLevel(Level.INFO);
 
-        Map<String, Object> e = (Map<String, Object>) courseService.objectExceptionExample();
-        List<Map<String, Object>> errorList = (List<Map<String, Object>>) e.get("errors");
+        Map<String, Object> e = (Map<String, Object>) courseService
+                .objectExceptionExample();
+        List<Map<String, Object>> errorList = (List<Map<String, Object>>) e
+                .get("errors");
         Map<String, Object> error = (Map<String, Object>) errorList.get(0);
         assertEquals("my error 3", error.get("message"));
     }
@@ -383,52 +387,52 @@ public class WSRequestHandlerAdapterTest {
         String[] badPayloads = { "my text", " 345 " };
         String[] badResult = { "my text", "345" };
         Map<String, Object> properties = new HashMap<>();
-        boolean[] multiRequest = new boolean[1];
         for (int i = 0; i < stringPayloads.length; i++) {
             Request request = newRequest(stringPayloads[i], properties);
-            List<Pair<String, String>> respList = handler
-                    .getMethodNameAndPayloads(request, multiRequest);
-            System.out.println("Verifying " + stringPayloads[i]);
-            assertEquals(1, respList.size());
-            Pair<String, String> resp = respList.get(0);
-            assertEquals("get", resp.first);
-            assertEquals(stringResult[i], resp.second);
+            MethodPayLoadRequest methodPayLoadRequest = handler
+                    .getMethodNameAndPayloads(request);
+            assertEquals(1, methodPayLoadRequest.requests.size());
+            MethodPayLoadInfo info = methodPayLoadRequest.requests.get(0);
+            assertEquals("get", info.method);
+            assertEquals(stringResult[i], info.payload);
         }
 
         for (int i = 0; i < intPayloads.length; i++) {
             Request request = newRequest(intPayloads[i], properties);
-            List<Pair<String, String>> respList = handler
-                    .getMethodNameAndPayloads(request, multiRequest);
-            assertEquals(1, respList.size());
-            Pair<String, String> resp = respList.get(0);
-            assertEquals("get", resp.first);
-            assertEquals(intResult[i], resp.second);
+            MethodPayLoadRequest methodPayLoadRequest = handler
+                    .getMethodNameAndPayloads(request);
+            assertEquals(1, methodPayLoadRequest.requests.size());
+            MethodPayLoadInfo info = methodPayLoadRequest.requests.get(0);
+            assertEquals("get", info.method);
+            assertEquals(intResult[i], info.payload);
         }
         for (int i = 0; i < objPayloads.length; i++) {
             Request request = newRequest(objPayloads[i], properties);
-            List<Pair<String, String>> respList = handler
-                    .getMethodNameAndPayloads(request, multiRequest);
-            assertEquals(1, respList.size());
-            Pair<String, String> resp = respList.get(0);
-            assertEquals("get", resp.first);
-            assertEquals(objResults[i], resp.second);
+            MethodPayLoadRequest methodPayLoadRequest = handler
+                    .getMethodNameAndPayloads(request);
+            assertEquals(1, methodPayLoadRequest.requests.size());
+            MethodPayLoadInfo info = methodPayLoadRequest.requests.get(0);
+            assertEquals("get", info.method);
+            assertEquals(objResults[i], info.payload);
         }
         for (int i = 0; i < badPayloads.length; i++) {
             Request request = newRequest(badPayloads[i], properties);
-            List<Pair<String, String>> respList = handler
-                    .getMethodNameAndPayloads(request, multiRequest);
-            assertEquals(0, respList.size());
+            try {
+                handler.getMethodNameAndPayloads(request);
+                fail("should have failed");
+            } catch (IllegalArgumentException e) {
+            }
         }
         //
         properties.put("methodName", "get");
         for (int i = 0; i < badPayloads.length; i++) {
             Request request = newRequest(badPayloads[i], properties);
-            List<Pair<String, String>> respList = handler
-                    .getMethodNameAndPayloads(request, multiRequest);
-            assertEquals(1, respList.size());
-            Pair<String, String> resp = respList.get(0);
-            assertEquals("get", resp.first);
-            assertEquals(badResult[i], resp.second);
+            MethodPayLoadRequest methodPayLoadRequest = handler
+                    .getMethodNameAndPayloads(request);
+            assertEquals(1, methodPayLoadRequest.requests.size());
+            MethodPayLoadInfo info = methodPayLoadRequest.requests.get(0);
+            assertEquals("get", info.method);
+            assertEquals(badResult[i], info.payload);
         }
 
     }

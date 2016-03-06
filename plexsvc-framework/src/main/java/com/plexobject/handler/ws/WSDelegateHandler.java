@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import com.plexobject.domain.Pair;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
 import com.plexobject.http.HttpResponse;
@@ -25,15 +24,34 @@ import com.plexobject.util.ReflectUtils;
 import com.plexobject.util.ReflectUtils.ParamType;
 
 public class WSDelegateHandler implements RequestHandler {
+    static class MethodPayLoadInfo {
+        String method;
+        String payload;
+
+        MethodPayLoadInfo(String method, String payload) {
+            this.method = method;
+            this.payload = payload;
+        }
+
+    }
+
+    static class MethodPayLoadRequest {
+        List<MethodPayLoadInfo> requests = new ArrayList<>();
+        boolean multiRequest;
+    }
+
     private static final Logger logger = Logger
             .getLogger(WSDelegateHandler.class);
+    //
     private static final String RESPONSE_SUFFIX = "Response";
     private static final ObjectMapper jsonMapper = new ObjectMapper();
+    //
     private final Object delegate;
     private final ServiceRegistry serviceRegistry;
     private final Map<String, WSServiceMethod> methodsByName = new HashMap<>();
     private WSServiceMethod defaultMethodInfo;
 
+    //
     public WSDelegateHandler(Object delegate, ServiceRegistry registry) {
         this.delegate = delegate;
         this.serviceRegistry = registry;
@@ -46,45 +64,37 @@ public class WSDelegateHandler implements RequestHandler {
 
     @Override
     public void handle(final Request request) {
-        boolean[] multiRequest = new boolean[1];
-        List<Pair<String, String>> methodAndPayloads = getMethodNameAndPayloads(
-                request, multiRequest);
-        if (methodAndPayloads.size() == 0) {
-            throw new IllegalArgumentException(
-                    "Could not find method-name in request "
-                            + request.getProperties());
-        }
+        MethodPayLoadRequest methodPayLoadRequest = getMethodNameAndPayloads(request);
         final List<Object> multiRequestResponse = new ArrayList<>();
 
-        for (int n = 0; n < methodAndPayloads.size(); n++) {
-            final Pair<String, String> methodAndPayload = methodAndPayloads
+        for (int n = 0; n < methodPayLoadRequest.requests.size(); n++) {
+            MethodPayLoadInfo methodPayLoadInfo = methodPayLoadRequest.requests
                     .get(n);
-            final String responseTag = methodAndPayload.first + RESPONSE_SUFFIX;
+            final String responseTag = methodPayLoadInfo.method
+                    + RESPONSE_SUFFIX;
 
             //
             final WSServiceMethod methodInfo = methodsByName
-                    .get(methodAndPayload.first);
+                    .get(methodPayLoadInfo.method);
             try {
                 if (methodInfo == null) {
                     logger.warn("PLEXSVC: Unknown method '"
-                            + methodAndPayload.first + "', available "
+                            + methodPayLoadInfo.method + "', available "
                             + methodsByName.keySet() + ", request "
                             + request.getContents());
-                    throw new ServiceInvocationException("Unknown method '"
-                            + methodAndPayload.first + "'",
-                            multiRequest[0] ? HttpResponse.SC_OK
+                    throw new ServiceInvocationException(
+                            "Unknown method '" + methodPayLoadInfo.method + "'",
+                            methodPayLoadRequest.multiRequest ? HttpResponse.SC_OK
                                     : HttpResponse.SC_NOT_FOUND);
                 }
                 // set method name
                 request.setMethodName(methodInfo.iMethod.getName());
                 //
                 // make sure you use iMethod to decode because implMethod might
-                // have
-                // erased parameterized type
+                // have erased parameterized type
                 // We can get input parameters either from JSON text, form/query
                 // parameters or method simply takes Map so we just pass all
-                // request
-                // properties
+                // request properties
                 if (methodInfo.hasMultipleParamTypes) {
                     for (int i = 0; i < methodInfo.params.length; i++) {
                         if (methodInfo.params[i].type == ParamType.MAP_PARAM) {
@@ -98,7 +108,7 @@ public class WSDelegateHandler implements RequestHandler {
                 //
                 final Object[] args = ReflectUtils.decode(methodInfo.iMethod,
                         request.getPropertiesAndHeaders(), methodInfo.params,
-                        methodAndPayload.second, request.getCodec());
+                        methodPayLoadInfo.payload, request.getCodec());
                 if (args.length > 0) {
                     request.setContents(args[0]); // In most cases the first
                                                   // argument will be the
@@ -114,7 +124,7 @@ public class WSDelegateHandler implements RequestHandler {
                         + request, e);
                 request.getResponse().setContents(e);
             }
-            if (multiRequest[0]) {
+            if (methodPayLoadRequest.multiRequest) {
                 if (request.getResponse().getContents() instanceof Exception) {
                     Map<String, Object> response = new HashMap<String, Object>();
                     response.put(responseTag, request.getResponse()
@@ -124,14 +134,10 @@ public class WSDelegateHandler implements RequestHandler {
                     multiRequestResponse.add(request.getResponse()
                             .getContents());
                 }
-                request.getResponse().setContents(null);// so that we can
-                                                        // overwrite it in
-                                                        // invoke otherwise it
-                                                        // assumes service set
-                                                        // the contents
             }
         }
-        if (multiRequest[0]) {
+        //
+        if (methodPayLoadRequest.multiRequest) {
             request.getResponse().setContents(multiRequestResponse);
         }
     }
@@ -207,20 +213,19 @@ public class WSDelegateHandler implements RequestHandler {
     }
 
     @VisibleForTesting
-    List<Pair<String, String>> getMethodNameAndPayloads(Request request,
-            boolean[] multiRequest) {
+    MethodPayLoadRequest getMethodNameAndPayloads(Request request) {
+        final MethodPayLoadRequest methodPayLoadRequest = new MethodPayLoadRequest();
         String text = request.getContentsAs();
-        List<Pair<String, String>> response = new ArrayList<>();
         if (text != null && text.length() > 0) {
             try {
                 JsonNode rootNode = jsonMapper.readTree(text);
                 if (rootNode.isObject()) {
-                    parseMethodPayload(response, rootNode);
+                    parseMethodPayload(methodPayLoadRequest, rootNode);
                 } else if (rootNode.isArray()) {
-                    multiRequest[0] = true;
+                    methodPayLoadRequest.multiRequest = true;
                     for (int i = 0; i < rootNode.size(); i++) {
                         JsonNode node = rootNode.get(i);
-                        parseMethodPayload(response, node);
+                        parseMethodPayload(methodPayLoadRequest, node);
                     }
                 }
             } catch (Exception e) {
@@ -243,11 +248,14 @@ public class WSDelegateHandler implements RequestHandler {
                     String payload = payloadStart <= payloadEnd ? text
                             .substring(payloadStart, payloadEnd + 1).trim()
                             : "";
-                    response.add(Pair.of(method, payload));
+                    MethodPayLoadInfo info = new MethodPayLoadInfo(method,
+                            payload);
+                    methodPayLoadRequest.requests.add(info);
                 }
             }
         }
-        if (response.size() == 0) {
+        //
+        if (methodPayLoadRequest.requests.size() == 0) {
             // trying to find method from the parameters
             String method = request.getStringProperty("methodName");
             if (method == null) {
@@ -257,20 +265,30 @@ public class WSDelegateHandler implements RequestHandler {
             }
             //
             if (method != null) {
-                response.add(Pair.of(method, text == null ? text : text.trim()));
+                MethodPayLoadInfo info = new MethodPayLoadInfo(method,
+                        text == null ? text : text.trim());
+                methodPayLoadRequest.requests.add(info);
             }
         }
-        return response;
+        //
+        if (methodPayLoadRequest.requests.size() == 0) {
+            throw new IllegalArgumentException(
+                    "Could not find method-name in request "
+                            + request.getProperties());
+        }
+        return methodPayLoadRequest;
     }
 
-    private static void parseMethodPayload(List<Pair<String, String>> response,
-            JsonNode node) {
+    private static void parseMethodPayload(
+            MethodPayLoadRequest methodPayLoadRequest, JsonNode node) {
         if (node.isObject()) {
             Iterator<String> it = node.fieldNames();
             if (it.hasNext()) {
                 String methodName = it.next();
                 String payload = node.get(methodName).toString();
-                response.add(Pair.of(methodName, payload));
+                MethodPayLoadInfo info = new MethodPayLoadInfo(methodName,
+                        payload);
+                methodPayLoadRequest.requests.add(info);
             }
         }
     }
