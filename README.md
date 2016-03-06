@@ -48,7 +48,8 @@ PlexServices is designed on following design principles:
 
 - PlexServices allows you to filter response JSON fields by passing comma-delimited list of field names from the response object.
 
-- PlexServices allows you to call multiple services at once when using JaxRS based JSON requests
+- PlexServices allows you to call multiple services (batch) in parallel at once when using JaxRS based JSON requests
+
 
 
 ##Building
@@ -67,7 +68,7 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file (build/libs/plexsvc-framework-1.6-SNAPSHOT.jar) manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-1.7-SNAPSHOT.jar) manually in your application.
 
 
 
@@ -78,7 +79,7 @@ cd plexsvc-framework
 - JMS API 1.1
 
 ##Version
-- 1.6
+- 1.7
 
 ##License
 - MIT

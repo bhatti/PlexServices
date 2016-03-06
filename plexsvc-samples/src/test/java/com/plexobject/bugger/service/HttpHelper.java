@@ -1,5 +1,6 @@
 package com.plexobject.bugger.service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.plexobject.domain.Pair;
@@ -33,12 +34,17 @@ public class HttpHelper {
     protected static <T> T postForm(String path, Map<String, Object> request,
             Class<?> responseType) throws Exception {
         // System.out.println("SENDING " + request);
-        Pair<String, String> respAndCookie = TestWebUtils.postForm(
-                "http://localhost:" + DEFAULT_PORT + path, request, "Cookie", cookie == null ? "" : cookie);
+        Pair<String, Map<String, List<String>>> respAndCookie = TestWebUtils
+                .postForm("http://localhost:" + DEFAULT_PORT + path, request,
+                        "Cookie", cookie == null ? "" : cookie);
         // System.out.println("RECEIVED " + resp);
         // System.out.println("POST FORM " + path + " " + respAndCookie.second);
         if (respAndCookie.second != null) {
-            cookie = respAndCookie.second;
+            Map<String, List<String>> headers = respAndCookie.second;
+            List<String> cookies = headers.get("Set-Cookie");
+            if (cookies != null && cookies.size() > 0) {
+                cookie = cookies.get(0);
+            }
         }
         return (T) ReflectUtils.decode(respAndCookie.first, responseType, null,
                 getObjectCodec());
@@ -47,14 +53,17 @@ public class HttpHelper {
     @SuppressWarnings("unchecked")
     protected static <T> T post(String path, Object request,
             Class<?> responseType) throws Exception {
-        // System.out.println("SENDING " + request);
-        Pair<String, String> respAndCookie = TestWebUtils.post(
-                "http://localhost:" + DEFAULT_PORT + path, encode(request),
-                "Accept", getAcceptHeader(), "Content-Type",
-                "application/json", "Cookie", cookie == null ? "" : cookie);
-        // System.out.println("RECEIVED " + resp);
+        Pair<String, Map<String, List<String>>> respAndCookie = TestWebUtils
+                .post("http://localhost:" + DEFAULT_PORT + path,
+                        encode(request), "Accept", getAcceptHeader(),
+                        "Content-Type", "application/json", "Cookie",
+                        cookie == null ? "" : cookie);
         if (respAndCookie.second != null) {
-            cookie = respAndCookie.second;
+            Map<String, List<String>> headers = respAndCookie.second;
+            List<String> cookies = headers.get("Set-Cookie");
+            if (cookies != null && cookies.size() > 0) {
+                cookie = cookies.get(0);
+            }
         }
         // System.out.println("POST " + path + " " + respAndCookie.second);
         return (T) ReflectUtils.decode(respAndCookie.first, responseType, null,

@@ -41,6 +41,8 @@ public interface CourseService {
 
     void error() throws IOException;
 
+    String longOperation(int millis);
+
     Object objectExceptionExample();
 
     String pathExample(String param1, String param2);

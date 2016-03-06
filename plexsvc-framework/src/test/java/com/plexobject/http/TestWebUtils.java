@@ -232,7 +232,7 @@ public class TestWebUtils {
         return getResponse(con);
     }
 
-    public static Pair<String, String> postForm(String path,
+    public static Pair<String, Map<String, List<String>>> postForm(String path,
             Map<String, Object> request, String... headers) throws IOException {
         StringBuilder params = new StringBuilder();
         if (request != null) {
@@ -249,8 +249,8 @@ public class TestWebUtils {
         return post(path, params.toString(), newHeaders);
     }
 
-    public static Pair<String, String> post(String target, String contents,
-            String... headers) throws IOException {
+    public static Pair<String, Map<String, List<String>>> post(String target,
+            String contents, String... headers) throws IOException {
         URL url = new URL(target);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
@@ -268,10 +268,8 @@ public class TestWebUtils {
             out.flush();
         }
         out.close();
-        String cookie = con.getHeaderField("Set-Cookie");
-        // System.out.println("API Version: "
-        // + con.getHeaderField(HttpResponse.VERSION_HEADER));
-        return Pair.of(getResponse(con), cookie);
+        // String cookie = con.getHeaderField("Set-Cookie");
+        return Pair.of(getResponse(con), con.getHeaderFields());
     }
 
     private static String getResponse(HttpURLConnection con) throws IOException {

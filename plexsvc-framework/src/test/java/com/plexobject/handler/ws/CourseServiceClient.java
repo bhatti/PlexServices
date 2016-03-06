@@ -397,4 +397,15 @@ public class CourseServiceClient extends BaseServiceClient implements
         }
     }
 
+    @Override
+    @WebMethod(exclude = true)
+    public String longOperation(int millis) {
+        RequestBuilder request = new RequestBuilder("longOperation", "");
+        try {
+            return post(COURSE_SERVICE, request, String.class, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import com.plexobject.domain.Configuration;
 import com.plexobject.domain.Constants;
+import com.plexobject.domain.Pair;
 import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.handler.BasePayload;
 import com.plexobject.handler.Request;
@@ -107,18 +108,22 @@ public class MultiRequestTest {
         String resp = TestWebUtils.post("http://localhost:"
                 + BaseServiceClient.DEFAULT_PORT + "/courses", b.encode(),
                 "Accept", RequestBuilder.getAcceptHeader()).first;
-        List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
-        assertEquals(3, jsonList.size());
+        Map<String, String> jsonList = MultiRequestBuilder
+                .parseResponseObject(resp);
+        // MultiRequestBuilder will collapse it
+        assertEquals(2, jsonList.size());
+        String[] saveResponse = jsonList.get("saveResponse").split("___");
         assertEquals(
                 course1,
-                MultiRequestBuilder.getObjectCodec().decode(jsonList.get(0),
+                MultiRequestBuilder.getObjectCodec().decode(saveResponse[0],
                         Course.class, new HashMap<String, Object>()));
+        //
         assertEquals(
                 course2,
-                MultiRequestBuilder.getObjectCodec().decode(jsonList.get(1),
+                MultiRequestBuilder.getObjectCodec().decode(saveResponse[1],
                         Course.class, new HashMap<String, Object>()));
         Map<String, Object> error = MultiRequestBuilder.getObjectCodec()
-                .decode(jsonList.get(2), HashMap.class,
+                .decode(jsonList.get("queryResponse"), HashMap.class,
                         new HashMap<String, Object>());
         assertEquals("Unknown method 'query'", error.get("message"));
 
@@ -129,7 +134,8 @@ public class MultiRequestTest {
 
         jsonList = MultiRequestBuilder.parseResponseObject(resp);
         Course[] searchedCourses = MultiRequestBuilder.getObjectCodec().decode(
-                jsonList.get(0), Course[].class, new HashMap<String, Object>());
+                jsonList.get("queryResponse"), Course[].class,
+                new HashMap<String, Object>());
         assertEquals(course1, searchedCourses[0]);
     }
 
@@ -143,8 +149,32 @@ public class MultiRequestTest {
         String resp = TestWebUtils.post("http://localhost:"
                 + BaseServiceClient.DEFAULT_PORT + "/courses", b.encode(),
                 "Accept", RequestBuilder.getAcceptHeader()).first;
-        List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
-        assertEquals(2, jsonList.size());
+        Map<String, String> jsonList = MultiRequestBuilder
+                .parseResponseObject(resp);
+        // MultiRequestBuilder will collapse it
+        assertEquals(1, jsonList.size());
+        // MultiRequestBuilder will split it
+        assertEquals(2, jsonList.get("getNanoTimeResponse").split("___").length);
+    }
+
+    @Test
+    public void testParallelMethods() throws Throwable {
+        MultiRequestBuilder b = new MultiRequestBuilder();
+
+        b.add("longOperation", rand(90, 100));
+        b.add("longOperation", rand(90, 100));
+        Pair<String, Map<String, List<String>>> resp = TestWebUtils.post(
+                "http://localhost:" + BaseServiceClient.DEFAULT_PORT
+                        + "/courses", b.encode(), "Accept",
+                RequestBuilder.getAcceptHeader());
+        // both requests should be parallel and take less than 200 millis
+        List<String> elapsed = resp.second.get("X-Response-MilliTime");
+        assertTrue("elapsed " + elapsed, Integer.valueOf(elapsed.get(0)) < 150);
+        Map<String, String> jsonList = MultiRequestBuilder
+                .parseResponseObject(resp.first);
+        assertEquals(1, jsonList.size());
+        assertEquals(2,
+                jsonList.get("longOperationResponse").split("___").length);
     }
 
     @SuppressWarnings("unchecked")
@@ -157,11 +187,12 @@ public class MultiRequestTest {
         String resp = TestWebUtils.post("http://localhost:"
                 + BaseServiceClient.DEFAULT_PORT + "/courses", b.encode(),
                 "Accept", RequestBuilder.getAcceptHeader()).first;
-        List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
+        Map<String, String> jsonList = MultiRequestBuilder
+                .parseResponseObject(resp);
         assertEquals(2, jsonList.size());
-        assertTrue(Long.valueOf(jsonList.get(0)) > 0);
+        assertTrue(Long.valueOf(jsonList.get("getNanoTimeResponse")) > 0);
         Map<String, Object> error = MultiRequestBuilder.getObjectCodec()
-                .decode(jsonList.get(1), HashMap.class,
+                .decode(jsonList.get("errorResponse"), HashMap.class,
                         new HashMap<String, Object>());
         List<Map<String, Object>> errorList = (List<Map<String, Object>>) error
                 .get("errors");
@@ -194,42 +225,50 @@ public class MultiRequestTest {
         b.add("objectExceptionExample", "");
         b.add("exceptionExample", "true");
         b.add("error", "");
+        b.add("unknownMethod", "");
 
         String resp = TestWebUtils.post("http://localhost:"
                 + BaseServiceClient.DEFAULT_PORT + "/courses", b.encode(),
                 "Accept", RequestBuilder.getAcceptHeader()).first;
-        List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
-        assertEquals(5, jsonList.size());
+        Map<String, String> jsonList = MultiRequestBuilder
+                .parseResponseObject(resp);
+        assertEquals(6, jsonList.size());
 
-        assertEquals("null", jsonList.get(0));
+        assertEquals("null", jsonList.get("clearResponse"));
         assertEquals(
                 course,
-                MultiRequestBuilder.getObjectCodec().decode(jsonList.get(1),
-                        Course.class, new HashMap<String, Object>()));
+                MultiRequestBuilder.getObjectCodec().decode(
+                        jsonList.get("saveResponse"), Course.class,
+                        new HashMap<String, Object>()));
 
         Map<String, Object> error1 = MultiRequestBuilder.getObjectCodec()
-                .decode(jsonList.get(2), HashMap.class,
-                        new HashMap<String, Object>());
+                .decode(jsonList.get("objectExceptionExampleResponse"),
+                        HashMap.class, new HashMap<String, Object>());
         List<Map<String, Object>> error1List = (List<Map<String, Object>>) error1
                 .get("errors");
         Map<String, Object> error1a = (Map<String, Object>) error1List.get(0);
         assertEquals("TestException2", error1a.get("errorType"));
 
         Map<String, Object> error2 = MultiRequestBuilder.getObjectCodec()
-                .decode(jsonList.get(3), HashMap.class,
-                        new HashMap<String, Object>());
+                .decode(jsonList.get("exceptionExampleResponse"),
+                        HashMap.class, new HashMap<String, Object>());
         List<Map<String, Object>> error2List = (List<Map<String, Object>>) error2
                 .get("errors");
         Map<String, Object> error2a = (Map<String, Object>) error2List.get(0);
         assertEquals("IllegalArgumentException", error2a.get("errorType"));
 
         Map<String, Object> error3 = MultiRequestBuilder.getObjectCodec()
-                .decode(jsonList.get(4), HashMap.class,
+                .decode(jsonList.get("errorResponse"), HashMap.class,
                         new HashMap<String, Object>());
         List<Map<String, Object>> error3List = (List<Map<String, Object>>) error3
                 .get("errors");
         Map<String, Object> error3a = (Map<String, Object>) error3List.get(0);
         assertEquals("IOException", error3a.get("errorType"));
+
+        Map<String, Object> error4 = MultiRequestBuilder.getObjectCodec()
+                .decode(jsonList.get("unknownMethodResponse"), HashMap.class,
+                        new HashMap<String, Object>());
+        assertEquals("ServiceInvocationException", error4.get("errorType"));
 
     }
 
@@ -250,9 +289,11 @@ public class MultiRequestTest {
                 + "methodName=getCoursesForStudentId&studentId="
                 + course1.getStudentIds().get(0));
 
-        List<String> jsonList = MultiRequestBuilder.parseResponseObject(resp);
+        Map<String, String> jsonList = MultiRequestBuilder
+                .parseResponseObject(resp);
         Course[] searchedCourses = MultiRequestBuilder.getObjectCodec().decode(
-                jsonList.get(0), Course[].class, new HashMap<String, Object>());
+                jsonList.get("getCoursesForStudentIdResponse"), Course[].class,
+                new HashMap<String, Object>());
         assertEquals(course1, searchedCourses[0]);
     }
 
@@ -269,5 +310,9 @@ public class MultiRequestTest {
         c.getAddresses().add(new Address("100 main", "Seattle", "98101"));
 
         return c;
+    }
+
+    private static int rand(double min, double max) {
+        return (int) Math.abs(min + (Math.random() * ((max - min) + 1)));
     }
 }

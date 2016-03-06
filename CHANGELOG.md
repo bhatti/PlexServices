@@ -30,3 +30,7 @@
 
 1.5 - Added filtering of JSON fields from response
 
+1.6 - Added support for batch requests 
+
+1.7 - Added support for parallel batch requests 
+

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
@@ -42,34 +43,64 @@ public class WSDelegateHandler implements RequestHandler {
     }
 
     @Override
-    public void handle(final Request rawRequest) {
+    public void handle(final Request incomingRequest) {
+        long started = System.currentTimeMillis();
+
         MethodPayLoadRequest methodPayLoadRequest = MethodPayLoadRequest
                 .getMethodNameAndPayloads(
-                        rawRequest,
+                        incomingRequest,
                         methodsByName.size() == 1 ? defaultMethodInfo.iMethod
                                 .getName() : null);
-        final Request[] allRequests = new Request[methodPayLoadRequest.requests
-                .size()];
-        for (int n = 0; n < methodPayLoadRequest.requests.size(); n++) {
-            if (n == 0) {
-                allRequests[n] = rawRequest;
-            } else {
-                allRequests[n] = new Request(rawRequest);
-            }
-        }
-        //
-        for (int n = 0; n < methodPayLoadRequest.requests.size(); n++) {
-            invokeRequest(methodPayLoadRequest.requests.get(n), allRequests[n],
-                    methodPayLoadRequest.multiRequest);
-        }
-        //
         if (methodPayLoadRequest.multiRequest) {
-            List<Object> allResponses = new ArrayList<>();
-            for (Request req : allRequests) {
-                allResponses.add(req.getResponse().getContents());
-            }
-            rawRequest.getResponse().setContents(allResponses);
+            handleMultiRequests(incomingRequest, methodPayLoadRequest);
+        } else {
+            invokeRequest(methodPayLoadRequest.requests.get(0),
+                    incomingRequest, methodPayLoadRequest.multiRequest);
         }
+        long elapsed = System.currentTimeMillis() - started;
+        incomingRequest.getResponse().setResponseMilliTime(elapsed);
+    }
+
+    // ///////////////////////////////////////////////////////////////////////
+    //
+    private void handleMultiRequests(final Request incomingRequest,
+            final MethodPayLoadRequest methodPayLoadRequest) {
+        Map<Future<Request>, MethodPayLoadInfo> futuresAndMethodPayLoadInfo = new HashMap<>();
+        for (int n = 0; n < methodPayLoadRequest.requests.size(); n++) {
+            final Request request = new Request(incomingRequest);
+            final MethodPayLoadInfo methodPayLoadInfo = methodPayLoadRequest.requests
+                    .get(n);
+            Future<Request> future = serviceRegistry
+                    .getDefaultExecutorService().submit(
+                            new Callable<Request>() {
+                                @Override
+                                public Request call() throws Exception {
+                                    invokeRequest(methodPayLoadInfo, request,
+                                            true);
+                                    return request;
+                                }
+                            });
+            futuresAndMethodPayLoadInfo.put(future, methodPayLoadInfo);
+        }
+        //
+        final List<Object> allResponses = new ArrayList<>();
+        for (Future<Request> future : futuresAndMethodPayLoadInfo.keySet()) {
+            try {
+                Request request = future.get();
+                allResponses.add(request.getResponse().getContents());
+                incomingRequest.getResponse().getHeaders()
+                        .putAll(request.getResponse().getHeaders());
+                incomingRequest.getResponse().getProperties()
+                        .putAll(request.getResponse().getProperties());
+            } catch (Exception e) {
+                final MethodPayLoadInfo methodPayLoadInfo = futuresAndMethodPayLoadInfo
+                        .get(future);
+                Map<String, Object> response = buildExceptionResponse(e,
+                        methodPayLoadInfo);
+                allResponses.add(response);
+            }
+        }
+        incomingRequest.getResponse().setContents(allResponses);
     }
 
     private void invokeRequest(MethodPayLoadInfo methodPayLoadInfo,
@@ -126,16 +157,21 @@ public class WSDelegateHandler implements RequestHandler {
         }
         if (multiRequest) {
             if (request.getResponse().getContents() instanceof Exception) {
-                Map<String, Object> response = new HashMap<String, Object>();
-                response.put(responseTag, request.getResponse().getContents());
-                request.getResponse().setContents(response);
+                request.getResponse()
+                        .setContents(
+                                buildExceptionResponse((Exception) request
+                                        .getResponse().getContents(),
+                                        methodPayLoadInfo));
             }
         }
     }
 
-    @Override
-    public String toString() {
-        return "WSDelegateHandler [delegate=" + delegate + "]";
+    private Map<String, Object> buildExceptionResponse(Exception e,
+            final MethodPayLoadInfo methodPayLoadInfo) {
+        final String responseTag = methodPayLoadInfo.method + RESPONSE_SUFFIX;
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put(responseTag, e);
+        return response;
     }
 
     private void invokeWithAroundInterceptorIfNeeded(Request request,
@@ -157,16 +193,6 @@ public class WSDelegateHandler implements RequestHandler {
             request = requestAfterRequestInterceptors(request);
             invoke(request, methodInfo, responseTag, args);
         }
-    }
-
-    private Request requestAfterRequestInterceptors(Request request) {
-        if (serviceRegistry.hasRequestInterceptors()) {
-            for (Interceptor<Request> interceptor : serviceRegistry
-                    .getRequestInterceptors()) {
-                request = interceptor.intercept(request);
-            }
-        }
-        return request;
     }
 
     private void invoke(final Request request,
@@ -201,5 +227,20 @@ public class WSDelegateHandler implements RequestHandler {
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    private Request requestAfterRequestInterceptors(Request request) {
+        if (serviceRegistry.hasRequestInterceptors()) {
+            for (Interceptor<Request> interceptor : serviceRegistry
+                    .getRequestInterceptors()) {
+                request = interceptor.intercept(request);
+            }
+        }
+        return request;
+    }
+
+    @Override
+    public String toString() {
+        return "WSDelegateHandler [delegate=" + delegate + "]";
     }
 }

@@ -136,6 +136,15 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public String longOperation(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+        }
+        return String.valueOf(millis);
+    }
+
+    @Override
     @GET
     public Course paramAndRequest(@FormParam("courseId") String courseId,
             Request incomingRequest) {

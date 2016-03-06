@@ -66,8 +66,8 @@ public class MultiRequestBuilder {
         return encode();
     }
 
-    public static List<String> parseResponseObject(String json) {
-        List<String> response = new ArrayList<>();
+    public static Map<String, String> parseResponseObject(String json) {
+        Map<String, String> response = new HashMap<>();
         try {
             JsonNode rootNode = jsonMapper.readTree(json);
             if (rootNode.isObject()) {
@@ -84,15 +84,21 @@ public class MultiRequestBuilder {
         return response;
     }
 
-    private static void parseResponseObject(List<String> response, JsonNode node) {
+    private static void parseResponseObject(Map<String, String> response,
+            JsonNode node) {
         if (node.isObject() && node.size() == 1) {
             Iterator<String> it = node.fieldNames();
             if (it.hasNext()) {
                 String key = it.next();
-                response.add(node.get(key).toString());
+                if (response.containsKey(key)) {
+                    String value = response.get(key);
+                    response.put(key, value + "___" + node.get(key).toString());
+                } else {
+                    response.put(key, node.get(key).toString());
+                }
             }
         } else {
-            response.add(node.toString());
+            response.put(node.asText(), node.toString());
         }
     }
 }
