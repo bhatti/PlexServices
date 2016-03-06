@@ -147,6 +147,13 @@ public class Request extends BasePayload<Object> {
     protected String requestUri;
     protected Object lastSentContents;
 
+    public Request(Request other) {
+        this(other.requestId, other.protocol, other.method, other.requestUri,
+                other.endpoint, other.replyEndpoint, other.properties,
+                other.headers, other.contents, other.codecType,
+                other.responseDispatcher);
+    }
+
     protected Request() {
     }
 
@@ -154,10 +161,10 @@ public class Request extends BasePayload<Object> {
             final RequestMethod method, final String requestUri,
             final String endpoint, final String replyEndpoint,
             final Map<String, Object> properties,
-            final Map<String, Object> headers, final Object payload,
+            final Map<String, Object> headers, final Object contents,
             final CodecType codecType,
             final ResponseDispatcher responseDispatcher) {
-        super(requestId, codecType, properties, headers, payload);
+        super(requestId, codecType, properties, headers, contents);
         Preconditions.requireNotNull(protocol, "protocol is required");
         Preconditions.requireNotNull(method, "method is required");
         Preconditions.requireNotNull(responseDispatcher,
