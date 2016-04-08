@@ -1,5 +1,5 @@
 *.class
-
+plexsvc-framework/copy.sh
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
