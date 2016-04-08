@@ -68,7 +68,7 @@ cd plexsvc-framework
 ./gradlew jar
 ```
 
-- Copy and add jar file (build/libs/plexsvc-framework-1.7-SNAPSHOT.jar) manually in your application.
+- Copy and add jar file (build/libs/plexsvc-framework-1.7.1-SNAPSHOT.jar) manually in your application.
 
 
 
@@ -79,7 +79,7 @@ cd plexsvc-framework
 - JMS API 1.1
 
 ##Version
-- 1.7
+- 1.7.1
 
 ##License
 - MIT
