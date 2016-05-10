@@ -34,5 +34,5 @@
 
 1.7 - Added support for parallel batch requests 
 
-1.7.1 - Added Updated netty to 4.0.35.Final
+1.7.3 - Updated netty to 4.0.35.Final
 

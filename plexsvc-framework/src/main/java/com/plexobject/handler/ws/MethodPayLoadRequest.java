@@ -92,7 +92,10 @@ class MethodPayLoadRequest {
             Iterator<String> it = node.fieldNames();
             if (it.hasNext()) {
                 String methodName = it.next();
-                String payload = node.get(methodName).toString();
+                JsonNode payloadNode = node.get(methodName);
+                String payload = payloadNode.isTextual() ? payloadNode.asText()
+                        : payloadNode.toString();
+                System.out.println("payload " + payload);
                 MethodPayLoadInfo info = new MethodPayLoadInfo(methodName,
                         payload);
                 methodPayLoadRequest.requests.add(info);
