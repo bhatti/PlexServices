@@ -66,6 +66,8 @@ public class SymbolTest {
     public interface SymbolService {
         SymbolData find(String symbol);
 
+        SymbolData[] findAll(String[] symbols);
+
         SymbolData get(long id);
 
         SymbolData save(SymbolData data);
@@ -110,6 +112,17 @@ public class SymbolTest {
             }
         }
 
+        @WebMethod(exclude = true)
+        @Override
+        public SymbolData[] findAll(String[] symbols) {
+            RequestBuilder request = new RequestBuilder("findAll", symbols);
+            try {
+                return post(URI, request, SymbolData[].class, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
     @WebService
@@ -128,6 +141,15 @@ public class SymbolTest {
 
         @Override
         public SymbolData save(SymbolData data) {
+            return data;
+        }
+
+        @Override
+        public SymbolData[] findAll(String[] symbols) {
+            SymbolData[] data = new SymbolData[symbols.length];
+            for (int i = 0; i < symbols.length; i++) {
+                data[i] = find(symbols[i]);
+            }
             return data;
         }
     }
@@ -177,6 +199,14 @@ public class SymbolTest {
     public void testFind() throws Throwable {
         SymbolData data = client.find("AAPL");
         assertEquals("AAPL", data.getSymbol());
+    }
+
+    @Test
+    public void testFindAll() throws Throwable {
+        SymbolData[] data = client.findAll(new String[] { "AAPL", "GOOG" });
+        assertEquals(2, data.length);
+        assertEquals("AAPL", data[0].getSymbol());
+        assertEquals("GOOG", data[1].getSymbol());
     }
 
     @Test
