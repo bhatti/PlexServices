@@ -4,9 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
@@ -19,8 +21,10 @@ import com.plexobject.service.Interceptor;
 import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 import com.plexobject.util.ReflectUtils.ParamType;
+import com.plexobject.util.SameThreadExecutorService;
 
 public class WSDelegateHandler implements RequestHandler {
+    private static final String SERIAL_EXECUTION = "serialExecution";
     private static final Logger logger = Logger
             .getLogger(WSDelegateHandler.class);
     //
@@ -30,6 +34,7 @@ public class WSDelegateHandler implements RequestHandler {
     private final ServiceRegistry serviceRegistry;
     private final Map<String, WSServiceMethod> methodsByName = new HashMap<>();
     private WSServiceMethod defaultMethodInfo;
+    private ExecutorService sameThreadExecutorService = new SameThreadExecutorService();
 
     //
     public WSDelegateHandler(Object delegate, ServiceRegistry registry) {
@@ -59,23 +64,29 @@ public class WSDelegateHandler implements RequestHandler {
 
     // ///////////////////////////////////////////////////////////////////////
     //
+    private ExecutorService getExecutorService(final Request request) {
+        if (request.getBooleanProperty(SERIAL_EXECUTION, false)) {
+            return sameThreadExecutorService;
+        } else {
+            return serviceRegistry.getDefaultExecutorService();
+        }
+    }
+
     private void handleMultiRequests(final Request incomingRequest,
             final MethodPayLoadRequest methodPayLoadRequest) {
-        Map<Future<Request>, MethodPayLoadInfo> futuresAndMethodPayLoadInfo = new HashMap<>();
+        Map<Future<Request>, MethodPayLoadInfo> futuresAndMethodPayLoadInfo = new LinkedHashMap<>();
         for (int n = 0; n < methodPayLoadRequest.requests.size(); n++) {
             final Request request = new Request(incomingRequest);
             final MethodPayLoadInfo methodPayLoadInfo = methodPayLoadRequest.requests
                     .get(n);
-            Future<Request> future = serviceRegistry
-                    .getDefaultExecutorService().submit(
-                            new Callable<Request>() {
-                                @Override
-                                public Request call() throws Exception {
-                                    invokeRequest(methodPayLoadInfo, request,
-                                            true);
-                                    return request;
-                                }
-                            });
+            Future<Request> future = getExecutorService(incomingRequest)
+                    .submit(new Callable<Request>() {
+                        @Override
+                        public Request call() throws Exception {
+                            invokeRequest(methodPayLoadInfo, request, true);
+                            return request;
+                        }
+                    });
             futuresAndMethodPayLoadInfo.put(future, methodPayLoadInfo);
         }
         //

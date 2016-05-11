@@ -88,7 +88,7 @@ public class XmlObjectCodecTest {
     public void testEncodePrivateObject() {
         String xml = instance.encode(new Obj("name"));
         assertEquals(
-                "<?xml version=\"1.0\" ?><Obj Name=\"name\" Date=\"2015-01-01 08:00:00.0 UTC\"></Obj>",
+                "<?xml version=\"1.0\" ?><Obj Name=\"name\" Date=\"2015-01-01 06:00:00.0 UTC\"></Obj>",
                 xml);
     }
 

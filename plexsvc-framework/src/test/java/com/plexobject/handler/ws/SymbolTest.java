@@ -2,6 +2,7 @@ package com.plexobject.handler.ws;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -21,8 +22,10 @@ import com.plexobject.domain.Constants;
 import com.plexobject.encode.json.NonFilteringJsonCodecWriter;
 import com.plexobject.handler.Request;
 import com.plexobject.handler.RequestHandler;
+import com.plexobject.http.TestWebUtils;
 import com.plexobject.service.BaseServiceClient;
 import com.plexobject.service.Interceptor;
+import com.plexobject.service.MultiRequestBuilder;
 import com.plexobject.service.RequestBuilder;
 import com.plexobject.service.ServiceConfigDesc;
 import com.plexobject.service.ServiceRegistry;
@@ -221,5 +224,33 @@ public class SymbolTest {
         SymbolData saved = client.save(data);
         assertEquals(data.getSymbol(), saved.getSymbol());
         assertEquals(data.getDescription(), saved.getDescription());
+    }
+
+    @Test
+    public void testMultipleFind() throws Throwable {
+        MultiRequestBuilder b = new MultiRequestBuilder();
+
+        b.add("find", "AAPL");
+        b.add("find", "GOOG");
+        b.add("find", "MSFT");
+
+        String resp = TestWebUtils.post("http://localhost:"
+                + BaseServiceClient.DEFAULT_PORT
+                + "/SymbolService?serialExecution=true", b.encode(), "Accept",
+                RequestBuilder.getAcceptHeader()).first;
+        Map<String, String> jsonList = MultiRequestBuilder
+                .parseResponseObject(resp);
+        // MultiRequestBuilder will collapse it
+        assertEquals(1, jsonList.size());
+        String[] response = jsonList.get("findResponse").split("___");
+        assertEquals("AAPL", getSymbol(response[0]));
+        assertEquals("GOOG", getSymbol(response[1]));
+        assertEquals("MSFT", getSymbol(response[2]));
+    }
+
+    private Object getSymbol(String response) {
+        Map<String, Object> map = MultiRequestBuilder.getObjectCodec().decode(
+                response, Map.class, new HashMap<String, Object>());
+        return map.get("symbol");
     }
 }
