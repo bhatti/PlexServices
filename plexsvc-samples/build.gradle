@@ -88,6 +88,17 @@ task order(type:JavaExec) {
     ]
 }
 
+task mail(type:JavaExec) {
+  main = 'com.plexobject.bugger.mail.Main'
+    classpath = sourceSets.main.runtimeClasspath
+    args "mail.properties"
+    systemProperties = [
+    "com.sun.management.jmxremote.ssl":"false",
+    "com.sun.management.jmxremote.authenticate":"false",
+    "com.sun.management.jmxremote.port":"9393",
+    ]
+}
+
 task log(type:JavaExec) {
   main = 'com.plexobject.basic.LogService'
     classpath = sourceSets.main.runtimeClasspath

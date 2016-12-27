@@ -1,0 +1,8 @@
+{
+  "sendEmail": {
+    "to": "sergei.doroshenko@aperturegroup.com",
+    "from": "sergei.doroshenko@aperturegroup.com",
+    "subject": "test subject",
+    "text": "test text"
+  }
+}
