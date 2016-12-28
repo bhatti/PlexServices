@@ -25,8 +25,7 @@ import com.plexobject.service.ServiceRegistry;
 import com.plexobject.util.ReflectUtils;
 
 public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
-    private static final Logger logger = Logger
-            .getLogger(WSRequestHandlerAdapter.class);
+    private static final Logger logger = Logger.getLogger(WSRequestHandlerAdapter.class);
     private static final String DEFAULT_VERSION = "1.0";
     private static final String[] DEFAULT_ROLES = new String[0];
     private final ServiceRegistry registry;
@@ -35,21 +34,19 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
         this.registry = registry;
     }
 
-    public Map<ServiceConfigDesc, RequestHandler> createFromPackages(
-            String... pkgNames) {
-        Collection<Class<?>> serviceClasses = ReflectUtils.getAnnotatedClasses(
-                WebService.class, pkgNames);
+    public Map<ServiceConfigDesc, RequestHandler> createFromPackages(String... pkgNames) {
+        Collection<Class<?>> serviceClasses = ReflectUtils.getAnnotatedClasses(WebService.class,
+                pkgNames);
         Map<ServiceConfigDesc, RequestHandler> handlers = new HashMap<>();
         for (Class<?> serviceClass : serviceClasses) {
             if (!serviceClass.isInterface()) {
-                Class<?> webService = ReflectUtils
-                        .getWebServiceInterface(serviceClass);
+                Class<?> webService = ReflectUtils.getWebServiceInterface(serviceClass);
                 if (webService == null) {
                     continue;
                 }
                 try {
-                    Map<ServiceConfigDesc, RequestHandler> handlerAndConfig = create(
-                            serviceClass, (ServiceConfigDesc) null);
+                    Map<ServiceConfigDesc, RequestHandler> handlerAndConfig = create(serviceClass,
+                            (ServiceConfigDesc) null);
                     handlers.putAll(handlerAndConfig);
                 } catch (IllegalArgumentException e) {
                     // ignore
@@ -73,10 +70,9 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
     }
 
     @Override
-    public Map<ServiceConfigDesc, RequestHandler> create(Object service,
-            String endpoint, RequestMethod method) {
-        ServiceConfigDesc serviceConfig = endpoint != null ? buildConfig(
-                endpoint, method) : null;
+    public Map<ServiceConfigDesc, RequestHandler> create(Object service, String endpoint,
+            RequestMethod method) {
+        ServiceConfigDesc serviceConfig = endpoint != null ? buildConfig(endpoint, method) : null;
         return create(service, serviceConfig);
     }
 
@@ -86,8 +82,7 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
         Class<?> serviceClass = service.getClass();
         Class<?> webService = ReflectUtils.getWebServiceInterface(serviceClass);
         if (webService == null) {
-            throw new IllegalArgumentException(service
-                    + " does not define WebService annotations");
+            throw new IllegalArgumentException(service + " does not define WebService annotations");
         }
         Map<ServiceConfigDesc, RequestHandler> handlers = new HashMap<>();
         if (defaultServiceConfig == null) {
@@ -101,52 +96,54 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
                 WSServiceMethod.Builder methodBuilder = new WSServiceMethod.Builder();
                 methodBuilder.iMethod = iMethod;
                 methodBuilder.implMethod = implMethod;
-                methodBuilder.methodPath = getMethodPath(
-                        defaultServiceConfig.endpoint(), iMethod, implMethod);
+                methodBuilder.methodPath = getMethodPath(defaultServiceConfig.endpoint(), iMethod,
+                        implMethod);
                 if (methodBuilder.methodPath == null) {
                     methodBuilder.methodPath = defaultServiceConfig.endpoint();
                 }
                 //
-                methodBuilder.requestMethod = getRequestMethod(iMethod,
-                        implMethod);
+                methodBuilder.requestMethod = getRequestMethod(iMethod, implMethod);
                 // we now allow users to send query/form parameters, JSON object
                 // (if POST) and Request parameter
                 if (!methodBuilder.canBuild()) {
                     logger.warn("PLEXSVC: Skipping handler for " + iMethod.getName()
-                            + " method, path " + methodBuilder.methodPath
-                            + ", service " + service.getClass().getSimpleName());
+                            + " method, path " + methodBuilder.methodPath + ", service "
+                            + service.getClass().getSimpleName());
 
                     continue;
                 }
                 //
-                ServiceConfigDesc serviceConfig = ServiceConfigDesc
-                        .builder(defaultServiceConfig)
+                ServiceConfigDesc serviceConfig = ServiceConfigDesc.builder(defaultServiceConfig)
                         .setMethod(methodBuilder.requestMethod)
                         .setEndpoint(methodBuilder.methodPath).build();
                 RequestHandler handler = handlers.get(serviceConfig);
                 if (handler == null) {
                     handler = new WSDelegateHandler(service, registry);
                     handlers.put(serviceConfig, handler);
+                    //
+                    ((WSDelegateHandler) handler).addMethod(methodBuilder.build());
+                    logger.info("PLEXSVC: Added handler " + handler + " for "
+                            + methodBuilder.requestMethod + " " + iMethod.getName() + ", path "
+                            + methodBuilder.methodPath + ", service "
+                            + service.getClass().getSimpleName());
+                } else {
+                    logger.error("PLEXSVC: Found duplicate handler " + handler + " for "
+                            + methodBuilder.requestMethod + " " + iMethod.getName() + ", path "
+                            + methodBuilder.methodPath + ", service "
+                            + service.getClass().getSimpleName()
+                            + ", overloaded method names are not supported!");
                 }
-                //
-                ((WSDelegateHandler) handler).addMethod(methodBuilder.build());
-                logger.info("PLEXSVC: Added handler " + handler + " for "
-                        + methodBuilder.requestMethod + " " + iMethod.getName()
-                        + ", path " + methodBuilder.methodPath + ", service "
-                        + service.getClass().getSimpleName());
             }
         }
         return handlers;
     }
 
-    private String getMethodPath(String prefix, final Method iMethod,
-            final Method implMethod) {
+    private String getMethodPath(String prefix, final Method iMethod, final Method implMethod) {
         Path path = iMethod.getAnnotation(Path.class);
         if (path == null) {
             path = implMethod.getAnnotation(Path.class);
         }
-        return path == null ? null : (prefix != null ? prefix : "")
-                + path.value();
+        return path == null ? null : (prefix != null ? prefix : "") + path.value();
     }
 
     private static String getEndpoint(Class<?> serviceClass, Class<?> webService) {
@@ -166,8 +163,7 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
                     implMethod.getParameterTypes());
             if (iMethod != null) {
                 WebMethod iWebMethod = iMethod.getAnnotation(WebMethod.class);
-                WebMethod implWebMethod = implMethod
-                        .getAnnotation(WebMethod.class);
+                WebMethod implWebMethod = implMethod.getAnnotation(WebMethod.class);
                 if ((iWebMethod == null || !iWebMethod.exclude())
                         && (implWebMethod == null || !implWebMethod.exclude())) {
                     return iMethod;
@@ -181,13 +177,11 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static RequestMethod getRequestMethod(Method iMethod,
-            Method implMethod) {
+    private static RequestMethod getRequestMethod(Method iMethod, Method implMethod) {
         try {
-            Class[] classes = { GET.class, POST.class, PUT.class, DELETE.class,
-                    HEAD.class };
-            RequestMethod[] methods = { RequestMethod.GET, RequestMethod.POST,
-                    RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.HEAD };
+            Class[] classes = { GET.class, POST.class, PUT.class, DELETE.class, HEAD.class };
+            RequestMethod[] methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+                    RequestMethod.DELETE, RequestMethod.HEAD };
             for (int i = 0; i < classes.length; i++) {
                 if (iMethod.getAnnotation(classes[i]) != null
                         || implMethod.getAnnotation(classes[i]) != null) {
@@ -202,7 +196,7 @@ public class WSRequestHandlerAdapter implements RequestHandlerAdapter {
 
     private ServiceConfigDesc buildConfig(String endpoint, RequestMethod method) {
         return new ServiceConfigDesc(Protocol.HTTP, method, Void.class,
-                registry.getConfiguration().getDefaultCodecType(),
-                DEFAULT_VERSION, endpoint, true, DEFAULT_ROLES, 1);
+                registry.getConfiguration().getDefaultCodecType(), DEFAULT_VERSION, endpoint, true,
+                DEFAULT_ROLES, 1);
     }
 }
